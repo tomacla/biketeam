@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+
+    <changeSet id="INITIAL-COMMIT" author="tomacla">
+
+        <createTable tableName="GLOBAL_DATA">
+            <column name="ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ADDRESS_POSTAL_CITY" type="VARCHAR(255)"/>
+            <column name="ADDRESS_POSTAL_CODE" type="VARCHAR(10)"/>
+            <column name="ADDRESS_STREET_LINE" type="VARCHAR(255)"/>
+            <column name="SITENAME" type="VARCHAR(2000)"/>
+            <column name="DESCRIPTION" type="VARCHAR(2000)"/>
+            <column name="PHONE_NUMBER" type="VARCHAR(255)"/>
+            <column name="EMAIL" type="VARCHAR(255)"/>
+            <column name="FACEBOOK" type="VARCHAR(255)"/>
+            <column name="TWITTER" type="VARCHAR(255)"/>
+            <column name="MAP_BOX_API_KEY" type="VARCHAR(255)"/>
+            <column name="OTHER" type="VARCHAR(2000)"/>
+        </createTable>
+
+        <addPrimaryKey tableName="GLOBAL_DATA" columnNames="ID"/>
+
+        <createTable tableName="MAP">
+            <column name="ID" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CROSSING" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="END_POINT_LAT" type="DOUBLE"/>
+            <column name="END_POINT_LNG" type="DOUBLE"/>
+            <column name="LENGTH" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="NEGATIVE_ELEVATION" type="DOUBLE"/>
+            <column name="POSITIVE_ELEVATION" type="DOUBLE"/>
+            <column name="POSTED_AT" type="DATE"/>
+            <column name="START_POINT_LAT" type="DOUBLE"/>
+            <column name="START_POINT_LNG" type="DOUBLE"/>
+            <column name="VISIBLE" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="WIND_VECTOR_X" type="DOUBLE"/>
+            <column name="WIND_VECTOR_Y" type="DOUBLE"/>
+        </createTable>
+
+        <addPrimaryKey tableName="MAP" columnNames="ID"/>
+
+        <createTable tableName="MAP_TAGS">
+            <column name="MAP_ID" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TAGS" type="VARCHAR(255)"/>
+        </createTable>
+
+        <createIndex tableName="MAP_TAGS" indexName="MAP_TAGS_MAP_ID">
+            <column name="MAP_ID"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="MAP_TAGS"
+                                 baseColumnNames="MAP_ID"
+                                 constraintName="FK_MAP_TAGS_MAP_ID"
+                                 referencedTableName="MAP"
+                                 referencedColumnNames="ID"/>
+
+        <createTable tableName="PUBLICATION">
+            <column name="ID" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CONTENT" type="VARCHAR(8000)"/>
+            <column name="IMAGED" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="POSTED_AT" type="TIMESTAMP"/>
+            <column name="TITLE" type="VARCHAR(255)"/>
+        </createTable>
+
+        <addPrimaryKey tableName="PUBLICATION" columnNames="ID"/>
+
+        <createTable tableName="RIDE">
+            <column name="ID" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DATE" type="DATE"/>
+            <column name="DESCRIPTION" type="VARCHAR(8000)"/>
+            <column name="IMAGED" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TITLE" type="VARCHAR(255)"/>
+            <column name="TYPE" type="INTEGER"/>
+        </createTable>
+
+        <addPrimaryKey tableName="RIDE" columnNames="ID"/>
+
+        <createTable tableName="RIDE_GROUP">
+            <column name="ID" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="LOWER_SPEED" type="DOUBLE"/>
+            <column name="UPPER_SPEED" type="DOUBLE"/>
+            <column name="MAP_ID" type="VARCHAR(255)"/>
+            <column name="MEETING_LOCATION" type="VARCHAR(255)"/>
+            <column name="MEETING_POINT_LAT" type="DOUBLE"/>
+            <column name="MEETING_POINT_LNG" type="DOUBLE"/>
+            <column name="MEETING_TIME" type="TIME"/>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="RIDE_ID" type="VARCHAR(255)"/>
+        </createTable>
+
+        <addPrimaryKey tableName="RIDE_GROUP" columnNames="ID"/>
+
+        <createIndex tableName="RIDE_GROUP" indexName="RIDE_GROUP_RIDE_ID">
+            <column name="RIDE_ID"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="RIDE_GROUP"
+                                 baseColumnNames="RIDE_ID"
+                                 constraintName="FK_RIDE_GROUP_RIDE_ID"
+                                 referencedTableName="RIDE"
+                                 referencedColumnNames="ID"/>
+
+        <createTable tableName="oauth2_authorized_client">
+            <column name="client_registration_id" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="principal_name" type="varchar(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="access_token_type" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="access_token_value" type="blob">
+                <constraints nullable="false"/>
+            </column>
+            <column name="access_token_issued_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="access_token_expires_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="access_token_scopes" type="varchar(1000)" />
+            <column name="refresh_token_value" type="blob" />
+            <column name="refresh_token_issued_at" type="timestamp" />
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="oauth2_authorized_client" columnNames="client_registration_id, principal_name" />
+
+        <createTable tableName="SPRING_SESSION">
+            <column name="PRIMARY_ID" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="SESSION_ID" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CREATION_TIME" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="LAST_ACCESS_TIME" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="MAX_INACTIVE_INTERVAL" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="EXPIRY_TIME" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PRINCIPAL_NAME" type="varchar(100)" />
+        </createTable>
+
+        <addPrimaryKey tableName="SPRING_SESSION" columnNames="PRIMARY_ID" />
+
+        <createIndex tableName="SPRING_SESSION" indexName="SPRING_SESSION_ID" unique="true">
+            <column name="SESSION_ID"/>
+        </createIndex>
+
+        <createIndex tableName="SPRING_SESSION" indexName="SPRING_SESSION_TIME">
+            <column name="EXPIRY_TIME"/>
+        </createIndex>
+
+        <createIndex tableName="SPRING_SESSION" indexName="SPRING_SESSION_NAME">
+            <column name="PRINCIPAL_NAME"/>
+        </createIndex>
+
+        <createTable tableName="SPRING_SESSION_ATTRIBUTES">
+            <column name="SESSION_PRIMARY_ID" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ATTRIBUTE_NAME" type="varchar(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ATTRIBUTE_BYTES" type="LONGVARBINARY">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="SPRING_SESSION_ATTRIBUTES" columnNames="SESSION_PRIMARY_ID, ATTRIBUTE_NAME" />
+
+        <addForeignKeyConstraint baseTableName="SPRING_SESSION_ATTRIBUTES"
+                                 baseColumnNames="SESSION_PRIMARY_ID"
+                                 constraintName="SPRING_SESSION_ATTRIBUTES_FK"
+                                 referencedTableName="SPRING_SESSION"
+                                 referencedColumnNames="PRIMARY_ID"
+                                onDelete="CASCADE"/>
+
+        <createTable tableName="USER">
+            <column name="ID" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ADMIN" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="FIRST_NAME" type="VARCHAR(255)"/>
+            <column name="LAST_NAME" type="VARCHAR(255)"/>
+            <column name="STRAVA_ID" type="BIGINT"/>
+            <column name="STRAVA_USER_NAME" type="VARCHAR(255)"/>
+            <column name="CITY" type="VARCHAR(255)"/>
+            <column name="PROFILE_IMAGE" type="VARCHAR(255)"/>
+
+        </createTable>
+
+        <addPrimaryKey tableName="USER" columnNames="ID" />
+
+
+    </changeSet>
+
+
+</databaseChangeLog>
+
+
+
+

@@ -1,0 +1,93 @@
+package info.tomacla.biketeam.domain.publication;
+
+import info.tomacla.biketeam.common.Strings;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.time.ZonedDateTime;
+import java.util.Objects;
+import java.util.UUID;
+
+@Entity
+@Table(name = "publication")
+public class Publication {
+
+    @Id
+    private String id;
+    private String title;
+    @Column(name = "posted_at")
+    private ZonedDateTime postedAt;
+    @Column(length = 8000)
+    private String content;
+    private boolean imaged;
+
+    protected Publication() {
+
+    }
+
+    public Publication(String title,
+                       String content,
+                       boolean imaged) {
+        this.id = UUID.randomUUID().toString();
+        this.postedAt = ZonedDateTime.now();
+        setTitle(title);
+        setContent(content);
+        setImaged(imaged);
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    protected void setId(String id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = Strings.requireNonBlank(title, "title is null");
+    }
+
+    public ZonedDateTime getPostedAt() {
+        return postedAt;
+    }
+
+    protected void setPostedAt(ZonedDateTime postedAt) {
+        this.postedAt = postedAt;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = Strings.requireNonBlank(content, "content is null");
+    }
+
+    public boolean isImaged() {
+        return imaged;
+    }
+
+    public void setImaged(boolean imaged) {
+        this.imaged = imaged;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Publication that = (Publication) o;
+        return id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+}
