@@ -53,7 +53,7 @@
 
     </script>
 
-    <div class="col-4">
+    <div class="col-12 col-md-4 mb-4">
 
         <form onsubmit="handleTags()" action="<@spring.url '/maps' />" method="POST" class="border rounded p-2">
 
@@ -121,7 +121,7 @@
 
     </div>
 
-    <div class="col-8">
+    <div class="col-12 col-md-8">
 
         <div class="row g-4">
             <#if maps?size == 0>
@@ -130,7 +130,7 @@
                  </div>
             </#if>
             <#list maps as map>
-                  <div class="col-6">
+                  <div class="col-12 col-md-6">
                     <div class="card">
                         <img src="<@spring.url '/api/maps/${map.id}/image' />" class="card-img-top" alt="${map.id} image">
                         <div class="card-body">

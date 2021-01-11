@@ -2,7 +2,7 @@
 
 <div class="row pt-2 justify-content-center">
 
-    <div class="col-5">
+    <div class="col-12 col-md-5 mb-4">
 
         <div class="border rounded p-2">
             <h4>${ride.title}</h4>
@@ -15,7 +15,7 @@
 
     </div>
 
-    <div class="col-7">
+    <div class="col-12 col-md-7">
 
         <#list ride.groups as group>
             <div class="card mb-2">

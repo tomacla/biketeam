@@ -4,7 +4,7 @@
 
     <#include "_includes_admin_aside.ftlh">
 
-    <div class="col-8">
+    <div class="col-12 col-md-8">
 
         <form enctype="multipart/form-data" method="POST" action="<@spring.url '/admin/maps/new' />" class="row mb-0">
             <div class="col-auto p-2">

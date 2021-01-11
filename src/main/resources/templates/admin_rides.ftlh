@@ -4,7 +4,7 @@
 
     <#include "_includes_admin_aside.ftlh">
 
-    <div class="col-8">
+    <div class="col-12 col-md-8">
 
         <a href="<@spring.url '/admin/rides/new' />" class="btn btn-secondary" role="button"><i class="bi bi-plus"></i> Nouveau ride</a>
         <hr/>

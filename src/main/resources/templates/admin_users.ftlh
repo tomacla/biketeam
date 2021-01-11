@@ -4,7 +4,7 @@
 
     <#include "_includes_admin_aside.ftlh">
 
-    <div class="col-8">
+    <div class="col-12 col-md-8">
 
         <#if users?size gt 0>
             <ul class="list-group mt-4">

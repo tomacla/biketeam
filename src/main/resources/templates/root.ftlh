@@ -2,9 +2,9 @@
 
 <div class="row pt-2 justify-content-center">
 
-    <aside class="col-4">
+    <aside class="col-12 col-md-4">
 
-        <section class="border p-2 rounded">
+        <section class="border p-2 mb-4 rounded">
             <img src="<@spring.url '/api/logo' />" class="d-block w-50 h-auto mx-auto my-4" alt="Logo image">
             <p class="lead">
               ${global.description}
@@ -31,7 +31,7 @@
 
     </aside>
 
-    <div class="col-8">
+    <div class="col-12 col-md-8">
 
         <div class="row pb-4 g-4">
             <#list feed as feedItem>

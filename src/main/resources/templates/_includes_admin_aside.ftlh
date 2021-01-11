@@ -1,4 +1,4 @@
-<ul class="col-4 list-group">
+<ul class="col-12 col-md-4 list-group mb-4">
   <a href="<@spring.url '/admin' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri == '/admin'> list-group-item-secondary</#if>">Général</a>
   <a href="<@spring.url '/admin/logo' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri == '/admin/logo'> list-group-item-secondary</#if>">Logo</a>
   <a href="<@spring.url '/admin/users' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri == '/admin/users'> list-group-item-secondary</#if>">Utilisateurs</a>

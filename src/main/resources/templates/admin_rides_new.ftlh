@@ -219,7 +219,7 @@
 
     <#include "_includes_admin_aside.ftlh">
 
-    <div class="col-8">
+    <div class="col-12 col-md-8">
     
         <form id="form-ride"
             onsubmit="handleGroups()"

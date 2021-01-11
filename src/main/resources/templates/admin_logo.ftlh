@@ -4,7 +4,7 @@
 
     <#include "_includes_admin_aside.ftlh">
 
-    <div class="col-8">
+    <div class="col-12 col-md-8">
 
         <div class="alert alert-warning" role="alert">
           Le logo est utilisé sur la page d'accueil, dans la barre de navigation et comme icône de favori.

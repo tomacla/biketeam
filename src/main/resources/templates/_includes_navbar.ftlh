@@ -24,11 +24,11 @@
             </li>
             <#if _admin>
                 <li class="nav-item">
-                  <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/admin')> active</#if>" href="<@spring.url '/admin' />"><i class="bi bi-gear"></i></a>
+                  <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/admin')> active</#if>" href="<@spring.url '/admin' />"><i class="bi bi-gear"></i> <span class="d-md-none">Administration</span></a>
                 </li>
             </#if>
             <li class="nav-item">
-                <a class="nav-link" href="<@spring.url '/logout' />"><i class="bi bi-door-closed"></i></a>
+                <a class="nav-link" href="<@spring.url '/logout' />"><i class="bi bi-door-closed"></i> <span class="d-md-none">Déconnexion</span></a>
             </li>
         <#else>
             <li class="nav-item">

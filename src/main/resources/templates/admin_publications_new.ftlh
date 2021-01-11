@@ -4,7 +4,7 @@
 
     <#include "_includes_admin_aside.ftlh">
 
-    <div class="col-8">
+    <div class="col-12 col-md-8">
     
         <form enctype="multipart/form-data" name="form-publication"
             action="<#if formdata.id??><@spring.url '/admin/publications/' + formdata.id /><#else><@spring.url '/admin/publications' /></#if>"

@@ -80,7 +80,7 @@
 
     </script>
 
-    <div class="col-8">
+    <div class="col-12 col-md-8">
     
         <form onsubmit="handleTags()" enctype="multipart/form-data" name="form-map"
             action="<@spring.url '/admin/maps/' + formdata.id />"

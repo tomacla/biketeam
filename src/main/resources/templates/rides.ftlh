@@ -2,7 +2,7 @@
 
 <div class="row pt-2 justify-content-center">
 
-    <div class="col-4">
+    <div class="col-12 col-md-4 mb-4">
 
         <form action="<@spring.url '/rides' />" method="POST" class="border rounded p-2">
 
@@ -32,7 +32,7 @@
 
     </div>
 
-    <div class="col-8">
+    <div class="col-12 col-md-8">
 
         <div class="row g-4">
 
