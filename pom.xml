@@ -14,6 +14,14 @@
 	<name>biketeam</name>
 	<description>Websites for bike teams</description>
 
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>GitHub Packages</name>
+			<url>https://maven.pkg.github.com/tomacla/biketeam</url>
+		</repository>
+	</distributionManagement>
+
 	<properties>
 		<java.version>11</java.version>
 	</properties>
