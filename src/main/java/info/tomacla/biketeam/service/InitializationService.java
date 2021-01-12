@@ -45,11 +45,12 @@ public class InitializationService {
                     defaultDescription));
         }
 
-        if(userRepository.findByStravaId(adminStravaId).isEmpty()) {
+        if (userRepository.findByStravaId(adminStravaId).isEmpty()) {
             userRepository.save(new User(true,
                     adminFirstName,
                     adminLastName,
                     adminStravaId,
+                    null,
                     null,
                     null,
                     null));

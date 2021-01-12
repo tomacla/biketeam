@@ -24,7 +24,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/", "/maps", "/rides").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().permitAll()
-                //.antMatchers("/admin/**").hasRole("ADMIN")
                 .and()
                 .oauth2Login(oauth2 -> {
                     oauth2.failureUrl("/login-error");
@@ -37,6 +36,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public OAuth2AuthorizedClientService oAuth2AuthorizedClientService(JdbcOperations jdbcOperations, ClientRegistrationRepository clientRegistrationRepository) {
         return new JdbcOAuth2AuthorizedClientService(jdbcOperations, clientRegistrationRepository);
     }
-
 
 }

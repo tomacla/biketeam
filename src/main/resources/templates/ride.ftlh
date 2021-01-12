@@ -35,6 +35,22 @@
                         <p class="fst-italic">La map n'a pas été ajoutée.</p>
                     </#if>
                 </div>
+                <#if _authenticated>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <#if group.hasParticipant(_user_id)>
+                                <a href="<@spring.url '/rides/${ride.id}/remove-participant/${group.id}/${_user_id}' />" class="btn btn-sm btn-outline-secondary"><i class="bi-emoji-frown-fill bi"></i> Je n'y vais pas</a>
+                            <#else>
+                                <a href="<@spring.url '/rides/${ride.id}/add-participant/${group.id}/${_user_id}' />" class="btn btn-sm btn-outline-secondary"><i class="bi-emoji-laughing-fill bi"></i> J'y vais</a>
+                             </#if>
+                            <div class="d-flex">
+                                <#list group.participants as participant>
+                                    <img src="${participant.profileImage}" alt="${participant.identity}" width="30" height="30" class="d-block rounded">
+                                </#list>
+                            </div>
+                        </div>
+                    </div>
+                </#if>
             </div>
         </#list>
 

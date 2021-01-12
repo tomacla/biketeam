@@ -259,9 +259,10 @@ public class AdminController extends AbstractController {
                                         mapRepository.findById(g.getMapId()).isPresent() ? g.getMapId() : null,
                                         g.getMeetingLocation(),
                                         LocalTime.parse(g.getMeetingTime()),
-                                        (g.getMeetingPoint() != null && !g.getMeetingPoint().isBlank()) ? Json.parse(g.getMeetingPoint(), Point.class) : null)
+                                        (g.getMeetingPoint() != null && !g.getMeetingPoint().isBlank()) ? Json.parse(g.getMeetingPoint(), Point.class) : null,
+                                        null)
                                 )
-                                .collect(Collectors.toList()));
+                                .collect(Collectors.toSet()));
             } else {
                 newRide = rideRepository.findById(rideId).get();
                 newRide.setType(RideType.valueOf(form.getType()));
@@ -279,7 +280,8 @@ public class AdminController extends AbstractController {
                                 mapRepository.findById(g.getMapId()).isPresent() ? g.getMapId() : null,
                                 g.getMeetingLocation(),
                                 LocalTime.parse(g.getMeetingTime()),
-                                (g.getMeetingPoint() != null && !g.getMeetingPoint().isBlank()) ? Json.parse(g.getMeetingPoint(), Point.class) : null));
+                                (g.getMeetingPoint() != null && !g.getMeetingPoint().isBlank()) ? Json.parse(g.getMeetingPoint(), Point.class) : null,
+                                null));
                     } else {
                         RideGroup toModify = newRide.getGroups().stream().filter(eg -> eg.getId().equals(g.getId())).findFirst().get();
                         toModify.setLowerSpeed(g.getLowerSpeed());

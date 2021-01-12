@@ -5,8 +5,8 @@ import info.tomacla.biketeam.common.Strings;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -23,7 +23,7 @@ public class Ride {
     private String description;
     private boolean imaged;
     @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<RideGroup> groups;
+    private Set<RideGroup> groups;
 
     protected Ride() {
 
@@ -34,7 +34,7 @@ public class Ride {
                 String title,
                 String description,
                 boolean imaged,
-                List<RideGroup> groups) {
+                Set<RideGroup> groups) {
 
         this.id = UUID.randomUUID().toString();
         setType(type);
@@ -93,7 +93,7 @@ public class Ride {
         this.imaged = imaged;
     }
 
-    public List<RideGroup> getGroups() {
+    public Set<RideGroup> getGroups() {
         return groups;
     }
 
@@ -102,9 +102,9 @@ public class Ride {
         groups.add(group);
     }
 
-    public void setGroups(List<RideGroup> groups) {
+    public void setGroups(Set<RideGroup> groups) {
         Lists.requireNonEmpty(groups, "groups is null");
-        this.groups = groups.stream().peek(g -> g.setRide(this)).collect(Collectors.toList());
+        this.groups = groups.stream().peek(g -> g.setRide(this)).collect(Collectors.toSet());
     }
 
     @Override

@@ -3,16 +3,18 @@ package info.tomacla.biketeam.web;
 
 import info.tomacla.biketeam.domain.global.GlobalData;
 import info.tomacla.biketeam.domain.global.GlobalDataRepository;
-import info.tomacla.biketeam.security.AdminAuthority;
+import info.tomacla.biketeam.domain.user.User;
+import info.tomacla.biketeam.domain.user.UserRepository;
+import info.tomacla.biketeam.security.LocalDefaultOAuth2User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.ui.Model;
 
 import java.security.Principal;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Locale;
+import java.util.Optional;
 
 public abstract class AbstractController {
 
@@ -20,6 +22,9 @@ public abstract class AbstractController {
 
     @Autowired
     protected GlobalDataRepository globalDataRepository;
+
+    @Autowired
+    protected UserRepository userRepository;
 
     // FIXME do this automatically
     protected void addGlobalValues(Principal principal, Model model, String pageTitle) {
@@ -32,16 +37,25 @@ public abstract class AbstractController {
         model.addAttribute("_date_formatter", frenchFormatter);
         model.addAttribute("_authenticated", false);
 
-        if (principal instanceof OAuth2AuthenticationToken) {
-            OAuth2AuthenticationToken wrapperPrincipal = (OAuth2AuthenticationToken) principal;
-            DefaultOAuth2User oauthprincipal = (DefaultOAuth2User) wrapperPrincipal.getPrincipal();
+        getUserFromPrincipal(principal).ifPresent(user -> {
             model.addAttribute("_authenticated", true);
-            model.addAttribute("_admin", AdminAuthority.check(wrapperPrincipal.getAuthorities()));
-            model.addAttribute("_strava_id", oauthprincipal.getAttributes().get("id"));
-            model.addAttribute("_identity", oauthprincipal.getAttributes().get("firstname") + " " + oauthprincipal.getAttributes().get("lastname"));
-            model.addAttribute("_profile_image", oauthprincipal.getAttributes().get("profile_medium"));
-        }
+            model.addAttribute("_admin", user.isAdmin());
+            model.addAttribute("_strava_id", user.getStravaId());
+            model.addAttribute("_identity", user.getIdentity());
+            model.addAttribute("_profile_image", user.getProfileImage());
+            model.addAttribute("_user_id", user.getId());
+        });
 
     }
+
+    protected Optional<User> getUserFromPrincipal(Principal principal) {
+        if (principal instanceof OAuth2AuthenticationToken) {
+            OAuth2AuthenticationToken wrapperPrincipal = (OAuth2AuthenticationToken) principal;
+            LocalDefaultOAuth2User oauthprincipal = (LocalDefaultOAuth2User) wrapperPrincipal.getPrincipal();
+            return userRepository.findById(oauthprincipal.getLocalUserId());
+        }
+        return Optional.empty();
+    }
+
 
 }

@@ -234,6 +234,19 @@
 
     </changeSet>
 
+    <changeSet id="GITHUB-1-RIDE-PARTICIPANTS" author="tomacla">
+
+        <createTable tableName="ride_group_participant">
+            <column name="ride_group_id" type="VARCHAR(255)" />
+            <column name="user_id" type="VARCHAR(255)" />
+        </createTable>
+
+        <sql>delete from SPRING_SESSION_ATTRIBUTES</sql>
+        <sql>delete from SPRING_SESSION</sql>
+        <sql>delete from oauth2_authorized_client</sql>
+
+    </changeSet>
+
 
 </databaseChangeLog>
 

@@ -1,16 +1,18 @@
 package info.tomacla.biketeam.domain.user;
 
 import info.tomacla.biketeam.common.Strings;
+import info.tomacla.biketeam.domain.ride.RideGroup;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
 @Table(name = "user")
-public class User {
+public class User implements Serializable {
 
     @Id
     private String id;
@@ -27,6 +29,8 @@ public class User {
     private String city;
     @Column(name = "profile_image", length = 500)
     private String profileImage;
+    @ManyToMany(mappedBy = "participants", fetch = FetchType.LAZY)
+    private Set<RideGroup> rideGroups;
 
     protected User() {
 
@@ -38,7 +42,8 @@ public class User {
                 Long stravaId,
                 String stravaUserName,
                 String city,
-                String profileImage) {
+                String profileImage,
+                Set<RideGroup> rideGroups) {
         this.id = UUID.randomUUID().toString();
         setAdmin(admin);
         setStravaId(stravaId);
@@ -47,6 +52,7 @@ public class User {
         setLastName(lastName);
         setCity(city);
         setProfileImage(profileImage);
+        setRides(rideGroups);
     }
 
     public String getId() {
@@ -111,5 +117,30 @@ public class User {
 
     public void setProfileImage(String profileImage) {
         this.profileImage = profileImage;
+    }
+
+    public Set<RideGroup> getRides() {
+        return rideGroups;
+    }
+
+    public void setRides(Set<RideGroup> rides) {
+        this.rideGroups = Objects.requireNonNullElse(rides, new HashSet<>());
+    }
+
+    public String getIdentity() {
+        return getFirstName() + " " + getLastName();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return id.equals(user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
