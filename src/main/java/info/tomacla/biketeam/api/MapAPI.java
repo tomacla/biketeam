@@ -1,8 +1,6 @@
 package info.tomacla.biketeam.api;
 
 import info.tomacla.biketeam.common.FileRepositories;
-import info.tomacla.biketeam.domain.navigationmap.MapIdNamePostedAtVisibleProjection;
-import info.tomacla.biketeam.domain.navigationmap.MapRepository;
 import info.tomacla.biketeam.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,9 +10,6 @@ import org.springframework.web.server.ServerErrorException;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/api/maps")

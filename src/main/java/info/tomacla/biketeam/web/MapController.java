@@ -2,7 +2,7 @@ package info.tomacla.biketeam.web;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import info.tomacla.biketeam.common.Json;
-import info.tomacla.biketeam.domain.navigationmap.*;
+import info.tomacla.biketeam.domain.map.*;
 import info.tomacla.biketeam.web.forms.SearchMapForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

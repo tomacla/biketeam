@@ -1,7 +1,7 @@
 package info.tomacla.biketeam.web.forms;
 
 import info.tomacla.biketeam.common.Json;
-import info.tomacla.biketeam.domain.navigationmap.Map;
+import info.tomacla.biketeam.domain.map.Map;
 
 public class NewMapForm {
 

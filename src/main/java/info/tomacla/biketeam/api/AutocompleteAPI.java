@@ -1,7 +1,7 @@
 package info.tomacla.biketeam.api;
 
-import info.tomacla.biketeam.domain.navigationmap.MapIdNamePostedAtVisibleProjection;
-import info.tomacla.biketeam.domain.navigationmap.MapRepository;
+import info.tomacla.biketeam.domain.map.MapIdNamePostedAtVisibleProjection;
+import info.tomacla.biketeam.domain.map.MapRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

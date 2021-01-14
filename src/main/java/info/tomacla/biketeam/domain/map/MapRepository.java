@@ -1,4 +1,4 @@
-package info.tomacla.biketeam.domain.navigationmap;
+package info.tomacla.biketeam.domain.map;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
