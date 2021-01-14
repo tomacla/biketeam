@@ -16,7 +16,7 @@ import java.nio.file.Files;
 
 @RestController
 @RequestMapping(value = "/api")
-public class GlobalAPI {
+public class RootAPI {
 
     @Autowired
     private FileService fileService;

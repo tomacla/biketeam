@@ -166,7 +166,7 @@
 
         AutoComplete({
             EmptyMessage: "Aucun tag trouvé",
-            Url : "<@spring.url '/api/maps/autocomplete/tags' />",
+            Url : "<@spring.url '/api/autocomplete/tags' />",
             OnSelect: function(input, value) {
                 createTag(value);
             },

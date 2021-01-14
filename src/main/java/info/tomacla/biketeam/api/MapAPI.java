@@ -23,9 +23,6 @@ public class MapAPI {
     @Autowired
     private FileService fileService;
 
-    @Autowired
-    private MapRepository mapRepository;
-
     @ResponseBody
     @RequestMapping(value = "/{mapId}/gpx", method = RequestMethod.GET, produces = "application/gpx+xml")
     public byte[] getMapGpxFile(@PathVariable("mapId") String mapId) {
@@ -52,24 +49,6 @@ public class MapAPI {
             }
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to find image : " + mapId);
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/autocomplete/tags", method = RequestMethod.GET)
-    public List<String> getTags(@RequestParam("q") String q) {
-        if (q == null || q.isBlank()) {
-            return mapRepository.findAllDistinctTags();
-        }
-        return mapRepository.findDistinctTagsContainer(q.toLowerCase());
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/autocomplete", method = RequestMethod.GET)
-    public Map<String, String> listMaps(@RequestParam("q") String q) {
-        List<MapIdNamePostedAtVisibleProjection> maps = q == null || q.isBlank() ? mapRepository.findAllByOrderByPostedAtDesc()
-                : mapRepository.findAllByNameContainingIgnoreCaseOrderByPostedAtDesc(q);
-        return maps.stream().collect(Collectors.toMap(MapIdNamePostedAtVisibleProjection::getId, MapIdNamePostedAtVisibleProjection::getName));
-
     }
 
 }

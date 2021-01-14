@@ -167,7 +167,7 @@
 
         AutoComplete({
             EmptyMessage: "Aucune map trouvée",
-            Url : "<@spring.url '/api/maps/autocomplete' />"
+            Url : "<@spring.url '/api/autocomplete/maps' />"
         }, '#form-ride-group-map-' + currentGroupIndex);
 
         currentGroupIndex++;
