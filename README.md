@@ -6,9 +6,21 @@ Easily create a website for bike groups.
 
 See live demo [here](https://biketeam.tomacla.info)
 
-## Deploy
+## Use sources
 
-### Create an application on your strava account
+Biketeam is a standard spring boot application so use spring boot maven plugin 
+
+`mvn spring-boot:run`
+
+Or to clean and install
+
+`mvn clean install`
+
+## Run or deploy
+
+### Prerequisites
+
+#### Create an application on your strava account
 
 You'll need to declare an app in strava for authentication.
 
@@ -16,15 +28,7 @@ Go to [this page](https://www.strava.com/settings/api) and create you app.
 
 Write down client-id and client-secret.
 
-### Install java
-
-You need Java 13 or above.
-
-### Get the jar
-
-Download the biketeam jar on github or clone the source and build source with `mvn clean install`.
-
-### Create a properties file
+#### Create a custom configuration file
 
 Create file for custom configuration for example `application-custom.properties`.
 
@@ -52,7 +56,27 @@ admin.last-name=admin
 * admin.first-name : your first name
 * admin.last-name : your last name
 
-### Start
+### With docker
+
+#### Build image
+
+`docker build -t biketeam:0.0.1 .`
+
+#### Run image
+
+`docker run -d -p 8080:8080 -v /path/to/application-custom.properties:/opt/biketeam/application-custom.properties -v /path/to/data:/opt/biketeam-data -t biketeam:0.0.1`
+
+### With java
+
+#### Install java
+
+You need Java 13 or above.
+
+#### Get the jar
+
+Download the biketeam jar on github or clone the source and build source with `mvn clean install`.
+
+#### Start
 
 Start with command line (change path to application-custom.properties if needed)
 
