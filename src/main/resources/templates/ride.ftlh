@@ -29,7 +29,7 @@
                     <#if (group.mapId)??>
                         <div class="btn-group" role="group">
                             <a download="${ride.title}-${group.name}.gpx" href="<@spring.url '/api/maps/${group.mapId}/gpx' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-download"></i> GPX</a>
-                            <a href="<@spring.url '/maps/${group.mapId}' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-map"></i> Web</a>
+                            <a href="<@spring.url '/maps/${group.mapId}' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-map"></i> Voir</a>
                         </div>
                     <#else>
                         <p class="fst-italic">La map n'a pas été ajoutée.</p>
