@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.security.Principal;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
@@ -37,7 +38,7 @@ public class RideController extends AbstractController {
         form.setTo(to.format(DateTimeFormatter.ISO_LOCAL_DATE));
 
         addGlobalValues(principal, model, "Rides");
-        model.addAttribute("rides", rideRepository.findByDateBetweenOrderByDateDesc(from, to));
+        model.addAttribute("rides", rideRepository.findByDateBetweenAndPublishedAtLessThanOrderByDateDesc(from, to, ZonedDateTime.now()));
         model.addAttribute("formdata", form);
         return "rides";
     }
@@ -112,7 +113,7 @@ public class RideController extends AbstractController {
         LocalDate from = LocalDate.parse(form.getFrom());
 
         addGlobalValues(principal, model, "Rides");
-        model.addAttribute("rides", rideRepository.findByDateBetweenOrderByDateDesc(from, to));
+        model.addAttribute("rides", rideRepository.findByDateBetweenAndPublishedAtLessThanOrderByDateDesc(from, to, ZonedDateTime.now()));
         model.addAttribute("formdata", form);
         return "rides";
     }

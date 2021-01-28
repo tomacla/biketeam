@@ -5,6 +5,7 @@ import info.tomacla.biketeam.common.Strings;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -18,6 +19,8 @@ public class Ride {
     private String id;
     private RideType type;
     private LocalDate date;
+    @Column(name = "published_at")
+    private ZonedDateTime publishedAt;
     private String title;
     @Column(length = 8000)
     private String description;
@@ -31,6 +34,7 @@ public class Ride {
 
     public Ride(RideType type,
                 LocalDate date,
+                ZonedDateTime publishedAt,
                 String title,
                 String description,
                 boolean imaged,
@@ -39,6 +43,7 @@ public class Ride {
         this.id = UUID.randomUUID().toString();
         setType(type);
         setDate(date);
+        setPublishedAt(publishedAt);
         setTitle(title);
         setDescription(description);
         setImaged(imaged);
@@ -67,6 +72,14 @@ public class Ride {
 
     public void setDate(LocalDate date) {
         this.date = Objects.requireNonNull(date, "date is null");
+    }
+
+    public ZonedDateTime getPublishedAt() {
+        return publishedAt;
+    }
+
+    public void setPublishedAt(ZonedDateTime publishedAt) {
+        this.publishedAt = Objects.requireNonNull(publishedAt, "publishedAt is null");
     }
 
     public String getTitle() {

@@ -4,9 +4,12 @@ import info.tomacla.biketeam.common.Json;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.ride.RideType;
+import org.apache.tomcat.jni.Local;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,6 +19,8 @@ public class NewRideForm {
     private String id;
     private String type;
     private String date;
+    private String publishedAtDate;
+    private String publishedAtTime;
     private String title;
     private String description;
     private MultipartFile file;
@@ -43,6 +48,22 @@ public class NewRideForm {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public String getPublishedAtDate() {
+        return publishedAtDate;
+    }
+
+    public void setPublishedAtDate(String publishedAtDate) {
+        this.publishedAtDate = publishedAtDate;
+    }
+
+    public String getPublishedAtTime() {
+        return publishedAtTime;
+    }
+
+    public void setPublishedAtTime(String publishedAtTime) {
+        this.publishedAtTime = publishedAtTime;
     }
 
     public String getTitle() {
@@ -84,6 +105,8 @@ public class NewRideForm {
     public static NewRideForm empty() {
         NewRideForm form = new NewRideForm();
         form.setId("new");
+        form.setPublishedAtDate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
+        form.setPublishedAtTime(LocalTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME));
         form.setGroups(Json.serialize(List.of(new NewRideForm.NewRideGroupForm())));
         return form;
     }
@@ -93,6 +116,8 @@ public class NewRideForm {
         form.setId(ride.getId());
         form.setType(ride.getType().name());
         form.setDate(ride.getDate().format(DateTimeFormatter.ISO_LOCAL_DATE));
+        form.publishedAtDate = ride.getPublishedAt().toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
+        form.publishedAtTime = ride.getPublishedAt().toLocalTime().format(DateTimeFormatter.ISO_LOCAL_TIME);
         form.setDescription(ride.getDescription());
         form.setTitle(ride.getTitle());
         form.setGroups(Json.serialize(ride.getGroups().stream().map(NewRideGroupForm::build).collect(Collectors.toList())).replace("\\", "\\\\"));

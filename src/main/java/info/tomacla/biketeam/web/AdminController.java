@@ -28,8 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Path;
 import java.security.Principal;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -126,7 +125,10 @@ public class AdminController extends AbstractController {
 
         try {
 
-            Publication newPublication = new Publication(form.getTitle(), form.getContent(), form.fileSet());
+
+            ZonedDateTime publishedAt =  ZonedDateTime.of(LocalDateTime.parse(form.getPublishedAtDate() + "T" + form.getPublishedAtTime()), ZoneId.of("Europe/Paris"));
+
+            Publication newPublication = new Publication(form.getTitle(), form.getContent(), publishedAt, form.fileSet());
             if (form.fileSet()) {
                 Path tmp = fileService.getTempFileFromInputStream(form.getFile().getInputStream());
                 fileService.store(tmp, FileRepositories.PUBLICATION_IMAGES, newPublication.getId() + ".jpg");
@@ -186,7 +188,7 @@ public class AdminController extends AbstractController {
     @GetMapping(value = "/publications/new")
     public String newPublication(Principal principal, Model model) {
         addGlobalValues(principal, model, "Administration - Nouvelle publication");
-        model.addAttribute("formdata", new NewPublicationForm());
+        model.addAttribute("formdata", NewPublicationForm.empty());
         return "admin_publications_new";
     }
 
@@ -247,10 +249,13 @@ public class AdminController extends AbstractController {
             });
             Set<String> groupIdsSet = parsedGroups.stream().map(NewRideForm.NewRideGroupForm::getId).collect(Collectors.toSet());
 
+            ZonedDateTime publishedAt =  ZonedDateTime.of(LocalDateTime.parse(form.getPublishedAtDate() + "T" + form.getPublishedAtTime()), ZoneId.of("Europe/Paris"));
+
             Ride newRide;
             if (rideId.equals("new")) {
                 newRide = new Ride(RideType.valueOf(form.getType()),
                         LocalDate.parse(form.getDate()),
+                        publishedAt,
                         form.getTitle(), form.getDescription(),
                         form.fileSet(),
                         parsedGroups.stream()
@@ -269,6 +274,7 @@ public class AdminController extends AbstractController {
                 newRide.setDate(LocalDate.parse(form.getDate()));
                 newRide.setTitle(form.getTitle());
                 newRide.setDescription(form.getDescription());
+                newRide.setPublishedAt(publishedAt);
 
                 // remove groups not in list
                 newRide.getGroups().removeIf(g -> !groupIdsSet.contains(g.getId()));

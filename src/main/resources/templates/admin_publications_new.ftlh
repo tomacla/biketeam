@@ -27,6 +27,16 @@
                   <label for="form-publication-file" class="form-label">Image associée (format jpg uniquement)</label>
                   <input autocomplete="off" name="file" accept=".jpg" class="form-control form-size-check" type="file" id="form-publication-file">
                 </div>
+                <div class="row mb-3">
+                    <div class="col-6 mb-3">
+                      <label for="form-ride-title" class="form-label">Date de publication</label>
+                      <input autocomplete="off" required="true" value="${formdata.publishedAtDate}" name="publishedAtDate" type="date" class="form-control" id="form-ride-publishedat-date">
+                    </div>
+                    <div class="col-6 mb-3">
+                      <label for="form-ride-date" class="form-label">Heure de publication</label>
+                      <input autocomplete="off" required="true" value="${formdata.publishedAtTime}" name="publishedAtTime" type="time" class="form-control" id="form-ride-publishedat-time">
+                    </div>
+                </div>
                 <button type="submit" class="btn btn-secondary">Publier</button>
         </form>
 

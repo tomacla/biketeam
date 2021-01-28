@@ -257,6 +257,17 @@
                   <textarea required="true" name="description" class="form-control" id="form-ride-description" rows="5">${formdata.description}</textarea>
                 </div>
 
+                <div class="row mb-3">
+                    <div class="col-6 mb-3">
+                      <label for="form-ride-title" class="form-label">Date de publication</label>
+                      <input autocomplete="off" required="true" value="${formdata.publishedAtDate}" name="publishedAtDate" type="date" class="form-control" id="form-ride-publishedat-date">
+                    </div>
+                    <div class="col-6 mb-3">
+                      <label for="form-ride-date" class="form-label">Heure de publication</label>
+                      <input autocomplete="off" required="true" value="${formdata.publishedAtTime}" name="publishedAtTime" type="time" class="form-control" id="form-ride-publishedat-time">
+                    </div>
+                </div>
+
                 <hr/>
 
                 <h5>Groupes <div class="btn-group"><button type="button" onclick="addGroup()" class="btn btn-outline-secondary btn-sm" role="button"><strong><i class="bi bi-plus"></i></strong></button><button type="button" disabled="true" id="form-ride-group-remove" onclick="removeGroup()" class="ml-2 btn btn-outline-secondary btn-sm" role="button"><strong><i class="bi bi-dash"></i></strong></button></div></h5>

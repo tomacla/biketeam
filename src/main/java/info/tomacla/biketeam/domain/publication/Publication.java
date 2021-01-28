@@ -17,6 +17,8 @@ public class Publication {
     @Id
     private String id;
     private String title;
+    @Column(name = "published_at")
+    private ZonedDateTime publishedAt;
     @Column(name = "posted_at")
     private ZonedDateTime postedAt;
     @Column(length = 8000)
@@ -29,9 +31,11 @@ public class Publication {
 
     public Publication(String title,
                        String content,
+                       ZonedDateTime publishedAt,
                        boolean imaged) {
         this.id = UUID.randomUUID().toString();
         this.postedAt = ZonedDateTime.now();
+        setPublishedAt(publishedAt);
         setTitle(title);
         setContent(content);
         setImaged(imaged);
@@ -51,6 +55,14 @@ public class Publication {
 
     public void setTitle(String title) {
         this.title = Strings.requireNonBlank(title, "title is null");
+    }
+
+    public ZonedDateTime getPublishedAt() {
+        return publishedAt;
+    }
+
+    public void setPublishedAt(ZonedDateTime publishedAt) {
+        this.publishedAt = Objects.requireNonNull(publishedAt, "publishedAt is null");
     }
 
     public ZonedDateTime getPostedAt() {

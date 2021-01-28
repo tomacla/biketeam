@@ -9,6 +9,7 @@ import info.tomacla.biketeam.service.feed.FeedItemType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,8 +30,8 @@ public class FeedService {
 
         var result = new ArrayList<FeedItem>();
 
-        rideRepository.findAll().stream().map(this::convertRide).forEach(result::add);
-        publicationRepository.findAll().stream().map(this::convertPublication).forEach(result::add);
+        rideRepository.findAllByPublishedAtLessThan(ZonedDateTime.now()).stream().map(this::convertRide).forEach(result::add);
+        publicationRepository.findAllByPublishedAtLessThan(ZonedDateTime.now()).stream().map(this::convertPublication).forEach(result::add);
 
         result.sort((f1, f2) -> f2.getDate().compareTo(f1.getDate()));
         return result;

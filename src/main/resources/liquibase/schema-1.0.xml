@@ -247,6 +247,22 @@
 
     </changeSet>
 
+    <changeSet id="GITHUB-3-PUBLISH-DATES" author="tomacla">
+
+        <addColumn tableName="PUBLICATION">
+            <column name="PUBLISHED_AT" type="TIMESTAMP"/>
+        </addColumn>
+
+        <sql>update publication set published_at = posted_at;</sql>
+
+        <addColumn tableName="RIDE">
+            <column name="PUBLISHED_AT" type="TIMESTAMP"/>
+        </addColumn>
+
+        <sql>update ride set published_at = to_timestamp(DATE);</sql>
+
+    </changeSet>
+
 
 </databaseChangeLog>
 
