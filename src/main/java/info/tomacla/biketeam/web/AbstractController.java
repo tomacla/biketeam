@@ -1,8 +1,7 @@
 package info.tomacla.biketeam.web;
 
 
-import info.tomacla.biketeam.domain.global.GlobalData;
-import info.tomacla.biketeam.domain.global.GlobalDataRepository;
+import info.tomacla.biketeam.domain.global.*;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.user.UserRepository;
 import info.tomacla.biketeam.security.LocalDefaultOAuth2User;
@@ -21,7 +20,13 @@ public abstract class AbstractController {
     private static final DateTimeFormatter frenchFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(Locale.FRANCE);
 
     @Autowired
-    protected GlobalDataRepository globalDataRepository;
+    protected SiteDescriptionRepository siteDescriptionRepository;
+
+    @Autowired
+    protected SiteConfigurationRepository siteConfigurationRepository;
+
+    @Autowired
+    protected SiteIntegrationRepository siteIntegrationRepository;
 
     @Autowired
     protected UserRepository userRepository;
@@ -29,11 +34,16 @@ public abstract class AbstractController {
     // FIXME do this automatically
     protected void addGlobalValues(Principal principal, Model model, String pageTitle) {
 
-        @SuppressWarnings("OptionalGetWithoutIsPresent") GlobalData data = globalDataRepository.findById(1L).get();
-        model.addAttribute("_sitename", data.getSitename());
-        model.addAttribute("_description", data.getDescription());
+        SiteDescription desc = siteDescriptionRepository.findById(1L).get();
+        SiteConfiguration config = siteConfigurationRepository.findById(1L).get();
+        SiteIntegration integ = siteIntegrationRepository.findById(1L).get();
+
+        model.addAttribute("_sitename", desc.getSitename());
+        model.addAttribute("_description", desc.getDescription());
         model.addAttribute("_pagetitle", pageTitle);
-        model.addAttribute("global", data);
+        model.addAttribute("_desc", desc);
+        model.addAttribute("_config", config);
+        model.addAttribute("_integ", integ);
         model.addAttribute("_date_formatter", frenchFormatter);
         model.addAttribute("_authenticated", false);
 

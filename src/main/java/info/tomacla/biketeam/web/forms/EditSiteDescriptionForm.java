@@ -1,8 +1,8 @@
 package info.tomacla.biketeam.web.forms;
 
-import info.tomacla.biketeam.domain.global.GlobalData;
+import info.tomacla.biketeam.domain.global.SiteDescription;
 
-public class EditGlobalDataForm {
+public class EditSiteDescriptionForm {
 
     private String sitename;
     private String description;
@@ -14,7 +14,6 @@ public class EditGlobalDataForm {
     private String addressPostalCode;
     private String addressCity;
     private String other;
-    private String mapBoxAPIKey;
 
     public String getSitename() {
         return sitename;
@@ -96,16 +95,8 @@ public class EditGlobalDataForm {
         this.other = other;
     }
 
-    public String getMapBoxAPIKey() {
-        return mapBoxAPIKey == null ? "" : mapBoxAPIKey;
-    }
-
-    public void setMapBoxAPIKey(String mapBoxAPIKey) {
-        this.mapBoxAPIKey = mapBoxAPIKey;
-    }
-
-    public static EditGlobalDataForm build(GlobalData obj) {
-        EditGlobalDataForm form = new EditGlobalDataForm();
+    public static EditSiteDescriptionForm build(SiteDescription obj) {
+        EditSiteDescriptionForm form = new EditSiteDescriptionForm();
         form.sitename = obj.getSitename();
         form.description = obj.getDescription();
         form.facebook = obj.getFacebook();
@@ -116,7 +107,6 @@ public class EditGlobalDataForm {
         form.addressPostalCode = obj.getAddressPostalCode();
         form.addressCity = obj.getAddressCity();
         form.other = obj.getOther();
-        form.mapBoxAPIKey = obj.getMapBoxAPIKey();
         return form;
     }
 

@@ -19,4 +19,11 @@ public class Strings {
         return s;
     }
 
+    public static String requireNonBlankOrDefault(String s, String defaultValue) {
+        if (s == null || s.isBlank()) {
+            return defaultValue;
+        }
+        return s;
+    }
+
 }

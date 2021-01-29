@@ -5,7 +5,9 @@ import info.tomacla.biketeam.common.FileRepositories;
 import info.tomacla.biketeam.common.Gpx;
 import info.tomacla.biketeam.common.Json;
 import info.tomacla.biketeam.common.Point;
-import info.tomacla.biketeam.domain.global.GlobalData;
+import info.tomacla.biketeam.domain.global.SiteConfiguration;
+import info.tomacla.biketeam.domain.global.SiteDescription;
+import info.tomacla.biketeam.domain.global.SiteIntegration;
 import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.map.MapRepository;
 import info.tomacla.biketeam.domain.publication.Publication;
@@ -16,10 +18,7 @@ import info.tomacla.biketeam.domain.ride.RideRepository;
 import info.tomacla.biketeam.domain.ride.RideType;
 import info.tomacla.biketeam.domain.user.UserRepository;
 import info.tomacla.biketeam.service.FileService;
-import info.tomacla.biketeam.web.forms.EditGlobalDataForm;
-import info.tomacla.biketeam.web.forms.NewMapForm;
-import info.tomacla.biketeam.web.forms.NewPublicationForm;
-import info.tomacla.biketeam.web.forms.NewRideForm;
+import info.tomacla.biketeam.web.forms.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -55,38 +54,92 @@ public class AdminController extends AbstractController {
     private UserRepository userRepository;
 
     @GetMapping
-    public String getGlobal(Principal principal, Model model) {
-        addGlobalValues(principal, model, "Administration - Général");
-        model.addAttribute("formdata", EditGlobalDataForm.build(globalDataRepository.findById(1L).get()));
-        return "admin_global";
+    public String getSiteDescription(Principal principal, Model model) {
+        addGlobalValues(principal, model, "Administration - Description");
+        model.addAttribute("formdata", EditSiteDescriptionForm.build(siteDescriptionRepository.findById(1L).get()));
+        return "admin_description";
     }
 
     @PostMapping
-    public String updateGlobal(Principal principal, Model model,
-                               EditGlobalDataForm form) {
+    public String updateSiteDescription(Principal principal, Model model,
+                                        EditSiteDescriptionForm form) {
 
         try {
-            @SuppressWarnings("OptionalGetWithoutIsPresent") GlobalData globalData = globalDataRepository.findById(1L).get();
-            globalData.setSitename(form.getSitename());
-            globalData.setDescription(form.getDescription());
-            globalData.setFacebook(form.getFacebook());
-            globalData.setTwitter(form.getTwitter());
-            globalData.setEmail(form.getEmail());
-            globalData.setPhoneNumber(form.getPhoneNumber());
-            globalData.setAddressStreetLine(form.getAddressStreetLine());
-            globalData.setAddressPostalCode(form.getAddressPostalCode());
-            globalData.setAddressCity(form.getAddressCity());
-            globalData.setOther(form.getOther());
-            globalData.setMapBoxAPIKey(form.getMapBoxAPIKey());
-            globalDataRepository.save(globalData);
+            @SuppressWarnings("OptionalGetWithoutIsPresent") SiteDescription siteDescription = siteDescriptionRepository.findById(1L).get();
+            siteDescription.setSitename(form.getSitename());
+            siteDescription.setDescription(form.getDescription());
+            siteDescription.setFacebook(form.getFacebook());
+            siteDescription.setTwitter(form.getTwitter());
+            siteDescription.setEmail(form.getEmail());
+            siteDescription.setPhoneNumber(form.getPhoneNumber());
+            siteDescription.setAddressStreetLine(form.getAddressStreetLine());
+            siteDescription.setAddressPostalCode(form.getAddressPostalCode());
+            siteDescription.setAddressCity(form.getAddressCity());
+            siteDescription.setOther(form.getOther());
+            siteDescriptionRepository.save(siteDescription);
         } catch (Exception e) {
             model.addAttribute("errors", List.of(e.getMessage()));
         } finally {
-            model.addAttribute("formdata", EditGlobalDataForm.build(globalDataRepository.findById(1L).get()));
-            addGlobalValues(principal, model, "Administration - Général");
+            model.addAttribute("formdata", EditSiteDescriptionForm.build(siteDescriptionRepository.findById(1L).get()));
+            addGlobalValues(principal, model, "Administration - Description");
         }
 
-        return "admin_global";
+        return "admin_description";
+
+    }
+
+    @GetMapping(value = "/configuration")
+    public String getSiteConfiguration(Principal principal, Model model) {
+        addGlobalValues(principal, model, "Administration - Configuration");
+        model.addAttribute("formdata", EditSiteConfigurationForm.build(siteConfigurationRepository.findById(1L).get()));
+        model.addAttribute("timezones", ZoneId.getAvailableZoneIds().stream().map(ZoneId::of).map(ZoneId::toString).sorted().collect(Collectors.toList()));
+        return "admin_configuration";
+    }
+
+    @PostMapping(value = "/configuration")
+    public String updateSiteConfiguration(Principal principal, Model model,
+                                          EditSiteConfigurationForm form) {
+
+        try {
+            @SuppressWarnings("OptionalGetWithoutIsPresent") SiteConfiguration siteConfiguration = siteConfigurationRepository.findById(1L).get();
+            siteConfiguration.setSoundEnabled(form.isSoundEnabled());
+            siteConfiguration.setTimezone(form.getTimezone());
+            siteConfigurationRepository.save(siteConfiguration);
+        } catch (Exception e) {
+            model.addAttribute("errors", List.of(e.getMessage()));
+        } finally {
+            model.addAttribute("formdata", EditSiteConfigurationForm.build(siteConfigurationRepository.findById(1L).get()));
+            model.addAttribute("timezones", ZoneId.getAvailableZoneIds().stream().map(ZoneId::of).map(ZoneId::toString).sorted().collect(Collectors.toList()));
+            addGlobalValues(principal, model, "Administration - Configuration");
+        }
+
+        return "admin_configuration";
+
+    }
+
+    @GetMapping(value = "/integration")
+    public String getSiteIntegration(Principal principal, Model model) {
+        addGlobalValues(principal, model, "Administration - Intégrations");
+        model.addAttribute("formdata", EditSiteIntegrationForm.build(siteIntegrationRepository.findById(1L).get()));
+        return "admin_integration";
+    }
+
+    @PostMapping(value = "/integration")
+    public String updateSiteIntegration(Principal principal, Model model,
+                                        EditSiteIntegrationForm form) {
+
+        try {
+            @SuppressWarnings("OptionalGetWithoutIsPresent") SiteIntegration siteIntegration = siteIntegrationRepository.findById(1L).get();
+            siteIntegration.setMapBoxAPIKey(form.getMapBoxAPIKey());
+            siteIntegrationRepository.save(siteIntegration);
+        } catch (Exception e) {
+            model.addAttribute("errors", List.of(e.getMessage()));
+        } finally {
+            model.addAttribute("formdata", EditSiteIntegrationForm.build(siteIntegrationRepository.findById(1L).get()));
+            addGlobalValues(principal, model, "Administration - Intégrations");
+        }
+
+        return "admin_integration";
 
     }
 
@@ -126,7 +179,7 @@ public class AdminController extends AbstractController {
         try {
 
 
-            ZonedDateTime publishedAt =  ZonedDateTime.of(LocalDateTime.parse(form.getPublishedAtDate() + "T" + form.getPublishedAtTime()), ZoneId.of("Europe/Paris"));
+            ZonedDateTime publishedAt = parseZonedDateTime(form.getPublishedAtDate(), form.getPublishedAtTime());
 
             Publication newPublication = new Publication(form.getTitle(), form.getContent(), publishedAt, form.fileSet());
             if (form.fileSet()) {
@@ -249,7 +302,7 @@ public class AdminController extends AbstractController {
             });
             Set<String> groupIdsSet = parsedGroups.stream().map(NewRideForm.NewRideGroupForm::getId).collect(Collectors.toSet());
 
-            ZonedDateTime publishedAt =  ZonedDateTime.of(LocalDateTime.parse(form.getPublishedAtDate() + "T" + form.getPublishedAtTime()), ZoneId.of("Europe/Paris"));
+            ZonedDateTime publishedAt = parseZonedDateTime(form.getPublishedAtDate(), form.getPublishedAtTime());
 
             Ride newRide;
             if (rideId.equals("new")) {
@@ -434,7 +487,7 @@ public class AdminController extends AbstractController {
             Path gpx = fileService.getTempFileFromInputStream(file.getInputStream());
 
             Gpx.GpxDescriptor gpxParsed = Gpx.parse(gpx);
-            Path staticMapImage = Gpx.staticImage(gpx, globalDataRepository.findById(1L).get().getMapBoxAPIKey());
+            Path staticMapImage = Gpx.staticImage(gpx, siteIntegrationRepository.findById(1L).get().getMapBoxAPIKey());
 
             Map newMap = new Map(file.getOriginalFilename(),
                     gpxParsed.getLength(),
@@ -519,6 +572,11 @@ public class AdminController extends AbstractController {
         }
 
         return "redirect:/admin/users";
+    }
+
+    private ZonedDateTime parseZonedDateTime(String datePart, String timePart) {
+        ZoneId timezone = ZoneId.of(siteConfigurationRepository.findById(1L).get().getTimezone());
+        return ZonedDateTime.of(LocalDateTime.parse(datePart + "T" + timePart), timezone);
     }
 
 }

@@ -8,8 +8,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "global_data")
-public class GlobalData {
+@Table(name = "site_description")
+public class SiteDescription {
 
     @Id
     private Long id = 1L;
@@ -29,20 +29,18 @@ public class GlobalData {
     private String addressCity;
     @Column(length = 2000)
     private String other;
-    @Column(name = "map_box_api_key")
-    private String mapBoxAPIKey;
 
-    protected GlobalData() {
+    protected SiteDescription() {
 
     }
 
-    public GlobalData(String sitename,
+    public SiteDescription(String sitename,
                       String description) {
         setSitename(sitename);
         setDescription(description);
     }
 
-    public GlobalData(String sitename,
+    public SiteDescription(String sitename,
                       String description,
                       String facebook,
                       String twitter,
@@ -51,8 +49,7 @@ public class GlobalData {
                       String addressStreetLine,
                       String addressPostalCode,
                       String addressCity,
-                      String other,
-                      String mapBoxAPIKey) {
+                      String other) {
         setSitename(sitename);
         setDescription(description);
         setFacebook(facebook);
@@ -63,7 +60,6 @@ public class GlobalData {
         setAddressPostalCode(addressPostalCode);
         setAddressCity(addressCity);
         setOther(other);
-        setOther(mapBoxAPIKey);
     }
 
     public Long getId() {
@@ -154,11 +150,5 @@ public class GlobalData {
         this.other = Strings.requireNonBlankOrNull(other);
     }
 
-    public String getMapBoxAPIKey() {
-        return mapBoxAPIKey;
-    }
 
-    public void setMapBoxAPIKey(String mapBoxAPIKey) {
-        this.mapBoxAPIKey = Strings.requireNonBlankOrNull(mapBoxAPIKey);
-    }
 }

@@ -208,8 +208,6 @@
             formData.delete(keyToDelete);
         }
 
-        console.log(groups);
-
         document.getElementById('form-ride-groups-field').value = JSON.stringify(groups);
     }
 

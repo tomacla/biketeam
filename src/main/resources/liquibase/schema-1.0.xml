@@ -263,6 +263,54 @@
 
     </changeSet>
 
+    <changeSet id="SPLT-GLOBAL-DATA" author="tomacla">
+
+        <createTable tableName="SITE_DESCRIPTION">
+            <column name="ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ADDRESS_POSTAL_CITY" type="VARCHAR(255)"/>
+            <column name="ADDRESS_POSTAL_CODE" type="VARCHAR(10)"/>
+            <column name="ADDRESS_STREET_LINE" type="VARCHAR(255)"/>
+            <column name="SITENAME" type="VARCHAR(2000)"/>
+            <column name="DESCRIPTION" type="VARCHAR(2000)"/>
+            <column name="PHONE_NUMBER" type="VARCHAR(255)"/>
+            <column name="EMAIL" type="VARCHAR(255)"/>
+            <column name="FACEBOOK" type="VARCHAR(255)"/>
+            <column name="TWITTER" type="VARCHAR(255)"/>
+            <column name="OTHER" type="VARCHAR(2000)"/>
+        </createTable>
+
+        <addPrimaryKey tableName="SITE_DESCRIPTION" columnNames="ID"/>
+
+        <createTable tableName="SITE_INTEGRATION">
+            <column name="ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="MAP_BOX_API_KEY" type="VARCHAR(255)"/>
+        </createTable>
+
+        <addPrimaryKey tableName="SITE_INTEGRATION" columnNames="ID"/>
+
+        <createTable tableName="SITE_CONFIGURATION">
+            <column name="ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TIMEZONE" type="VARCHAR(50)"/>
+            <column name="SOUND_ENABLED" type="BOOLEAN"/>
+        </createTable>
+
+        <addPrimaryKey tableName="SITE_CONFIGURATION" columnNames="ID"/>
+
+        <sql>insert into SITE_DESCRIPTION select ID, ADDRESS_POSTAL_CITY, ADDRESS_POSTAL_CODE,
+            ADDRESS_STREET_LINE, SITENAME, DESCRIPTION, PHONE_NUMBER, EMAIL, FACEBOOK, TWITTER, OTHER from GLOBAL_DATA</sql>
+
+        <sql>insert into SITE_INTEGRATION select ID, MAP_BOX_API_KEY from GLOBAL_DATA</sql>
+
+        <dropTable tableName="GLOBAL_DATA" />
+
+    </changeSet>
+
 
 </databaseChangeLog>
 

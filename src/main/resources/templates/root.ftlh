@@ -7,25 +7,25 @@
         <section class="border p-2 mb-4 rounded">
             <img src="<@spring.url '/api/logo' />" class="d-block w-50 h-auto mx-auto my-4" alt="Logo image">
             <p class="lead">
-              ${global.description}
+              ${_desc.description}
             </p>
             <p class="lead">
-                <#if (global.facebook)??>
-                    <a target="_blank" href="${global.facebook}"><i class="bi bi-facebook"></i></a>
+                <#if (_desc.facebook)??>
+                    <a target="_blank" href="${_desc.facebook}"><i class="bi bi-facebook"></i></a>
                 </#if>
-                <#if (global.twitter)??>
-                    <a target="_blank" href="${global.twitter}"><i class="bi bi-twitter"></i></a>
+                <#if (_desc.twitter)??>
+                    <a target="_blank" href="${_desc.twitter}"><i class="bi bi-twitter"></i></a>
                 </#if>
             </p>
             <address>
-                <#if (global.addressStreetLine)?? >${global.addressStreetLine}<br></#if>
-                <#if (global.addressPostalCode)?? >${global.addressPostalCode}<br></#if>
-                <#if (global.addressCity)?? >${global.addressCity}<br></#if>
-                <#if (global.phoneNumber)?? ><i class="bi bi-telephone-fill"></i> ${global.phoneNumber}<br></#if>
-                <#if (global.email)?? ><i class="bi bi-envelope"></i> ${global.email}<br></#if>
+                <#if (_desc.addressStreetLine)?? >${_desc.addressStreetLine}<br></#if>
+                <#if (_desc.addressPostalCode)?? >${_desc.addressPostalCode}<br></#if>
+                <#if (_desc.addressCity)?? >${_desc.addressCity}<br></#if>
+                <#if (_desc.phoneNumber)?? ><i class="bi bi-telephone-fill"></i> ${_desc.phoneNumber}<br></#if>
+                <#if (_desc.email)?? ><i class="bi bi-envelope"></i> ${_desc.email}<br></#if>
             </address>
-             <#if (global.other)?? >
-                <p>${global.other}</p>
+             <#if (_desc.other)?? >
+                <p>${_desc.other}</p>
              </#if>
         </section>
 
