@@ -2,24 +2,25 @@
 
 <div class="row pt-2 justify-content-center">
 
-    <div class="col-4">
+    <div class="col-12 mb-4">
 
         <div class="border rounded p-2">
-            <h4>${map.name}</h4>
-            <ul class="list-unstyled">
-                <li><i class="bi bi-arrow-left-right"></i> ${map.length}km</li>
-                <li><i class="bi bi-arrow-up"></i> ${map.positiveElevation}m</li>
-                <li><i class="bi bi-arrow-down"></i> ${map.negativeElevation}m</li>
+            <h4>${map.name}<small class="text-muted"> - Ajoutée le ${map.postedAt.format(_date_formatter)}</small></h4>
+            <ul class="list-inline">
+                <li class="list-inline-item"><i class="bi bi-arrow-left-right"></i> ${map.length}km</li>
+                <li class="list-inline-item"><i class="bi bi-arrow-up"></i> ${map.positiveElevation}m</li>
+                <li class="list-inline-item"><i class="bi bi-arrow-down"></i> ${map.negativeElevation}m</li>
             </ul>
 
-            <p><#list map.tags as tag><span class="badge bg-secondary">${tag}</span><#if tag_has_next> </#if></#list></p>
+            <#if map.tags?size gt 0>
+                <p><strong>Tags</strong> : <#list map.tags as tag><span class="badge bg-secondary">${tag}</span><#if tag_has_next> </#if></#list></p>
+            </#if>
             <a download="${map.name}.gpx" href="<@spring.url '/api/maps/${map.id}/gpx' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-download"></i> GPX</a>
-            <p class="mt-4 small text-end text-muted">Ajoutée le ${map.postedAt.format(_date_formatter)}</p>
         </div>
 
     </div>
 
-    <div class="col-8">
+    <div class="col-12">
 
         <div style="width:100%; height:500px;" id="map-container"></div>
 
