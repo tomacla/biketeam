@@ -32,7 +32,7 @@ public class MapController extends AbstractController {
     }
 
     @PostMapping
-    public String getRides(Principal principal, Model model,
+    public String getMaps(Principal principal, Model model,
                            SearchMapForm form) {
         addGlobalValues(principal, model, "Maps");
 
@@ -51,6 +51,7 @@ public class MapController extends AbstractController {
         }
 
         model.addAttribute("maps", maps);
+        model.addAttribute("tags", mapRepository.findAllDistinctTags());
         model.addAttribute("formdata", form);
         return "maps";
     }

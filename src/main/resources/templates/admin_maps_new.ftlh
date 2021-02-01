@@ -78,6 +78,32 @@
             document.getElementById('form-map-tags-field').value = JSON.stringify(tags);
         }
 
+        function handleTagChange() {
+            var tagSelect = document.getElementById('form-map-tags-select');
+            var newValue = tagSelect.value;
+            if(newValue !== '' && getTags().indexOf(newValue) === -1) {
+                createTag(tagSelect.value);
+            }
+            tagSelect.value = '';
+        }
+
+        function getTags() {
+            var container = document.getElementById('form-map-tags-container');
+            var tags = [];
+            for (var i = 0; i < container.childNodes.length; i++) {
+
+                var badge = container.childNodes[i];
+                for (var j = 0; j < badge.childNodes.length; j++) {
+                    if (badge.childNodes[j].nodeType === Node.TEXT_NODE) {
+                        tags.push(badge.childNodes[j].nodeValue);
+                        break;
+                    }
+                }
+
+            }
+            return tags;
+        }
+
     </script>
 
     <div class="col-12 col-md-8">
@@ -107,8 +133,14 @@
                 <div class="mb-3">
                   <label for="form-map-tags" class="form-label">Tags</label>
                   <div class="input-group">
-                    <input autocomplete="off" id="form-map-tags" type="text" class="form-control" placeholder="tag">
-                    <button class="btn btn-outline-secondary" type="button" onclick="addTag()"><strong><i class="bi bi-plus"></i></strong></button>
+                    <select name="tmp-tags" onchange="handleTagChange()" class="form-select" id="form-map-tags-select">
+                        <option value="">---</option>
+                        <#list tags as tag>
+                            <option value="${tag}">${tag}</option>
+                        </#list>
+                    </select>
+                    <input autocomplete="off" id="form-map-tags" type="text" class="form-control" placeholder="nouveau">
+                    <button class="btn btn-secondary" type="button" onclick="addTag()"><strong><i class="bi bi-plus"></i></strong></button>
                  </div>
                  <div class="fs-5 p-2" id="form-map-tags-container"></div>
                 </div>

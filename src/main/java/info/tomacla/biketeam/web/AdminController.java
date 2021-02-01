@@ -454,6 +454,7 @@ public class AdminController extends AbstractController {
             addGlobalValues(principal, model, "Administration - Modifier la map");
             model.addAttribute("errors", List.of(e.getMessage()));
             model.addAttribute("formdata", form);
+            model.addAttribute("tags", mapRepository.findAllDistinctTags());
             return "admin_maps_new";
         }
 
@@ -472,6 +473,7 @@ public class AdminController extends AbstractController {
 
         addGlobalValues(principal, model, "Administration - Modifier la map");
         model.addAttribute("formdata", NewMapForm.build(optionalMap.get()));
+        model.addAttribute("tags", mapRepository.findAllDistinctTags());
         return "admin_maps_new";
 
     }

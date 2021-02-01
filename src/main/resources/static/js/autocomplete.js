@@ -394,6 +394,12 @@ var AutoComplete = /** @class */ (function () {
          * Manage the open
          */
         _Focus: function () {
+
+            AutoComplete.prototype.cache(this, function (response) {
+                this._Render(this._Post(response));
+                this._Open();
+            }.bind(this), this._Error);
+
             var oldValue = this.Input.getAttribute("data-autocomplete-old-value");
             if ((!oldValue || this.Input.value != oldValue) && this._MinChars() <= this.Input.value.length) {
                 this.DOMResults.setAttribute("class", "autocomplete open");

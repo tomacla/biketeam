@@ -13,7 +13,7 @@
             var badge = document.createElement("span");
             badge.classList.add('badge');
             badge.classList.add('bg-secondary');
-            badge.classList.add('me-1');
+            badge.classList.add('me-2');
             badge.innerHTML = label;
 
             var button = document.createElement("button");
@@ -33,7 +33,19 @@
         }
 
         function handleTags() {
+           document.getElementById('form-map-tags-field').value = JSON.stringify(getTags());
+        }
 
+        function handleTagChange() {
+            var tagSelect = document.getElementById('maps-filter-tags');
+            var newValue = tagSelect.value;
+            if(newValue !== '' && getTags().indexOf(newValue) === -1) {
+                createTag(tagSelect.value);
+            }
+            tagSelect.value = '';
+        }
+
+        function getTags() {
             var container = document.getElementById('maps-filter-tags-container');
             var tags = [];
             for (var i = 0; i < container.childNodes.length; i++) {
@@ -47,8 +59,7 @@
                 }
 
             }
-
-           document.getElementById('form-map-tags-field').value = JSON.stringify(tags);
+            return tags;
         }
 
     </script>
@@ -56,8 +67,6 @@
     <div class="col-12 mb-4">
 
         <form onsubmit="handleTags()" action="<@spring.url '/maps' />" method="POST" class="border rounded p-2">
-
-
 
             <div class="row gy-2">
                 <div class="col-12 col-md-6">
@@ -88,7 +97,12 @@
                   <div class="col-12 col-md-6">
                       <div class="input-group">
                           <label class="input-group-text" for="maps-filter-tags" class="form-label">Tags</label>
-                          <input type="text" class="form-control" id="maps-filter-tags">
+                          <select name="tmp-tags" onchange="handleTagChange()" class="form-select" id="maps-filter-tags">
+                            <option value="">---</option>
+                            <#list tags as tag>
+                                <option value="${tag}">${tag}</option>
+                            </#list>
+                          </select>
                       </div>
                       <div id="maps-filter-tags-container"></div>
                       <input type="hidden" name="tags" id="form-map-tags-field">
@@ -155,15 +169,6 @@
         });
 
         preventElementToSubmitForm('maps-filter-tags');
-
-        AutoComplete({
-            EmptyMessage: "Aucun tag trouvé",
-            Url : "<@spring.url '/api/autocomplete/tags' />",
-            OnSelect: function(input, value) {
-                createTag(value);
-            },
-            ClearOnSelect: true
-        }, '#maps-filter-tags');
 
     </script>
 
