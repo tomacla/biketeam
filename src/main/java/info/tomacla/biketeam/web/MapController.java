@@ -24,10 +24,15 @@ public class MapController extends AbstractController {
 
     @GetMapping
     public String getMaps(Principal principal, Model model) {
+        List<String> defaultSearchTags = siteConfigurationRepository.findById(1L).get().getDefaultSearchTags();
         addGlobalValues(principal, model, "Maps");
-        model.addAttribute("maps", mapRepository.findByVisibleTrue());
+        if (defaultSearchTags.isEmpty()) {
+            model.addAttribute("maps", mapRepository.findByVisibleTrue());
+        } else {
+            model.addAttribute("maps", mapRepository.findByTagsInAndVisibleTrue(defaultSearchTags));
+        }
         model.addAttribute("tags", mapRepository.findAllDistinctTags());
-        model.addAttribute("formdata", SearchMapForm.empty());
+        model.addAttribute("formdata", SearchMapForm.empty(defaultSearchTags));
         return "maps";
     }
 

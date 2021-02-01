@@ -1,5 +1,9 @@
 package info.tomacla.biketeam.web.forms;
 
+import info.tomacla.biketeam.common.Json;
+
+import java.util.List;
+
 public class SearchMapForm {
 
     private double lowerDistance;
@@ -48,11 +52,11 @@ public class SearchMapForm {
         this.tags = tags;
     }
 
-    public static SearchMapForm empty() {
+    public static SearchMapForm empty(List<String> defaultSearchTags) {
         SearchMapForm form = new SearchMapForm();
         form.setLowerDistance(1);
         form.setUpperDistance(1000);
-        form.setTags("[]");
+        form.setTags(Json.serialize(defaultSearchTags));
         form.setWindDirection("");
         form.setSort("");
         return form;

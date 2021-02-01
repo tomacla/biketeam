@@ -93,6 +93,7 @@ public class AdminController extends AbstractController {
         addGlobalValues(principal, model, "Administration - Configuration");
         model.addAttribute("formdata", EditSiteConfigurationForm.build(siteConfigurationRepository.findById(1L).get()));
         model.addAttribute("timezones", ZoneId.getAvailableZoneIds().stream().map(ZoneId::of).map(ZoneId::toString).sorted().collect(Collectors.toList()));
+        model.addAttribute("tags", mapRepository.findAllDistinctTags());
         return "admin_configuration";
     }
 
@@ -104,12 +105,15 @@ public class AdminController extends AbstractController {
             @SuppressWarnings("OptionalGetWithoutIsPresent") SiteConfiguration siteConfiguration = siteConfigurationRepository.findById(1L).get();
             siteConfiguration.setSoundEnabled(form.isSoundEnabled());
             siteConfiguration.setTimezone(form.getTimezone());
+            siteConfiguration.setDefaultSearchTags(Json.parse(form.getDefaultSearchTags(), new TypeReference<List<String>>() {
+            }));
             siteConfigurationRepository.save(siteConfiguration);
         } catch (Exception e) {
             model.addAttribute("errors", List.of(e.getMessage()));
         } finally {
             model.addAttribute("formdata", EditSiteConfigurationForm.build(siteConfigurationRepository.findById(1L).get()));
             model.addAttribute("timezones", ZoneId.getAvailableZoneIds().stream().map(ZoneId::of).map(ZoneId::toString).sorted().collect(Collectors.toList()));
+            model.addAttribute("tags", mapRepository.findAllDistinctTags());
             addGlobalValues(principal, model, "Administration - Configuration");
         }
 

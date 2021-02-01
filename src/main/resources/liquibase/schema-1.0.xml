@@ -311,6 +311,17 @@
 
     </changeSet>
 
+    <changeSet id="GITHUB-8-DEFAULT-SEARCH-TAGS" author="tomacla">
+
+        <createTable tableName="SITE_CONFIGURATION_DEFAULT_SEARCH_TAGS">
+            <column name="SITE_CONFIGURATION_ID" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DEFAULT_SEARCH_TAGS" type="VARCHAR(255)"/>
+        </createTable>
+
+    </changeSet>
+
 
 </databaseChangeLog>
 

@@ -18,6 +18,8 @@ public interface MapRepository extends CrudRepository<Map, String> {
 
     List<Map> findByVisibleTrue();
 
+    List<Map> findByTagsInAndVisibleTrue(List<String> tags);
+
     List<MapIdNamePostedAtVisibleProjection> findAllByOrderByPostedAtDesc();
 
     List<MapIdNamePostedAtVisibleProjection> findAllByNameContainingIgnoreCaseOrderByPostedAtDesc(String namePart);

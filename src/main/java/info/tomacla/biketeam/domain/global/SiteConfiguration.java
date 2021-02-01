@@ -3,10 +3,10 @@ package info.tomacla.biketeam.domain.global;
 import info.tomacla.biketeam.common.Strings;
 import info.tomacla.biketeam.common.Timezone;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "site_configuration")
@@ -17,14 +17,21 @@ public class SiteConfiguration {
     private String timezone;
     @Column(name = "sound_enabled")
     private boolean soundEnabled;
+    @ElementCollection
+    @CollectionTable(
+            name = "SITE_CONFIGURATION_DEFAULT_SEARCH_TAGS",
+            joinColumns=@JoinColumn(name = "site_configuration_id", referencedColumnName = "id")
+    )
+    private List<String> defaultSearchTags;
 
     protected SiteConfiguration() {
 
     }
 
-    public SiteConfiguration(String timezone, boolean soundEnabled) {
+    public SiteConfiguration(String timezone, boolean soundEnabled, List<String> defaultSearchTags) {
         setTimezone(timezone);
         setSoundEnabled(soundEnabled);
+        setDefaultSearchTags(defaultSearchTags);
     }
 
     public Long getId() {
@@ -49,5 +56,13 @@ public class SiteConfiguration {
 
     public void setSoundEnabled(boolean soundEnabled) {
         this.soundEnabled = soundEnabled;
+    }
+
+    public List<String> getDefaultSearchTags() {
+        return defaultSearchTags;
+    }
+
+    public void setDefaultSearchTags(List<String> defaultSearchTags) {
+        this.defaultSearchTags = Objects.requireNonNullElse(defaultSearchTags, new ArrayList<>());
     }
 }
