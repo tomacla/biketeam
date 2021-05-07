@@ -1,8 +1,6 @@
 <#include "_includes_head.ftlh">
 
-<div class="row pt-2 justify-content-center">
-
-    <script type="text/javascript">
+ <script type="text/javascript">
 
         function createTag(label) {
 
@@ -25,15 +23,17 @@
             button.style.height = '10px';
             button.addEventListener('click', function(event) {
                 badge.parentNode.removeChild(badge);
+                serializeTags();
             });
 
             badge.appendChild(button);
 
             document.getElementById('maps-filter-tags-container').appendChild(badge);
+            serializeTags();
         }
 
-        function handleTags() {
-           document.getElementById('form-map-tags-field').value = JSON.stringify(getTags());
+        function serializeTags() {
+            document.getElementById('form-map-tags-field').value = JSON.stringify(getTags());
         }
 
         function handleTagChange() {
@@ -64,9 +64,14 @@
 
     </script>
 
+<div class="row pt-2 justify-content-center">
+
     <div class="col-12 mb-4">
 
-        <form onsubmit="handleTags()" action="<@spring.url '/maps' />" method="POST" class="border rounded p-2">
+        <form id="maps-filter" action="<@spring.url '/maps' />" method="POST" class="border rounded p-2">
+
+            <input type="hidden" id="maps-filter-page" name="page" value="${formdata.page}">
+            <input type="hidden" id="maps-filter-pageSize" name="pageSize" value="${formdata.pageSize}">
 
             <div class="row gy-2">
                 <div class="col-12 col-md-6">
@@ -105,7 +110,7 @@
                           </select>
                       </div>
                       <div id="maps-filter-tags-container"></div>
-                      <input type="hidden" name="tags" id="form-map-tags-field">
+                      <input type="hidden" value="${formdata.tags}" name="tags" id="form-map-tags-field">
                   </div>
                 <div class="col-12 col-md-5">
                     <div class="input-group">
@@ -123,13 +128,14 @@
                     <button type="submit" class="btn btn-secondary btn-sm">Valider</button>
                 </div>
             </div>
-        </form>
+
+         </form>
 
     </div>
 
     <div class="col-12">
 
-        <div class="row g-4">
+        <div class="row g-2 pb-4">
             <#if maps?size == 0>
                  <div class="alert alert-warning" role="alert">
                    Aucune map à afficher.
@@ -159,18 +165,27 @@
             </#list>
         </div>
 
+
+
+        <#if pages gt 1>
+            <div class="pb-4 d-flex justify-content-center">
+                <@common.pagination formdata.page pages 'maps-filter-page' 'maps-filter' />
+            </div>
+        </#if>
+
     </div>
+
 
 
     <script type="text/javascript">
 
-        JSON.parse('${(formdata.tags)?no_esc}').forEach(function(tag) {
-            createTag(tag);
-        });
+            JSON.parse('${(formdata.tags)?no_esc}').forEach(function(tag) {
+                createTag(tag);
+            });
 
-        preventElementToSubmitForm('maps-filter-tags');
+            preventElementToSubmitForm('maps-filter-tags');
 
-    </script>
+        </script>
 
 </div>
 

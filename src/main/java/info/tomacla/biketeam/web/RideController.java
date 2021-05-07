@@ -6,18 +6,17 @@ import info.tomacla.biketeam.domain.ride.RideRepository;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.web.forms.SearchRideForm;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 @Controller
@@ -27,18 +26,47 @@ public class RideController extends AbstractController {
     @Autowired
     private RideRepository rideRepository;
 
+    @GetMapping(value = "/{rideId}")
+    public String getRide(@PathVariable("rideId") String rideId,
+                          Principal principal,
+                          Model model) {
+
+        Optional<Ride> optionalRide = rideRepository.findById(rideId);
+        if (optionalRide.isEmpty()) {
+            return "redirect:/rides";
+        }
+
+        Ride ride = optionalRide.get();
+        addGlobalValues(principal, model, "Ride " + ride.getTitle());
+        model.addAttribute("ride", ride);
+        return "ride";
+    }
+
     @GetMapping
-    public String getRides(Principal principal, Model model) {
+    public String getRides(Principal principal,
+                           Model model) {
 
-        LocalDate to = LocalDate.now();
-        LocalDate from = to.minus(1L, ChronoUnit.MONTHS);
-
-        SearchRideForm form = new SearchRideForm();
-        form.setFrom(from.format(DateTimeFormatter.ISO_LOCAL_DATE));
-        form.setTo(to.format(DateTimeFormatter.ISO_LOCAL_DATE));
+        SearchRideForm form = SearchRideForm.builder().get();
+        Page<Ride> rides = getRidesFromRepository(form);
 
         addGlobalValues(principal, model, "Rides");
-        model.addAttribute("rides", rideRepository.findByDateBetweenAndPublishedAtLessThanOrderByDateDesc(from, to, ZonedDateTime.now()));
+        model.addAttribute("rides", rides.getContent());
+        model.addAttribute("pages", rides.getTotalPages());
+        model.addAttribute("formdata", form);
+        return "rides";
+    }
+
+    @PostMapping
+    public String getRides(Principal principal,
+                           Model model,
+                           SearchRideForm form) {
+
+
+        Page<Ride> rides = getRidesFromRepository(form);
+
+        addGlobalValues(principal, model, "Rides");
+        model.addAttribute("rides", rides.getContent());
+        model.addAttribute("pages", rides.getTotalPages());
         model.addAttribute("formdata", form);
         return "rides";
     }
@@ -105,26 +133,15 @@ public class RideController extends AbstractController {
         return "redirect:/rides/" + rideId;
     }
 
-    @PostMapping
-    public String getRides(Principal principal, Model model,
-                           SearchRideForm form) {
-
-        LocalDate to = LocalDate.parse(form.getTo());
-        LocalDate from = LocalDate.parse(form.getFrom());
-
-        addGlobalValues(principal, model, "Rides");
-        model.addAttribute("rides", rideRepository.findByDateBetweenAndPublishedAtLessThanOrderByDateDesc(from, to, ZonedDateTime.now()));
-        model.addAttribute("formdata", form);
-        return "rides";
+    private Page<Ride> getRidesFromRepository(SearchRideForm form) {
+        SearchRideForm.SearchRideFormParser parser = SearchRideForm.parser(form);
+        Pageable pageable = PageRequest.of(parser.getPage(), parser.getPageSize(), Sort.by("date").descending());
+        return rideRepository.findByDateBetweenAndPublishedAtLessThan(
+                parser.getFrom(),
+                parser.getTo(),
+                ZonedDateTime.now(),
+                pageable);
     }
 
-    @GetMapping(value = "/{rideId}")
-    public String getRide(@PathVariable("rideId") String rideId,
-                          Principal principal, Model model) {
-        Ride ride = rideRepository.findById(rideId).get();
-        addGlobalValues(principal, model, "Ride " + ride.getTitle());
-        model.addAttribute("ride", ride);
-        return "ride";
-    }
 
 }

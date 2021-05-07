@@ -43,8 +43,9 @@ public class Map {
             @AttributeOverride(name = "x", column = @Column(name = "wind_vector_x")),
             @AttributeOverride(name = "y", column = @Column(name = "wind_vector_y"))
     })
-    @Embedded
-    private Vector windVector;
+    @Column(name = "wind_direction")
+    @Enumerated(EnumType.STRING)
+    private WindDirection windDirection;
     private boolean crossing;
     private boolean visible;
 
@@ -59,7 +60,7 @@ public class Map {
                List<String> tags,
                Point startPoint,
                Point endPoint,
-               Vector windVector,
+               WindDirection windDirection,
                boolean crossing,
                boolean visible) {
         this.id = UUID.randomUUID().toString();
@@ -71,7 +72,7 @@ public class Map {
         setTags(tags);
         setStartPoint(startPoint);
         setEndPoint(endPoint);
-        setWindVector(windVector);
+        setWindDirection(windDirection);
         setCrossing(crossing);
         setVisible(visible);
     }
@@ -148,12 +149,12 @@ public class Map {
         this.endPoint = Objects.requireNonNull(endPoint);
     }
 
-    public Vector getWindVector() {
-        return windVector;
+    public WindDirection getWindDirection() {
+        return windDirection;
     }
 
-    public void setWindVector(Vector windVector) {
-        this.windVector = Objects.requireNonNull(windVector);
+    public void setWindDirection(WindDirection windDirection) {
+        this.windDirection = Objects.requireNonNull(windDirection);
     }
 
     public boolean isCrossing() {

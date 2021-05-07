@@ -1,7 +1,14 @@
 package info.tomacla.biketeam.web;
 
-import info.tomacla.biketeam.service.FeedService;
+import info.tomacla.biketeam.domain.feed.Feed;
+import info.tomacla.biketeam.domain.feed.FeedRepository;
+import info.tomacla.biketeam.domain.map.Map;
+import info.tomacla.biketeam.web.forms.SearchMapForm;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,12 +22,12 @@ import java.util.List;
 public class RootController extends AbstractController {
 
     @Autowired
-    private FeedService feedService;
+    private FeedRepository feedRepository;
 
     @GetMapping
     public String getRoot(Principal principal, Model model) {
         addGlobalValues(principal, model, "Accueil");
-        model.addAttribute("feed", feedService.getFeed());
+        model.addAttribute("feed", getFeedFromRepository().getContent());
         return "root";
     }
 
@@ -28,8 +35,12 @@ public class RootController extends AbstractController {
     public String loginError(Principal principal, Model model) {
         addGlobalValues(principal, model, "Accueil");
         model.addAttribute("errors", List.of("Erreur de connexion"));
-        model.addAttribute("feed", feedService.getFeed());
+        model.addAttribute("feed", getFeedFromRepository().getContent());
         return "root";
+    }
+
+    private Page<Feed> getFeedFromRepository() {
+        return feedRepository.findAll(PageRequest.of(0, 10, Sort.by("publishedAt").descending()));
     }
 
 }

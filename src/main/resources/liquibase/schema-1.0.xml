@@ -48,8 +48,7 @@
             <column name="VISIBLE" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
-            <column name="WIND_VECTOR_X" type="DOUBLE"/>
-            <column name="WIND_VECTOR_Y" type="DOUBLE"/>
+            <column name="WIND_DIRECTION" type="VARCHAR(15)"/>
         </createTable>
 
         <addPrimaryKey tableName="MAP" columnNames="ID"/>
@@ -319,6 +318,16 @@
             </column>
             <column name="DEFAULT_SEARCH_TAGS" type="VARCHAR(255)"/>
         </createTable>
+
+    </changeSet>
+
+    <changeSet id="GITHUB-2-PAGINATION-AND-FEED" author="tomacla">
+
+        <createView viewName="FEED" replaceIfExists="true">
+            select id as id, 'RIDE' as type, published_at as published_at, title as title, description as content, imaged as imaged FROM ride
+            UNION
+            select id as id, 'PUBLICATION' as type, published_at as published_at, title as title, content as content, imaged as imaged FROM publication
+        </createView>
 
     </changeSet>
 

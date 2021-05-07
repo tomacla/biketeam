@@ -4,7 +4,7 @@
 
     <div class="col-12 col-md-4 mb-4">
 
-        <form action="<@spring.url '/rides' />" method="POST" class="border rounded p-2">
+        <form id="rides-filter" action="<@spring.url '/rides' />" method="POST" class="border rounded p-2">
 
             <div class="row mt-3">
                  <div class="col-3 text-end">
@@ -22,10 +22,12 @@
                     <input autocomplete="off" type="date" name="to" value="${formdata.to}" required="true" class="form-control" id="rides-filter-to">
                 </div>
             </div>
-            <div class="row mt-2 justify-content-end">
-                <div class="col-6 text-end">
-                    <button type="submit" class="btn btn-secondary btn-sm">Valider</button>
-                </div>
+
+            <input type="hidden" id="rides-filter-page" name="page" value="${formdata.page}">
+            <input type="hidden" id="rides-filter-pageSize" name="pageSize" value="${formdata.pageSize}">
+
+            <div class="d-flex mt-3 justify-content-center">
+                <button type="submit" class="btn btn-secondary btn-sm">Valider</button>
             </div>
 
         </form>
@@ -34,7 +36,7 @@
 
     <div class="col-12 col-md-8">
 
-        <div class="row g-4">
+        <div class="row g-2 pb-4">
 
              <#if rides?size == 0>
                  <div class="alert alert-warning" role="alert">
@@ -55,12 +57,19 @@
                           </#if>
                         </div>
                         <div class="card-footer text-center">
-                            <a href="<@spring.url '/rides/${ride.id}' />" class="btn btn-secondary btn-sm" role="button">Voir plus</a>
+                            <a href="<@spring.url '/rides/${ride.id}' />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye"></i> Voir plus</a>
                         </div>
                     </div>
                   </div>
             </#list>
+
         </div>
+
+        <#if pages gt 1>
+            <div class="pb-4 d-flex justify-content-center">
+                <@common.pagination formdata.page pages 'rides-filter-page' 'rides-filter' />
+            </div>
+        </#if>
 
     </div>
 

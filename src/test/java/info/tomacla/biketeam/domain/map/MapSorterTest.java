@@ -22,7 +22,7 @@ public class MapSorterTest {
                 new ArrayList<>(),
                 new Point(10.0,5.0),
                 new Point(5.0, 10.0),
-                new Vector(5.0, -3.0),
+                WindDirection.NORTH,
                 false,
                 false);
 
@@ -33,16 +33,16 @@ public class MapSorterTest {
                 new ArrayList<>(),
                 new Point(10.0,5.0),
                 new Point(5.0, 10.0),
-                new Vector(5.0, -3.0),
+                WindDirection.NORTH,
                 false,
                 false);
 
         List<Map> maps = Arrays.asList(shortM, longM);
 
-        maps.sort(MapSorter.of("short"));
+        maps.sort(MapSorter.of(MapSorterOption.SHORT));
         assertEquals(maps.get(0), shortM);
 
-        maps.sort(MapSorter.of("long"));
+        maps.sort(MapSorter.of(MapSorterOption.LONG));
         assertEquals(maps.get(0), longM);
 
     }

@@ -56,7 +56,7 @@
                                 </a>
                             </#if>
                             </h5>
-                            <small class="text-muted">Ajouté le ${feedItem.date.format(_date_formatter)}</small>
+                            <small class="text-muted">Ajouté le ${feedItem.publishedAt.format(_date_formatter)}</small>
                         </div>
                         <div class="card-body">
                           <h5 class="card-title">${feedItem.title}</h5>
@@ -67,7 +67,7 @@
                         </div>
                         <#if (feedItem.detailsUrl)??>
                         <div class="card-footer text-center">
-                            <a href="<@spring.url feedItem.detailsUrl />" class="btn btn-secondary btn-sm" role="button">Voir plus</a>
+                            <a href="<@spring.url feedItem.detailsUrl />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye"></i> Voir plus</a>
                         </div>
                         </#if>
                     </div>

@@ -4,17 +4,17 @@ import java.util.Comparator;
 
 public class MapSorter {
 
-    public static Comparator<Map> of(String sort) {
-        if ("short".equals(sort)) {
+    public static Comparator<Map> of(MapSorterOption sort) {
+        if (MapSorterOption.SHORT.equals(sort)) {
             return new MapDistanceComparator();
         }
-        if ("long".equals(sort)) {
+        if (MapSorterOption.LONG.equals(sort)) {
             return new MapDistanceComparator().reversed();
         }
-        if ("flat".equals(sort)) {
+        if (MapSorterOption.FLAT.equals(sort)) {
             return new MapElevationComparator();
         }
-        if ("hilly".equals(sort)) {
+        if (MapSorterOption.HILLY.equals(sort)) {
             return new MapElevationComparator().reversed();
         }
         return new MapPostedAtComparator().reversed();

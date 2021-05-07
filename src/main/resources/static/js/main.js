@@ -17,6 +17,14 @@ document.addEventListener("DOMContentLoaded", function() {
 
 });
 
+function setFieldValue(fieldId, value) {
+    document.getElementById(fieldId).value = value;
+}
+
+function forceSubmitForm(formId) {
+    document.getElementById(formId).submit();
+}
+
 function preventElementToSubmitForm(elementId, replacement) {
 
     var preventSubmit = function(event) {

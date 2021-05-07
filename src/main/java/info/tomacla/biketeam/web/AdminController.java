@@ -1,15 +1,13 @@
 package info.tomacla.biketeam.web;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import info.tomacla.biketeam.common.FileRepositories;
-import info.tomacla.biketeam.common.Gpx;
-import info.tomacla.biketeam.common.Json;
-import info.tomacla.biketeam.common.Point;
+import info.tomacla.biketeam.common.*;
 import info.tomacla.biketeam.domain.global.SiteConfiguration;
 import info.tomacla.biketeam.domain.global.SiteDescription;
 import info.tomacla.biketeam.domain.global.SiteIntegration;
 import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.map.MapRepository;
+import info.tomacla.biketeam.domain.map.WindDirection;
 import info.tomacla.biketeam.domain.publication.Publication;
 import info.tomacla.biketeam.domain.publication.PublicationRepository;
 import info.tomacla.biketeam.domain.ride.Ride;
@@ -495,6 +493,8 @@ public class AdminController extends AbstractController {
             Gpx.GpxDescriptor gpxParsed = Gpx.parse(gpx);
             Path staticMapImage = Gpx.staticImage(gpx, siteIntegrationRepository.findById(1L).get().getMapBoxAPIKey());
 
+            Vector windVector = gpxParsed.getWind();
+
             Map newMap = new Map(file.getOriginalFilename(),
                     gpxParsed.getLength(),
                     gpxParsed.getPositiveElevation(),
@@ -502,7 +502,7 @@ public class AdminController extends AbstractController {
                     new ArrayList<>(),
                     gpxParsed.getStart(),
                     gpxParsed.getEnd(),
-                    gpxParsed.getWind(),
+                    WindDirection.findDirectionFromVector(windVector),
                     gpxParsed.isCrossing(),
                     false);
 

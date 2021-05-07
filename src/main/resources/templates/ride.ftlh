@@ -39,7 +39,7 @@
                     <div class="card-footer">
                         <div class="d-flex justify-content-between">
                             <#if group.hasParticipant(_user_id)>
-                                <a href="<@spring.url '/rides/${ride.id}/remove-participant/${group.id}/${_user_id}' />" class="btn btn-sm btn-outline-secondary"><i class="bi-emoji-frown-fill bi"></i> Je n'y vais pas</a>
+                                <a href="<@spring.url '/rides/${ride.id}/remove-participant/${group.id}/${_user_id}' />" class="btn btn-sm btn-success"><i class="bi-emoji-laughing-fill bi"></i> J'y vais</a>
                             <#else>
                                 <a href="<@spring.url '/rides/${ride.id}/add-participant/${group.id}/${_user_id}' />" class="btn btn-sm btn-outline-secondary"><i class="bi-emoji-laughing-fill bi"></i> J'y vais</a>
                              </#if>

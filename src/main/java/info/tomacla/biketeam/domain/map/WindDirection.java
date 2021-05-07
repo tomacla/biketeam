@@ -1,5 +1,11 @@
 package info.tomacla.biketeam.domain.map;
 
+import info.tomacla.biketeam.common.Vector;
+import org.springframework.data.util.Pair;
+
+import java.util.Comparator;
+import java.util.List;
+
 public enum WindDirection {
 
     NORTH(0),
@@ -15,6 +21,26 @@ public enum WindDirection {
 
     WindDirection(int angle) {
         this.angle = angle;
+    }
+
+    public static WindDirection findDirectionFromVector(Vector windVector) {
+
+        return List.of(WindDirection.values()).stream()
+                .map(wd -> {
+                    double angle = Math.toRadians(90 - wd.angle);
+                    double x1 = Math.cos(angle);
+                    double y1 = Math.sin(angle) * -1;
+                    double x2 = windVector.getX();
+                    double y2 = windVector.getY();
+                    double dotProduct = (x1 * x2) + (y1 * y2);
+                    return Pair.of(wd, 0.5 + (0.5 * dotProduct));
+                })
+                .sorted(Comparator.comparing(Pair::getSecond))
+                .map(Pair::getFirst)
+                .findFirst()
+                .orElse(WindDirection.NORTH);
+
+
     }
 
 }
