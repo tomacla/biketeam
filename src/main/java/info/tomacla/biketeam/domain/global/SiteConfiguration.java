@@ -15,8 +15,6 @@ public class SiteConfiguration {
     @Id
     private Long id = 1L;
     private String timezone;
-    @Column(name = "sound_enabled")
-    private boolean soundEnabled;
     @ElementCollection
     @CollectionTable(
             name = "SITE_CONFIGURATION_DEFAULT_SEARCH_TAGS",
@@ -28,9 +26,8 @@ public class SiteConfiguration {
 
     }
 
-    public SiteConfiguration(String timezone, boolean soundEnabled, List<String> defaultSearchTags) {
+    public SiteConfiguration(String timezone, List<String> defaultSearchTags) {
         setTimezone(timezone);
-        setSoundEnabled(soundEnabled);
         setDefaultSearchTags(defaultSearchTags);
     }
 
@@ -48,14 +45,6 @@ public class SiteConfiguration {
 
     public void setTimezone(String timezone) {
         this.timezone = Strings.requireNonBlankOrDefault(timezone, Timezone.DEFAULT_TIMEZONE);
-    }
-
-    public boolean isSoundEnabled() {
-        return soundEnabled;
-    }
-
-    public void setSoundEnabled(boolean soundEnabled) {
-        this.soundEnabled = soundEnabled;
     }
 
     public List<String> getDefaultSearchTags() {

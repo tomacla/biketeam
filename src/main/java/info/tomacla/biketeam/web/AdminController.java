@@ -101,7 +101,6 @@ public class AdminController extends AbstractController {
 
         try {
             @SuppressWarnings("OptionalGetWithoutIsPresent") SiteConfiguration siteConfiguration = siteConfigurationRepository.findById(1L).get();
-            siteConfiguration.setSoundEnabled(form.isSoundEnabled());
             siteConfiguration.setTimezone(form.getTimezone());
             siteConfiguration.setDefaultSearchTags(Json.parse(form.getDefaultSearchTags(), new TypeReference<List<String>>() {
             }));

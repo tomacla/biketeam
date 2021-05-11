@@ -7,17 +7,8 @@ import info.tomacla.biketeam.domain.global.SiteIntegration;
 
 public class EditSiteConfigurationForm {
 
-    private boolean soundEnabled;
     private String timezone;
     private String defaultSearchTags;
-
-    public boolean isSoundEnabled() {
-        return soundEnabled;
-    }
-
-    public void setSoundEnabled(boolean soundEnabled) {
-        this.soundEnabled = soundEnabled;
-    }
 
     public String getTimezone() {
         return timezone;
@@ -37,7 +28,6 @@ public class EditSiteConfigurationForm {
 
     public static EditSiteConfigurationForm build(SiteConfiguration obj) {
         EditSiteConfigurationForm form = new EditSiteConfigurationForm();
-        form.soundEnabled = obj.isSoundEnabled();
         form.timezone = obj.getTimezone();
         form.defaultSearchTags = Json.serialize(obj.getDefaultSearchTags());
         return form;

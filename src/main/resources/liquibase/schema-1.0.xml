@@ -331,6 +331,12 @@
 
     </changeSet>
 
+    <changeSet id="DROP-TURKEY-SOUND" author="tomacla">
+
+        <dropColumn tableName="SITE_CONFIGURATION" columnName="SOUND_ENABLED" />
+
+    </changeSet>
+
 
 </databaseChangeLog>
 

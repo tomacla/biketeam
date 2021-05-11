@@ -58,7 +58,7 @@ public class InitializationService {
 
         Optional<SiteConfiguration> siteConfiguration = siteConfigurationRepository.findById(1L);
         if (siteConfiguration.isEmpty()) {
-            siteConfigurationRepository.save(new SiteConfiguration(Timezone.DEFAULT_TIMEZONE, false, null));
+            siteConfigurationRepository.save(new SiteConfiguration(Timezone.DEFAULT_TIMEZONE, null));
         }
 
         if (userRepository.findByStravaId(adminStravaId).isEmpty()) {
