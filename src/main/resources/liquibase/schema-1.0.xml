@@ -338,6 +338,45 @@
     </changeSet>
 
 
+    <changeSet id="GITHUB-4-RIDE-TEMPLATES" author="tomacla">
+
+        <createTable tableName="RIDE_TEMPLATE">
+            <column name="ID" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="DESCRIPTION" type="VARCHAR(8000)"/>
+            <column name="TYPE" type="INTEGER"/>
+        </createTable>
+
+        <addPrimaryKey tableName="RIDE_TEMPLATE" columnNames="ID"/>
+
+        <createTable tableName="RIDE_GROUP_TEMPLATE">
+            <column name="ID" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="LOWER_SPEED" type="DOUBLE"/>
+            <column name="UPPER_SPEED" type="DOUBLE"/>
+            <column name="MEETING_LOCATION" type="VARCHAR(255)"/>
+            <column name="MEETING_POINT_LAT" type="DOUBLE"/>
+            <column name="MEETING_POINT_LNG" type="DOUBLE"/>
+            <column name="MEETING_TIME" type="TIME"/>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="RIDE_TEMPLATE_ID" type="VARCHAR(255)"/>
+        </createTable>
+
+        <addPrimaryKey tableName="RIDE_GROUP_TEMPLATE" columnNames="ID"/>
+
+        <addForeignKeyConstraint baseTableName="RIDE_GROUP_TEMPLATE"
+                                 baseColumnNames="RIDE_TEMPLATE_ID"
+                                 constraintName="FK_RIDE_GROUP_TEMPLATE_RIDE_TEMPLATE_ID"
+                                 referencedTableName="RIDE_TEMPLATE"
+                                 referencedColumnNames="ID"/>
+
+    </changeSet>
+
+
+
 </databaseChangeLog>
 
 

@@ -6,7 +6,22 @@
 
     <div class="col-12 col-md-8">
 
-        <a href="<@spring.url '/admin/rides/new' />" class="btn btn-secondary" role="button"><i class="bi bi-plus"></i> Nouveau ride</a>
+        <form enctype="multipart/form-data" method="GET" action="<@spring.url '/admin/rides/new' />" class="row mb-0">
+            <div class="col-auto p-2">
+              <label for="form-map-gpx" class="form-label">Template</label>
+            </div>
+            <div class="col-auto">
+                <select class="form-select" autocomplete="off" required="true" name="templateId" id="form-ride-template">
+                    <option value="new">---</option>
+                    <#list templates as template>
+                        <option value="${template.id}">${template.name}</option>
+                    </#list>
+                </select>
+            </div>
+            <div class="col-auto">
+                <input type="submit" class="btn btn-secondary" value="Nouveau ride">
+            </div>
+        </form>
         <hr/>
 
         <#if rides?size gt 0>

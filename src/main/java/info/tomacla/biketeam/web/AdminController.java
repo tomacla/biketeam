@@ -2,9 +2,7 @@ package info.tomacla.biketeam.web;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import info.tomacla.biketeam.common.*;
-import info.tomacla.biketeam.domain.global.SiteConfiguration;
-import info.tomacla.biketeam.domain.global.SiteDescription;
-import info.tomacla.biketeam.domain.global.SiteIntegration;
+import info.tomacla.biketeam.domain.global.*;
 import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.map.MapRepository;
 import info.tomacla.biketeam.domain.map.WindDirection;
@@ -50,6 +48,9 @@ public class AdminController extends AbstractController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private RideTemplateRepository rideTemplateRepository;
 
     @GetMapping
     public String getSiteDescription(Principal principal, Model model) {
@@ -280,6 +281,7 @@ public class AdminController extends AbstractController {
     public String getRides(Principal principal, Model model) {
         addGlobalValues(principal, model, "Administration - Rides");
         model.addAttribute("rides", rideRepository.findAllByOrderByDateDesc());
+        model.addAttribute("templates", rideTemplateRepository.findAllByOrderByNameAsc());
         return "admin_rides";
     }
 
@@ -366,6 +368,7 @@ public class AdminController extends AbstractController {
 
             addGlobalValues(principal, model, "Administration - Rides");
             model.addAttribute("rides", rideRepository.findAllByOrderByDateDesc());
+            model.addAttribute("templates", rideTemplateRepository.findAllByOrderByNameAsc());
             return "admin_rides";
 
 
@@ -396,9 +399,22 @@ public class AdminController extends AbstractController {
     }
 
     @GetMapping(value = "/rides/new")
-    public String newRide(Principal principal, Model model) {
+    public String newRide(@RequestParam("templateId") String templateId,
+                          Principal principal,
+                          Model model) {
         addGlobalValues(principal, model, "Administration - Nouveau ride");
-        model.addAttribute("formdata", NewRideForm.empty());
+
+        Optional<RideTemplate> optionalTemplate = Optional.empty();
+        if(templateId != null && !templateId.equals("new")) {
+            optionalTemplate = rideTemplateRepository.findById(templateId);
+        }
+
+        if(optionalTemplate.isEmpty()) {
+            model.addAttribute("formdata", NewRideForm.empty());
+        } else {
+            RideTemplate rideTemplate = optionalTemplate.get();
+            model.addAttribute("formdata", NewRideForm.fromTemplate(rideTemplate));
+        }
         return "admin_rides_new";
     }
 
@@ -563,7 +579,7 @@ public class AdminController extends AbstractController {
     }
 
     @GetMapping(value = "/users/relegate/{userId}")
-    public String relagetUser(@PathVariable("userId") String userId,
+    public String relegateUser(@PathVariable("userId") String userId,
                               Model model) {
 
         try {
@@ -578,6 +594,133 @@ public class AdminController extends AbstractController {
 
         return "redirect:/admin/users";
     }
+
+
+    @GetMapping(value = "/templates")
+    public String getTemplates(Principal principal, Model model) {
+        addGlobalValues(principal, model, "Administration - Templates");
+        model.addAttribute("templates", rideTemplateRepository.findAllByOrderByNameAsc());
+        return "admin_templates";
+    }
+
+    @PostMapping(value = "/templates/{templateId}")
+    public String createTemplate(@PathVariable("templateId") String templateId,
+                             Principal principal,
+                             Model model,
+                             NewTemplateForm form) {
+
+        try {
+
+            if (!templateId.equals("new")) {
+                Optional<RideTemplate> optionalTemplate = rideTemplateRepository.findById(templateId);
+                if (optionalTemplate.isEmpty()) {
+                    return "redirect:/admin/templates";
+                }
+            }
+
+            @SuppressWarnings("Convert2Diamond")
+            List<NewTemplateForm.NewRideGroupTemplateForm> parsedGroups = Json.parse(form.getGroups(), new TypeReference<List<NewTemplateForm.NewRideGroupTemplateForm>>() {
+            });
+            Set<String> groupIdsSet = parsedGroups.stream().map(NewTemplateForm.NewRideGroupTemplateForm::getId).collect(Collectors.toSet());
+
+            RideTemplate newTemplate;
+            if (templateId.equals("new")) {
+                newTemplate = new RideTemplate(form.getName(),
+                        RideType.valueOf(form.getType()),
+                        form.getDescription(),
+                        parsedGroups.stream()
+                                .map(g -> new RideGroupTemplate(g.getName(),
+                                        g.getLowerSpeed(),
+                                        g.getUpperSpeed(),
+                                        g.getMeetingLocation(),
+                                        LocalTime.parse(g.getMeetingTime()),
+                                        (g.getMeetingPoint() != null && !g.getMeetingPoint().isBlank()) ? Json.parse(g.getMeetingPoint(), Point.class) : null)
+                                )
+                                .collect(Collectors.toSet()));
+            } else {
+                newTemplate = rideTemplateRepository.findById(templateId).get();
+                newTemplate.setName(form.getName());
+                newTemplate.setType(RideType.valueOf(form.getType()));
+                newTemplate.setDescription(form.getDescription());
+
+                // remove groups not in list
+                newTemplate.getGroups().removeIf(g -> !groupIdsSet.contains(g.getId()));
+                // update and groups in list
+                parsedGroups.forEach(g -> {
+                    if (g.getId() == null || g.getId().equals("null")) { // FIXME
+                        newTemplate.addGroup(new RideGroupTemplate(g.getName(),
+                                g.getLowerSpeed(),
+                                g.getUpperSpeed(),
+                                g.getMeetingLocation(),
+                                LocalTime.parse(g.getMeetingTime()),
+                                (g.getMeetingPoint() != null && !g.getMeetingPoint().isBlank()) ? Json.parse(g.getMeetingPoint(), Point.class) : null));
+                    } else {
+                        RideGroupTemplate toModify = newTemplate.getGroups().stream().filter(eg -> eg.getId().equals(g.getId())).findFirst().get();
+                        toModify.setLowerSpeed(g.getLowerSpeed());
+                        toModify.setUpperSpeed(g.getUpperSpeed());
+                        toModify.setMeetingTime(LocalTime.parse(g.getMeetingTime()));
+                        toModify.setMeetingLocation(g.getMeetingLocation());
+                        toModify.setMeetingPoint((g.getMeetingPoint() != null && !g.getMeetingPoint().isBlank()) ? Json.parse(g.getMeetingPoint(), Point.class) : null);
+                        toModify.setName(g.getName());
+                    }
+                });
+
+            }
+
+            rideTemplateRepository.save(newTemplate);
+
+            addGlobalValues(principal, model, "Administration - Templates");
+            model.addAttribute("templates", rideTemplateRepository.findAllByOrderByNameAsc());
+            return "admin_templates";
+
+
+        } catch (Exception e) {
+            addGlobalValues(principal, model, "Administration - Nouveau template");
+            model.addAttribute("errors", List.of(e.getMessage()));
+            model.addAttribute("formdata", form);
+            return "admin_templates_new";
+        }
+
+    }
+
+    @GetMapping(value = "/templates/{templateId}")
+    public String editTemplate(@PathVariable("templateId") String templateId,
+                           Principal principal,
+                           Model model) {
+
+        Optional<RideTemplate> optionalTemplate = rideTemplateRepository.findById(templateId);
+        if (optionalTemplate.isEmpty()) {
+            return "redirect:/admin/templates";
+        }
+
+        addGlobalValues(principal, model, "Administration - Modifier le template");
+        model.addAttribute("formdata", NewTemplateForm.build(optionalTemplate.get()));
+        return "admin_templates_new";
+
+    }
+
+    @GetMapping(value = "/templates/new")
+    public String newTemplate(Principal principal, Model model) {
+        addGlobalValues(principal, model, "Administration - Nouveau template");
+        model.addAttribute("formdata", NewTemplateForm.empty());
+        return "admin_templates_new";
+    }
+
+    @GetMapping(value = "/templates/delete/{templateId}")
+    public String deleteTemplate(@PathVariable("templateId") String templateId,
+                             Model model) {
+
+        try {
+            rideTemplateRepository.findById(templateId).ifPresent(template -> rideTemplateRepository.delete(template));
+
+        } catch (Exception e) {
+            model.addAttribute("errors", List.of(e.getMessage()));
+        }
+
+        return "redirect:/admin/templates";
+
+    }
+
 
     private ZonedDateTime parseZonedDateTime(String datePart, String timePart) {
         ZoneId timezone = ZoneId.of(siteConfigurationRepository.findById(1L).get().getTimezone());

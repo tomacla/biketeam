@@ -1,6 +1,8 @@
 package info.tomacla.biketeam.web.forms;
 
 import info.tomacla.biketeam.common.Json;
+import info.tomacla.biketeam.domain.global.RideGroupTemplate;
+import info.tomacla.biketeam.domain.global.RideTemplate;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.ride.RideType;
@@ -25,6 +27,8 @@ public class NewRideForm {
     private String description;
     private MultipartFile file;
     private String groups;
+
+
 
     public String getId() {
         return id;
@@ -124,6 +128,18 @@ public class NewRideForm {
         return form;
     }
 
+    public static Object fromTemplate(RideTemplate rideTemplate) {
+        NewRideForm form = new NewRideForm();
+        form.setId("new");
+        form.setPublishedAtDate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
+        form.setPublishedAtTime(LocalTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME));
+        form.setType(rideTemplate.getType().name());
+        form.setDescription(rideTemplate.getDescription());
+        form.setTitle(rideTemplate.getName());
+        form.setGroups(Json.serialize(rideTemplate.getGroups().stream().map(NewRideGroupForm::fromTemplate).collect(Collectors.toList())).replace("\\", "\\\\"));
+        return form;
+    }
+
     public static class NewRideGroupForm {
 
         private String id;
@@ -209,6 +225,18 @@ public class NewRideForm {
             form.setMeetingTime(group.getMeetingTime().format(DateTimeFormatter.ISO_TIME));
             form.setMeetingPoint(Json.serialize(group.getMeetingPoint()));
             form.setMeetingLocation(group.getMeetingLocation());
+            return form;
+        }
+
+        public static NewRideGroupForm fromTemplate(RideGroupTemplate groupTemplate) {
+            NewRideGroupForm form = new NewRideGroupForm();
+            form.setId(groupTemplate.getId());
+            form.setLowerSpeed(groupTemplate.getLowerSpeed());
+            form.setUpperSpeed(groupTemplate.getUpperSpeed());
+            form.setName(groupTemplate.getName());
+            form.setMeetingTime(groupTemplate.getMeetingTime().format(DateTimeFormatter.ISO_TIME));
+            form.setMeetingPoint(Json.serialize(groupTemplate.getMeetingPoint()));
+            form.setMeetingLocation(groupTemplate.getMeetingLocation());
             return form;
         }
 
