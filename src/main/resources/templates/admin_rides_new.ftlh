@@ -157,9 +157,13 @@
 
             if(event.target.value.length > 2) {
                 geoCodeTimeouts['form-ride-group-meetinglocation-' + currentGroupIndex] = setTimeout(function() {
-                    geoCode(event.target.value, function(label, point) {
-                        event.target.value = label;
-                        document.getElementById(event.target.id.replace('meetinglocation', 'meetingpoint')).value = JSON.stringify(point);
+                    geoCode(event.target.value, function(geocodeResponse) {
+                        if(geocodeResponse !== null) {
+                            event.target.value = geocodeResponse.label;
+                            document.getElementById(event.target.id.replace('meetinglocation', 'meetingpoint')).value = JSON.stringify(geocodeResponse.point);
+                        } else {
+                            document.getElementById(event.target.id.replace('meetinglocation', 'meetingpoint')).value = '';
+                        }
                     });
                 }, 1000);
             }

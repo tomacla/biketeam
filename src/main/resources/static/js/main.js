@@ -43,16 +43,88 @@ function preventElementToSubmitForm(elementId, replacement) {
     document.getElementById(elementId).addEventListener('keyup', preventSubmit);
 }
 
+var geoCodeModal = null;
 function geoCode(toGeoCode, callback) {
+
+    if(geoCodeModal === null) {
+        geoCodeModal = new bootstrap.Modal(document.getElementById('modal-choose-geocode'));
+    }
+
+    var modalEl = document.getElementById('modal-choose-geocode');
+
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() {
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
             var r = JSON.parse(xmlHttp.responseText);
             if(r.features.length > 0) {
-                callback(r.features[0].properties.label, lambertToGPS({
-                    x: r.features[0].properties.x,
-                    y: r.features[0].properties.y
-                }));
+                var result = [];
+                var geocodeList = document.getElementById('modal-choose-geocode-list');
+                while (geocodeList.firstChild) {
+                    geocodeList.removeChild(geocodeList.lastChild);
+                }
+                for(var i = 0; i < r.features.length; i++) {
+
+                    var li = document.createElement("li");
+                    li.classList.add('list-group-item');
+
+                    var span = document.createElement("span");
+                    span.textContent = r.features[i].properties.label;
+
+                    var input = document.createElement("input");
+                    input.classList.add('form-check-input');
+                    input.classList.add('me-1');
+                    input.setAttribute('type', 'radio');
+                    input.setAttribute('name', 'geocode-selected-value');
+                    input.setAttribute('value', ''+i);
+
+                    li.appendChild(input);
+                    li.appendChild(span);
+                    geocodeList.appendChild(li);
+
+                    result.push({
+                        label : r.features[i].properties.label,
+                        point: lambertToGPS({
+                            x: r.features[i].properties.x,
+                            y: r.features[i].properties.y
+                        })
+                    });
+                }
+
+                var li = document.createElement("li");
+                li.classList.add('list-group-item');
+
+                var span = document.createElement("span");
+                span.textContent = 'Conserver l\'adresse saisie';
+
+                var input = document.createElement("input");
+                input.classList.add('form-check-input');
+                input.classList.add('me-1');
+                input.setAttribute('type', 'radio');
+                input.setAttribute('name', 'geocode-selected-value');
+                input.setAttribute('value', '-1');
+                input.setAttribute('checked', 'checked');
+
+                li.appendChild(input);
+                li.appendChild(span);
+                geocodeList.appendChild(li);
+
+                geoCodeModal.show();
+
+                var hideListener = function(event) {
+
+                    var checked = modalEl.querySelector("input[type=radio]:checked");
+                    if (checked && parseInt(checked.value) !== -1) {
+                       callback(result[parseInt(checked.value)]);
+                    } else {
+                        callback(null);
+                    }
+
+                    modalEl.removeEventListener('hidden.bs.modal', hideListener, true);
+                    geoCodeModalListener = null;
+                }
+
+                modalEl.addEventListener('hidden.bs.modal', hideListener, true);
+
             }
         }
     }

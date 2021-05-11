@@ -49,6 +49,25 @@
       </div>
     </div>
 
+    <div class="modal fade" id="modal-choose-geocode" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Précisez l'adresse</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <ul class="list-group" id="modal-choose-geocode-list">
+
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Accepter</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="container">
 
     <#include "_includes_errors.ftlh">
