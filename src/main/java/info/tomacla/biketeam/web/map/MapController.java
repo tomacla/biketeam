@@ -1,9 +1,7 @@
-package info.tomacla.biketeam.web;
+package info.tomacla.biketeam.web.map;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import info.tomacla.biketeam.common.Json;
 import info.tomacla.biketeam.domain.map.*;
-import info.tomacla.biketeam.web.forms.SearchMapForm;
+import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,11 +11,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,11 +43,27 @@ public class MapController extends AbstractController {
     }
 
     @GetMapping
-    public String getMaps(Principal principal,
+    public String getMaps(@RequestParam(value = "lowerDistance", required = false, defaultValue = "1") double lowerDistance,
+                          @RequestParam(value = "upperDistance", required = false, defaultValue = "1000") double upperDistance,
+                          @RequestParam(value = "sort", required = false) MapSorterOption sort,
+                          @RequestParam(value = "windDirection", required = false) WindDirection windDirection,
+                          @RequestParam(value = "tags", required = false) List<String> tags,
+                          @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+                          @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
+                          Principal principal,
                           Model model) {
 
-        List<String> defaultSearchTags = siteConfigurationRepository.findById(1L).get().getDefaultSearchTags();
-        SearchMapForm form = SearchMapForm.builder().withTags(defaultSearchTags).get();
+        // FIXME search with no tags = bug
+        SearchMapForm form = SearchMapForm.builder()
+                .withTags(tags == null || tags.isEmpty() ? configurationService.getDefaultSearchTags() : tags)
+                .withSort(sort)
+                .withWindDirection(windDirection)
+                .withLowerDistance(lowerDistance)
+                .withUpperDistance(upperDistance)
+                .withPage(page)
+                .withPageSize(pageSize)
+                .get();
+
         Page<Map> maps = getMapsFromRepository(form);
 
         addGlobalValues(principal, model, "Maps");
@@ -59,24 +72,10 @@ public class MapController extends AbstractController {
         model.addAttribute("tags", mapRepository.findAllDistinctTags());
         model.addAttribute("formdata", form);
         return "maps";
-    }
-
-    @PostMapping
-    public String getMaps(Principal principal, Model model,
-                          SearchMapForm form) {
-
-        Page<Map> maps = getMapsFromRepository(form);
-        addGlobalValues(principal, model, "Maps");
-        model.addAttribute("maps", maps.getContent());
-        model.addAttribute("pages", maps.getTotalPages());
-        model.addAttribute("tags", mapRepository.findAllDistinctTags());
-        model.addAttribute("formdata", form);
-        return "maps";
-
     }
 
     private Page<Map> getMapsFromRepository(SearchMapForm form) {
-        SearchMapForm.SearchMapFormParser parser = SearchMapForm.parser(form);
+        SearchMapForm.SearchMapFormParser parser = form.parser();
         Sort sort = Sort.by("postedAt").descending();
         if (parser.getSort() != null) {
             if (parser.getSort().equals(MapSorterOption.SHORT)) {

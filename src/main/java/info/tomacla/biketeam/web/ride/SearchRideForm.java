@@ -1,10 +1,9 @@
-package info.tomacla.biketeam.web.forms;
-
-import org.apache.tomcat.jni.Local;
+package info.tomacla.biketeam.web.ride;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 
 public class SearchRideForm {
 
@@ -16,8 +15,8 @@ public class SearchRideForm {
     public SearchRideForm() {
         setPage(0);
         setPageSize(10);
-        setTo(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
-        setFrom(LocalDate.now().minus(1, ChronoUnit.MONTHS).format(DateTimeFormatter.ISO_LOCAL_DATE));
+        setTo(null);
+        setFrom(null);
     }
 
     public int getPage() {
@@ -41,7 +40,7 @@ public class SearchRideForm {
     }
 
     public void setFrom(String from) {
-        this.from = from;
+        this.from = Objects.requireNonNullElse(from, LocalDate.now().minus(1, ChronoUnit.MONTHS).format(DateTimeFormatter.ISO_LOCAL_DATE));
     }
 
     public String getTo() {
@@ -49,11 +48,11 @@ public class SearchRideForm {
     }
 
     public void setTo(String to) {
-        this.to = to;
+        this.to = Objects.requireNonNullElse(to, LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
     }
 
-    public static SearchRideFormParser parser(SearchRideForm form) {
-        return new SearchRideFormParser(form);
+    public SearchRideFormParser parser() {
+        return new SearchRideFormParser(this);
     }
 
     public static SearchRideFormBuilder builder() {
@@ -62,7 +61,7 @@ public class SearchRideForm {
 
     public static class SearchRideFormParser {
 
-        private SearchRideForm form;
+        private final SearchRideForm form;
 
         protected SearchRideFormParser(SearchRideForm form) {
             this.form = form;
@@ -88,19 +87,33 @@ public class SearchRideForm {
 
     public static class SearchRideFormBuilder {
 
-        private SearchRideForm form;
+        private final SearchRideForm form;
 
         protected SearchRideFormBuilder() {
             this.form = new SearchRideForm();
         }
 
+        public SearchRideFormBuilder withPage(int page) {
+            form.setPage(page);
+            return this;
+        }
+
+        public SearchRideFormBuilder withPageSize(int pageSize) {
+            form.setPageSize(pageSize);
+            return this;
+        }
+
         public SearchRideFormBuilder withFrom(LocalDate from) {
-            form.setFrom(from.format(DateTimeFormatter.ISO_LOCAL_DATE));
+            if (from != null) {
+                form.setFrom(from.format(DateTimeFormatter.ISO_LOCAL_DATE));
+            }
             return this;
         }
 
         public SearchRideFormBuilder withTo(LocalDate to) {
-            form.setTo(to.format(DateTimeFormatter.ISO_LOCAL_DATE));
+            if (to != null) {
+                form.setTo(to.format(DateTimeFormatter.ISO_LOCAL_DATE));
+            }
             return this;
         }
 

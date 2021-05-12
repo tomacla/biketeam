@@ -83,15 +83,15 @@ public class Feed {
     }
 
     public String getDetailsUrl() {
-        if(type.equals(FeedType.RIDE)) {
+        if (type.equals(FeedType.RIDE)) {
             return "/rides/" + getId();
         }
         return null;
     }
 
     public String getImageUrl() {
-        if(imaged) {
-            if(type.equals(FeedType.RIDE)) {
+        if (imaged) {
+            if (type.equals(FeedType.RIDE)) {
                 return "/api/rides/" + getId() + "/image";
             }
             return "/api/publications/" + getId() + "/image";

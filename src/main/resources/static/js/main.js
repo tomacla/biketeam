@@ -1,5 +1,8 @@
+/** FILE SIZE CHECK **/
+
 var maxFileSizeInMB = 1;
 
+var geoCodeTimeouts = {};
 document.addEventListener("DOMContentLoaded", function() {
 
     Array.from(document.getElementsByClassName('form-size-check')).forEach(function(input) {
@@ -15,7 +18,44 @@ document.addEventListener("DOMContentLoaded", function() {
 
     });
 
+
+    Array.from(document.getElementsByClassName('form-input-geocode')).forEach(function(input) {
+
+        input.addEventListener('keyup', function(event) {
+
+           if(geoCodeTimeouts[input.id]) {
+               clearTimeout(geoCodeTimeouts[input.id]);
+               delete geoCodeTimeouts[input.id];
+           }
+
+           if(input.value.length > 2) {
+               geoCodeTimeouts[input.id] = setTimeout(function() {
+                   geoCode(input.value, function(geocodeResponse) {
+                       if(geocodeResponse !== null) {
+                           input.value = geocodeResponse.label;
+                           document.getElementById(input.id + '-lat').value = geocodeResponse.point.lat;
+                           document.getElementById(input.id + '-lng').value = geocodeResponse.point.lng;
+                       }
+                   });
+               }, 1000);
+           }
+       });
+
+    });
+
+    Array.from(document.getElementsByClassName('form-map-control')).forEach(function(input) {
+
+        AutoComplete({
+            EmptyMessage: "Aucune map trouvée",
+            Url : '/api/autocomplete/maps'
+        }, '#' + input.id);
+
+    });
+
+
 });
+
+/** FORMS **/
 
 function setFieldValue(fieldId, value) {
     document.getElementById(fieldId).value = value;
@@ -42,6 +82,80 @@ function preventElementToSubmitForm(elementId, replacement) {
     document.getElementById(elementId).addEventListener('keydown', preventSubmit);
     document.getElementById(elementId).addEventListener('keyup', preventSubmit);
 }
+
+/** TAGS **/
+
+function handleTagChange(containerId, fieldName, tagsContainerId, tagsFieldContainerId) {
+    var tagSelect = document.getElementById(containerId);
+    var newValue = tagSelect.value;
+    if(newValue !== '' && getTags(tagsContainerId).indexOf(newValue) === -1) {
+        createTag(tagSelect.value, fieldName, tagsContainerId, tagsFieldContainerId);
+    }
+    tagSelect.value = '';
+}
+
+function getTags(containerId) {
+    var container = document.getElementById(containerId);
+    var tags = [];
+    for (var i = 0; i < container.childNodes.length; i++) {
+        var badge = container.childNodes[i];
+        for (var j = 0; j < badge.childNodes.length; j++) {
+            if (badge.childNodes[j].nodeType === Node.TEXT_NODE) {
+                tags.push(badge.childNodes[j].nodeValue);
+                break;
+            }
+        }
+    }
+    return tags;
+}
+
+function createTag(label, fieldName, tagsContainerId, tagsFieldContainerId) {
+
+    if(label === null || label === '') {
+        return;
+    }
+
+    var fieldContainer = document.getElementById(tagsFieldContainerId);
+    var badgeContainer = document.getElementById(tagsContainerId);
+
+    var input = document.createElement('input');
+    input.setAttribute('type', 'hidden');
+    input.setAttribute('name', fieldName);
+    input.setAttribute('value', label);
+
+
+    var badge = document.createElement("span");
+    badge.classList.add('badge');
+    badge.classList.add('bg-secondary');
+    badge.classList.add('me-2');
+    badge.innerHTML = label;
+
+    var button = document.createElement("button");
+    button.setAttribute('type', 'button');
+    button.classList.add('btn-close');
+    button.style.padding = '0';
+    button.style.margin = '0 0 0 5px';
+    button.style.width = '10px';
+    button.style.height = '10px';
+    button.addEventListener('click', function(event) {
+        badgeContainer.removeChild(badge);
+        fieldContainer.removeChild(input);
+    });
+
+    badge.appendChild(button);
+
+    badgeContainer.appendChild(badge);
+    fieldContainer.appendChild(input);
+
+}
+
+function addTag(inputId, fieldName, tagsContainerId, tagsFieldContainerId) {
+   var tagInput = document.getElementById(inputId);
+   createTag(tagInput.value, fieldName, tagsContainerId, tagsFieldContainerId);
+   tagInput.value = '';
+}
+
+/** GEOCODE **/
 
 var geoCodeModal = null;
 function geoCode(toGeoCode, callback) {

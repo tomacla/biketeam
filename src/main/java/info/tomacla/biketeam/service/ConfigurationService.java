@@ -9,10 +9,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
-public class InitializationService {
+public class ConfigurationService {
 
     @Autowired
     private SiteDescriptionRepository siteDescriptionRepository;
@@ -40,6 +43,18 @@ public class InitializationService {
 
     @Value("${admin.last-name}")
     private String adminLastName;
+
+    public List<String> getDefaultSearchTags() {
+        List<String> defaultSearchTags = siteConfigurationRepository.findById(1L).get().getDefaultSearchTags();
+        if (defaultSearchTags == null) {
+            return new ArrayList<>();
+        }
+        return defaultSearchTags;
+    }
+
+    public ZoneId getTimezone() {
+        return ZoneId.of(siteConfigurationRepository.findById(1L).get().getTimezone());
+    }
 
     @PostConstruct
     public void init() {

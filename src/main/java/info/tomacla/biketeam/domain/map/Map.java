@@ -2,7 +2,6 @@ package info.tomacla.biketeam.domain.map;
 
 import info.tomacla.biketeam.common.Point;
 import info.tomacla.biketeam.common.Strings;
-import info.tomacla.biketeam.common.Vector;
 
 import javax.persistence.*;
 import java.time.LocalDate;

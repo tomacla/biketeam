@@ -4,7 +4,7 @@
 
     <div class="col-12 col-md-4 mb-4">
 
-        <form id="rides-filter" action="<@spring.url '/rides' />" method="POST" class="border rounded p-2">
+        <form id="rides-filter" action="<@spring.url '/rides' />" method="GET" class="border rounded p-2">
 
             <div class="row mt-3">
                  <div class="col-3 text-end">

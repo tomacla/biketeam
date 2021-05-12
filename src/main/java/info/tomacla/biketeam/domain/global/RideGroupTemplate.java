@@ -15,7 +15,7 @@ public class RideGroupTemplate {
     @Id
     private String id;
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name="ride_template_id")
+    @JoinColumn(name = "ride_template_id")
     private RideTemplate rideTemplate;
     private String name;
     @Column(name = "lower_speed")
@@ -56,7 +56,7 @@ public class RideGroupTemplate {
         return id;
     }
 
-    protected void setId(String id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -64,7 +64,7 @@ public class RideGroupTemplate {
         return rideTemplate;
     }
 
-    protected void setRideTemplate(RideTemplate ride) {
+    public void setRideTemplate(RideTemplate ride) {
         this.rideTemplate = Objects.requireNonNull(ride);
     }
 

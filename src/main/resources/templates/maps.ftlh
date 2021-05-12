@@ -1,74 +1,10 @@
 <#include "_includes_head.ftlh">
 
- <script type="text/javascript">
-
-        function createTag(label) {
-
-            if(label === null || label === '') {
-                return;
-            }
-
-            var badge = document.createElement("span");
-            badge.classList.add('badge');
-            badge.classList.add('bg-secondary');
-            badge.classList.add('me-2');
-            badge.innerHTML = label;
-
-            var button = document.createElement("button");
-            button.setAttribute('type', 'button');
-            button.classList.add('btn-close');
-            button.style.padding = '0';
-            button.style.margin = '0 0 0 5px';
-            button.style.width = '10px';
-            button.style.height = '10px';
-            button.addEventListener('click', function(event) {
-                badge.parentNode.removeChild(badge);
-                serializeTags();
-            });
-
-            badge.appendChild(button);
-
-            document.getElementById('maps-filter-tags-container').appendChild(badge);
-            serializeTags();
-        }
-
-        function serializeTags() {
-            document.getElementById('form-map-tags-field').value = JSON.stringify(getTags());
-        }
-
-        function handleTagChange() {
-            var tagSelect = document.getElementById('maps-filter-tags');
-            var newValue = tagSelect.value;
-            if(newValue !== '' && getTags().indexOf(newValue) === -1) {
-                createTag(tagSelect.value);
-            }
-            tagSelect.value = '';
-        }
-
-        function getTags() {
-            var container = document.getElementById('maps-filter-tags-container');
-            var tags = [];
-            for (var i = 0; i < container.childNodes.length; i++) {
-
-                var badge = container.childNodes[i];
-                for (var j = 0; j < badge.childNodes.length; j++) {
-                    if (badge.childNodes[j].nodeType === Node.TEXT_NODE) {
-                        tags.push(badge.childNodes[j].nodeValue);
-                        break;
-                    }
-                }
-
-            }
-            return tags;
-        }
-
-    </script>
-
 <div class="row pt-2 justify-content-center">
 
     <div class="col-12 mb-4">
 
-        <form id="maps-filter" action="<@spring.url '/maps' />" method="POST" class="border rounded p-2">
+        <form id="maps-filter" action="<@spring.url '/maps' />" method="GET" class="border rounded p-2">
 
             <input type="hidden" id="maps-filter-page" name="page" value="${formdata.page}">
             <input type="hidden" id="maps-filter-pageSize" name="pageSize" value="${formdata.pageSize}">
@@ -102,7 +38,7 @@
                   <div class="col-12 col-md-6">
                       <div class="input-group">
                           <label class="input-group-text" for="maps-filter-tags" class="form-label">Tags</label>
-                          <select name="tmp-tags" onchange="handleTagChange()" class="form-select" id="maps-filter-tags">
+                          <select onchange="handleTagChange('maps-filter-tags', 'tags', 'maps-filter-tags-container', 'maps-filter-tags-field-container')" class="form-select" id="maps-filter-tags">
                             <option value="">---</option>
                             <#list tags as tag>
                                 <option value="${tag}">${tag}</option>
@@ -110,17 +46,17 @@
                           </select>
                       </div>
                       <div id="maps-filter-tags-container"></div>
-                      <input type="hidden" value="${formdata.tags}" name="tags" id="form-map-tags-field">
+                      <div id="maps-filter-tags-field-container"></div>
                   </div>
                 <div class="col-12 col-md-5">
                     <div class="input-group">
                         <label class="input-group-text" for="maps-filter-sort">Tri</label>
                         <select name="sort" class="form-select" id="maps-filter-sort">
                           <option <#if formdata.sort == ''>selected</#if> value="">---</option>
-                          <option <#if formdata.sort == 'short'>selected</#if> value="short">Plus courtes</option>
-                          <option <#if formdata.sort == 'long'>selected</#if> value="long">Plus longues</option>
-                          <option <#if formdata.sort == 'flat'>selected</#if> value="flat">Plus plates</option>
-                          <option <#if formdata.sort == 'hilly'>selected</#if> value="hilly">Plus valonnées</option>
+                          <option <#if formdata.sort == 'SHORT'>selected</#if> value="short">Plus courtes</option>
+                          <option <#if formdata.sort == 'LONG'>selected</#if> value="long">Plus longues</option>
+                          <option <#if formdata.sort == 'FLAT'>selected</#if> value="flat">Plus plates</option>
+                          <option <#if formdata.sort == 'HILLY'>selected</#if> value="hilly">Plus valonnées</option>
                         </select>
                    </div>
                 </div>
@@ -165,8 +101,6 @@
             </#list>
         </div>
 
-
-
         <#if pages gt 1>
             <div class="pb-4 d-flex justify-content-center">
                 <@common.pagination formdata.page pages 'maps-filter-page' 'maps-filter' />
@@ -179,13 +113,11 @@
 
     <script type="text/javascript">
 
-            JSON.parse('${(formdata.tags)?no_esc}').forEach(function(tag) {
-                createTag(tag);
-            });
+       <#list formdata.tags as tag>
+            createTag('${tag}', 'tags', 'maps-filter-tags-container', 'maps-filter-tags-field-container');
+       </#list>
 
-            preventElementToSubmitForm('maps-filter-tags');
-
-        </script>
+    </script>
 
 </div>
 

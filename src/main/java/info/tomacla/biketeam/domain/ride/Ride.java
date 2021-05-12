@@ -6,6 +6,7 @@ import info.tomacla.biketeam.common.Strings;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -26,7 +27,7 @@ public class Ride {
     private String description;
     private boolean imaged;
     @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Set<RideGroup> groups;
+    private Set<RideGroup> groups = new HashSet<>();
 
     protected Ride() {
 
@@ -37,8 +38,7 @@ public class Ride {
                 ZonedDateTime publishedAt,
                 String title,
                 String description,
-                boolean imaged,
-                Set<RideGroup> groups) {
+                boolean imaged) {
 
         this.id = UUID.randomUUID().toString();
         setType(type);
@@ -47,7 +47,6 @@ public class Ride {
         setTitle(title);
         setDescription(description);
         setImaged(imaged);
-        setGroups(groups);
     }
 
     public String getId() {

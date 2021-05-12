@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class LocalDefaultOAuth2User extends DefaultOAuth2User {
 
-    private String localUserId;
+    private final String localUserId;
 
     public LocalDefaultOAuth2User(Collection<? extends GrantedAuthority> authorities,
                                   Map<String, Object> attributes,

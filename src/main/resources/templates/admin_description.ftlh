@@ -26,13 +26,15 @@
                 <div class="alert alert-info" role="alert">
                    Les informations ci dessous seront affichées sur la page d'accueil.
                  </div>
-                <div class="mb-3">
-                  <label for="form-description-facebook" class="form-label">Lien facebook</label>
-                  <input autocomplete="off" name="facebook" value="${formdata.facebook}" type="text" class="form-control" id="form-description-facebook" placeholder="https://www.facebook.com/biketeam">
+                <label for="form-description-facebook" class="form-label">Lien facebook</label>
+                <div class="input-group mb-3">
+                  <span class="input-group-text">https://www.facebook.com/</span>
+                  <input autocomplete="off" name="facebook" value="${formdata.facebook}" type="text" class="form-control" id="form-description-facebook" placeholder="biketeam">
                 </div>
-                <div class="mb-3">
-                  <label for="form-description-twitter" class="form-label">Lien twitter</label>
-                  <input autocomplete="off" name="twitter" value="${formdata.twitter}" type="text" class="form-control" id="form-description-twitter" placeholder="https://www.twitter.com/biketeam">
+                <label for="form-description-twitter" class="form-label">Lien twitter</label>
+                <div class="input-group mb-3">
+                  <span class="input-group-text">https://www.twitter.com/</span>
+                  <input autocomplete="off" name="twitter" value="${formdata.twitter}" type="text" class="form-control" id="form-description-twitter" placeholder="biketeam">
                 </div>
                 <div class="mb-3">
                   <label for="form-description-email" class="form-label">Email</label>

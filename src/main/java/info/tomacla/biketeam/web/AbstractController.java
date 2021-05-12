@@ -5,19 +5,26 @@ import info.tomacla.biketeam.domain.global.*;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.user.UserRepository;
 import info.tomacla.biketeam.security.LocalDefaultOAuth2User;
+import info.tomacla.biketeam.service.ConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.ui.Model;
 
 import java.security.Principal;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public abstract class AbstractController {
 
     private static final DateTimeFormatter frenchFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(Locale.FRANCE);
+
+    @Autowired
+    protected ConfigurationService configurationService;
 
     @Autowired
     protected SiteDescriptionRepository siteDescriptionRepository;
@@ -65,6 +72,10 @@ public abstract class AbstractController {
             return userRepository.findById(oauthprincipal.getLocalUserId());
         }
         return Optional.empty();
+    }
+
+    protected List<String> getAllAvailableTimeZones() {
+        return ZoneId.getAvailableZoneIds().stream().map(ZoneId::of).map(ZoneId::toString).sorted().collect(Collectors.toList());
     }
 
 

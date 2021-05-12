@@ -1,13 +1,11 @@
-package info.tomacla.biketeam.web;
+package info.tomacla.biketeam.web.feed;
 
 import info.tomacla.biketeam.domain.feed.Feed;
 import info.tomacla.biketeam.domain.feed.FeedRepository;
-import info.tomacla.biketeam.domain.map.Map;
-import info.tomacla.biketeam.web.forms.SearchMapForm;
+import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,17 +13,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.security.Principal;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Controller
 @RequestMapping(value = "/")
-public class RootController extends AbstractController {
+public class FeedController extends AbstractController {
 
     @Autowired
     private FeedRepository feedRepository;
 
     @GetMapping
-    public String getRoot(Principal principal, Model model) {
+    public String getFeed(Principal principal, Model model) {
         addGlobalValues(principal, model, "Accueil");
         model.addAttribute("feed", getFeedFromRepository().getContent());
         return "root";
@@ -40,7 +39,9 @@ public class RootController extends AbstractController {
     }
 
     private Page<Feed> getFeedFromRepository() {
-        return feedRepository.findAll(PageRequest.of(0, 10, Sort.by("publishedAt").descending()));
+        return feedRepository.findAllByPublishedAtLessThan(
+                ZonedDateTime.now(configurationService.getTimezone()),
+                PageRequest.of(0, 15, Sort.by("publishedAt").descending()));
     }
 
 }

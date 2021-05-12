@@ -6,7 +6,21 @@
 
     <div class="col-12 col-md-8">
 
-        <a href="<@spring.url '/admin/templates/new' />" class="btn btn-secondary" role="button"><i class="bi bi-plus"></i> Nouveau template</a>
+        <form enctype="multipart/form-data" method="GET" action="<@spring.url '/admin/templates/new' />" class="row mb-0">
+            <div class="col-auto">
+                <select class="form-select" autocomplete="off" required="true" name="numberOfGroups" id="form-template-groups">
+                    <option value="">-- Nombre de groupes --</option>
+                    <option value="1">1 groupe</option>
+                    <option value="2">2 groupes</option>
+                    <option value="3">3 groupes</option>
+                    <option value="4">4 groupes</option>
+                    <option value="5">5 groupes</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <input type="submit" class="btn btn-secondary" value="Nouveau template">
+            </div>
+        </form>
         <hr/>
 
         <#if templates?size gt 0>

@@ -1,18 +1,22 @@
-package info.tomacla.biketeam.web;
+package info.tomacla.biketeam.web.ride;
 
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.ride.RideRepository;
 import info.tomacla.biketeam.domain.user.User;
-import info.tomacla.biketeam.web.forms.SearchRideForm;
+import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
 import java.time.LocalDate;
@@ -43,24 +47,19 @@ public class RideController extends AbstractController {
     }
 
     @GetMapping
-    public String getRides(Principal principal,
+    public String getRides(@RequestParam(value = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                           @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+                           @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+                           @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
+                           Principal principal,
                            Model model) {
 
-        SearchRideForm form = SearchRideForm.builder().get();
-        Page<Ride> rides = getRidesFromRepository(form);
-
-        addGlobalValues(principal, model, "Rides");
-        model.addAttribute("rides", rides.getContent());
-        model.addAttribute("pages", rides.getTotalPages());
-        model.addAttribute("formdata", form);
-        return "rides";
-    }
-
-    @PostMapping
-    public String getRides(Principal principal,
-                           Model model,
-                           SearchRideForm form) {
-
+        SearchRideForm form = SearchRideForm.builder()
+                .withFrom(from)
+                .withTo(to)
+                .withPage(page)
+                .withPageSize(pageSize)
+                .get();
 
         Page<Ride> rides = getRidesFromRepository(form);
 
@@ -69,6 +68,7 @@ public class RideController extends AbstractController {
         model.addAttribute("pages", rides.getTotalPages());
         model.addAttribute("formdata", form);
         return "rides";
+
     }
 
     @GetMapping(value = "/{rideId}/add-participant/{groupId}/{userId}")
@@ -134,7 +134,7 @@ public class RideController extends AbstractController {
     }
 
     private Page<Ride> getRidesFromRepository(SearchRideForm form) {
-        SearchRideForm.SearchRideFormParser parser = SearchRideForm.parser(form);
+        SearchRideForm.SearchRideFormParser parser = form.parser();
         Pageable pageable = PageRequest.of(parser.getPage(), parser.getPageSize(), Sort.by("date").descending());
         return rideRepository.findByDateBetweenAndPublishedAtLessThan(
                 parser.getFrom(),

@@ -7,7 +7,7 @@
     <div class="col-12 col-md-8">
     
         <form enctype="multipart/form-data" name="form-publication"
-            action="<#if formdata.id??><@spring.url '/admin/publications/' + formdata.id /><#else><@spring.url '/admin/publications' /></#if>"
+            action="<@spring.url '/admin/publications/' + formdata.id />"
             method="POST" class="border rounded p-4">
 
                 <div class="mb-3">
@@ -18,14 +18,14 @@
                   <label for="form-publication-content" class="form-label">Contenu</label>
                   <textarea required="true" name="content" class="form-control" id="form-publication-content" rows="10">${formdata.content}</textarea>
                 </div>
-                <#if formdata.id??>
+                <#if formdata.id != 'new'>
                     <div class="alert alert-warning" role="alert">
                         Remplissez le champ image pour modifier l'image de la publication. Pour conserver l'image existante, ne rien modifier.
                     </div>
                 </#if>
                 <div class="mb-3">
-                  <label for="form-publication-file" class="form-label">Image associée (format jpg uniquement)</label>
-                  <input autocomplete="off" name="file" accept=".jpg" class="form-control form-size-check" type="file" id="form-publication-file">
+                  <label for="form-publication-file" class="form-label">Image associée (PNG ou JPEG)</label>
+                  <input autocomplete="off" name="file" accept=".png,.jpg" class="form-control form-size-check" type="file" id="form-publication-file">
                 </div>
                 <div class="row mb-3">
                     <div class="col-6 mb-3">

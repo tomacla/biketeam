@@ -1,11 +1,11 @@
-package info.tomacla.biketeam.web.forms;
+package info.tomacla.biketeam.web.map;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import info.tomacla.biketeam.common.Json;
 import info.tomacla.biketeam.domain.map.MapSorterOption;
 import info.tomacla.biketeam.domain.map.WindDirection;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class SearchMapForm {
 
@@ -15,14 +15,14 @@ public class SearchMapForm {
     private double upperDistance;
     private String sort;
     private String windDirection;
-    private String tags;
+    private List<String> tags;
 
     public SearchMapForm() {
         setPage(0);
         setPageSize(9);
         setLowerDistance(1);
         setUpperDistance(1000);
-        setTags("[]");
+        setTags(new ArrayList<>());
         setWindDirection("");
         setSort("");
     }
@@ -64,7 +64,7 @@ public class SearchMapForm {
     }
 
     public void setSort(String sort) {
-        this.sort = sort;
+        this.sort = Objects.requireNonNullElse(sort, "");
     }
 
     public String getWindDirection() {
@@ -72,19 +72,19 @@ public class SearchMapForm {
     }
 
     public void setWindDirection(String windDirection) {
-        this.windDirection = windDirection;
+        this.windDirection = Objects.requireNonNullElse(windDirection, "");
     }
 
-    public String getTags() {
+    public List<String> getTags() {
         return tags;
     }
 
-    public void setTags(String tags) {
-        this.tags = tags;
+    public void setTags(List<String> tags) {
+        this.tags = Objects.requireNonNullElse(tags, new ArrayList<>());
     }
 
-    public static SearchMapFormParser parser(SearchMapForm form) {
-        return new SearchMapFormParser(form);
+    public SearchMapFormParser parser() {
+        return new SearchMapFormParser(this);
     }
 
     public static SearchMapFormBuilder builder() {
@@ -93,7 +93,7 @@ public class SearchMapForm {
 
     public static class SearchMapFormParser {
 
-        private SearchMapForm form;
+        private final SearchMapForm form;
 
         protected SearchMapFormParser(SearchMapForm form) {
             this.form = form;
@@ -130,18 +130,27 @@ public class SearchMapForm {
         }
 
         public List<String> getTags() {
-            return Json.parse(form.getTags(), new TypeReference<List<String>>() {
-            });
+            return form.getTags();
         }
 
     }
 
     public static class SearchMapFormBuilder {
 
-        private SearchMapForm form;
+        private final SearchMapForm form;
 
         protected SearchMapFormBuilder() {
             this.form = new SearchMapForm();
+        }
+
+        public SearchMapFormBuilder withPage(int page) {
+            form.setPage(page);
+            return this;
+        }
+
+        public SearchMapFormBuilder withPageSize(int pageSize) {
+            form.setPageSize(pageSize);
+            return this;
         }
 
         public SearchMapFormBuilder withLowerDistance(double lowerDistance) {
@@ -155,17 +164,23 @@ public class SearchMapForm {
         }
 
         public SearchMapFormBuilder withSort(MapSorterOption sort) {
-            form.setSort(sort.name().toLowerCase());
+            if (sort != null) {
+                form.setSort(sort.name().toLowerCase());
+            }
             return this;
         }
 
         public SearchMapFormBuilder withWindDirection(WindDirection windDirection) {
-            form.setWindDirection(windDirection.name());
+            if (windDirection != null) {
+                form.setWindDirection(windDirection.name());
+            }
             return this;
         }
 
         public SearchMapFormBuilder withTags(List<String> tags) {
-            form.setTags(Json.serialize(tags));
+            if (tags != null) {
+                form.setTags(tags);
+            }
             return this;
         }
 

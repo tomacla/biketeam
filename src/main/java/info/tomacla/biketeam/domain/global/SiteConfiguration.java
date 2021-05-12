@@ -18,7 +18,7 @@ public class SiteConfiguration {
     @ElementCollection
     @CollectionTable(
             name = "SITE_CONFIGURATION_DEFAULT_SEARCH_TAGS",
-            joinColumns=@JoinColumn(name = "site_configuration_id", referencedColumnName = "id")
+            joinColumns = @JoinColumn(name = "site_configuration_id", referencedColumnName = "id")
     )
     private List<String> defaultSearchTags;
 

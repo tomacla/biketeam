@@ -11,10 +11,10 @@
             </p>
             <p class="lead">
                 <#if (_desc.facebook)??>
-                    <a target="_blank" href="${_desc.facebook}"><i class="bi bi-facebook"></i></a>
+                    <a target="_blank" href="https://www.facebook.com/${_desc.facebook}"><i class="bi bi-facebook"></i></a>
                 </#if>
                 <#if (_desc.twitter)??>
-                    <a target="_blank" href="${_desc.twitter}"><i class="bi bi-twitter"></i></a>
+                    <a target="_blank" href="https://www.twitter.com/${_desc.twitter}"><i class="bi bi-twitter"></i></a>
                 </#if>
             </p>
             <address>

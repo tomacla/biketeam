@@ -71,7 +71,7 @@ public class RideGroup {
         return id;
     }
 
-    protected void setId(String id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -79,7 +79,7 @@ public class RideGroup {
         return ride;
     }
 
-    protected void setRide(Ride ride) {
+    public void setRide(Ride ride) {
         this.ride = Objects.requireNonNull(ride);
     }
 

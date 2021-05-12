@@ -5,6 +5,7 @@ import info.tomacla.biketeam.common.Strings;
 import info.tomacla.biketeam.domain.ride.RideType;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -21,7 +22,7 @@ public class RideTemplate {
     @Column(length = 8000)
     private String description;
     @OneToMany(mappedBy = "rideTemplate", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Set<RideGroupTemplate> groups;
+    private Set<RideGroupTemplate> groups = new HashSet<>();
 
     protected RideTemplate() {
 
@@ -29,14 +30,12 @@ public class RideTemplate {
 
     public RideTemplate(String name,
                         RideType type,
-                        String description,
-                        Set<RideGroupTemplate> groups) {
+                        String description) {
 
         this.id = UUID.randomUUID().toString();
         setName(name);
         setType(type);
         setDescription(description);
-        setGroups(groups);
     }
 
     public String getId() {

@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.service;
 
+import info.tomacla.biketeam.common.FileExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -20,6 +23,24 @@ public class FileService {
     @Autowired
     public FileService(@Value("${file.repository}") String fileRepository) {
         this.fileRepository = fileRepository;
+    }
+
+    public Optional<FileExtension> exists(String fileName, List<FileExtension> extensions) {
+        for (FileExtension extension : extensions) {
+            if (exists(fileName + extension.getExtension())) {
+                return Optional.of(extension);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public Optional<FileExtension> exists(String directory, String fileName, List<FileExtension> extensions) {
+        for (FileExtension extension : extensions) {
+            if (exists(directory, fileName + extension.getExtension())) {
+                return Optional.of(extension);
+            }
+        }
+        return Optional.empty();
     }
 
     public boolean exists(String fileName) {
@@ -47,7 +68,7 @@ public class FileService {
         try {
             Files.copy(file, Path.of(fileRepository, fileName), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            throw new RuntimeException("Unable to store file : " + file.toString(), e);
+            throw new RuntimeException("Unable to store file : " + file, e);
         }
     }
 

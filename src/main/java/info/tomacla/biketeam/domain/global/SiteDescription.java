@@ -35,21 +35,21 @@ public class SiteDescription {
     }
 
     public SiteDescription(String sitename,
-                      String description) {
+                           String description) {
         setSitename(sitename);
         setDescription(description);
     }
 
     public SiteDescription(String sitename,
-                      String description,
-                      String facebook,
-                      String twitter,
-                      String email,
-                      String phoneNumber,
-                      String addressStreetLine,
-                      String addressPostalCode,
-                      String addressCity,
-                      String other) {
+                           String description,
+                           String facebook,
+                           String twitter,
+                           String email,
+                           String phoneNumber,
+                           String addressStreetLine,
+                           String addressPostalCode,
+                           String addressCity,
+                           String other) {
         setSitename(sitename);
         setDescription(description);
         setFacebook(facebook);

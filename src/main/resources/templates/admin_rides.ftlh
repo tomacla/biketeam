@@ -7,15 +7,27 @@
     <div class="col-12 col-md-8">
 
         <form enctype="multipart/form-data" method="GET" action="<@spring.url '/admin/rides/new' />" class="row mb-0">
-            <div class="col-auto p-2">
-              <label for="form-map-gpx" class="form-label">Template</label>
-            </div>
             <div class="col-auto">
                 <select class="form-select" autocomplete="off" required="true" name="templateId" id="form-ride-template">
-                    <option value="new">---</option>
-                    <#list templates as template>
-                        <option value="${template.id}">${template.name}</option>
-                    </#list>
+                    <option value="">---</option>
+                    <#if templates?size != 0>
+                        <optgroup label="Templates">
+                            <#list templates as template>
+                                <option value="${template.id}">${template.name}</option>
+                            </#list>
+                        </optgroup>
+                    </#if>
+                    <#if templates?size != 0>
+                        <optgroup label="Vide">
+                    </#if>
+                        <option value="empty-1">1 groupe</option>
+                        <option value="empty-2">2 groupes</option>
+                        <option value="empty-3">3 groupes</option>
+                        <option value="empty-4">4 groupes</option>
+                        <option value="empty-5">5 groupes</option>
+                    <#if templates?size != 0>
+                        </optgroup>
+                    </#if>
                 </select>
             </div>
             <div class="col-auto">
