@@ -15,11 +15,11 @@
                 <h5>Obligatoires</h5>
                 <div class="mb-3">
                   <label for="form-description-sitename" class="form-label">Nom du site</label>
-                  <input autocomplete="off" required="true" name="sitename" value="${formdata.sitename}" type="text" class="form-control" id="form-description-sitename" placeholder="biketeam">
+                  <input autocomplete="off" required name="sitename" value="${formdata.sitename}" type="text" class="form-control" id="form-description-sitename" placeholder="biketeam">
                 </div>
                 <div class="mb-3">
                   <label for="form-description-description" class="form-label">Description</label>
-                  <textarea required="true" name="description" class="form-control" id="form-description-description" rows="3">${formdata.description}</textarea>
+                  <textarea required name="description" class="form-control" id="form-description-description" rows="3">${formdata.description}</textarea>
                 </div>
                 <hr/>
                 <h5>Complémentaires</h5>

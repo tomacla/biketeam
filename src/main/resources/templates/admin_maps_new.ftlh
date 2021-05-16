@@ -12,7 +12,7 @@
 
                 <div class="mb-3">
                   <label for="form-map-name" class="form-label">Nom</label>
-                  <input autocomplete="off" required="true" value="${formdata.name}" name="name" type="text" class="form-control" id="form-map-name" placeholder="Parcours de la semaine">
+                  <input autocomplete="off" required value="${formdata.name}" name="name" type="text" class="form-control" id="form-map-name" placeholder="Parcours de la semaine">
                 </div>
 
                  <div class="mb-3">

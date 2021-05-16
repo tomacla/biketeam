@@ -11,7 +11,7 @@
                     <label for="rides-filter-from" class="form-label">Du</label>
                 </div>
                 <div class="col-9">
-                    <input autocomplete="off" type="date" name="from" value="${formdata.from}" required="true" class="form-control" id="rides-filter-from">
+                    <input autocomplete="off" type="date" name="from" value="${formdata.from}" required class="form-control" id="rides-filter-from">
                 </div>
             </div>
             <div class="row mt-3">
@@ -19,7 +19,7 @@
                     <label for="rides-filter-to" class="form-label">Au</label>
                 </div>
                 <div class="col-9">
-                    <input autocomplete="off" type="date" name="to" value="${formdata.to}" required="true" class="form-control" id="rides-filter-to">
+                    <input autocomplete="off" type="date" name="to" value="${formdata.to}" required class="form-control" id="rides-filter-to">
                 </div>
             </div>
 

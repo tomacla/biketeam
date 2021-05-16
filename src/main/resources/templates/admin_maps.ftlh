@@ -11,7 +11,7 @@
               <label for="form-map-gpx" class="form-label">Fichier GPX</label>
             </div>
             <div class="col-auto">
-                <input autocomplete="off" required="true" name="file" accept=".gpx" class="form-control form-size-check" type="file" id="form-map-gpx">
+                <input autocomplete="off" required name="file" accept=".gpx" class="form-control form-size-check" type="file" id="form-map-gpx">
             </div>
             <div class="col-auto">
                 <input type="submit" class="btn btn-secondary" value="Nouvelle Map">

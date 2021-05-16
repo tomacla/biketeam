@@ -13,9 +13,9 @@
                 <div class="col-12 col-md-6">
                     <div class="input-group">
                         <span class="input-group-text">Distance de</span>
-                        <input autocomplete="off" type="number" required="true" step="1" min="1" value="${formdata.lowerDistance?c}" name="lowerDistance" class="form-control" id="maps-filter-distance">
+                        <input autocomplete="off" type="number" required step="1" min="1" value="${formdata.lowerDistance?c}" name="lowerDistance" class="form-control" id="maps-filter-distance">
                         <span class="input-group-text">à</span>
-                        <input autocomplete="off" type="number" required="true" step="1" min="1" value="${formdata.upperDistance?c}" name="upperDistance" class="form-control">
+                        <input autocomplete="off" type="number" required step="1" min="1" value="${formdata.upperDistance?c}" name="upperDistance" class="form-control">
                         <span class="input-group-text">km</span>
                     </div>
                 </div>

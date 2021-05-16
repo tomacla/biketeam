@@ -8,7 +8,7 @@
 
         <form enctype="multipart/form-data" method="GET" action="<@spring.url '/admin/templates/new' />" class="row mb-0">
             <div class="col-auto">
-                <select class="form-select" autocomplete="off" required="true" name="numberOfGroups" id="form-template-groups">
+                <select class="form-select" autocomplete="off" required name="numberOfGroups" id="form-template-groups">
                     <option value="">-- Nombre de groupes --</option>
                     <option value="1">1 groupe</option>
                     <option value="2">2 groupes</option>

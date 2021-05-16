@@ -12,11 +12,11 @@
 
                 <div class="mb-3">
                   <label for="form-publication-title" class="form-label">Titre</label>
-                  <input autocomplete="off" required="true" value="${formdata.title}" name="title" type="text" class="form-control" id="form-publication-title" placeholder="Actualité de la semaine">
+                  <input autocomplete="off" required value="${formdata.title}" name="title" type="text" class="form-control" id="form-publication-title" placeholder="Actualité de la semaine">
                 </div>
                 <div class="mb-3">
                   <label for="form-publication-content" class="form-label">Contenu</label>
-                  <textarea required="true" name="content" class="form-control" id="form-publication-content" rows="10">${formdata.content}</textarea>
+                  <textarea required name="content" class="form-control" id="form-publication-content" rows="10">${formdata.content}</textarea>
                 </div>
                 <#if formdata.id != 'new'>
                     <div class="alert alert-warning" role="alert">
@@ -30,11 +30,11 @@
                 <div class="row mb-3">
                     <div class="col-6 mb-3">
                       <label for="form-ride-title" class="form-label">Date de publication</label>
-                      <input autocomplete="off" required="true" value="${formdata.publishedAtDate}" name="publishedAtDate" type="date" class="form-control" id="form-ride-publishedat-date">
+                      <input autocomplete="off" required value="${formdata.publishedAtDate}" name="publishedAtDate" type="date" class="form-control" id="form-ride-publishedat-date">
                     </div>
                     <div class="col-6 mb-3">
                       <label for="form-ride-date" class="form-label">Heure de publication</label>
-                      <input autocomplete="off" required="true" value="${formdata.publishedAtTime}" name="publishedAtTime" type="time" class="form-control" id="form-ride-publishedat-time">
+                      <input autocomplete="off" required value="${formdata.publishedAtTime}" name="publishedAtTime" type="time" class="form-control" id="form-ride-publishedat-time">
                     </div>
                 </div>
                 <button type="submit" class="btn btn-secondary">Publier</button>

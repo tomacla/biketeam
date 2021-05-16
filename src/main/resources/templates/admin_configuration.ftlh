@@ -10,7 +10,7 @@
 
                 <div class="mb-3">
                   <label for="form-configuration-timezone" class="form-label">Timezone</label>
-                    <select required="true" name="timezone" class="form-select" id="form-configuration-timezone">
+                    <select required name="timezone" class="form-select" id="form-configuration-timezone">
                         <#list timezones as timezone>
                             <option <#if formdata.timezone == timezone>selected</#if> value="${timezone}">${timezone}</option>
                         </#list>

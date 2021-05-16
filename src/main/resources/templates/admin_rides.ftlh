@@ -8,7 +8,7 @@
 
         <form enctype="multipart/form-data" method="GET" action="<@spring.url '/admin/rides/new' />" class="row mb-0">
             <div class="col-auto">
-                <select class="form-select" autocomplete="off" required="true" name="templateId" id="form-ride-template">
+                <select class="form-select" autocomplete="off" required name="templateId" id="form-ride-template">
                     <option value="">---</option>
                     <#if templates?size != 0>
                         <optgroup label="Templates">
