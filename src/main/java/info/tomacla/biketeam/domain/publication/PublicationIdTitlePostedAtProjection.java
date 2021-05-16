@@ -1,5 +1,7 @@
 package info.tomacla.biketeam.domain.publication;
 
+import info.tomacla.biketeam.common.PublishedStatus;
+
 import java.time.ZonedDateTime;
 
 public interface PublicationIdTitlePostedAtProjection {
@@ -8,6 +10,8 @@ public interface PublicationIdTitlePostedAtProjection {
 
     String getTitle();
 
-    ZonedDateTime getPostedAt();
+    ZonedDateTime getPublishedAt();
+
+    PublishedStatus getPublishedStatus();
 
 }

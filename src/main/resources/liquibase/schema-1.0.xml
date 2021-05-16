@@ -374,6 +374,36 @@
                                  referencedColumnNames="ID"/>
 
     </changeSet>
+    
+    <changeSet id="GITHUB-14-PUBLICATION-TASK" author="tomacla">
+
+        <dropColumn tableName="RIDE" columnName="type" />
+        <addColumn tableName="RIDE">
+            <column name="type" type="VARCHAR(25)"/>
+        </addColumn>
+
+        <sql>update RIDE set type = 'REGULAR'</sql>
+
+        <addColumn tableName="PUBLICATION">
+            <column name="published_status" type="VARCHAR(25)" />
+        </addColumn>
+
+        <addColumn tableName="RIDE">
+            <column name="published_status" type="VARCHAR(25)" />
+        </addColumn>
+
+        <sql>update PUBLICATION set published_status = 'UNPUBLISHED'</sql>
+        <sql>update RIDE set published_status = 'UNPUBLISHED'</sql>
+        <sql><![CDATA[ update PUBLICATION set published_status = 'PUBLISHED' where published_at < NOW() ]]></sql>
+        <sql><![CDATA[ update RIDE set published_status = 'PUBLISHED' where published_at < NOW() ]]></sql>
+
+        <createView viewName="FEED" replaceIfExists="true">
+            select id as id, 'RIDE' as type, published_at as published_at, title as title, description as content, imaged as imaged FROM ride where published_status = 'PUBLISHED'
+            UNION
+            select id as id, 'PUBLICATION' as type, published_at as published_at, title as title, content as content, imaged as imaged FROM publication where published_status = 'PUBLISHED'
+        </createView>
+
+    </changeSet>
 
 
 

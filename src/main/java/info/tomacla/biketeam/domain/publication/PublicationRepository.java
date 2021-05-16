@@ -1,5 +1,7 @@
 package info.tomacla.biketeam.domain.publication;
 
+import info.tomacla.biketeam.common.PublishedStatus;
+import info.tomacla.biketeam.domain.ride.Ride;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,7 +11,7 @@ import java.util.List;
 @Repository
 public interface PublicationRepository extends CrudRepository<Publication, String> {
 
-    List<Publication> findAllByPublishedAtLessThan(ZonedDateTime now);
+    List<Publication> findAllByPublishedStatusAndPublishedAtLessThan(PublishedStatus publishedStatus, ZonedDateTime now);
 
     List<PublicationIdTitlePostedAtProjection> findAllByOrderByPostedAtDesc();
 

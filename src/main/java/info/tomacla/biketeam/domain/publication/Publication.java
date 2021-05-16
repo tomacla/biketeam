@@ -1,11 +1,9 @@
 package info.tomacla.biketeam.domain.publication;
 
+import info.tomacla.biketeam.common.PublishedStatus;
 import info.tomacla.biketeam.common.Strings;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -16,6 +14,9 @@ public class Publication {
 
     @Id
     private String id;
+    @Enumerated(EnumType.STRING)
+    @Column(name= "published_status")
+    private PublishedStatus publishedStatus;
     private String title;
     @Column(name = "published_at")
     private ZonedDateTime publishedAt;
@@ -35,6 +36,7 @@ public class Publication {
                        boolean imaged) {
         this.id = UUID.randomUUID().toString();
         this.postedAt = ZonedDateTime.now();
+        this.publishedStatus = PublishedStatus.UNPUBLISHED;
         setPublishedAt(publishedAt);
         setTitle(title);
         setContent(content);
@@ -47,6 +49,14 @@ public class Publication {
 
     protected void setId(String id) {
         this.id = id;
+    }
+
+    public PublishedStatus getPublishedStatus() {
+        return publishedStatus;
+    }
+
+    public void setPublishedStatus(PublishedStatus publishedStatus) {
+        this.publishedStatus = Objects.requireNonNull(publishedStatus);
     }
 
     public String getTitle() {

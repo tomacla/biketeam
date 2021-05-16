@@ -1,6 +1,7 @@
 package info.tomacla.biketeam.domain.ride;
 
 import info.tomacla.biketeam.common.Lists;
+import info.tomacla.biketeam.common.PublishedStatus;
 import info.tomacla.biketeam.common.Strings;
 
 import javax.persistence.*;
@@ -18,6 +19,10 @@ public class Ride {
 
     @Id
     private String id;
+    @Enumerated(EnumType.STRING)
+    @Column(name= "published_status")
+    private PublishedStatus publishedStatus;
+    @Enumerated(EnumType.STRING)
     private RideType type;
     private LocalDate date;
     @Column(name = "published_at")
@@ -41,6 +46,7 @@ public class Ride {
                 boolean imaged) {
 
         this.id = UUID.randomUUID().toString();
+        this.publishedStatus = PublishedStatus.UNPUBLISHED;
         setType(type);
         setDate(date);
         setPublishedAt(publishedAt);
@@ -55,6 +61,14 @@ public class Ride {
 
     protected void setId(String id) {
         this.id = id;
+    }
+
+    public PublishedStatus getPublishedStatus() {
+        return publishedStatus;
+    }
+
+    public void setPublishedStatus(PublishedStatus publishedStatus) {
+        this.publishedStatus = Objects.requireNonNull(publishedStatus);
     }
 
     public RideType getType() {

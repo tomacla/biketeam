@@ -2,6 +2,7 @@ package info.tomacla.biketeam.web.admin.ride;
 
 import info.tomacla.biketeam.common.FileExtension;
 import info.tomacla.biketeam.common.FileRepositories;
+import info.tomacla.biketeam.common.PublishedStatus;
 import info.tomacla.biketeam.domain.global.RideTemplate;
 import info.tomacla.biketeam.domain.global.RideTemplateRepository;
 import info.tomacla.biketeam.domain.map.MapRepository;
@@ -74,6 +75,7 @@ public class AdminRideController extends AbstractController {
 
         addGlobalValues(principal, model, "Administration - Nouveau ride");
         model.addAttribute("formdata", form);
+        model.addAttribute("published", false);
         return "admin_rides_new";
 
     }
@@ -102,6 +104,7 @@ public class AdminRideController extends AbstractController {
 
         addGlobalValues(principal, model, "Administration - Modifier le ride");
         model.addAttribute("formdata", form);
+        model.addAttribute("published", ride.getPublishedStatus().equals(PublishedStatus.PUBLISHED));
         return "admin_rides_new";
 
     }

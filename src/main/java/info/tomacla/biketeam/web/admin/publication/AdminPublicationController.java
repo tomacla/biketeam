@@ -2,6 +2,7 @@ package info.tomacla.biketeam.web.admin.publication;
 
 import info.tomacla.biketeam.common.FileExtension;
 import info.tomacla.biketeam.common.FileRepositories;
+import info.tomacla.biketeam.common.PublishedStatus;
 import info.tomacla.biketeam.domain.publication.Publication;
 import info.tomacla.biketeam.domain.publication.PublicationRepository;
 import info.tomacla.biketeam.service.FileService;
@@ -99,6 +100,8 @@ public class AdminPublicationController extends AbstractController {
                                   Principal principal,
                                   Model model) {
 
+        boolean published = false;
+
         NewPublicationForm.NewPublicationFormBuilder builder = NewPublicationForm.builder();
         if (!publicationId.equals("new")) {
 
@@ -112,12 +115,15 @@ public class AdminPublicationController extends AbstractController {
                     .withId(publication.getId())
                     .withTitle(publication.getTitle())
                     .withPublishedAt(publication.getPublishedAt());
+
+            published = publication.getPublishedStatus().equals(PublishedStatus.PUBLISHED);
         }
 
         NewPublicationForm form = builder.get();
 
         addGlobalValues(principal, model, "Administration - Modifier la publication");
         model.addAttribute("formdata", form);
+        model.addAttribute("published", published);
         return "admin_publications_new";
     }
 

@@ -13,6 +13,22 @@
             method="POST"
             class="border rounded p-4">
 
+                <div class="row mb-3 border rounded bg-light p-2">
+                    <#if published>
+                        <div class="alert alert-warning p-2" role="alert">
+                            <i class="bi bi-calendar-check"></i> Le ride a été publié.
+                        </div>
+                    </#if>
+                    <div class="col-6 mb-3">
+                      <label for="form-ride-title" class="form-label">Date de publication</label>
+                      <input <#if published>disabled </#if>autocomplete="off" required value="${formdata.publishedAtDate}" name="publishedAtDate" type="date" class="form-control" id="form-ride-publishedat-date">
+                    </div>
+                    <div class="col-6 mb-3">
+                      <label for="form-ride-date" class="form-label">Heure de publication</label>
+                      <input <#if published>disabled </#if> autocomplete="off" required value="${formdata.publishedAtTime}" name="publishedAtTime" type="time" class="form-control" id="form-ride-publishedat-time">
+                    </div>
+                </div>
+
                 <div class="row">
                     <div class="col-6 mb-3">
                       <label for="form-ride-title" class="form-label">Titre</label>
@@ -39,17 +55,6 @@
                 <div class="mb-3">
                   <label for="form-ride-description" class="form-label">Description</label>
                   <textarea required name="description" class="form-control" id="form-ride-description" rows="5">${formdata.description}</textarea>
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-6 mb-3">
-                      <label for="form-ride-title" class="form-label">Date de publication</label>
-                      <input autocomplete="off" required value="${formdata.publishedAtDate}" name="publishedAtDate" type="date" class="form-control" id="form-ride-publishedat-date">
-                    </div>
-                    <div class="col-6 mb-3">
-                      <label for="form-ride-date" class="form-label">Heure de publication</label>
-                      <input autocomplete="off" required value="${formdata.publishedAtTime}" name="publishedAtTime" type="time" class="form-control" id="form-ride-publishedat-time">
-                    </div>
                 </div>
 
                 <hr/>

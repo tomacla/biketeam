@@ -12,7 +12,7 @@
             <ul class="list-group mt-4">
                 <#list publications as publication>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>${publication.title}<span class="text-muted"> - ${publication.postedAt.format(_date_formatter)}</span></div>
+                        <div><span class="text-<#if publication.publishedStatus == 'PUBLISHED'>success<#else>danger</#if>"><i class="bi bi-calendar-<#if publication.publishedStatus == 'PUBLISHED'>check<#else>x</#if>"></i></span> ${publication.title}<span class="text-muted"> - ${publication.publishedAt.format(_date_formatter)}</span></div>
                         <div class="btn-group" role="group">
                             <a href="<@spring.url '/admin/publications/${publication.id}' />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-pencil"></i></a>
                             <a href="<@spring.url '/admin/publications/delete/${publication.id}' />" class="btn btn-danger btn-sm" role="button"><i class="bi bi-trash"></i></a>

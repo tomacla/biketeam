@@ -40,7 +40,7 @@
             <ul class="list-group mt-4">
                 <#list rides as ride>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>${ride.title}<span class="text-muted"> - ${ride.date.format(_date_formatter)}</span></div>
+                        <div><span class="text-<#if ride.publishedStatus == 'PUBLISHED'>success<#else>danger</#if>"><i class="bi bi-calendar-<#if ride.publishedStatus == 'PUBLISHED'>check<#else>x</#if>"></i></span> ${ride.title} (${ride.date.format(_date_formatter)})<span class="text-muted"> - ${ride.publishedAt.format(_date_formatter)}</span></div>
                         <div class="btn-group" role="group">
                             <a href="<@spring.url '/admin/rides/${ride.id}' />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-pencil"></i></a>
                             <a href="<@spring.url '/admin/rides/delete/${ride.id}' />" class="btn btn-danger btn-sm" role="button"><i class="bi bi-trash"></i></a>

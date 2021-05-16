@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.web.ride;
 
+import info.tomacla.biketeam.common.PublishedStatus;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.ride.RideRepository;
@@ -136,10 +137,10 @@ public class RideController extends AbstractController {
     private Page<Ride> getRidesFromRepository(SearchRideForm form) {
         SearchRideForm.SearchRideFormParser parser = form.parser();
         Pageable pageable = PageRequest.of(parser.getPage(), parser.getPageSize(), Sort.by("date").descending());
-        return rideRepository.findByDateBetweenAndPublishedAtLessThan(
+        return rideRepository.findByDateBetweenAndPublishedStatus(
                 parser.getFrom(),
                 parser.getTo(),
-                ZonedDateTime.now(),
+                PublishedStatus.PUBLISHED,
                 pageable);
     }
 
