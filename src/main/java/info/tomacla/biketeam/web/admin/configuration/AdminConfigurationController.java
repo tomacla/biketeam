@@ -5,6 +5,7 @@ import info.tomacla.biketeam.domain.global.SiteConfiguration;
 import info.tomacla.biketeam.domain.global.SiteDescription;
 import info.tomacla.biketeam.domain.global.SiteIntegration;
 import info.tomacla.biketeam.domain.map.MapRepository;
+import info.tomacla.biketeam.service.FacebookService;
 import info.tomacla.biketeam.service.FileService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +32,14 @@ public class AdminConfigurationController extends AbstractController {
     @Autowired
     private MapRepository mapRepository;
 
+    @Autowired
+    private FacebookService facebookService;
+
     @GetMapping
     public String getSiteDescription(Principal principal, Model model) {
 
-        SiteDescription siteDescription = siteDescriptionRepository.findById(1L).get();
+        SiteDescription siteDescription = configurationService.getSiteDescription();
+
         EditSiteDescriptionForm form = EditSiteDescriptionForm.builder()
                 .withSitename(siteDescription.getSitename())
                 .withDescription(siteDescription.getDescription())
@@ -59,7 +64,7 @@ public class AdminConfigurationController extends AbstractController {
 
         try {
 
-            SiteDescription siteDescription = siteDescriptionRepository.findById(1L).get();
+            SiteDescription siteDescription = configurationService.getSiteDescription();
             siteDescription.setSitename(form.getSitename());
             siteDescription.setDescription(form.getDescription());
             siteDescription.setFacebook(form.getFacebook());
@@ -89,7 +94,7 @@ public class AdminConfigurationController extends AbstractController {
     @GetMapping(value = "/configuration")
     public String getSiteConfiguration(Principal principal, Model model) {
 
-        SiteConfiguration configuration = siteConfigurationRepository.findById(1L).get();
+        SiteConfiguration configuration = configurationService.getSiteConfiguration();
         EditSiteConfigurationForm form = EditSiteConfigurationForm.builder()
                 .withTimezone(configuration.getTimezone())
                 .withDefaultSearchTags(configuration.getDefaultSearchTags())
@@ -108,7 +113,7 @@ public class AdminConfigurationController extends AbstractController {
                                           EditSiteConfigurationForm form) {
 
         try {
-            SiteConfiguration siteConfiguration = siteConfigurationRepository.findById(1L).get();
+            SiteConfiguration siteConfiguration = configurationService.getSiteConfiguration();
             EditSiteConfigurationForm.EditSiteConfigurationFormParser parser = form.parser();
 
             siteConfiguration.setTimezone(parser.getTimezone());
@@ -132,16 +137,65 @@ public class AdminConfigurationController extends AbstractController {
 
     }
 
+    @GetMapping(value = "/integration/facebook/login")
+    public String getSiteIntegration(@RequestParam("code") String facebookCode,
+                                     Principal principal,
+                                     Model model) {
+
+        try {
+            SiteIntegration siteIntegration = configurationService.getSiteIntegration();
+            final String userAccessToken = facebookService.getUserAccessToken(facebookCode);
+            siteIntegration.setFacebookAccessToken(userAccessToken);
+
+            siteIntegrationRepository.save(siteIntegration);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            return "redirect:/admin/integration";
+        }
+
+    }
+
+    @GetMapping(value = "/integration/facebook/backward")
+    public String facebookConfBackward(Principal principal,
+                                       Model model) {
+
+        SiteIntegration siteIntegration = configurationService.getSiteIntegration();
+
+        final int facebookConfigurationStep = siteIntegration.getFacebookConfigurationStep();
+        if (facebookConfigurationStep == 4) {
+            siteIntegration.setFacebookPageId(null);
+        } else if (facebookConfigurationStep == 3) {
+            siteIntegration.setFacebookAccessToken(null);
+        } else if (facebookConfigurationStep == 2) {
+            siteIntegration.setFacebookAppId(null);
+            siteIntegration.setFacebookAppSecret(null);
+        }
+
+        siteIntegrationRepository.save(siteIntegration);
+
+        return "redirect:/admin/integration";
+
+    }
+
     @GetMapping(value = "/integration")
     public String getSiteIntegration(Principal principal, Model model) {
 
-        SiteIntegration siteIntegration = siteIntegrationRepository.findById(1L).get();
+        SiteIntegration siteIntegration = configurationService.getSiteIntegration();
         EditSiteIntegrationForm form = EditSiteIntegrationForm.builder()
                 .withMapBoxAPIKey(siteIntegration.getMapBoxAPIKey())
+                .withFacebookAppId(siteIntegration.getFacebookAppId())
+                .withFacebookAppSecret(siteIntegration.getFacebookAppSecret())
+                .withFacebookPageId(siteIntegration.getFacebookPageId())
                 .get();
 
         addGlobalValues(principal, model, "Administration - Intégrations");
         model.addAttribute("formdata", form);
+        model.addAttribute("facebookConfigurationStep", siteIntegration.getFacebookConfigurationStep());
+        if (siteIntegration.getFacebookConfigurationStep() == 2) {
+            model.addAttribute("facebookUrl", facebookService.getLoginUrl());
+        }
         return "admin_integration";
     }
 
@@ -149,19 +203,32 @@ public class AdminConfigurationController extends AbstractController {
     public String updateSiteIntegration(Principal principal, Model model,
                                         EditSiteIntegrationForm form) {
 
+        SiteIntegration siteIntegration = configurationService.getSiteIntegration();
+
         try {
-            SiteIntegration siteIntegration = siteIntegrationRepository.findById(1L).get();
+
             siteIntegration.setMapBoxAPIKey(form.getMapBoxAPIKey());
+            siteIntegration.setFacebookPageId(form.getFacebookPageId());
+            siteIntegration.setFacebookAppId(form.getFacebookAppId());
+            siteIntegration.setFacebookAppSecret(form.getFacebookAppSecret());
             siteIntegrationRepository.save(siteIntegration);
 
             addGlobalValues(principal, model, "Administration - Intégrations");
             model.addAttribute("formdata", form);
+            model.addAttribute("facebookConfigurationStep", siteIntegration.getFacebookConfigurationStep());
+            if (siteIntegration.getFacebookConfigurationStep() == 2) {
+                model.addAttribute("facebookUrl", facebookService.getLoginUrl());
+            }
             return "admin_integration";
 
         } catch (Exception e) {
             model.addAttribute("errors", List.of(e.getMessage()));
             addGlobalValues(principal, model, "Administration - Intégrations");
             model.addAttribute("formdata", form);
+            model.addAttribute("facebookConfigurationStep", siteIntegration.getFacebookConfigurationStep());
+            if (siteIntegration.getFacebookConfigurationStep() == 2) {
+                model.addAttribute("facebookUrl", facebookService.getLoginUrl());
+            }
             return "admin_integration";
         }
 

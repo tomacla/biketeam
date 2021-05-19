@@ -404,8 +404,15 @@
         </createView>
 
     </changeSet>
-
-
+    
+    <changeSet id="GITHUB-15-FACEBOOK-INTEGRATION" author="tomacla">
+        <addColumn tableName="SITE_INTEGRATION">
+            <column name="facebook_app_id" type="VARCHAR(100)" />
+            <column name="facebook_app_secret" type="VARCHAR(100)" />
+            <column name="facebook_access_token" type="VARCHAR(300)" />
+            <column name="facebook_page_id" type="VARCHAR(100)" />
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>
 

@@ -47,7 +47,15 @@ document.addEventListener("DOMContentLoaded", function() {
 
         AutoComplete({
             EmptyMessage: "Aucune map trouvée",
-            Url : '/api/autocomplete/maps'
+            Url : '/api/autocomplete/maps',
+            ClearOnSelect: true,
+            OnSelect: function(field, value) {
+                var jsonValue = JSON.parse(value);
+                var targetIdField = document.getElementById(field.getAttribute("data-target-id-field"));
+                var targetNameField = document.getElementById(field.getAttribute("data-target-name-field"));
+                targetIdField.value = Object.keys(jsonValue)[0];
+                targetNameField.value = jsonValue[Object.keys(jsonValue)[0]];
+            }
         }, '#' + input.id);
 
     });

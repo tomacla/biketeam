@@ -1,11 +1,10 @@
 package info.tomacla.biketeam.web.admin.templates;
 
+import info.tomacla.biketeam.common.Dates;
 import info.tomacla.biketeam.common.Point;
 import info.tomacla.biketeam.common.Strings;
 
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 public class NewRideGroupTemplateForm {
@@ -89,7 +88,7 @@ public class NewRideGroupTemplateForm {
     }
 
     public void setMeetingTime(String meetingTime) {
-        this.meetingTime = Strings.requireNonBlankOrDefault(meetingTime, "12:00");
+        this.meetingTime = Strings.requireNonBlankOrDefault(meetingTime, Dates.formatTime());
     }
 
     public static NewRideGroupTemplateFormBuilder builder() {
@@ -184,7 +183,7 @@ public class NewRideGroupTemplateForm {
 
         public NewRideGroupTemplateFormBuilder withMeetingTime(LocalTime meetingTime) {
             if (meetingTime != null) {
-                form.setMeetingTime(meetingTime.truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_LOCAL_TIME));
+                form.setMeetingTime(Dates.formatTime(meetingTime));
             }
             return this;
         }

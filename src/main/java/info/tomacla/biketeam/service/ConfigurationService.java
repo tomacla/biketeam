@@ -45,7 +45,7 @@ public class ConfigurationService {
     private String adminLastName;
 
     public List<String> getDefaultSearchTags() {
-        List<String> defaultSearchTags = siteConfigurationRepository.findById(1L).get().getDefaultSearchTags();
+        List<String> defaultSearchTags = getSiteConfiguration().getDefaultSearchTags();
         if (defaultSearchTags == null) {
             return new ArrayList<>();
         }
@@ -53,7 +53,19 @@ public class ConfigurationService {
     }
 
     public ZoneId getTimezone() {
-        return ZoneId.of(siteConfigurationRepository.findById(1L).get().getTimezone());
+        return ZoneId.of(getSiteConfiguration().getTimezone());
+    }
+
+    public SiteDescription getSiteDescription() {
+        return siteDescriptionRepository.findById(1L).get();
+    }
+
+    public SiteConfiguration getSiteConfiguration() {
+        return siteConfigurationRepository.findById(1L).get();
+    }
+
+    public SiteIntegration getSiteIntegration() {
+        return siteIntegrationRepository.findById(1L).get();
     }
 
     @PostConstruct
@@ -68,7 +80,7 @@ public class ConfigurationService {
 
         Optional<SiteIntegration> siteIntegration = siteIntegrationRepository.findById(1L);
         if (siteIntegration.isEmpty()) {
-            siteIntegrationRepository.save(new SiteIntegration(null));
+            siteIntegrationRepository.save(new SiteIntegration());
         }
 
         Optional<SiteConfiguration> siteConfiguration = siteConfigurationRepository.findById(1L);

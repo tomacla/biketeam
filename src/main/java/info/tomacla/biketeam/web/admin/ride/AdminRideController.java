@@ -99,7 +99,7 @@ public class AdminRideController extends AbstractController {
                 .withType(ride.getType())
                 .withPublishedAt(ride.getPublishedAt())
                 .withTitle(ride.getTitle())
-                .withGroups(ride.getGroups())
+                .withGroups(ride.getGroups(), mapRepository)
                 .get();
 
         addGlobalValues(principal, model, "Administration - Modifier le ride");

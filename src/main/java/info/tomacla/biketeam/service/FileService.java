@@ -106,8 +106,8 @@ public class FileService {
         Files.createDirectories(getBiketeamTempPath());
 
         // copy default logo
-        if (!Files.exists(Path.of(fileRepository, "logo.jpg"))) {
-            Files.copy(getClass().getResourceAsStream("/default-logo.jpg"), Path.of(fileRepository, "logo.jpg"), StandardCopyOption.REPLACE_EXISTING);
+        if (!Files.exists(Path.of(fileRepository, "logo.png")) && !Files.exists(Path.of(fileRepository, "logo.jpg"))) {
+            Files.copy(getClass().getResourceAsStream("/default-logo.png"), Path.of(fileRepository, "logo.png"), StandardCopyOption.REPLACE_EXISTING);
         }
 
     }

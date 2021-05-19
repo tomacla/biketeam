@@ -76,21 +76,28 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="mb-3 col-4">
-                                <label for="form-ride-group-map-${group?index}" class="form-label">Map</label>
-                                <input type="text" autocomplete="off" value="${group.mapId}" name="groups[${group?index}].mapId" id="form-ride-group-map-${group?index}" class="form-control form-map-control">
-                            </div>
-                            <div class="mb-3 col-4">
+                            <div class="mb-3 col-6">
                                 <label for="form-ride-group-lowerspeed-${group?index}" class="form-label">Vitesse basse</label>
                                 <div class="input-group">
                                     <input type="number" autocomplete="off" required value="${group.lowerSpeed}" name="groups[${group?index}].lowerSpeed" id="form-ride-group-lowerspeed-${group?index}" placeholder="30.0" class="form-control">
                                     <span class="input-group-text">km/h</span>
                                 </div>
                             </div>
-                            <div class="mb-3 col-4">
+                            <div class="mb-3 col-6">
                                 <label for="form-ride-group-upperspeed-${group?index}" class="form-label">Vitesse haute</label>
                                 <div class="input-group"><input type="number" autocomplete="off" required value="${group.upperSpeed}" name="groups[${group?index}].upperSpeed" id="form-ride-group-upperspeed-${group?index}" placeholder="30.0" class="form-control">
                                 <span class="input-group-text">km/h</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="mb-3 col-4">
+                                <label for="form-ride-group-map-${group?index}" class="form-label">Map</label>
+                                <input id="search-map-field-${group?index}" type="text" data-target-name-field="form-ride-group-mapname-${group?index}" data-target-id-field="form-ride-group-mapid-${group?index}" autocomplete="off" value="" class="form-control form-map-control">
+                            </div>
+                            <div class="mb-3 col-8">
+                                <label for="form-ride-group-map-${group?index}" class="form-label">&nbsp;</label>
+                                <input type="text" name="groups[${group?index}].mapName" readonly class="form-control-plaintext" id="form-ride-group-mapname-${group?index}" value="${group.mapName}">
+                                <input type="hidden" name="groups[${group?index}].mapId" id="form-ride-group-mapid-${group?index}" value="${group.mapId}">
                             </div>
                         </div>
                         <div class="row">

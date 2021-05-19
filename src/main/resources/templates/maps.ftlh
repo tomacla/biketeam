@@ -46,7 +46,9 @@
                           </select>
                       </div>
                       <div id="maps-filter-tags-container"></div>
-                      <div id="maps-filter-tags-field-container"></div>
+                      <div id="maps-filter-tags-field-container">
+                        <input type="hidden" name="tags" value="" />
+                      </div>
                   </div>
                 <div class="col-12 col-md-5">
                     <div class="input-group">

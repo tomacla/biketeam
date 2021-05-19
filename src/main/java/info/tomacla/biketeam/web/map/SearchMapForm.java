@@ -178,7 +178,7 @@ public class SearchMapForm {
         }
 
         public SearchMapFormBuilder withTags(List<String> tags) {
-            if (tags != null) {
+            if (tags != null && !tags.isEmpty()) {
                 form.setTags(tags);
             }
             return this;

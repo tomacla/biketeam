@@ -1,11 +1,12 @@
 package info.tomacla.biketeam.web.admin.publication;
 
+import info.tomacla.biketeam.common.Dates;
 import info.tomacla.biketeam.common.Strings;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 
 public class NewPublicationForm {
@@ -55,7 +56,7 @@ public class NewPublicationForm {
     }
 
     public void setPublishedAtDate(String publishedAtDate) {
-        this.publishedAtDate = Strings.requireNonBlankOrDefault(publishedAtDate, LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
+        this.publishedAtDate = Strings.requireNonBlankOrDefault(publishedAtDate, Dates.formatDate());
     }
 
     public String getPublishedAtTime() {
@@ -63,7 +64,7 @@ public class NewPublicationForm {
     }
 
     public void setPublishedAtTime(String publishedAtTime) {
-        this.publishedAtTime = Strings.requireNonBlankOrDefault(publishedAtTime, LocalTime.now().truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_LOCAL_TIME));
+        this.publishedAtTime = Strings.requireNonBlankOrDefault(publishedAtTime, Dates.formatTime());
     }
 
     public MultipartFile getFile() {
@@ -143,8 +144,8 @@ public class NewPublicationForm {
         }
 
         public NewPublicationFormBuilder withPublishedAt(ZonedDateTime publishedAt) {
-            form.setPublishedAtDate(publishedAt.toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE));
-            form.setPublishedAtTime(publishedAt.truncatedTo(ChronoUnit.SECONDS).toLocalTime().format(DateTimeFormatter.ISO_LOCAL_TIME));
+            form.setPublishedAtDate(Dates.formatZonedDate(publishedAt));
+            form.setPublishedAtTime(Dates.formatZonedTime(publishedAt));
             return this;
         }
 

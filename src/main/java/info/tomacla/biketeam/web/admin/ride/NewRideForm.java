@@ -1,17 +1,20 @@
 package info.tomacla.biketeam.web.admin.ride;
 
+import info.tomacla.biketeam.common.Dates;
 import info.tomacla.biketeam.common.Strings;
 import info.tomacla.biketeam.domain.global.RideGroupTemplate;
 import info.tomacla.biketeam.domain.global.RideTemplate;
+import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.map.MapRepository;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.ride.RideType;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -89,7 +92,7 @@ public class NewRideForm {
     }
 
     public void setDate(String date) {
-        this.date = Strings.requireNonBlankOrDefault(date, LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
+        this.date = Strings.requireNonBlankOrDefault(date, Dates.formatDate());
     }
 
     public String getPublishedAtDate() {
@@ -97,7 +100,7 @@ public class NewRideForm {
     }
 
     public void setPublishedAtDate(String publishedAtDate) {
-        this.publishedAtDate = Strings.requireNonBlankOrDefault(publishedAtDate, LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
+        this.publishedAtDate = Strings.requireNonBlankOrDefault(publishedAtDate, Dates.formatDate());
     }
 
     public String getPublishedAtTime() {
@@ -105,7 +108,7 @@ public class NewRideForm {
     }
 
     public void setPublishedAtTime(String publishedAtTime) {
-        this.publishedAtTime = Strings.requireNonBlankOrDefault(publishedAtTime, LocalTime.now().truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_LOCAL_TIME));
+        this.publishedAtTime = Strings.requireNonBlankOrDefault(publishedAtTime, Dates.formatTime());
     }
 
     public String getTitle() {
@@ -253,28 +256,41 @@ public class NewRideForm {
         }
 
         public NewRideFormBuilder withDate(LocalDate date) {
-            form.setDate(date.format(DateTimeFormatter.ISO_LOCAL_DATE));
+            form.setDate(Dates.formatDate(date));
             return this;
         }
 
         public NewRideFormBuilder withPublishedAt(ZonedDateTime publishedAt) {
-            form.setPublishedAtDate(publishedAt.toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE));
-            form.setPublishedAtTime(publishedAt.truncatedTo(ChronoUnit.SECONDS).toLocalTime().format(DateTimeFormatter.ISO_LOCAL_TIME));
+            form.setPublishedAtDate(Dates.formatZonedDate(publishedAt));
+            form.setPublishedAtTime(Dates.formatZonedTime(publishedAt));
             return this;
         }
 
-        public NewRideFormBuilder withGroups(Set<RideGroup> groups) {
+        public NewRideFormBuilder withGroups(Set<RideGroup> groups, MapRepository mapRepository) {
             if (groups != null) {
-                form.setGroups(groups.stream().map(g -> NewRideGroupForm.builder()
-                        .withId(g.getId())
-                        .withName(g.getName())
-                        .withMapId(g.getMapId())
-                        .withLowerSpeed(g.getLowerSpeed())
-                        .withUpperSpeed(g.getUpperSpeed())
-                        .withMeetingLocation(g.getMeetingLocation())
-                        .withMeetingTime(g.getMeetingTime())
-                        .withMeetingPoint(g.getMeetingPoint())
-                        .get()).collect(Collectors.toList()));
+                form.setGroups(groups.stream().map(g -> {
+
+                    final String mapId = g.getMapId();
+                    String mapName = null;
+                    if (mapId != null) {
+                        final Optional<Map> optionalMap = mapRepository.findById(mapId);
+                        if (optionalMap.isPresent()) {
+                            mapName = optionalMap.get().getName();
+                        }
+                    }
+
+                    return NewRideGroupForm.builder()
+                            .withId(g.getId())
+                            .withName(g.getName())
+                            .withMapId(mapId)
+                            .withMapName(mapName)
+                            .withLowerSpeed(g.getLowerSpeed())
+                            .withUpperSpeed(g.getUpperSpeed())
+                            .withMeetingLocation(g.getMeetingLocation())
+                            .withMeetingTime(g.getMeetingTime())
+                            .withMeetingPoint(g.getMeetingPoint())
+                            .get();
+                }).collect(Collectors.toList()));
             }
             return this;
         }

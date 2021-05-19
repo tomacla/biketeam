@@ -38,7 +38,9 @@
                         <button class="btn btn-secondary" type="button" onclick="addTag('form-map-tags-add', 'tags', 'form-map-tags-container', 'form-map-tags-field-container')"><strong><i class="bi bi-plus"></i></strong></button>
                     </div>
                     <div id="form-map-tags-container"></div>
-                    <div id="form-map-tags-field-container"></div>
+                    <div id="form-map-tags-field-container">
+                        <input type="hidden" name="tags" value="" />
+                    </div>
 
                 </div>
 
@@ -65,11 +67,9 @@
 
      <script type="text/javascript">
 
-        JSON.parse('${(formdata.tags)?no_esc}').forEach(function(tag) {
-            createTag(tag);
-        });
-
-        preventElementToSubmitForm('form-map-tags', addTag);
+        <#list formdata.tags as tag>
+            createTag('${tag}', 'tags', 'form-map-tags-container', 'form-map-tags-field-container');
+       </#list>
 
     </script>
 

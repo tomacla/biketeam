@@ -109,7 +109,7 @@ public class AdminMapController extends AbstractController {
             Path gpx = fileService.getTempFileFromInputStream(file.getInputStream());
 
             Gpx.GpxDescriptor gpxParsed = Gpx.parse(gpx);
-            Path staticMapImage = Gpx.staticImage(gpx, siteIntegrationRepository.findById(1L).get().getMapBoxAPIKey());
+            Path staticMapImage = Gpx.staticImage(gpx, configurationService.getSiteIntegration().getMapBoxAPIKey());
 
             Vector windVector = gpxParsed.getWind();
 

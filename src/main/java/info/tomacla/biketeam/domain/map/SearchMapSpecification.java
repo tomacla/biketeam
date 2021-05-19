@@ -29,6 +29,7 @@ public class SearchMapSpecification implements Specification<Map> {
         if (parser.getWindDirection() != null) {
             predicates.add(criteriaBuilder.equal(root.get("windDirection"), parser.getWindDirection()));
         }
+        criteriaQuery.distinct(true);
         return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
     }
 

@@ -1,11 +1,13 @@
 package info.tomacla.biketeam.web.admin.configuration;
 
 import info.tomacla.biketeam.common.Strings;
-import info.tomacla.biketeam.domain.global.SiteIntegration;
 
 public class EditSiteIntegrationForm {
 
     private String mapBoxAPIKey;
+    private String facebookAppId;
+    private String facebookAppSecret;
+    private String facebookPageId;
 
     public String getMapBoxAPIKey() {
         return mapBoxAPIKey;
@@ -15,10 +17,28 @@ public class EditSiteIntegrationForm {
         this.mapBoxAPIKey = Strings.requireNonBlankOrDefault(mapBoxAPIKey, "");
     }
 
-    public static EditSiteIntegrationForm build(SiteIntegration obj) {
-        EditSiteIntegrationForm form = new EditSiteIntegrationForm();
-        form.mapBoxAPIKey = obj.getMapBoxAPIKey();
-        return form;
+    public String getFacebookAppId() {
+        return facebookAppId;
+    }
+
+    public void setFacebookAppId(String facebookAppId) {
+        this.facebookAppId = Strings.requireNonBlankOrDefault(facebookAppId, "");
+    }
+
+    public String getFacebookAppSecret() {
+        return facebookAppSecret;
+    }
+
+    public void setFacebookAppSecret(String facebookAppSecret) {
+        this.facebookAppSecret = Strings.requireNonBlankOrDefault(facebookAppSecret, "");
+    }
+
+    public String getFacebookPageId() {
+        return facebookPageId;
+    }
+
+    public void setFacebookPageId(String facebookPageId) {
+        this.facebookPageId = Strings.requireNonBlankOrDefault(facebookPageId, "");
     }
 
     public EditSiteIntegrationFormParser parser() {
@@ -41,6 +61,18 @@ public class EditSiteIntegrationForm {
             return form.getMapBoxAPIKey();
         }
 
+        public String getFacebookAppId() {
+            return form.getFacebookAppId();
+        }
+
+        public String getFacebookAppSecret() {
+            return form.getFacebookAppSecret();
+        }
+
+        public String getFacebookPageId() {
+            return form.getFacebookPageId();
+        }
+
     }
 
     public static class EditSiteIntegrationFormBuilder {
@@ -55,6 +87,22 @@ public class EditSiteIntegrationForm {
             form.setMapBoxAPIKey(mapBoxAPIKey);
             return this;
         }
+
+        public EditSiteIntegrationFormBuilder withFacebookAppId(String facebookAppId) {
+            form.setFacebookAppId(facebookAppId);
+            return this;
+        }
+
+        public EditSiteIntegrationFormBuilder withFacebookAppSecret(String facebookAppSecret) {
+            form.setFacebookAppSecret(facebookAppSecret);
+            return this;
+        }
+
+        public EditSiteIntegrationFormBuilder withFacebookPageId(String facebookPageId) {
+            form.setFacebookPageId(facebookPageId);
+            return this;
+        }
+
 
         public EditSiteIntegrationForm get() {
             return form;

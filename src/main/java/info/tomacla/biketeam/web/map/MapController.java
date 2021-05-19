@@ -53,9 +53,8 @@ public class MapController extends AbstractController {
                           Principal principal,
                           Model model) {
 
-        // FIXME search with no tags = bug
         SearchMapForm form = SearchMapForm.builder()
-                .withTags(tags == null || tags.isEmpty() ? configurationService.getDefaultSearchTags() : tags)
+                .withTags(tags == null ? configurationService.getDefaultSearchTags() : tags)
                 .withSort(sort)
                 .withWindDirection(windDirection)
                 .withLowerDistance(lowerDistance)

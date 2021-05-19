@@ -15,7 +15,7 @@ public class Publication {
     @Id
     private String id;
     @Enumerated(EnumType.STRING)
-    @Column(name= "published_status")
+    @Column(name = "published_status")
     private PublishedStatus publishedStatus;
     private String title;
     @Column(name = "published_at")

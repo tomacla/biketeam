@@ -1,7 +1,8 @@
 package info.tomacla.biketeam.web.ride;
 
+import info.tomacla.biketeam.common.Dates;
+
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
@@ -40,7 +41,7 @@ public class SearchRideForm {
     }
 
     public void setFrom(String from) {
-        this.from = Objects.requireNonNullElse(from, LocalDate.now().minus(1, ChronoUnit.MONTHS).format(DateTimeFormatter.ISO_LOCAL_DATE));
+        this.from = Objects.requireNonNullElse(from, Dates.formatDate(LocalDate.now().minus(1, ChronoUnit.MONTHS)));
     }
 
     public String getTo() {
@@ -48,7 +49,7 @@ public class SearchRideForm {
     }
 
     public void setTo(String to) {
-        this.to = Objects.requireNonNullElse(to, LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
+        this.to = Objects.requireNonNullElse(to, Dates.formatDate());
     }
 
     public SearchRideFormParser parser() {
@@ -105,14 +106,14 @@ public class SearchRideForm {
 
         public SearchRideFormBuilder withFrom(LocalDate from) {
             if (from != null) {
-                form.setFrom(from.format(DateTimeFormatter.ISO_LOCAL_DATE));
+                form.setFrom(Dates.formatDate(from));
             }
             return this;
         }
 
         public SearchRideFormBuilder withTo(LocalDate to) {
             if (to != null) {
-                form.setTo(to.format(DateTimeFormatter.ISO_LOCAL_DATE));
+                form.setTo(Dates.formatDate(to));
             }
             return this;
         }

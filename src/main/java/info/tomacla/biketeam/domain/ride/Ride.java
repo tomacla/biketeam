@@ -20,7 +20,7 @@ public class Ride {
     @Id
     private String id;
     @Enumerated(EnumType.STRING)
-    @Column(name= "published_status")
+    @Column(name = "published_status")
     private PublishedStatus publishedStatus;
     @Enumerated(EnumType.STRING)
     private RideType type;

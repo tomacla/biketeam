@@ -1,6 +1,7 @@
 package info.tomacla.biketeam.web;
 
 
+import info.tomacla.biketeam.common.Dates;
 import info.tomacla.biketeam.domain.global.*;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.user.UserRepository;
@@ -12,16 +13,11 @@ import org.springframework.ui.Model;
 
 import java.security.Principal;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public abstract class AbstractController {
-
-    private static final DateTimeFormatter frenchFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(Locale.FRANCE);
 
     @Autowired
     protected ConfigurationService configurationService;
@@ -41,9 +37,9 @@ public abstract class AbstractController {
     // FIXME do this automatically
     protected void addGlobalValues(Principal principal, Model model, String pageTitle) {
 
-        SiteDescription desc = siteDescriptionRepository.findById(1L).get();
-        SiteConfiguration config = siteConfigurationRepository.findById(1L).get();
-        SiteIntegration integ = siteIntegrationRepository.findById(1L).get();
+        SiteDescription desc = configurationService.getSiteDescription();
+        SiteConfiguration config = configurationService.getSiteConfiguration();
+        SiteIntegration integ = configurationService.getSiteIntegration();
 
         model.addAttribute("_sitename", desc.getSitename());
         model.addAttribute("_description", desc.getDescription());
@@ -51,7 +47,7 @@ public abstract class AbstractController {
         model.addAttribute("_desc", desc);
         model.addAttribute("_config", config);
         model.addAttribute("_integ", integ);
-        model.addAttribute("_date_formatter", frenchFormatter);
+        model.addAttribute("_date_formatter", Dates.frenchFormatter);
         model.addAttribute("_authenticated", false);
 
         getUserFromPrincipal(principal).ifPresent(user -> {

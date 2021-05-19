@@ -21,17 +21,22 @@ public class TaskService {
     @Autowired
     private ConfigurationService configurationService;
 
+    @Autowired
+    private FacebookService facebookService;
+
     @Scheduled(fixedRate = 60000, initialDelay = 10000)
-    public void reportCurrentTime() {
+    public void publicationTask() {
 
         rideRepository.findAllByPublishedStatusAndPublishedAtLessThan(PublishedStatus.UNPUBLISHED, ZonedDateTime.now(configurationService.getTimezone())).forEach(ride -> {
             ride.setPublishedStatus(PublishedStatus.PUBLISHED);
             rideRepository.save(ride);
+            facebookService.publish(ride);
         });
 
         publicationRepository.findAllByPublishedStatusAndPublishedAtLessThan(PublishedStatus.UNPUBLISHED, ZonedDateTime.now(configurationService.getTimezone())).forEach(pub -> {
             pub.setPublishedStatus(PublishedStatus.PUBLISHED);
             publicationRepository.save(pub);
+            facebookService.publish(pub);
         });
     }
 

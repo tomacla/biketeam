@@ -1,11 +1,10 @@
 package info.tomacla.biketeam.web.admin.ride;
 
+import info.tomacla.biketeam.common.Dates;
 import info.tomacla.biketeam.common.Point;
 import info.tomacla.biketeam.common.Strings;
 
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 public class NewRideGroupForm {
@@ -15,6 +14,7 @@ public class NewRideGroupForm {
     private double lowerSpeed;
     private double upperSpeed;
     private String mapId;
+    private String mapName;
     private String meetingLocation;
     private double meetingPointLat;
     private double meetingPointLng;
@@ -24,6 +24,7 @@ public class NewRideGroupForm {
         setId(null);
         setName(null);
         setMapId(null);
+        setMapName(null);
         setMeetingLocation(null);
         setMeetingTime("12:00");
     }
@@ -66,6 +67,14 @@ public class NewRideGroupForm {
 
     public void setMapId(String mapId) {
         this.mapId = Strings.requireNonBlankOrDefault(mapId, "");
+    }
+
+    public String getMapName() {
+        return mapName;
+    }
+
+    public void setMapName(String mapName) {
+        this.mapName = Strings.requireNonBlankOrDefault(mapName, "");
     }
 
     public String getMeetingLocation() {
@@ -199,13 +208,18 @@ public class NewRideGroupForm {
 
         public NewRideGroupFormBuilder withMeetingTime(LocalTime meetingTime) {
             if (meetingTime != null) {
-                form.setMeetingTime(meetingTime.truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_LOCAL_TIME));
+                form.setMeetingTime(Dates.formatTime(meetingTime));
             }
             return this;
         }
 
         public NewRideGroupFormBuilder withMapId(String mapId) {
             form.setMapId(mapId);
+            return this;
+        }
+
+        public NewRideGroupFormBuilder withMapName(String mapName) {
+            form.setMapName(mapName);
             return this;
         }
 

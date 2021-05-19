@@ -1,7 +1,5 @@
 package info.tomacla.biketeam.domain.feed;
 
-import info.tomacla.biketeam.common.PublishedStatus;
-
 import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.Objects;

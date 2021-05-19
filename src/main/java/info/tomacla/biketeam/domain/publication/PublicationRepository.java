@@ -1,7 +1,6 @@
 package info.tomacla.biketeam.domain.publication;
 
 import info.tomacla.biketeam.common.PublishedStatus;
-import info.tomacla.biketeam.domain.ride.Ride;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

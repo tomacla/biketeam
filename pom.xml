@@ -6,7 +6,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.4.1</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
 	</parent>
 	<groupId>info.tomacla</groupId>
 	<artifactId>biketeam</artifactId>
@@ -48,6 +48,11 @@
 			<artifactId>spring-session-jdbc</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.restfb</groupId>
+			<artifactId>restfb</artifactId>
+			<version>3.18.0</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.hsqldb</groupId>
