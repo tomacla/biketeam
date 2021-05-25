@@ -62,6 +62,10 @@
                 <input name="facebookAppId" value="${formdata.facebookAppId}" type="hidden">
                 <input name="facebookPageId" value="" type="hidden">
 
+                <div class="mb-3">
+                    <a class="btn btn-primary btn-sm" href="${facebookUrl}" role="button"><i class="bi bi-facebook"></i> Connecter Facebook</a>
+                </div>
+
             <#elseif facebookConfigurationStep == 3>
 
                 <input name="facebookAppSecret" value="${formdata.facebookAppSecret}" type="hidden">

@@ -129,7 +129,6 @@ public class FacebookService {
 
             ScopeBuilder scopeBuilder = new ScopeBuilder();
             scopeBuilder.addPermission(FacebookPermissions.PAGES_MANAGE_POSTS);
-            scopeBuilder.addPermission(FacebookPermissions.PUBLISH_PAGES);
 
             return facebookClient.getLoginDialogUrl(
                     siteIntegration.getFacebookAppId(),
