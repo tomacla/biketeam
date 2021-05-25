@@ -52,7 +52,7 @@ public class User implements Serializable {
         setLastName(lastName);
         setCity(city);
         setProfileImage(profileImage);
-        setRides(rideGroups);
+        setRideGroups(rideGroups);
     }
 
     public String getId() {
@@ -119,12 +119,12 @@ public class User implements Serializable {
         this.profileImage = profileImage;
     }
 
-    public Set<RideGroup> getRides() {
+    public Set<RideGroup> getRideGroups() {
         return rideGroups;
     }
 
-    public void setRides(Set<RideGroup> rides) {
-        this.rideGroups = Objects.requireNonNullElse(rides, new HashSet<>());
+    public void setRideGroups(Set<RideGroup> rideGroups) {
+        this.rideGroups = Objects.requireNonNullElse(rideGroups, new HashSet<>());
     }
 
     public String getIdentity() {

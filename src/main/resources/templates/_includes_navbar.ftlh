@@ -20,7 +20,7 @@
         </li>
         <#if _authenticated>
             <li class="nav-item border-start">
-               <a class="nav-link" href="https://www.strava.com/athletes/${_strava_id?c}" target="_blank"><img class="rounded" height="24" src="${_profile_image}" alt="profile"> ${_identity}</a>
+               <a class="nav-link" href="<@spring.url '/users/me' />"><img class="rounded" height="24" src="${_profile_image}" alt="profile"> ${_identity}</a>
             </li>
             <#if _admin>
                 <li class="nav-item">

@@ -1,0 +1,40 @@
+<#include "_includes_head.ftlh">
+
+<div class="row pt-2 justify-content-center">
+
+    <div class="col-12 col-md-5 mb-4">
+
+        <div class="border rounded p-2">
+            <img class="rounded" src="${user.profileImage}" alt="profile">
+            <h5>${(user.firstName)!'inconnu'} ${(user.lastName)!'inconnu'}</h5>
+            <dl>
+                <#if user.stravaId??>
+                    <dt>Strava</dt>
+                    <dd><a class="link-dark" href="https://www.strava.com/athletes/${_strava_id?c}" target="_blank">${(user.stravaId?c)}</a></dd>
+                </#if>
+                <#if user.city??>
+                    <dt>Ville</dt>
+                    <dd>${user.city}</dd>
+                </#if>
+            </dl>
+        </div>
+
+    </div>
+
+    <div class="col-12 col-md-7">
+
+        <#if user.rideGroups?? && user.rideGroups?size != 0>
+            <ul class="list-group">
+                <#list user.rideGroups as group>
+                    <li class="list-group-item">${group.ride.date.format(_date_formatter)} - ${group.ride.title} - ${group.name}</li>
+                </#list>
+            </ul>
+        <#else>
+            Cet utilisateur n'a participé à aucune ride.
+        </#if>
+
+
+
+    </div>
+
+<#include "_includes_tail.ftlh">
