@@ -49,7 +49,7 @@ public class MapController extends AbstractController {
                           @RequestParam(value = "windDirection", required = false) WindDirection windDirection,
                           @RequestParam(value = "tags", required = false) List<String> tags,
                           @RequestParam(value = "page", defaultValue = "0", required = false) int page,
-                          @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
+                          @RequestParam(value = "pageSize", defaultValue = "9", required = false) int pageSize,
                           Principal principal,
                           Model model) {
 
