@@ -49,7 +49,7 @@ public class SearchRideForm {
     }
 
     public void setTo(String to) {
-        this.to = Objects.requireNonNullElse(to, Dates.formatDate());
+        this.to = Objects.requireNonNullElse(to, Dates.formatDate(LocalDate.now().plus(1, ChronoUnit.MONTHS)));
     }
 
     public SearchRideFormParser parser() {
