@@ -35,11 +35,12 @@ Create file for custom configuration for example `application-custom.properties`
 Copy following lines and set your values.
 
 ```
-file.repository=/path/to/data/folder
-spring.datasource.url=jdbc:hsqldb:file:/path/to/data/folder/db/biketeam
+site.url=http[s]://your-domain
+file.repository=./data/repository
+spring.datasource.url=jdbc:hsqldb:file:./data/db
 spring.security.oauth2.client.registration.strava.client-id=xxx
 spring.security.oauth2.client.registration.strava.client-secret=xxx
-spring.security.oauth2.client.registration.strava.redirect-uri=http://callback.oauth2.url
+spring.security.oauth2.client.registration.strava.redirect-uri=http[s]://your-domain/login/oauth2/code/strava
 spring.security.oauth2.client.provider.strava.token-uri=https://www.strava.com/oauth/token?client_id=xxx&client_secret=xxx
 admin.strava-id=xxx
 admin.first-name=admin
