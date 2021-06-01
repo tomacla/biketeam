@@ -1,6 +1,7 @@
 package info.tomacla.biketeam.web.admin.map;
 
 import info.tomacla.biketeam.common.Strings;
+import info.tomacla.biketeam.domain.map.MapType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,12 +11,14 @@ public class NewMapForm {
 
     private String id;
     private String name;
+    private String type;
     private boolean visible;
     private List<String> tags;
 
     public NewMapForm() {
         setId(null);
         setName(null);
+        setType(null);
         setVisible(false);
         setTags(null);
     }
@@ -34,6 +37,14 @@ public class NewMapForm {
 
     public void setName(String name) {
         this.name = Strings.requireNonBlankOrDefault(name, "");
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = Strings.requireNonBlankOrDefault(type, MapType.ROAD.name());
     }
 
     public boolean isVisible() {
@@ -84,6 +95,10 @@ public class NewMapForm {
             return form.getTags();
         }
 
+        public MapType getType() {
+            return MapType.valueOf(form.getType());
+        }
+
     }
 
     public static class NewMapFormBuilder {
@@ -111,6 +126,11 @@ public class NewMapForm {
 
         public NewMapFormBuilder withTags(List<String> tags) {
             form.setTags(tags);
+            return this;
+        }
+
+        public NewMapFormBuilder withType(MapType type) {
+            form.setType(type.name());
             return this;
         }
 

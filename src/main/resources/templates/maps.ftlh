@@ -95,6 +95,7 @@
                             <span class="small text-muted">Ajoutée le ${map.postedAt.format(_date_formatter)}</span>
                             <div class="btn-group" role="group">
                                 <a download="${map.name}.gpx" href="<@spring.url '/api/maps/${map.id}/gpx' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-download"></i> GPX</a>
+                                <a download="${map.name}.fit" href="<@spring.url '/api/maps/${map.id}/fit' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-download"></i> FIT</a>
                                 <a href="<@spring.url '/maps/${map.id}' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-map"></i> Voir</a>
                             </div>
                         </div>

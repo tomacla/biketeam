@@ -5,10 +5,10 @@ import info.tomacla.biketeam.common.Strings;
 import info.tomacla.biketeam.domain.global.RideGroupTemplate;
 import info.tomacla.biketeam.domain.global.RideTemplate;
 import info.tomacla.biketeam.domain.map.Map;
-import info.tomacla.biketeam.domain.map.MapRepository;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.ride.RideType;
+import info.tomacla.biketeam.service.MapService;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
@@ -198,12 +198,12 @@ public class NewRideForm {
             return Optional.empty();
         }
 
-        public Set<RideGroup> getGroups(Ride parent, MapRepository mapRepository) {
+        public Set<RideGroup> getGroups(Ride parent, MapService mapService) {
             return form.getGroups().stream().map(g -> {
                 NewRideGroupForm.NewRideGroupFormParser parser = g.parser();
                 String mapId = null;
                 if (parser.getMapId().isPresent()) {
-                    mapId = mapRepository.findById(parser.getMapId().get()).isPresent() ? parser.getMapId().get() : null;
+                    mapId = mapService.get(parser.getMapId().get()).isPresent() ? parser.getMapId().get() : null;
                 }
                 RideGroup gg = new RideGroup(parser.getName(),
                         parser.getLowerSpeed(),
@@ -266,14 +266,14 @@ public class NewRideForm {
             return this;
         }
 
-        public NewRideFormBuilder withGroups(Set<RideGroup> groups, MapRepository mapRepository) {
+        public NewRideFormBuilder withGroups(Set<RideGroup> groups, MapService mapService) {
             if (groups != null) {
                 form.setGroups(groups.stream().map(g -> {
 
                     final String mapId = g.getMapId();
                     String mapName = null;
                     if (mapId != null) {
-                        final Optional<Map> optionalMap = mapRepository.findById(mapId);
+                        final Optional<Map> optionalMap = mapService.get(mapId);
                         if (optionalMap.isPresent()) {
                             mapName = optionalMap.get().getName();
                         }

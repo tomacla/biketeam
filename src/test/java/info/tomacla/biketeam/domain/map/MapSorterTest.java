@@ -17,6 +17,7 @@ public class MapSorterTest {
 
         Map shortM = new Map("short",
                 50.0,
+                MapType.ROAD,
                 100.0,
                 -100.0,
                 new ArrayList<>(),
@@ -28,6 +29,7 @@ public class MapSorterTest {
 
         Map longM = new Map("long",
                 100.0,
+                MapType.ROAD,
                 100.0,
                 -100.0,
                 new ArrayList<>(),

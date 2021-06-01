@@ -1,12 +1,12 @@
 package info.tomacla.biketeam.web.map;
 
-import info.tomacla.biketeam.domain.map.*;
+import info.tomacla.biketeam.domain.map.Map;
+import info.tomacla.biketeam.domain.map.MapSorterOption;
+import info.tomacla.biketeam.domain.map.WindDirection;
+import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,14 +23,14 @@ import java.util.Optional;
 public class MapController extends AbstractController {
 
     @Autowired
-    private MapRepository mapRepository;
+    private MapService mapService;
 
     @GetMapping(value = "/{mapId}")
     public String getMap(@PathVariable("mapId") String mapId,
                          Principal principal,
                          Model model) {
 
-        Optional<Map> optionalMap = mapRepository.findById(mapId);
+        Optional<Map> optionalMap = mapService.get(mapId);
         if (optionalMap.isEmpty()) {
             return "redirect:/maps";
         }
@@ -63,36 +63,20 @@ public class MapController extends AbstractController {
                 .withPageSize(pageSize)
                 .get();
 
-        Page<Map> maps = getMapsFromRepository(form);
+        SearchMapForm.SearchMapFormParser parser = form.parser();
+
+        Page<Map> maps = mapService.searchMaps(form.getPage(), form.getPageSize(), parser.getSort(),
+                parser.getLowerDistance(),
+                parser.getUpperDistance(),
+                parser.getTags(),
+                parser.getWindDirection());
 
         addGlobalValues(principal, model, "Maps");
         model.addAttribute("maps", maps.getContent());
         model.addAttribute("pages", maps.getTotalPages());
-        model.addAttribute("tags", mapRepository.findAllDistinctTags());
+        model.addAttribute("tags", mapService.listTags());
         model.addAttribute("formdata", form);
         return "maps";
-    }
-
-    private Page<Map> getMapsFromRepository(SearchMapForm form) {
-        SearchMapForm.SearchMapFormParser parser = form.parser();
-        Sort sort = Sort.by("postedAt").descending();
-        if (parser.getSort() != null) {
-            if (parser.getSort().equals(MapSorterOption.SHORT)) {
-                sort = Sort.by("length").ascending();
-            } else if (parser.getSort().equals(MapSorterOption.LONG)) {
-                sort = Sort.by("length").descending();
-            } else if (parser.getSort().equals(MapSorterOption.HILLY)) {
-                sort = Sort.by("positiveElevation").descending();
-            } else if (parser.getSort().equals(MapSorterOption.FLAT)) {
-                sort = Sort.by("positiveElevation").ascending();
-            }
-        }
-        Pageable pageable = PageRequest.of(form.getPage(), form.getPageSize(), sort);
-
-        SearchMapSpecification spec = new SearchMapSpecification(form);
-
-        return mapRepository.findAll(spec, pageable);
-
     }
 
 

@@ -10,6 +10,7 @@ import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.ride.RideRepository;
 import info.tomacla.biketeam.service.FileService;
+import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -36,7 +37,7 @@ public class AdminRideController extends AbstractController {
     private RideRepository rideRepository;
 
     @Autowired
-    private MapRepository mapRepository;
+    private MapService mapService;
 
     @Autowired
     private RideTemplateRepository rideTemplateRepository;
@@ -99,7 +100,7 @@ public class AdminRideController extends AbstractController {
                 .withType(ride.getType())
                 .withPublishedAt(ride.getPublishedAt())
                 .withTitle(ride.getTitle())
-                .withGroups(ride.getGroups(), mapRepository)
+                .withGroups(ride.getGroups(), mapService)
                 .get();
 
         addGlobalValues(principal, model, "Administration - Modifier le ride");
@@ -137,7 +138,7 @@ public class AdminRideController extends AbstractController {
                         parser.getTitle(), parser.getDescription(), parser.getFile().isPresent());
             }
 
-            Set<RideGroup> groups = parser.getGroups(target, mapRepository);
+            Set<RideGroup> groups = parser.getGroups(target, mapService);
             Set<String> groupIdsSet = groups.stream().map(RideGroup::getId).collect(Collectors.toSet());
 
             // remove groups not in list
@@ -190,7 +191,6 @@ public class AdminRideController extends AbstractController {
         } catch (Exception e) {
             addGlobalValues(principal, model, "Administration - Modifier le ride");
             model.addAttribute("errors", List.of(e.getMessage()));
-            model.addAttribute("maps", mapRepository.findAllByOrderByPostedAtDesc());
             model.addAttribute("formdata", form);
             return "admin_rides_new";
         }

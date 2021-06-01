@@ -18,6 +18,9 @@ public class Map {
     private String id;
     private String name;
     private double length;
+    @Column(name = "type")
+    @Enumerated(EnumType.STRING)
+    private MapType type;
     @Column(name = "positive_elevation")
     private double positiveElevation;
     @Column(name = "negative_elevation")
@@ -54,6 +57,7 @@ public class Map {
 
     public Map(String name,
                double length,
+               MapType type,
                double positiveElevation,
                double negativeElevation,
                List<String> tags,
@@ -64,6 +68,7 @@ public class Map {
                boolean visible) {
         this.id = UUID.randomUUID().toString();
         this.postedAt = LocalDate.now();
+        setType(type);
         setName(name);
         setLength(length);
         setPositiveElevation(positiveElevation);
@@ -98,6 +103,14 @@ public class Map {
 
     public void setLength(double length) {
         this.length = length;
+    }
+
+    public MapType getType() {
+        return type;
+    }
+
+    public void setType(MapType type) {
+        this.type = Objects.requireNonNull(type);
     }
 
     public double getPositiveElevation() {

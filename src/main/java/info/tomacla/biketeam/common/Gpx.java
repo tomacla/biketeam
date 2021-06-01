@@ -23,6 +23,8 @@ import java.util.Optional;
 public class Gpx {
 
     private static final String PARSER_URL = "https://n-peloton.fr/api/java/gpxinfo";
+    private static final String SIMPLIFY_URL = "https://n-peloton.fr/api/java/simplify";
+    private static final String FIT_CONVERTER_URL = "https://n-peloton.fr/api/java/fit";
     private static final String STATIC_IMAGE_GENERATOR_URL = "https://n-peloton.fr/api/java/map";
 
     public static Path staticImage(Path gpx, String mapBoxApiKey) {
@@ -37,21 +39,11 @@ public class Gpx {
 
     }
 
-    public static GpxDescriptor parse(Path gpx) {
+    public static Path simplify(Path gpx, String name) {
 
         try {
 
-            GpxParserResponse info = parseGpxInfo(gpx);
-            List<WayPoint> points = parseGpxPoints(gpx);
-
-            return new GpxDescriptor(
-                    new Point(points.get(0).getLatitude().doubleValue(), points.get(0).getLongitude().doubleValue()),
-                    new Point(points.get(points.size() - 1).getLatitude().doubleValue(), points.get(points.size() - 1).getLongitude().doubleValue()),
-                    Rounder.round1Decimal(info.getDistance()),
-                    Rounder.round1Decimal(info.getPositiveElevation()),
-                    Rounder.round1Decimal(info.getNegativeElevation()),
-                    info.isCrossing(),
-                    new Vector(info.getWind().get("x"), info.getWind().get("y")));
+            return simplifyGpx(gpx, name);
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -59,21 +51,64 @@ public class Gpx {
 
     }
 
-    private static List<WayPoint> parseGpxPoints(Path gpx) throws IOException {
+    public static Path fit(Path gpx, String name) {
+
+        try {
+
+            return convertToFit(gpx, name);
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public static GpxDescriptor parse(Path gpx, String defaultName) {
+
+        try {
+
+            final GpxParserResponse gpxParserResponse = parseGpxInfo(gpx);
+            final JpxParserResponse jpxParserResponse = parseGpxPoints(gpx, defaultName);
+
+            return new GpxDescriptor(
+                    jpxParserResponse.getName(),
+                    jpxParserResponse.getStart(),
+                    jpxParserResponse.getEnd(),
+                    Rounder.round1Decimal(gpxParserResponse.getDistance()),
+                    Rounder.round1Decimal(gpxParserResponse.getPositiveElevation()),
+                    Rounder.round1Decimal(gpxParserResponse.getNegativeElevation()),
+                    gpxParserResponse.isCrossing(),
+                    new Vector(gpxParserResponse.getWind().get("x"), gpxParserResponse.getWind().get("y")));
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private static JpxParserResponse parseGpxPoints(Path gpx, String defaultName) throws IOException {
 
         GPX readGpx = GPX.read(gpx);
 
-        Optional<Track> track = readGpx.tracks().findFirst();
-        if (track.isEmpty()) {
+        Optional<Track> optionalTrack = readGpx.tracks().findFirst();
+        if (optionalTrack.isEmpty()) {
             throw new IllegalStateException("No tracks in GPX file");
         }
 
-        Optional<TrackSegment> segment = track.get().getSegments().stream().findFirst();
-        if (segment.isEmpty()) {
+        final Track track = optionalTrack.get();
+
+        Optional<TrackSegment> optionalSegment = track.getSegments().stream().findFirst();
+        if (optionalSegment.isEmpty()) {
             throw new IllegalStateException("No segments in GPX file");
         }
 
-        return segment.get().getPoints();
+        final TrackSegment segment = optionalSegment.get();
+
+        return new JpxParserResponse(
+                new Point(segment.getPoints().get(0).getLatitude().doubleValue(), segment.getPoints().get(0).getLongitude().doubleValue()),
+                new Point(segment.getPoints().get(segment.getPoints().size() - 1).getLatitude().doubleValue(), segment.getPoints().get(segment.getPoints().size() - 1).getLongitude().doubleValue()),
+                track.getName().orElse(defaultName)
+        );
 
     }
 
@@ -125,8 +160,57 @@ public class Gpx {
 
     }
 
+    private static Path simplifyGpx(Path gpx, String name) throws IOException {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        LinkedMultiValueMap<String, String> gpxHeaderMap = new LinkedMultiValueMap<>();
+        gpxHeaderMap.add("Content-disposition", "form-data; name=file; filename=" + gpx.getFileName().toString());
+        gpxHeaderMap.add("Content-type", "application/gpx+xml");
+        HttpEntity<byte[]> fileEntity = new HttpEntity<>(Files.readAllBytes(gpx), gpxHeaderMap);
+
+        LinkedMultiValueMap<String, Object> multipartReqMap = new LinkedMultiValueMap<>();
+        multipartReqMap.add("filex", fileEntity);
+        multipartReqMap.add("name", name);
+
+        HttpEntity<LinkedMultiValueMap<String, Object>> reqEntity = new HttpEntity<>(multipartReqMap, headers);
+        byte[] simplifiedBytes = new RestTemplate(requestFactory()).postForObject(SIMPLIFY_URL, reqEntity, byte[].class);
+
+        Path simplified = Files.createTempFile("gpx-simplified", ".gpx");
+        Files.write(simplified, simplifiedBytes);
+
+        return simplified;
+
+    }
+
+    private static Path convertToFit(Path gpx, String name) throws IOException {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        LinkedMultiValueMap<String, String> gpxHeaderMap = new LinkedMultiValueMap<>();
+        gpxHeaderMap.add("Content-disposition", "form-data; name=file; filename=" + gpx.getFileName().toString());
+        gpxHeaderMap.add("Content-type", "application/gpx+xml");
+        HttpEntity<byte[]> fileEntity = new HttpEntity<>(Files.readAllBytes(gpx), gpxHeaderMap);
+
+        LinkedMultiValueMap<String, Object> multipartReqMap = new LinkedMultiValueMap<>();
+        multipartReqMap.add("filex", fileEntity);
+        multipartReqMap.add("name", name);
+
+        HttpEntity<LinkedMultiValueMap<String, Object>> reqEntity = new HttpEntity<>(multipartReqMap, headers);
+        byte[] simplifiedBytes = new RestTemplate(requestFactory()).postForObject(FIT_CONVERTER_URL, reqEntity, byte[].class);
+
+        Path simplified = Files.createTempFile("gpx-simplified", ".fit");
+        Files.write(simplified, simplifiedBytes);
+
+        return simplified;
+
+    }
+
     public static class GpxDescriptor {
 
+        private final String name;
         private final Point start;
         private final Point end;
         private final double length;
@@ -135,8 +219,9 @@ public class Gpx {
         private final boolean crossing;
         private final Vector wind;
 
-        public GpxDescriptor(Point start, Point end, double length, double positiveElevation, double negativeElevation,
+        public GpxDescriptor(String name, Point start, Point end, double length, double positiveElevation, double negativeElevation,
                              boolean crossing, Vector wind) {
+            this.name = name;
             this.start = start;
             this.end = end;
             this.length = length;
@@ -145,6 +230,10 @@ public class Gpx {
             this.crossing = crossing;
             this.wind = wind;
 
+        }
+
+        public String getName() {
+            return name;
         }
 
         public Point getStart() {
@@ -227,6 +316,31 @@ public class Gpx {
 
         public void setCrossing(boolean crossing) {
             this.crossing = crossing;
+        }
+    }
+
+    private static class JpxParserResponse {
+
+        private Point start;
+        private Point end;
+        private String name;
+
+        public JpxParserResponse(Point start, Point end, String name) {
+            this.start = start;
+            this.end = end;
+            this.name = name;
+        }
+
+        public Point getStart() {
+            return start;
+        }
+
+        public Point getEnd() {
+            return end;
+        }
+
+        public String getName() {
+            return name;
         }
     }
 

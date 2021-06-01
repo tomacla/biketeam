@@ -414,6 +414,16 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="ADD-MAP-TYPE" author="tomacla">
+
+        <addColumn tableName="MAP">
+            <column name="type" type="VARCHAR(30)" />
+        </addColumn>
+
+        <sql>update MAP set type = 'ROAD'</sql>
+
+    </changeSet>
+
 </databaseChangeLog>
 
 

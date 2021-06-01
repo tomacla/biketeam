@@ -21,4 +21,5 @@ public class LocalDefaultOAuth2User extends DefaultOAuth2User {
     public String getLocalUserId() {
         return localUserId;
     }
+
 }

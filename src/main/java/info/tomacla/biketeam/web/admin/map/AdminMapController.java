@@ -1,22 +1,16 @@
 package info.tomacla.biketeam.web.admin.map;
 
-import info.tomacla.biketeam.common.FileRepositories;
-import info.tomacla.biketeam.common.Gpx;
-import info.tomacla.biketeam.common.Vector;
 import info.tomacla.biketeam.domain.map.Map;
-import info.tomacla.biketeam.domain.map.MapRepository;
-import info.tomacla.biketeam.domain.map.WindDirection;
-import info.tomacla.biketeam.service.FileService;
+import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.web.AbstractController;
+import liquibase.util.file.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Path;
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,16 +19,13 @@ import java.util.Optional;
 public class AdminMapController extends AbstractController {
 
     @Autowired
-    private FileService fileService;
-
-    @Autowired
-    private MapRepository mapRepository;
+    private MapService mapService;
 
 
     @GetMapping
     public String getMaps(Principal principal, Model model) {
         addGlobalValues(principal, model, "Administration - Maps");
-        model.addAttribute("maps", mapRepository.findAllByOrderByPostedAtDesc());
+        model.addAttribute("maps", mapService.listMaps());
         return "admin_maps";
     }
 
@@ -43,7 +34,7 @@ public class AdminMapController extends AbstractController {
                           Principal principal,
                           Model model) {
 
-        Optional<Map> optionalMap = mapRepository.findById(mapId);
+        Optional<Map> optionalMap = mapService.get(mapId);
         if (optionalMap.isEmpty()) {
             return "redirect:/admin/maps";
         }
@@ -55,12 +46,13 @@ public class AdminMapController extends AbstractController {
                 .withName(map.getName())
                 .withVisible(map.isVisible())
                 .withTags(map.getTags())
+                .withType(map.getType())
                 .get();
 
         addGlobalValues(principal, model, "Administration - Modifier la map");
         model.addAttribute("formdata", form);
         model.addAttribute("map", map);
-        model.addAttribute("tags", mapRepository.findAllDistinctTags());
+        model.addAttribute("tags", mapService.listTags());
         return "admin_maps_new";
 
     }
@@ -73,17 +65,20 @@ public class AdminMapController extends AbstractController {
 
         try {
 
-            Optional<Map> optionalMap = mapRepository.findById(mapId);
+            Optional<Map> optionalMap = mapService.get(mapId);
             if (optionalMap.isEmpty()) {
                 return "redirect:/admin/maps";
             }
 
-            Map map = optionalMap.get();
-            map.setName(form.getName());
-            map.setVisible(form.isVisible());
-            map.setTags(form.getTags());
+            final NewMapForm.NewMapFormParser parser = form.parser();
 
-            mapRepository.save(map);
+            Map map = optionalMap.get();
+            map.setName(parser.getName());
+            map.setVisible(parser.isVisible());
+            map.setTags(parser.getTags());
+            map.setType(parser.getType());
+
+            mapService.save(map);
 
             return "redirect:/admin/maps";
 
@@ -91,7 +86,7 @@ public class AdminMapController extends AbstractController {
             addGlobalValues(principal, model, "Administration - Modifier la map");
             model.addAttribute("errors", List.of(e.getMessage()));
             model.addAttribute("formdata", form);
-            model.addAttribute("tags", mapRepository.findAllDistinctTags());
+            model.addAttribute("tags", mapService.listTags());
             return "admin_maps_new";
         }
 
@@ -106,37 +101,14 @@ public class AdminMapController extends AbstractController {
 
         try {
 
-            Path gpx = fileService.getTempFileFromInputStream(file.getInputStream());
-
-            Gpx.GpxDescriptor gpxParsed = Gpx.parse(gpx);
-            Path staticMapImage = Gpx.staticImage(gpx, configurationService.getSiteIntegration().getMapBoxAPIKey());
-
-            Vector windVector = gpxParsed.getWind();
-
-            Map newMap = new Map(file.getOriginalFilename(),
-                    gpxParsed.getLength(),
-                    gpxParsed.getPositiveElevation(),
-                    gpxParsed.getNegativeElevation(),
-                    new ArrayList<>(),
-                    gpxParsed.getStart(),
-                    gpxParsed.getEnd(),
-                    WindDirection.findDirectionFromVector(windVector),
-                    gpxParsed.isCrossing(),
-                    false);
-
-            fileService.store(gpx, FileRepositories.GPX_FILES, newMap.getId() + ".gpx");
-            fileService.store(staticMapImage, FileRepositories.MAP_IMAGES, newMap.getId() + ".png");
-
-            mapRepository.save(newMap);
-
+            final Map newMap = mapService.save(file.getInputStream(), FilenameUtils.removeExtension(file.getOriginalFilename()));
             return "redirect:/admin/maps/" + newMap.getId();
-
 
         } catch (Exception e) {
 
             addGlobalValues(principal, model, "Administration - Maps");
             model.addAttribute("errors", List.of(e.getMessage()));
-            model.addAttribute("maps", mapRepository.findAllByOrderByPostedAtDesc());
+            model.addAttribute("maps", mapService.listMaps());
             return "admin_maps";
 
         }
@@ -148,8 +120,7 @@ public class AdminMapController extends AbstractController {
                             Model model) {
 
         try {
-            mapRepository.findById(mapId).ifPresent(map -> mapRepository.delete(map));
-
+            mapService.delete(mapId);
         } catch (Exception e) {
             model.addAttribute("errors", List.of(e.getMessage()));
         }

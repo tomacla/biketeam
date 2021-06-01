@@ -10,9 +10,22 @@
             action="<@spring.url '/admin/maps/' + formdata.id />"
             method="POST" class="border rounded p-4">
 
-                <div class="mb-3">
-                  <label for="form-map-name" class="form-label">Nom</label>
-                  <input autocomplete="off" required value="${formdata.name}" name="name" type="text" class="form-control" id="form-map-name" placeholder="Parcours de la semaine">
+                <div class="mb-3 row">
+
+                     <div class="col-6">
+                          <label for="form-map-name" class="form-label">Nom</label>
+                          <input autocomplete="off" required value="${formdata.name}" name="name" type="text" class="form-control" id="form-map-name" placeholder="Parcours de la semaine">
+                    </div>
+
+                    <div class="col-6">
+                        <label for="form-map-tags" class="form-label">Type</label>
+                        <select name="type" class="form-select" id="form-map-type">
+                            <option<#if map.type == 'ROAD'> selected</#if> value="ROAD">Route</option>
+                            <option<#if map.type == 'GRAVEL'> selected</#if> value="GRAVEL">Gravel</option>
+                            <option<#if map.type == 'MTB'> selected</#if> value="MTB">VTT</option>
+                        </select>
+                    </div>
+
                 </div>
 
                  <div class="mb-3">

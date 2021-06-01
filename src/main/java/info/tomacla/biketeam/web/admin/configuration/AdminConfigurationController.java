@@ -7,6 +7,7 @@ import info.tomacla.biketeam.domain.global.SiteIntegration;
 import info.tomacla.biketeam.domain.map.MapRepository;
 import info.tomacla.biketeam.service.FacebookService;
 import info.tomacla.biketeam.service.FileService;
+import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -30,7 +31,7 @@ public class AdminConfigurationController extends AbstractController {
     private FileService fileService;
 
     @Autowired
-    private MapRepository mapRepository;
+    private MapService mapService;
 
     @Autowired
     private FacebookService facebookService;
@@ -103,7 +104,7 @@ public class AdminConfigurationController extends AbstractController {
         addGlobalValues(principal, model, "Administration - Configuration");
         model.addAttribute("formdata", form);
         model.addAttribute("timezones", getAllAvailableTimeZones());
-        model.addAttribute("tags", mapRepository.findAllDistinctTags());
+        model.addAttribute("tags", mapService.listTags());
         return "admin_configuration";
     }
 
@@ -123,14 +124,14 @@ public class AdminConfigurationController extends AbstractController {
             addGlobalValues(principal, model, "Administration - Configuration");
             model.addAttribute("formdata", form);
             model.addAttribute("timezones", getAllAvailableTimeZones());
-            model.addAttribute("tags", mapRepository.findAllDistinctTags());
+            model.addAttribute("tags", mapService.listTags());
             return "admin_configuration";
 
         } catch (Exception e) {
             addGlobalValues(principal, model, "Administration - Configuration");
             model.addAttribute("formdata", form);
             model.addAttribute("timezones", getAllAvailableTimeZones());
-            model.addAttribute("tags", mapRepository.findAllDistinctTags());
+            model.addAttribute("tags", mapService.listTags());
             return "admin_configuration";
 
         }
