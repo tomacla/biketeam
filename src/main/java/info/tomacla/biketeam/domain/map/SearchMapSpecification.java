@@ -12,10 +12,10 @@ import java.util.Objects;
 
 public class SearchMapSpecification implements Specification<Map> {
 
-    private double lowerDistance;
-    private double upperDistance;
-    private List<String> tags;
-    private WindDirection windDirection;
+    private final double lowerDistance;
+    private final double upperDistance;
+    private final List<String> tags;
+    private final WindDirection windDirection;
 
     public SearchMapSpecification(double lowerDistance, double upperDistance, List<String> tags, WindDirection windDirection) {
         this.lowerDistance = lowerDistance;

@@ -43,7 +43,7 @@ public class MapService {
 
         try {
             gpx = Gpx.simplify(gpx, defaultName);
-        } catch(Exception e) {
+        } catch (Exception e) {
             // ignore : if simplified fails, just use the original file
         }
 
@@ -90,7 +90,7 @@ public class MapService {
         return mapRepository.findDistinctTagsContainer(q.toLowerCase());
     }
 
-    public List<MapIdNamePostedAtVisibleProjection>  searchMaps(String q) {
+    public List<MapIdNamePostedAtVisibleProjection> searchMaps(String q) {
         return (q == null || q.isBlank()) ? mapRepository.findAllByOrderByPostedAtDesc()
                 : mapRepository.findAllByNameContainingIgnoreCaseOrderByPostedAtDesc(q);
     }
@@ -169,7 +169,6 @@ public class MapService {
         }
         return sort;
     }
-
 
 
 }

@@ -1,4 +1,4 @@
-package info.tomacla.biketeam.domain.global;
+package info.tomacla.biketeam.domain.template;
 
 public interface RideTemplateIdNameProjection {
 

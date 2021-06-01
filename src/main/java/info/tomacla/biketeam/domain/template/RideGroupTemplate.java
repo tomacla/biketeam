@@ -1,4 +1,4 @@
-package info.tomacla.biketeam.domain.global;
+package info.tomacla.biketeam.domain.template;
 
 import info.tomacla.biketeam.common.Point;
 import info.tomacla.biketeam.common.Strings;

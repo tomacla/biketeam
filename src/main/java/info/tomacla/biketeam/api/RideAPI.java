@@ -1,8 +1,7 @@
 package info.tomacla.biketeam.api;
 
-import info.tomacla.biketeam.common.FileExtension;
-import info.tomacla.biketeam.common.FileRepositories;
-import info.tomacla.biketeam.service.FileService;
+import info.tomacla.biketeam.common.ImageDescriptor;
+import info.tomacla.biketeam.service.RideService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,29 +19,28 @@ import java.util.Optional;
 public class RideAPI {
 
     @Autowired
-    private FileService fileService;
+    private RideService rideService;
 
     @ResponseBody
     @RequestMapping(value = "/{rideId}/image", method = RequestMethod.GET)
     public ResponseEntity<byte[]> getRideImage(@PathVariable("rideId") String rideId) {
-        Optional<FileExtension> fileExtensionExists = fileService.exists(FileRepositories.RIDE_IMAGES, rideId, FileExtension.byPriority());
-        if (fileExtensionExists.isPresent()) {
+        final Optional<ImageDescriptor> image = rideService.getImage(rideId);
+        if (image.isPresent()) {
             try {
 
-                FileExtension extension = fileExtensionExists.get();
                 HttpHeaders headers = new HttpHeaders();
-                headers.add("Content-Type", extension.getMediaType());
+                headers.add("Content-Type", image.get().getExtension().getMediaType());
 
                 return new ResponseEntity<>(
-                        Files.readAllBytes(fileService.get(FileRepositories.RIDE_IMAGES, rideId + extension.getExtension())),
+                        Files.readAllBytes(image.get().getPath()),
                         headers,
                         HttpStatus.OK
                 );
-
             } catch (IOException e) {
                 throw new ServerErrorException("Error while reading ride image : " + rideId, e);
             }
         }
+
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to find ride image : " + rideId);
 
     }

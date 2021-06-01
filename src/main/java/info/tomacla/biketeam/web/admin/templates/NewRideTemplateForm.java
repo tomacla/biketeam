@@ -1,9 +1,9 @@
 package info.tomacla.biketeam.web.admin.templates;
 
 import info.tomacla.biketeam.common.Strings;
-import info.tomacla.biketeam.domain.global.RideGroupTemplate;
-import info.tomacla.biketeam.domain.global.RideTemplate;
 import info.tomacla.biketeam.domain.ride.RideType;
+import info.tomacla.biketeam.domain.template.RideGroupTemplate;
+import info.tomacla.biketeam.domain.template.RideTemplate;
 
 import java.util.ArrayList;
 import java.util.List;

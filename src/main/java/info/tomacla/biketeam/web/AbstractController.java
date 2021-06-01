@@ -4,9 +4,9 @@ package info.tomacla.biketeam.web;
 import info.tomacla.biketeam.common.Dates;
 import info.tomacla.biketeam.domain.global.*;
 import info.tomacla.biketeam.domain.user.User;
-import info.tomacla.biketeam.domain.user.UserRepository;
 import info.tomacla.biketeam.security.LocalDefaultOAuth2User;
 import info.tomacla.biketeam.service.ConfigurationService;
+import info.tomacla.biketeam.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.ui.Model;
@@ -32,7 +32,7 @@ public abstract class AbstractController {
     protected SiteIntegrationRepository siteIntegrationRepository;
 
     @Autowired
-    protected UserRepository userRepository;
+    protected UserService userService;
 
     // FIXME do this automatically
     protected void addGlobalValues(Principal principal, Model model, String pageTitle) {
@@ -65,7 +65,7 @@ public abstract class AbstractController {
         if (principal instanceof OAuth2AuthenticationToken) {
             OAuth2AuthenticationToken wrapperPrincipal = (OAuth2AuthenticationToken) principal;
             LocalDefaultOAuth2User oauthprincipal = (LocalDefaultOAuth2User) wrapperPrincipal.getPrincipal();
-            return userRepository.findById(oauthprincipal.getLocalUserId());
+            return userService.get(oauthprincipal.getLocalUserId());
         }
         return Optional.empty();
     }

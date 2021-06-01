@@ -1,7 +1,7 @@
 package info.tomacla.biketeam.security;
 
 import info.tomacla.biketeam.domain.user.User;
-import info.tomacla.biketeam.domain.user.UserRepository;
+import info.tomacla.biketeam.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -20,7 +20,7 @@ import java.util.Optional;
 public class AuthUserService extends DefaultOAuth2UserService {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -32,7 +32,7 @@ public class AuthUserService extends DefaultOAuth2UserService {
         Map<String, Object> attributes = user.getAttributes();
         Long stravaId = Long.valueOf((Integer) attributes.get("id"));
 
-        Optional<User> optionalUser = userRepository.findByStravaId(stravaId);
+        Optional<User> optionalUser = userService.getByStravaId(stravaId);
         User u;
         if (optionalUser.isEmpty()) {
             u = new User(
@@ -45,7 +45,7 @@ public class AuthUserService extends DefaultOAuth2UserService {
                     (String) attributes.get("profile_medium"),
                     null
             );
-            userRepository.save(u);
+            userService.save(u);
 
         } else {
 
@@ -54,7 +54,7 @@ public class AuthUserService extends DefaultOAuth2UserService {
             u.setLastName((String) attributes.get("lastname"));
             u.setCity((String) attributes.get("city"));
             u.setProfileImage((String) attributes.get("profile_medium"));
-            userRepository.save(u);
+            userService.save(u);
 
             if (u.isAdmin()) {
                 authorities.add(AdminAuthority.get());

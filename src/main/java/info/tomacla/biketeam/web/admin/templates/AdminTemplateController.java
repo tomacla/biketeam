@@ -1,8 +1,8 @@
 package info.tomacla.biketeam.web.admin.templates;
 
-import info.tomacla.biketeam.domain.global.RideGroupTemplate;
-import info.tomacla.biketeam.domain.global.RideTemplate;
-import info.tomacla.biketeam.domain.global.RideTemplateRepository;
+import info.tomacla.biketeam.domain.template.RideGroupTemplate;
+import info.tomacla.biketeam.domain.template.RideTemplate;
+import info.tomacla.biketeam.service.RideTemplateService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -20,13 +20,13 @@ import java.util.stream.Collectors;
 public class AdminTemplateController extends AbstractController {
 
     @Autowired
-    private RideTemplateRepository rideTemplateRepository;
+    private RideTemplateService rideTemplateService;
 
 
     @GetMapping
     public String getTemplates(Principal principal, Model model) {
         addGlobalValues(principal, model, "Administration - Templates");
-        model.addAttribute("templates", rideTemplateRepository.findAllByOrderByNameAsc());
+        model.addAttribute("templates", rideTemplateService.listTemplates());
         return "admin_templates";
     }
 
@@ -48,7 +48,7 @@ public class AdminTemplateController extends AbstractController {
                                Principal principal,
                                Model model) {
 
-        Optional<RideTemplate> optionalTemplate = rideTemplateRepository.findById(templateId);
+        Optional<RideTemplate> optionalTemplate = rideTemplateService.get(templateId);
         if (optionalTemplate.isEmpty()) {
             return "redirect:/admin/templates";
         }
@@ -82,7 +82,7 @@ public class AdminTemplateController extends AbstractController {
             NewRideTemplateForm.NewRideTemplateFormParser parser = form.parser();
             RideTemplate target;
             if (!isNew) {
-                Optional<RideTemplate> optionalTemplate = rideTemplateRepository.findById(templateId);
+                Optional<RideTemplate> optionalTemplate = rideTemplateService.get(templateId);
                 if (optionalTemplate.isEmpty()) {
                     return "redirect:/admin/templates";
                 }
@@ -120,10 +120,10 @@ public class AdminTemplateController extends AbstractController {
                 }
             }
 
-            rideTemplateRepository.save(target);
+            rideTemplateService.save(target);
 
             addGlobalValues(principal, model, "Administration - Templates");
-            model.addAttribute("templates", rideTemplateRepository.findAllByOrderByNameAsc());
+            model.addAttribute("templates", rideTemplateService.listTemplates());
             return "admin_templates";
 
 
@@ -141,8 +141,7 @@ public class AdminTemplateController extends AbstractController {
                                  Model model) {
 
         try {
-            rideTemplateRepository.findById(templateId).ifPresent(template -> rideTemplateRepository.delete(template));
-
+            rideTemplateService.delete(templateId);
         } catch (Exception e) {
             model.addAttribute("errors", List.of(e.getMessage()));
         }

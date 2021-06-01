@@ -1,9 +1,7 @@
 package info.tomacla.biketeam.web.admin.user;
 
 import info.tomacla.biketeam.domain.user.User;
-import info.tomacla.biketeam.domain.user.UserRepository;
 import info.tomacla.biketeam.web.AbstractController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,13 +13,10 @@ import java.util.List;
 @RequestMapping(value = "/admin/users")
 public class AdminUserController extends AbstractController {
 
-    @Autowired
-    private UserRepository userRepository;
-
     @GetMapping
     public String getUsers(Principal principal, Model model) {
         addGlobalValues(principal, model, "Administration - Utilisateurs");
-        model.addAttribute("users", userRepository.findAll());
+        model.addAttribute("users", userService.listUsers());
         return "admin_users";
     }
 
@@ -32,7 +27,7 @@ public class AdminUserController extends AbstractController {
         User user = new User(false, "Inconnu", "Inconnu", stravaId,
                 null, null, null, null);
 
-        userRepository.save(user);
+        userService.save(user);
 
         return "redirect:/admin/users";
 
@@ -43,9 +38,9 @@ public class AdminUserController extends AbstractController {
                               Model model) {
 
         try {
-            userRepository.findById(userId).ifPresent(user -> {
+            userService.get(userId).ifPresent(user -> {
                 user.setAdmin(true);
-                userRepository.save(user);
+                userService.save(user);
             });
 
         } catch (Exception e) {
@@ -60,9 +55,9 @@ public class AdminUserController extends AbstractController {
                                Model model) {
 
         try {
-            userRepository.findById(userId).ifPresent(user -> {
+            userService.get(userId).ifPresent(user -> {
                 user.setAdmin(false);
-                userRepository.save(user);
+                userService.save(user);
             });
 
         } catch (Exception e) {

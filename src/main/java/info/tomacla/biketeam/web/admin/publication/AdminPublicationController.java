@@ -4,8 +4,8 @@ import info.tomacla.biketeam.common.FileExtension;
 import info.tomacla.biketeam.common.FileRepositories;
 import info.tomacla.biketeam.common.PublishedStatus;
 import info.tomacla.biketeam.domain.publication.Publication;
-import info.tomacla.biketeam.domain.publication.PublicationRepository;
 import info.tomacla.biketeam.service.FileService;
+import info.tomacla.biketeam.service.PublicationService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -29,12 +29,12 @@ public class AdminPublicationController extends AbstractController {
     private FileService fileService;
 
     @Autowired
-    private PublicationRepository publicationRepository;
+    private PublicationService publicationService;
 
     @GetMapping
     public String getPublications(Principal principal, Model model) {
         addGlobalValues(principal, model, "Administration - Publications");
-        model.addAttribute("publications", publicationRepository.findAllByOrderByPostedAtDesc());
+        model.addAttribute("publications", publicationService.listPublications());
         return "admin_publications";
     }
 
@@ -51,7 +51,7 @@ public class AdminPublicationController extends AbstractController {
             Publication publication;
             if (!publicationId.equals("new")) {
 
-                Optional<Publication> optionalPublication = publicationRepository.findById(publicationId);
+                Optional<Publication> optionalPublication = publicationService.get(publicationId);
                 if (optionalPublication.isEmpty()) {
                     return "redirect:/admin/publications";
                 }
@@ -82,7 +82,7 @@ public class AdminPublicationController extends AbstractController {
                 }
             }
 
-            publicationRepository.save(publication);
+            publicationService.save(publication);
 
             return "redirect:/admin/publications";
 
@@ -105,7 +105,7 @@ public class AdminPublicationController extends AbstractController {
         NewPublicationForm.NewPublicationFormBuilder builder = NewPublicationForm.builder();
         if (!publicationId.equals("new")) {
 
-            Optional<Publication> optionalPublication = publicationRepository.findById(publicationId);
+            Optional<Publication> optionalPublication = publicationService.get(publicationId);
             if (optionalPublication.isEmpty()) {
                 return "redirect:/admin/publications";
             }
@@ -132,8 +132,7 @@ public class AdminPublicationController extends AbstractController {
                                     Model model) {
 
         try {
-            publicationRepository.findById(publicationId).ifPresent(publication -> publicationRepository.delete(publication));
-
+            publicationService.delete(publicationId);
         } catch (Exception e) {
             model.addAttribute("errors", List.of(e.getMessage()));
         }

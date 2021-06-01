@@ -1,16 +1,12 @@
 package info.tomacla.biketeam.web.admin.ride;
 
-import info.tomacla.biketeam.common.FileExtension;
-import info.tomacla.biketeam.common.FileRepositories;
 import info.tomacla.biketeam.common.PublishedStatus;
-import info.tomacla.biketeam.domain.global.RideTemplate;
-import info.tomacla.biketeam.domain.global.RideTemplateRepository;
-import info.tomacla.biketeam.domain.map.MapRepository;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
-import info.tomacla.biketeam.domain.ride.RideRepository;
-import info.tomacla.biketeam.service.FileService;
+import info.tomacla.biketeam.domain.template.RideTemplate;
 import info.tomacla.biketeam.service.MapService;
+import info.tomacla.biketeam.service.RideService;
+import info.tomacla.biketeam.service.RideTemplateService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -18,7 +14,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Path;
 import java.security.Principal;
 import java.util.HashSet;
 import java.util.List;
@@ -31,23 +26,20 @@ import java.util.stream.Collectors;
 public class AdminRideController extends AbstractController {
 
     @Autowired
-    private FileService fileService;
-
-    @Autowired
-    private RideRepository rideRepository;
+    private RideService rideService;
 
     @Autowired
     private MapService mapService;
 
     @Autowired
-    private RideTemplateRepository rideTemplateRepository;
+    private RideTemplateService rideTemplateService;
 
 
     @GetMapping
     public String getRides(Principal principal, Model model) {
         addGlobalValues(principal, model, "Administration - Rides");
-        model.addAttribute("rides", rideRepository.findAllByOrderByDateDesc());
-        model.addAttribute("templates", rideTemplateRepository.findAllByOrderByNameAsc());
+        model.addAttribute("rides", rideService.listRides());
+        model.addAttribute("templates", rideTemplateService.listTemplates());
         return "admin_rides";
     }
 
@@ -59,7 +51,7 @@ public class AdminRideController extends AbstractController {
         NewRideForm form = null;
 
         if (templateId != null && !templateId.startsWith("empty-")) {
-            Optional<RideTemplate> optionalTemplate = rideTemplateRepository.findById(templateId);
+            Optional<RideTemplate> optionalTemplate = rideTemplateService.get(templateId);
             if (optionalTemplate.isPresent()) {
                 form = NewRideForm.builder(optionalTemplate.get()).get();
             }
@@ -86,7 +78,7 @@ public class AdminRideController extends AbstractController {
                            Principal principal,
                            Model model) {
 
-        Optional<Ride> optionalRide = rideRepository.findById(rideId);
+        Optional<Ride> optionalRide = rideService.get(rideId);
         if (optionalRide.isEmpty()) {
             return "redirect:/admin/rides";
         }
@@ -123,7 +115,7 @@ public class AdminRideController extends AbstractController {
             NewRideForm.NewRideFormParser parser = form.parser();
             Ride target;
             if (!isNew) {
-                Optional<Ride> optionalRide = rideRepository.findById(rideId);
+                Optional<Ride> optionalRide = rideService.get(rideId);
                 if (optionalRide.isEmpty()) {
                     return "redirect:/admin/rides";
                 }
@@ -173,18 +165,14 @@ public class AdminRideController extends AbstractController {
 
             if (parser.getFile().isPresent()) {
                 MultipartFile uploadedFile = parser.getFile().get();
-                Optional<FileExtension> optionalFileExtension = FileExtension.findByFileName(uploadedFile.getOriginalFilename());
-                if (optionalFileExtension.isPresent()) {
-                    Path newImage = fileService.getTempFileFromInputStream(form.getFile().getInputStream());
-                    fileService.store(newImage, FileRepositories.RIDE_IMAGES, target.getId() + optionalFileExtension.get().getExtension());
-                }
+                rideService.saveImage(target.getId(), form.getFile().getInputStream(), uploadedFile.getOriginalFilename());
             }
 
-            rideRepository.save(target);
+            rideService.save(target);
 
             addGlobalValues(principal, model, "Administration - Rides");
-            model.addAttribute("rides", rideRepository.findAllByOrderByDateDesc());
-            model.addAttribute("templates", rideTemplateRepository.findAllByOrderByNameAsc());
+            model.addAttribute("rides", rideService.listRides());
+            model.addAttribute("templates", rideTemplateService.listTemplates());
             return "admin_rides";
 
 
@@ -203,8 +191,7 @@ public class AdminRideController extends AbstractController {
                              Model model) {
 
         try {
-            rideRepository.findById(rideId).ifPresent(ride -> rideRepository.delete(ride));
-
+            rideService.delete(rideId);
         } catch (Exception e) {
             model.addAttribute("errors", List.of(e.getMessage()));
         }

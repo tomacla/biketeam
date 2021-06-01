@@ -1,16 +1,12 @@
 package info.tomacla.biketeam.web.ride;
 
-import info.tomacla.biketeam.common.PublishedStatus;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
-import info.tomacla.biketeam.domain.ride.RideRepository;
 import info.tomacla.biketeam.domain.user.User;
+import info.tomacla.biketeam.service.RideService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,14 +24,14 @@ import java.util.Optional;
 public class RideController extends AbstractController {
 
     @Autowired
-    private RideRepository rideRepository;
+    private RideService rideService;
 
     @GetMapping(value = "/{rideId}")
     public String getRide(@PathVariable("rideId") String rideId,
                           Principal principal,
                           Model model) {
 
-        Optional<Ride> optionalRide = rideRepository.findById(rideId);
+        Optional<Ride> optionalRide = rideService.get(rideId);
         if (optionalRide.isEmpty()) {
             return "redirect:/rides";
         }
@@ -61,7 +57,14 @@ public class RideController extends AbstractController {
                 .withPageSize(pageSize)
                 .get();
 
-        Page<Ride> rides = getRidesFromRepository(form);
+        final SearchRideForm.SearchRideFormParser parser = form.parser();
+
+        Page<Ride> rides = rideService.searchRides(
+                parser.getPage(),
+                parser.getPageSize(),
+                parser.getFrom(),
+                parser.getTo()
+        );
 
         addGlobalValues(principal, model, "Rides");
         model.addAttribute("rides", rides.getContent());
@@ -77,14 +80,14 @@ public class RideController extends AbstractController {
                                        @PathVariable("userId") String userId,
                                        Principal principal, Model model) {
 
-        Optional<Ride> optionalRide = rideRepository.findById(rideId);
+        Optional<Ride> optionalRide = rideService.get(rideId);
         if (optionalRide.isEmpty()) {
             return "redirect:/rides";
         }
 
         Ride ride = optionalRide.get();
         Optional<RideGroup> optionalGroup = ride.getGroups().stream().filter(rg -> rg.getId().equals(groupId)).findFirst();
-        Optional<User> optionalUser = userRepository.findById(userId);
+        Optional<User> optionalUser = userService.get(userId);
         Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
 
         if (optionalConnectedUser.isPresent() && optionalGroup.isPresent() && optionalUser.isPresent()) {
@@ -94,7 +97,7 @@ public class RideController extends AbstractController {
 
             if (user.equals(connectedUser) || connectedUser.isAdmin()) {
                 rideGroup.addParticipant(user);
-                rideRepository.save(ride);
+                rideService.save(ride);
             }
 
         }
@@ -108,14 +111,14 @@ public class RideController extends AbstractController {
                                           @PathVariable("userId") String userId,
                                           Principal principal, Model model) {
 
-        Optional<Ride> optionalRide = rideRepository.findById(rideId);
+        Optional<Ride> optionalRide = rideService.get(rideId);
         if (optionalRide.isEmpty()) {
             return "redirect:/rides";
         }
 
         Ride ride = optionalRide.get();
         Optional<RideGroup> optionalGroup = ride.getGroups().stream().filter(rg -> rg.getId().equals(groupId)).findFirst();
-        Optional<User> optionalUser = userRepository.findById(userId);
+        Optional<User> optionalUser = userService.get(userId);
         Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
 
         if (optionalConnectedUser.isPresent() && optionalGroup.isPresent() && optionalUser.isPresent()) {
@@ -125,22 +128,12 @@ public class RideController extends AbstractController {
 
             if (user.equals(connectedUser) || connectedUser.isAdmin()) {
                 rideGroup.removeParticipant(user);
-                rideRepository.save(ride);
+                rideService.save(ride);
             }
 
         }
 
         return "redirect:/rides/" + rideId;
-    }
-
-    private Page<Ride> getRidesFromRepository(SearchRideForm form) {
-        SearchRideForm.SearchRideFormParser parser = form.parser();
-        Pageable pageable = PageRequest.of(parser.getPage(), parser.getPageSize(), Sort.by("date").descending());
-        return rideRepository.findByDateBetweenAndPublishedStatus(
-                parser.getFrom(),
-                parser.getTo(),
-                PublishedStatus.PUBLISHED,
-                pageable);
     }
 
 

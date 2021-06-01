@@ -4,7 +4,6 @@ import info.tomacla.biketeam.common.FileExtension;
 import info.tomacla.biketeam.domain.global.SiteConfiguration;
 import info.tomacla.biketeam.domain.global.SiteDescription;
 import info.tomacla.biketeam.domain.global.SiteIntegration;
-import info.tomacla.biketeam.domain.map.MapRepository;
 import info.tomacla.biketeam.service.FacebookService;
 import info.tomacla.biketeam.service.FileService;
 import info.tomacla.biketeam.service.MapService;

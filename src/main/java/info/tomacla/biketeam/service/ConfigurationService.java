@@ -3,7 +3,6 @@ package info.tomacla.biketeam.service;
 import info.tomacla.biketeam.common.Timezone;
 import info.tomacla.biketeam.domain.global.*;
 import info.tomacla.biketeam.domain.user.User;
-import info.tomacla.biketeam.domain.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -27,7 +26,7 @@ public class ConfigurationService {
     private SiteIntegrationRepository siteIntegrationRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Value("${default.sitename}")
     private String defaultSiteName;
@@ -88,8 +87,8 @@ public class ConfigurationService {
             siteConfigurationRepository.save(new SiteConfiguration(Timezone.DEFAULT_TIMEZONE, null));
         }
 
-        if (userRepository.findByStravaId(adminStravaId).isEmpty()) {
-            userRepository.save(new User(true,
+        if (userService.getByStravaId(adminStravaId).isEmpty()) {
+            userService.save(new User(true,
                     adminFirstName,
                     adminLastName,
                     adminStravaId,

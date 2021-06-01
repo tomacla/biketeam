@@ -3,7 +3,6 @@ package info.tomacla.biketeam.common;
 import io.jenetics.jpx.GPX;
 import io.jenetics.jpx.Track;
 import io.jenetics.jpx.TrackSegment;
-import io.jenetics.jpx.WayPoint;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -16,7 +15,6 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -321,9 +319,9 @@ public class Gpx {
 
     private static class JpxParserResponse {
 
-        private Point start;
-        private Point end;
-        private String name;
+        private final Point start;
+        private final Point end;
+        private final String name;
 
         public JpxParserResponse(Point start, Point end, String name) {
             this.start = start;

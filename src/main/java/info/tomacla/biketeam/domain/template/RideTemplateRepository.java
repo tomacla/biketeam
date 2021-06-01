@@ -1,4 +1,4 @@
-package info.tomacla.biketeam.domain.global;
+package info.tomacla.biketeam.domain.template;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;

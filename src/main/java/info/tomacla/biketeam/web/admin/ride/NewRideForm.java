@@ -2,12 +2,12 @@ package info.tomacla.biketeam.web.admin.ride;
 
 import info.tomacla.biketeam.common.Dates;
 import info.tomacla.biketeam.common.Strings;
-import info.tomacla.biketeam.domain.global.RideGroupTemplate;
-import info.tomacla.biketeam.domain.global.RideTemplate;
 import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.ride.RideType;
+import info.tomacla.biketeam.domain.template.RideGroupTemplate;
+import info.tomacla.biketeam.domain.template.RideTemplate;
 import info.tomacla.biketeam.service.MapService;
 import org.springframework.web.multipart.MultipartFile;
 
