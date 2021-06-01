@@ -51,6 +51,10 @@
                             </div>
                         </div>
                     </div>
+                <#else>
+                    <div class="card-footer">
+                        ${group.participants?size} participant<#if group.participants?size gt 1>s</#if>
+                    </div>
                 </#if>
             </div>
         </#list>
