@@ -1,9 +1,19 @@
 package info.tomacla.biketeam.service;
 
 import info.tomacla.biketeam.common.FileRepositories;
-import info.tomacla.biketeam.common.Gpx;
+import info.tomacla.biketeam.common.Point;
 import info.tomacla.biketeam.common.Vector;
 import info.tomacla.biketeam.domain.map.*;
+import io.github.glandais.GPXDataComputer;
+import io.github.glandais.GPXPathEnhancer;
+import io.github.glandais.fit.FitFileWriter;
+import io.github.glandais.gpx.GPXFilter;
+import io.github.glandais.gpx.GPXPath;
+import io.github.glandais.io.GPXFileWriter;
+import io.github.glandais.io.GPXParser;
+import io.github.glandais.map.TileMapImage;
+import io.github.glandais.map.TileMapProducer;
+import io.github.glandais.srtm.GPXElevationFixer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,7 +21,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import javax.imageio.ImageIO;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +42,27 @@ public class MapService {
     @Autowired
     private MapRepository mapRepository;
 
+    @Autowired
+    private GPXParser gpxParser;
+
+    @Autowired
+    private GPXPathEnhancer gpxPathEnhancer;
+
+    @Autowired
+    private GPXFileWriter gpxFileWriter;
+
+    @Autowired
+    private GPXDataComputer gpxDataComputer;
+
+    @Autowired
+    private GPXElevationFixer gpxElevationFixer;
+
+    @Autowired
+    private FitFileWriter fitFileWriter;
+
+    @Autowired
+    private TileMapProducer tileMapProducer;
+
     public void delete(String mapId) {
         get(mapId).ifPresent(map -> mapRepository.delete(map));
     }
@@ -41,38 +75,88 @@ public class MapService {
 
         Path gpx = fileService.getTempFileFromInputStream(is);
 
-        try {
-            gpx = Gpx.simplify(gpx, defaultName);
-        } catch(Exception e) {
-            // ignore : if simplified fails, just use the original file
-        }
+        GPXPath gpxPath = getGPXPath(gpx, defaultName);
 
-        Gpx.GpxDescriptor gpxParsed = Gpx.parse(gpx, defaultName);
-        Path staticMapImage = Gpx.staticImage(gpx, configurationService.getSiteIntegration().getMapBoxAPIKey());
-        Path fit = Gpx.fit(gpx, defaultName);
+        gpxPathEnhancer.virtualize(gpxPath);
+        GPXFilter.filterPointsDouglasPeucker(gpxPath);
 
-        Vector windVector = gpxParsed.getWind();
+        io.github.glandais.util.Vector windRaw = gpxDataComputer.getWind(gpxPath);
+        Vector wind = new Vector(windRaw.getX(), windRaw.getY());
+        boolean crossing = gpxDataComputer.isCrossing(gpxPath);
+
+        Path staticMap = getStaticMap(gpxPath);
+
+        Path fit = getFit(gpxPath);
+
+        List<io.github.glandais.gpx.Point> points = gpxPath.getPoints();
+        io.github.glandais.gpx.Point startPoint = points.get(0);
+        io.github.glandais.gpx.Point endPoint = points.get(points.size() - 1);
+
+        Point start = new Point(startPoint.getLatDeg(), startPoint.getLonDeg());
+        Point end = new Point(endPoint.getLatDeg(), endPoint.getLonDeg());
 
         Map newMap = new Map(
-                gpxParsed.getName(),
-                gpxParsed.getLength(),
+                gpxPath.getName(),
+                Math.round(10.0 * gpxPath.getDist()) / 10000.0f,
                 MapType.ROAD,
-                gpxParsed.getPositiveElevation(),
-                gpxParsed.getNegativeElevation(),
+                (int) Math.round(gpxPath.getTotalElevation()),
+                (int) Math.round(gpxPath.getTotalElevationNegative()),
                 new ArrayList<>(),
-                gpxParsed.getStart(),
-                gpxParsed.getEnd(),
-                WindDirection.findDirectionFromVector(windVector),
-                gpxParsed.isCrossing(),
+                start,
+                end,
+                WindDirection.findDirectionFromVector(wind),
+                crossing,
                 false
         );
 
         fileService.store(gpx, FileRepositories.GPX_FILES, newMap.getId() + ".gpx");
         fileService.store(fit, FileRepositories.FIT_FILES, newMap.getId() + ".fit");
-        fileService.store(staticMapImage, FileRepositories.MAP_IMAGES, newMap.getId() + ".png");
+        fileService.store(staticMap, FileRepositories.MAP_IMAGES, newMap.getId() + ".png");
 
         return mapRepository.save(newMap);
 
+    }
+
+    private GPXPath getGPXPath(Path path, String defaultName) {
+        GPXPath gpxPath;
+        try {
+            List<GPXPath> paths = gpxParser.parsePaths(path.toFile(), defaultName);
+            if (paths.size() == 1) {
+                gpxPath = paths.get(0);
+                if (gpxPath.getPoints().size() < 2) {
+                    throw new IllegalArgumentException("0 or 1 points in path");
+                }
+            } else {
+                throw new IllegalArgumentException("0 or more than 1 path found");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return gpxPath;
+    }
+
+    private Path getFit(GPXPath gpxPath) {
+        try {
+            Path fit = Files.createTempFile("gpx-simplified", ".fit");
+            fitFileWriter.writeFitFile(gpxPath, fit.toFile());
+            return fit;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Path getStaticMap(GPXPath path) {
+        try {
+            String mapBoxAPIKey = configurationService.getSiteIntegration().getMapBoxAPIKey();
+            String tileUrl = mapBoxAPIKey != null ? "https://api.mapbox.com/styles/v1/mapbox/outdoors-v11/tiles/256/{z}/{x}/{y}?access_token=" + mapBoxAPIKey : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+
+            TileMapImage tileMap = tileMapProducer.createTileMap(path, tileUrl, 0, 768, 512);
+            Path staticMap = Files.createTempFile("staticmap", ".png");
+            ImageIO.write(tileMap.getImage(), "png", staticMap.toFile());
+            return staticMap;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Optional<Map> get(String mapId) {
@@ -90,7 +174,7 @@ public class MapService {
         return mapRepository.findDistinctTagsContainer(q.toLowerCase());
     }
 
-    public List<MapIdNamePostedAtVisibleProjection>  searchMaps(String q) {
+    public List<MapIdNamePostedAtVisibleProjection> searchMaps(String q) {
         return (q == null || q.isBlank()) ? mapRepository.findAllByOrderByPostedAtDesc()
                 : mapRepository.findAllByNameContainingIgnoreCaseOrderByPostedAtDesc(q);
     }
@@ -149,7 +233,8 @@ public class MapService {
     public void generateImage(String mapId) {
         final Optional<Path> gpxFile = this.getGpxFile(mapId);
         if (gpxFile.isPresent()) {
-            Path staticMapImage = Gpx.staticImage(gpxFile.get(), configurationService.getSiteIntegration().getMapBoxAPIKey());
+            GPXPath gpxPath = getGPXPath(gpxFile.get(), "");
+            Path staticMapImage = getStaticMap(gpxPath);
             fileService.store(staticMapImage, FileRepositories.MAP_IMAGES, mapId + ".png");
         }
     }
@@ -169,7 +254,6 @@ public class MapService {
         }
         return sort;
     }
-
 
 
 }
