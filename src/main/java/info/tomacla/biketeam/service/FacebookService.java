@@ -60,7 +60,19 @@ public class FacebookService {
     }
 
     public void publish(Publication publication) {
-        this.publish(publication.getContent(), null);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(publication.getTitle()).append("\n");
+        sb.append(publication.getContent()).append("\n\n");
+
+        final String content = sb.toString();
+        if (publication.isImaged()) {
+            final Path image = fileService.get(FileRepositories.PUBLICATION_IMAGES, publication.getId() + fileService.exists(FileRepositories.PUBLICATION_IMAGES, publication.getId(), FileExtension.byPriority()).get().getExtension());
+            this.publish(content, image);
+        } else {
+            this.publish(content, null);
+        }
+
     }
 
     private void publish(String content, Path image) {
