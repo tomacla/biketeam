@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.4.1</version>
+		<version>2.5.0</version>
 		<relativePath/>
 	</parent>
 	<groupId>info.tomacla</groupId>
@@ -22,8 +22,18 @@
 		</repository>
 	</distributionManagement>
 
+	<repositories>
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>
+	</repositories>
+
 	<properties>
 		<java.version>11</java.version>
+		<jpx.version>2.2.0</jpx.version>
+		<restfb.version>3.18.0</restfb.version>
+		<gpx2web.version>1.0.14</gpx2web.version>
 	</properties>
 
 	<dependencies>
@@ -51,29 +61,37 @@
 		<dependency>
 			<groupId>com.restfb</groupId>
 			<artifactId>restfb</artifactId>
-			<version>3.18.0</version>
+			<version>${restfb.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
-			<version>2.5.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.5.13</version>
 		</dependency>
 		<dependency>
 			<groupId>org.liquibase</groupId>
 			<artifactId>liquibase-core</artifactId>
-			<version>3.8.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.jenetics</groupId>
 			<artifactId>jpx</artifactId>
-			<version>2.1.0</version>
+			<version>${jpx.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.github.glandais.gpx2web</groupId>
+			<artifactId>gpx</artifactId>
+			<version>${gpx2web.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.glandais.gpx2web</groupId>
+			<artifactId>virtual-cyclist</artifactId>
+			<version>${gpx2web.version}</version>
 		</dependency>
 
 		<dependency>
@@ -104,4 +122,29 @@
 		</plugins>
 	</build>
 
+	<profiles>
+		<profile>
+			<id>docker</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.springframework.boot</groupId>
+						<artifactId>spring-boot-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<goals>
+									<goal>build-image</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<image>
+								<name>biketeam:latest</name>
+							</image>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
