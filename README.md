@@ -47,6 +47,7 @@ admin.first-name=admin
 admin.last-name=admin
 ```
 
+* site.url : domain where your site is deployed
 * file.repository : define a local path to a writable repository
 * spring.datasource.url : change the path to a writable repository
 * spring.security.oauth2.client.registration.strava.client-id : strava app client id
