@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", function() {
           text = text.replace(urlPattern, function (url) {
                              var protocol_pattern = /^(?:(?:https?|ftp):\/\/)/i;
                              var href = protocol_pattern.test(url) ? url : 'http://' + url;
-                             return '<a href="' + href + '">' + url + '</a>';
+                             return '<a class="link-dark" href="' + href + '">' + url + '</a>';
                            });
 
           text = text.replace(new RegExp('\r?\n','g'), "<br />");

@@ -149,8 +149,6 @@ public class AdminConfigurationController extends AbstractController {
 
             siteIntegrationRepository.save(siteIntegration);
 
-        } catch (Exception e) {
-            e.printStackTrace();
         } finally {
             return "redirect:/admin/integration";
         }

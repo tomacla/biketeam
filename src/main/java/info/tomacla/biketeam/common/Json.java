@@ -5,6 +5,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import java.io.IOException;
+import java.nio.file.Path;
+
 public class Json {
 
     private static final ObjectMapper om = new ObjectMapper().registerModule(new JavaTimeModule());
@@ -29,6 +32,14 @@ public class Json {
         try {
             return om.readValue(json, clazz);
         } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static <T> T parse(Path json, TypeReference<T> clazz) {
+        try {
+            return om.readValue(json.toFile(), clazz);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

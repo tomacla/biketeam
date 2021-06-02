@@ -5,6 +5,7 @@ import info.tomacla.biketeam.common.Dates;
 import info.tomacla.biketeam.domain.global.*;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.security.LocalDefaultOAuth2User;
+import info.tomacla.biketeam.service.ArchiveService;
 import info.tomacla.biketeam.service.ConfigurationService;
 import info.tomacla.biketeam.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,9 @@ public abstract class AbstractController {
     @Autowired
     protected UserService userService;
 
+    @Autowired
+    private ArchiveService archiveService;
+
     // FIXME do this automatically
     protected void addGlobalValues(Principal principal, Model model, String pageTitle) {
 
@@ -51,6 +55,7 @@ public abstract class AbstractController {
         model.addAttribute("_integ", integ);
         model.addAttribute("_date_formatter", Dates.frenchFormatter);
         model.addAttribute("_authenticated", false);
+        model.addAttribute("_archive_support", archiveService.isActivated());
 
         getUserFromPrincipal(principal).ifPresent(user -> {
             model.addAttribute("_authenticated", true);

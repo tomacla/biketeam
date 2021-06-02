@@ -8,4 +8,7 @@
   <a href="<@spring.url '/admin/rides' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri?starts_with('/admin/rides')> list-group-item-secondary</#if>">Rides</a>
   <a href="<@spring.url '/admin/maps' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri?starts_with('/admin/maps')> list-group-item-secondary</#if>">Maps</a>
   <a href="<@spring.url '/admin/integration' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri == '/admin/integration'> list-group-item-secondary</#if>">Intégrations</a>
+  <#if _archive_support>
+    <a href="<@spring.url '/admin/archives' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri == '/admin/archives'> list-group-item-secondary</#if>">Archives</a>
+  </#if>
 </ul>
