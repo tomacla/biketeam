@@ -4,6 +4,7 @@ import info.tomacla.biketeam.api.dto.AndroidMapDTO;
 import info.tomacla.biketeam.api.dto.GarminMapDTO;
 import info.tomacla.biketeam.service.ConfigurationService;
 import info.tomacla.biketeam.service.MapService;
+import info.tomacla.biketeam.service.UrlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -30,8 +31,8 @@ public class MapAPI {
     @Autowired
     private MapService mapService;
 
-    @Value("${site.url}")
-    private String siteUrl;
+   @Autowired
+   private UrlService urlService;
 
     @ResponseBody
     @RequestMapping(value = "/android", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -47,7 +48,7 @@ public class MapAPI {
                     dto.setNegativeElevation(Math.round(m.getNegativeElevation()));
                     dto.setPositiveElevation(Math.round(m.getPositiveElevation()));
                     dto.setTime(m.getPostedAt().atStartOfDay(configurationService.getTimezone()).toEpochSecond());
-                    dto.setType("route");
+                    dto.setType(m.getType().getLabel().toLowerCase());
                     return dto;
                 }).collect(Collectors.toList());
 
@@ -61,7 +62,7 @@ public class MapAPI {
                 .map(m -> {
                     GarminMapDTO dto = new GarminMapDTO();
                     dto.setTitle(m.getName());
-                    dto.setUrl(siteUrl + "/api/maps/" + m.getId() + "/fit");
+                    dto.setUrl(urlService.getMapFitUrl(m.getId()));
                     return dto;
                 }).collect(Collectors.toList()));
 

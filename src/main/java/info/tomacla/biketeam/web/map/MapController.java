@@ -4,6 +4,7 @@ import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.map.MapSorterOption;
 import info.tomacla.biketeam.domain.map.WindDirection;
 import info.tomacla.biketeam.service.MapService;
+import info.tomacla.biketeam.service.UrlService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,6 +26,9 @@ public class MapController extends AbstractController {
     @Autowired
     private MapService mapService;
 
+    @Autowired
+    private UrlService urlService;
+
     @GetMapping(value = "/{mapId}")
     public String getMap(@PathVariable("mapId") String mapId,
                          Principal principal,
@@ -36,6 +40,13 @@ public class MapController extends AbstractController {
         }
 
         Map map = optionalMap.get();
+        addOpenGraphValues(model,
+                map.getName(),
+                urlService.getMapImageUrl(map.getId()),
+                urlService.getMapUrl( map.getId()),
+                map.getDescription()
+        );
+
         addGlobalValues(principal, model, "Map " + map.getName());
         model.addAttribute("map", map);
         return "map";

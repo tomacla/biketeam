@@ -1,5 +1,8 @@
 package info.tomacla.biketeam.service;
 
+import info.tomacla.biketeam.common.FileExtension;
+import info.tomacla.biketeam.common.FileRepositories;
+import info.tomacla.biketeam.common.ImageDescriptor;
 import info.tomacla.biketeam.common.PublishedStatus;
 import info.tomacla.biketeam.domain.publication.Publication;
 import info.tomacla.biketeam.domain.publication.PublicationIdTitlePostedAtProjection;
@@ -7,6 +10,7 @@ import info.tomacla.biketeam.domain.publication.PublicationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +26,9 @@ public class PublicationService {
 
     @Autowired
     private FacebookService facebookService;
+
+    @Autowired
+    private FileService fileService;
 
 
     public void publishPublications() {
@@ -46,6 +53,23 @@ public class PublicationService {
 
     public void delete(String publicationId) {
         get(publicationId).ifPresent(publication -> publicationRepository.delete(publication));
+    }
+
+    public Optional<ImageDescriptor> getImage(String publicationId) {
+
+        Optional<FileExtension> fileExtensionExists = fileService.exists(FileRepositories.PUBLICATION_IMAGES, publicationId, FileExtension.byPriority());
+
+        if (fileExtensionExists.isPresent()) {
+
+            final FileExtension extension = fileExtensionExists.get();
+            final Path path = fileService.get(FileRepositories.PUBLICATION_IMAGES, publicationId + extension.getExtension());
+
+            return Optional.of(ImageDescriptor.of(extension, path));
+
+        }
+
+        return Optional.empty();
+
     }
 
 }

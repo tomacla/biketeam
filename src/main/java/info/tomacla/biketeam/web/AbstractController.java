@@ -13,7 +13,9 @@ import org.springframework.ui.Model;
 
 import java.security.Principal;
 import java.time.ZoneId;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -58,6 +60,36 @@ public abstract class AbstractController {
             model.addAttribute("_profile_image", user.getProfileImage());
             model.addAttribute("_user_id", user.getId());
         });
+
+    }
+
+    protected void addOpenGraphValues(
+            Model model,
+            String title,
+            String image,
+            String url,
+            String description) {
+
+        Map<String, String> og = new HashMap<>();
+        if(configurationService.getSiteDescription().getTwitter() != null) {
+            og.put("twitter:image:src", image);
+            og.put("twitter:site", "@" + configurationService.getSiteDescription().getTwitter());
+            og.put("twitter:card", "summary_large_image");
+            og.put("twitter:title", title);
+            og.put("twitter:description", description);
+        }
+
+        og.put("og:image", image);
+        og.put("og:image:alt", "Détails");
+        og.put("og:image:width", "1200");
+        og.put("og:image:height", "600");
+        og.put("og:site_name", configurationService.getSiteDescription().getSitename());
+        og.put("og:type", "object");
+        og.put("og:title", title);
+        og.put("og:url", url);
+        og.put("og:description", description);
+
+        model.addAttribute("og", og);
 
     }
 

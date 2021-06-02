@@ -10,6 +10,16 @@
     <meta name="description" content="${_description}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <#if og??>
+        <#list og?keys as prop>
+            <#if prop?starts_with("og:")>
+                <meta property="${prop}" content="${og[prop]}">
+            <#else>
+                <meta name="${prop}" content="${og[prop]}">
+            </#if>
+        </#list>
+    </#if>
+
     <link rel="shortcut icon" href="<@spring.url '/api/logo' />">
 
     <title>${_sitename} - ${_pagetitle}</title>

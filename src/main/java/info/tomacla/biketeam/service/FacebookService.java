@@ -12,7 +12,6 @@ import info.tomacla.biketeam.domain.global.SiteIntegration;
 import info.tomacla.biketeam.domain.publication.Publication;
 import info.tomacla.biketeam.domain.ride.Ride;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -28,10 +27,13 @@ public class FacebookService {
     private ConfigurationService configurationService;
 
     @Autowired
-    private FileService fileService;
+    private RideService rideService;
 
-    @Value("${site.url}")
-    private String siteUrl;
+    @Autowired
+    private PublicationService publicationService;
+
+    @Autowired
+    private UrlService urlService;
 
     public void publish(Ride ride) {
 
@@ -44,15 +46,14 @@ public class FacebookService {
             sb.append("Départ ").append(Dates.formatTime(group.getMeetingTime())).append(" - ");
             sb.append(group.getMeetingLocation()).append("\n");
             if (group.getMapId() != null) {
-                sb.append("Map : ").append(siteUrl).append("/maps/").append(group.getMapId()).append("\n");
+                sb.append("Map : ").append(urlService.getMapUrl(group.getMapId())).append("\n");
             }
             sb.append("\n");
         });
 
         final String content = sb.toString();
         if (ride.isImaged()) {
-            final Path image = fileService.get(FileRepositories.RIDE_IMAGES, ride.getId() + fileService.exists(FileRepositories.RIDE_IMAGES, ride.getId(), FileExtension.byPriority()).get().getExtension());
-            this.publish(content, image);
+            rideService.getImage(ride.getId()).ifPresent(rideImage -> this.publish(content, rideImage.getPath()));
         } else {
             this.publish(content, null);
         }
@@ -67,8 +68,7 @@ public class FacebookService {
 
         final String content = sb.toString();
         if (publication.isImaged()) {
-            final Path image = fileService.get(FileRepositories.PUBLICATION_IMAGES, publication.getId() + fileService.exists(FileRepositories.PUBLICATION_IMAGES, publication.getId(), FileExtension.byPriority()).get().getExtension());
-            this.publish(content, image);
+            publicationService.getImage(publication.getId()).ifPresent(pubImage -> this.publish(content, pubImage.getPath()));
         } else {
             this.publish(content, null);
         }
@@ -173,7 +173,7 @@ public class FacebookService {
     }
 
     private String getRedirectUri() {
-        return siteUrl + "/admin/integration/facebook/login/";
+        return urlService.getUrlWithSuffix("/admin/integration/facebook/login/");
     }
 
 }
