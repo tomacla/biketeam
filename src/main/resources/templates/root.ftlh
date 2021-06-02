@@ -60,7 +60,7 @@
                         </div>
                         <div class="card-body">
                           <h5 class="card-title">${feedItem.title}</h5>
-                          <p class="card-text"><@common.displayContent feedItem.content /></p>
+                          <p class="card-text wrap-content">${feedItem.content}</p>
                           <#if (feedItem.imageUrl)??>
                             <img src="<@spring.url feedItem.imageUrl />" class="d-block shadow rounded w-50 h-auto mx-auto" alt="${feedItem.title} image">
                           </#if>

@@ -1,7 +1,3 @@
-<#macro displayContent content>
-  ${(content?replace('\n', '<br>'))}
-</#macro>
-
 <#macro pagination page pages pageFieldId formId>
   <div class="btn-group btn-group-sm" role="group">
     <button <#if page == 0>disabled</#if> onclick="setFieldValue('${pageFieldId}', 0); forceSubmitForm('${formId}');" type="button" class="btn btn-outline-secondary"><i class="bi bi-skip-backward-fill"></i></button>

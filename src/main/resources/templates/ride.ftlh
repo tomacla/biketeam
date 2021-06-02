@@ -10,7 +10,7 @@
             <#if ride.imaged>
               <img src="<@spring.url '/api/rides/${ride.id}/image' />" class="d-block shadow rounded w-100 h-auto mx-auto" alt="${ride.id} image">
             </#if>
-            <p class="mt-4"><@common.displayContent ride.description /></p>
+            <p class="mt-4 wrap-content">${ride.description}</p>
         </div>
 
     </div>

@@ -51,7 +51,7 @@
                           <h4>${ride.title}</h4>
                           <h5 class="text-muted">${ride.date.format(_date_formatter)}</h5>
                           <p>Groupes : <#list ride.groups as group><span class="badge bg-secondary">${group.name}</span><#if group_has_next> </#if></#list></p>
-                          <p class="small"><@common.displayContent ride.description /></p>
+                          <p class="small wrap-content">${ride.description}</p>
                           <#if ride.imaged>
                             <img src="<@spring.url '/api/rides/${ride.id}/image' />" class="d-block shadow rounded w-50 h-auto mx-auto" alt="${ride.id} image">
                           </#if>
