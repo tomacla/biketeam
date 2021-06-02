@@ -53,8 +53,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 var jsonValue = JSON.parse(value);
                 var targetIdField = document.getElementById(field.getAttribute("data-target-id-field"));
                 var targetNameField = document.getElementById(field.getAttribute("data-target-name-field"));
-                targetIdField.value = Object.keys(jsonValue)[0];
-                targetNameField.value = jsonValue[Object.keys(jsonValue)[0]];
+                targetIdField.value = jsonValue.key;
+                targetNameField.value = jsonValue.value;
             }
         }, '#' + input.id);
 

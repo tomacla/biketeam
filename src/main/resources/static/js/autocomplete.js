@@ -510,7 +510,7 @@ var AutoComplete = /** @class */ (function () {
                 else {
                     for (var value in json) {
                         returnResponse.push({
-                            "Value": JSON.stringify(json),
+                            "Value": JSON.stringify({ "key" : value, "value" : json[value] }),
                             "Label": this._Highlight(json[value])
                         });
                     }

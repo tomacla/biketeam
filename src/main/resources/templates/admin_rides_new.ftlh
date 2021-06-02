@@ -90,11 +90,11 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="mb-3 col-4">
+                            <div class="mb-3 col-6">
                                 <label for="form-ride-group-map-${group?index}" class="form-label">Map</label>
                                 <input id="search-map-field-${group?index}" type="text" data-target-name-field="form-ride-group-mapname-${group?index}" data-target-id-field="form-ride-group-mapid-${group?index}" autocomplete="off" value="" class="form-control form-map-control">
                             </div>
-                            <div class="mb-3 col-8">
+                            <div class="mb-3 col-6">
                                 <label for="form-ride-group-map-${group?index}" class="form-label">&nbsp;</label>
                                 <input type="text" name="groups[${group?index}].mapName" readonly class="form-control-plaintext" id="form-ride-group-mapname-${group?index}" value="${group.mapName}">
                                 <input type="hidden" name="groups[${group?index}].mapId" id="form-ride-group-mapid-${group?index}" value="${group.mapId}">

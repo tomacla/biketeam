@@ -27,10 +27,13 @@
                         <li>Lieu de rendez vous : <#if (group.meetingPoint)??><a class="text-reset" target="_blank" href="https://www.google.com/maps/search/?api=1&query=${group.meetingPoint.lat?c},${group.meetingPoint.lng?c}"></#if>${group.meetingLocation}<#if (group.meetingPoint)??></a></#if></li>
                     </ul>
                     <#if (group.mapId)??>
-                        <div class="btn-group" role="group">
-                            <a download="${ride.title}-${group.name}.gpx" href="<@spring.url '/api/maps/${group.mapId}/gpx' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-download"></i> GPX</a>
-                            <a download="${ride.title}-${group.name}.fit" href="<@spring.url '/api/maps/${group.mapId}/fit' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-download"></i> FIT</a>
-                            <a href="<@spring.url '/maps/${group.mapId}' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-map"></i> Voir</a>
+                        <div class="w-50 shadow rounded border d-flex flex-column justify-content-center">
+                            <img src="<@spring.url '/api/maps/${group.mapId}/image' />" class="d-block w-100 h-auto" alt="${group.mapId} image">
+                            <div class="btn-group" role="group">
+                                <a download="${ride.title}-${group.name}.gpx" href="<@spring.url '/api/maps/${group.mapId}/gpx' />" class="btn btn-light" role="button"><i class="bi bi-download"></i> GPX</a>
+                                <a download="${ride.title}-${group.name}.fit" href="<@spring.url '/api/maps/${group.mapId}/fit' />" class="btn btn-light" role="button"><i class="bi bi-download"></i> FIT</a>
+                                <a href="<@spring.url '/maps/${group.mapId}' />" class="btn btn-light" role="button"><i class="bi bi-map"></i> Voir</a>
+                            </div>
                         </div>
                     <#else>
                         <p class="fst-italic">La map n'a pas été ajoutée.</p>
