@@ -31,7 +31,6 @@
 
 	<properties>
 		<java.version>11</java.version>
-		<jpx.version>2.2.0</jpx.version>
 		<restfb.version>3.18.0</restfb.version>
 		<gpx2web.version>1.0.14</gpx2web.version>
 	</properties>
@@ -75,12 +74,6 @@
 		<dependency>
 			<groupId>org.liquibase</groupId>
 			<artifactId>liquibase-core</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>io.jenetics</groupId>
-			<artifactId>jpx</artifactId>
-			<version>${jpx.version}</version>
 		</dependency>
 
 		<dependency>
