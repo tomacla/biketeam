@@ -46,18 +46,37 @@ document.addEventListener("DOMContentLoaded", function() {
 
     Array.from(document.getElementsByClassName('form-map-control')).forEach(function(input) {
 
-        AutoComplete({
-            EmptyMessage: "Aucune map trouvée",
-            Url : '/api/autocomplete/maps',
-            ClearOnSelect: true,
-            OnSelect: function(field, value) {
-                var jsonValue = JSON.parse(value);
-                var targetIdField = document.getElementById(field.getAttribute("data-target-id-field"));
-                var targetNameField = document.getElementById(field.getAttribute("data-target-name-field"));
-                targetIdField.value = jsonValue.key;
-                targetNameField.value = jsonValue.value;
+        var autocompleteField = new Autocomplete(input, {
+            data: [],
+            maximumItems: 10,
+            treshold: 2,
+            highlightClass: 'text-warning',
+            onSelectItem: (selected) => {
+                var targetIdField = document.getElementById(input.getAttribute("data-target-id-field"));
+                var targetNameField = document.getElementById(input.getAttribute("data-target-name-field"));
+                targetIdField.value = selected.value;
+                targetNameField.value = selected.label;
+                input.value = '';
+            },
+            onInput: (fieldValue) => {
+                var xmlHttp = new XMLHttpRequest();
+                    xmlHttp.onreadystatechange = function() {
+                        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+                            var r = JSON.parse(xmlHttp.responseText);
+                            var result = [];
+                            Object.keys(r).forEach(function(key) {
+                                result.push({
+                                    label: r[key],
+                                    value: key
+                                });
+                            });
+                            autocompleteField.setData(result);
+                        }
+                    }
+                    xmlHttp.open("GET", "/api/autocomplete/maps?q="+encodeURI(fieldValue), true); // true for asynchronous
+                    xmlHttp.send(null);
             }
-        }, '#' + input.id);
+        });
 
     });
 
