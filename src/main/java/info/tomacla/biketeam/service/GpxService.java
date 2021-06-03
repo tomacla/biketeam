@@ -131,10 +131,10 @@ public class GpxService {
 
     private Path getFit(GPXPath gpxPath) {
         try {
-            Path fit = Files.createTempFile("gpx-simplified", ".fit");
+            Path fit = fileService.getTempFile("gpxsimplified", ".fit");
             fitFileWriter.writeFitFile(gpxPath, fit.toFile());
             return fit;
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("Error while creating FIT", e);
             throw new RuntimeException(e);
         }
@@ -146,7 +146,7 @@ public class GpxService {
             String tileUrl = mapBoxAPIKey != null ? "https://api.mapbox.com/styles/v1/mapbox/outdoors-v11/tiles/256/{z}/{x}/{y}?access_token=" + mapBoxAPIKey : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 
             TileMapImage tileMap = tileMapProducer.createTileMap(path, tileUrl, 0, 768, 512);
-            Path staticMap = Files.createTempFile("staticmap", ".png");
+            Path staticMap = fileService.getTempFile("staticmap", ".png");
             ImageIO.write(tileMap.getImage(), "png", staticMap.toFile());
             return staticMap;
         } catch (IOException e) {

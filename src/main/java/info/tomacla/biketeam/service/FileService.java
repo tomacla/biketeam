@@ -16,6 +16,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class FileService {
@@ -88,18 +89,22 @@ public class FileService {
         }
     }
 
-    public Path getTempFile() {
+    public Path getTempFile(String prefix, String suffix) {
         try {
-            return Files.createTempFile(getBiketeamTempPath(), UUID.randomUUID().toString(), ".tmp");
+            return Files.createTempFile(getTmpDirectory(), prefix, suffix);
         } catch (IOException e) {
             log.error("Unable to get temp file", e);
             throw new RuntimeException(e);
         }
     }
 
-    public Path getTempFileFromInputStream(InputStream is) {
+    public Path getTempFile() {
+        return this.getTempFile(UUID.randomUUID().toString(), ".tmp");
+    }
+
+    public Path getTempFileFromInputStream(InputStream is, String prefix, String suffix) {
         try {
-            Path tmp = this.getTempFile();
+            Path tmp = this.getTempFile(prefix, suffix);
             Files.copy(is, tmp, StandardCopyOption.REPLACE_EXISTING);
             return tmp;
         } catch (IOException e) {
@@ -108,13 +113,17 @@ public class FileService {
         }
     }
 
+    public Path getTempFileFromInputStream(InputStream is) {
+        return this.getTempFileFromInputStream(is, UUID.randomUUID().toString(), ".tmp");
+    }
+
     @PostConstruct
     public void initTmpDir() throws Exception {
 
         log.info("Initializing appliation directories");
 
         Files.createDirectories(Path.of(fileRepository));
-        Files.createDirectories(getBiketeamTempPath());
+        Files.createDirectories(getTmpDirectory());
 
         // copy default logo
         if (!Files.exists(Path.of(fileRepository, "logo.png")) && !Files.exists(Path.of(fileRepository, "logo.jpg"))) {
@@ -123,8 +132,30 @@ public class FileService {
 
     }
 
-    private Path getBiketeamTempPath() {
+    private Path getTmpDirectory() {
         return Path.of(System.getProperty("java.io.tmpdir"), "biketeam");
     }
 
+    public void cleanTmpDirectory() {
+        try {
+            long cutOff = System.currentTimeMillis() - (2 * 24 * 60 * 60 * 1000);
+            Files.list(getTmpDirectory())
+                    .filter(path -> {
+                        try {
+                            return Files.isRegularFile(path) && Files.getLastModifiedTime(path).to(TimeUnit.MILLISECONDS) < cutOff;
+                        } catch (IOException ex) {
+                            return false;
+                        }
+                    })
+                    .forEach(path -> {
+                        try {
+                            Files.delete(path);
+                        } catch (IOException e) {
+                            log.error("Unable to delete file " + path.toString(), e);
+                        }
+                    });
+        } catch (IOException e) {
+            log.error("Unable to clean tmp directory", e);
+        }
+    }
 }
