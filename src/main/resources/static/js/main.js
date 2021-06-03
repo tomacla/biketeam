@@ -96,6 +96,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
     });
 
+    Tags.init();
+
 });
 
 /** FORMS **/
@@ -106,101 +108,6 @@ function setFieldValue(fieldId, value) {
 
 function forceSubmitForm(formId) {
     document.getElementById(formId).submit();
-}
-
-function preventElementToSubmitForm(elementId, replacement) {
-
-    var preventSubmit = function(event) {
-        if(event.keyCode == 13) {
-            event.preventDefault();
-            event.stopPropagation();
-            if(replacement) {
-                replacement();
-            }
-            return false;
-        }
-    }
-
-    document.getElementById(elementId).addEventListener('keypress', preventSubmit);
-    document.getElementById(elementId).addEventListener('keydown', preventSubmit);
-    document.getElementById(elementId).addEventListener('keyup', preventSubmit);
-}
-
-/** TAGS **/
-
-function handleTagChange(containerId, fieldName, tagsContainerId, tagsFieldContainerId, deleteCallback) {
-    var tagSelect = document.getElementById(containerId);
-    var newValue = tagSelect.value;
-    if(newValue !== '' && getTags(tagsContainerId).indexOf(newValue) === -1) {
-        createTag(tagSelect.value, fieldName, tagsContainerId, tagsFieldContainerId, deleteCallback);
-    }
-    tagSelect.value = '';
-}
-
-function getTags(containerId) {
-    var container = document.getElementById(containerId);
-    var tags = [];
-    for (var i = 0; i < container.childNodes.length; i++) {
-        var badge = container.childNodes[i];
-        for (var j = 0; j < badge.childNodes.length; j++) {
-            if (badge.childNodes[j].nodeType === Node.TEXT_NODE) {
-                tags.push(badge.childNodes[j].nodeValue);
-                break;
-            }
-        }
-    }
-    return tags;
-}
-
-function createTag(label, fieldName, tagsContainerId, tagsFieldContainerId, deleteCallback) {
-
-    if(label === null || label === '') {
-        return;
-    }
-
-    var fieldContainer = document.getElementById(tagsFieldContainerId);
-    var badgeContainer = document.getElementById(tagsContainerId);
-
-    var input = document.createElement('input');
-    input.setAttribute('type', 'hidden');
-    input.setAttribute('name', fieldName);
-    input.setAttribute('value', label);
-
-
-    var badge = document.createElement("span");
-    badge.classList.add('badge');
-    badge.classList.add('bg-secondary');
-    badge.classList.add('me-2');
-    badge.innerHTML = label;
-
-    var button = document.createElement("button");
-    button.setAttribute('type', 'button');
-    button.classList.add('btn-close');
-    button.style.padding = '0';
-    button.style.margin = '0 0 0 5px';
-    button.style.width = '10px';
-    button.style.height = '10px';
-    button.addEventListener('click', function(event) {
-        badgeContainer.removeChild(badge);
-        fieldContainer.removeChild(input);
-
-        if(deleteCallback) {
-            deleteCallback();
-        }
-
-    });
-
-    badge.appendChild(button);
-
-    badgeContainer.appendChild(badge);
-    fieldContainer.appendChild(input);
-
-}
-
-function addTag(inputId, fieldName, tagsContainerId, tagsFieldContainerId) {
-   var tagInput = document.getElementById(inputId);
-   createTag(tagInput.value, fieldName, tagsContainerId, tagsFieldContainerId);
-   tagInput.value = '';
 }
 
 /** GEOCODE **/

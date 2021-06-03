@@ -36,20 +36,16 @@
                      </div>
                   </div>
                   <div class="col-12 col-md-6">
-                      <div class="input-group">
-                          <label class="input-group-text" for="maps-filter-tags" class="form-label">Tags</label>
-                          <select onchange="setFieldValue('maps-filter-page', 0); handleTagChange('maps-filter-tags', 'tags', 'maps-filter-tags-container', 'maps-filter-tags-field-container', function() { setFieldValue('maps-filter-page', 0); })" class="form-select" id="maps-filter-tags">
-                            <option value="">---</option>
-                            <#list tags as tag>
-                                <option value="${tag}">${tag}</option>
-                            </#list>
-                          </select>
-                      </div>
-                      <div id="maps-filter-tags-container"></div>
-                      <div id="maps-filter-tags-field-container">
-                        <input type="hidden" name="tags" value="" />
-                      </div>
-                  </div>
+                    <div class="input-group">
+                        <label class="input-group-text" for="maps-filter-tags" class="form-label">Tags</label>
+                        <select onchange="setFieldValue('maps-filter-page', 0);" name="tags" multiple class="form-select" id="maps-filter-tags-2">
+                            <option selected value="">Tag...</option>
+                             <#list tags as tag>
+                                <option <#if formdata.tags?seq_contains(tag)>selected</#if> value="${tag}">${tag}</option>
+                              </#list>
+                        </select>
+                    </div>
+                </div>
                 <div class="col-12 col-md-5">
                     <div class="input-group">
                         <label class="input-group-text" for="maps-filter-sort">Tri</label>
@@ -111,16 +107,6 @@
         </#if>
 
     </div>
-
-
-
-    <script type="text/javascript">
-
-       <#list formdata.tags as tag>
-            createTag('${tag}', 'tags', 'maps-filter-tags-container', 'maps-filter-tags-field-container', function() { setFieldValue('maps-filter-page', 0); });
-       </#list>
-
-    </script>
 
 </div>
 

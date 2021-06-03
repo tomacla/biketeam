@@ -21,29 +21,19 @@
                     <label class="form-label" for="maps-filter-tags" class="form-label">Tags par défaut pour la recherche</label>
                     <div class="input-group">
                           <label class="input-group-text" for="maps-filter-tags" class="form-label">Tags</label>
-                          <select onchange="handleTagChange('maps-filter-tags', 'defaultSearchTags', 'maps-filter-tags-container', 'maps-filter-tags-field-container')" class="form-select" id="maps-filter-tags">
-                            <option value="">---</option>
+                          <select multiple data-remove-first="true" name="defaultSearchTags" class="form-select" id="maps-filter-tags">
+                            <option selected disabled hidden value="">Tag...</option>
                             <#list tags as tag>
-                                <option value="${tag}">${tag}</option>
+                                <option <#if formdata.defaultSearchTags?seq_contains(tag)>selected</#if> value="${tag}">${tag}</option>
                             </#list>
                           </select>
                       </div>
-                      <div id="maps-filter-tags-container"></div>
-                      <div id="maps-filter-tags-field-container"></div>
                 </div>
 
                 <button type="submit" class="btn btn-secondary">Enregistrer</button>
         </form>
 
     </div>
-
-     <script type="text/javascript">
-
-         <#list formdata.defaultSearchTags as tag>
-            createTag('${tag}', 'defaultSearchTags', 'maps-filter-tags-container', 'maps-filter-tags-field-container');
-       </#list>
-
-    </script>
 
 </div>
 

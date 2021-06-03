@@ -41,18 +41,12 @@
 
                     <label for="form-map-tags" class="form-label">Tags</label>
                     <div class="input-group">
-                        <select onchange="handleTagChange('form-map-tags', 'tags', 'form-map-tags-container', 'form-map-tags-field-container')" class="form-select" id="form-map-tags">
-                            <option value="">---</option>
+                        <select multiple data-remove-first="true" data-allow-new="true" name="tags" class="form-select" id="form-map-tags">
+                            <option selected disabled hidden value="">Tag...</option>
                             <#list tags as tag>
-                            <option value="${tag}">${tag}</option>
+                                <option <#if formdata.tags?seq_contains(tag)>selected</#if> value="${tag}">${tag}</option>
                             </#list>
                         </select>
-                        <input autocomplete="off" id="form-map-tags-add" type="text" class="form-control" placeholder="nouveau">
-                        <button class="btn btn-secondary" type="button" onclick="addTag('form-map-tags-add', 'tags', 'form-map-tags-container', 'form-map-tags-field-container')"><strong><i class="bi bi-plus"></i></strong></button>
-                    </div>
-                    <div id="form-map-tags-container"></div>
-                    <div id="form-map-tags-field-container">
-                        <input type="hidden" name="tags" value="" />
                     </div>
 
                 </div>
@@ -77,14 +71,6 @@
         </form>
 
     </div>
-
-     <script type="text/javascript">
-
-        <#list formdata.tags as tag>
-            createTag('${tag}', 'tags', 'form-map-tags-container', 'form-map-tags-field-container');
-       </#list>
-
-    </script>
 
 </div>
 
