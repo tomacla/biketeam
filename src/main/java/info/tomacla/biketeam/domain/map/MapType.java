@@ -4,7 +4,7 @@ public enum MapType {
 
     ROAD("Route"), GRAVEL("Gravel"), MTB("VTT");
 
-    private String label;
+    private final String label;
 
     MapType(String label) {
         this.label = label;

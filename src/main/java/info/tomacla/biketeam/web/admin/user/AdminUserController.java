@@ -38,11 +38,7 @@ public class AdminUserController extends AbstractController {
                               Model model) {
 
         try {
-            userService.get(userId).ifPresent(user -> {
-                user.setAdmin(true);
-                userService.save(user);
-            });
-
+            userService.promote(userId);
         } catch (Exception e) {
             model.addAttribute("errors", List.of(e.getMessage()));
         }
@@ -55,11 +51,7 @@ public class AdminUserController extends AbstractController {
                                Model model) {
 
         try {
-            userService.get(userId).ifPresent(user -> {
-                user.setAdmin(false);
-                userService.save(user);
-            });
-
+            userService.relegate(userId);
         } catch (Exception e) {
             model.addAttribute("errors", List.of(e.getMessage()));
         }

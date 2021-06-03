@@ -14,6 +14,8 @@ import io.github.glandais.io.GPXParser;
 import io.github.glandais.map.TileMapImage;
 import io.github.glandais.map.TileMapProducer;
 import io.github.glandais.srtm.GPXElevationFixer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,6 +34,8 @@ import java.util.Optional;
 
 @Service
 public class MapService {
+
+    private static final Logger log = LoggerFactory.getLogger(MapService.class);
 
     @Autowired
     private FileService fileService;
@@ -64,6 +68,7 @@ public class MapService {
     private TileMapProducer tileMapProducer;
 
     public void delete(String mapId) {
+        log.info("Request map deletion {}", mapId);
         get(mapId).ifPresent(map -> mapRepository.delete(map));
     }
 
@@ -72,6 +77,8 @@ public class MapService {
     }
 
     public Map save(InputStream is, String defaultName) {
+
+        log.info("Saving new map with default name {}", defaultName);
 
         Path gpx = fileService.getTempFileFromInputStream(is);
 
@@ -130,6 +137,7 @@ public class MapService {
                 throw new IllegalArgumentException("0 or more than 1 path found");
             }
         } catch (Exception e) {
+            log.error("Error while parsing GPX", e);
             throw new RuntimeException(e);
         }
         return gpxPath;
@@ -141,6 +149,7 @@ public class MapService {
             fitFileWriter.writeFitFile(gpxPath, fit.toFile());
             return fit;
         } catch (IOException e) {
+            log.error("Error while creating FIT", e);
             throw new RuntimeException(e);
         }
     }
@@ -155,6 +164,7 @@ public class MapService {
             ImageIO.write(tileMap.getImage(), "png", staticMap.toFile());
             return staticMap;
         } catch (IOException e) {
+            log.error("Error while getting static map", e);
             throw new RuntimeException(e);
         }
     }

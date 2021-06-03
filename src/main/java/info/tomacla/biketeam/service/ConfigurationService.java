@@ -3,6 +3,8 @@ package info.tomacla.biketeam.service;
 import info.tomacla.biketeam.common.Timezone;
 import info.tomacla.biketeam.domain.global.*;
 import info.tomacla.biketeam.domain.user.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,8 @@ import java.util.Optional;
 
 @Service
 public class ConfigurationService {
+
+    private static final Logger log = LoggerFactory.getLogger(ConfigurationService.class);
 
     @Autowired
     private SiteDescriptionRepository siteDescriptionRepository;
@@ -67,8 +71,25 @@ public class ConfigurationService {
         return siteIntegrationRepository.findById(1L).get();
     }
 
+    public void save(SiteIntegration siteIntegration) {
+        log.info("Site integration is updated");
+        siteIntegrationRepository.save(siteIntegration);
+    }
+
+    public void save(SiteConfiguration siteConfiguration) {
+        log.info("Site configuration is updated");
+        siteConfigurationRepository.save(siteConfiguration);
+    }
+
+    public void save(SiteDescription siteDescription) {
+        log.info("Site description is updated");
+        siteDescriptionRepository.save(siteDescription);
+    }
+
     @PostConstruct
     public void init() {
+
+        log.info("Initializing application data");
 
         Optional<SiteDescription> siteDescription = siteDescriptionRepository.findById(1L);
         if (siteDescription.isEmpty()) {

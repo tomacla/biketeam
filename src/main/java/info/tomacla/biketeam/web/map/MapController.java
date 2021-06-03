@@ -43,7 +43,7 @@ public class MapController extends AbstractController {
         addOpenGraphValues(model,
                 map.getName(),
                 urlService.getMapImageUrl(map.getId()),
-                urlService.getMapUrl( map.getId()),
+                urlService.getMapUrl(map.getId()),
                 map.getDescription()
         );
 

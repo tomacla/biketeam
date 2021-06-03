@@ -25,8 +25,7 @@ public class PublicationAPI {
     @ResponseBody
     @RequestMapping(value = "/{publicationId}/image", method = RequestMethod.GET)
     public ResponseEntity<byte[]> getPublicationImage(@PathVariable("publicationId") String publicationId) {
-        String imageName = publicationId;
-        Optional<FileExtension> fileExtensionExists = fileService.exists(FileRepositories.PUBLICATION_IMAGES, imageName, FileExtension.byPriority());
+        Optional<FileExtension> fileExtensionExists = fileService.exists(FileRepositories.PUBLICATION_IMAGES, publicationId, FileExtension.byPriority());
         if (fileExtensionExists.isPresent()) {
             try {
 
@@ -35,7 +34,7 @@ public class PublicationAPI {
                 headers.add("Content-Type", extension.getMediaType());
 
                 return new ResponseEntity<>(
-                        Files.readAllBytes(fileService.get(FileRepositories.PUBLICATION_IMAGES, imageName + extension.getExtension())),
+                        Files.readAllBytes(fileService.get(FileRepositories.PUBLICATION_IMAGES, publicationId + extension.getExtension())),
                         headers,
                         HttpStatus.OK
                 );

@@ -2,7 +2,9 @@ package info.tomacla.biketeam.web;
 
 
 import info.tomacla.biketeam.common.Dates;
-import info.tomacla.biketeam.domain.global.*;
+import info.tomacla.biketeam.domain.global.SiteConfiguration;
+import info.tomacla.biketeam.domain.global.SiteDescription;
+import info.tomacla.biketeam.domain.global.SiteIntegration;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.security.LocalDefaultOAuth2User;
 import info.tomacla.biketeam.service.ArchiveService;
@@ -24,15 +26,6 @@ public abstract class AbstractController {
 
     @Autowired
     protected ConfigurationService configurationService;
-
-    @Autowired
-    protected SiteDescriptionRepository siteDescriptionRepository;
-
-    @Autowired
-    protected SiteConfigurationRepository siteConfigurationRepository;
-
-    @Autowired
-    protected SiteIntegrationRepository siteIntegrationRepository;
 
     @Autowired
     protected UserService userService;
@@ -76,7 +69,7 @@ public abstract class AbstractController {
             String description) {
 
         Map<String, String> og = new HashMap<>();
-        if(configurationService.getSiteDescription().getTwitter() != null) {
+        if (configurationService.getSiteDescription().getTwitter() != null) {
             og.put("twitter:image:src", image);
             og.put("twitter:site", "@" + configurationService.getSiteDescription().getTwitter());
             og.put("twitter:card", "summary_large_image");

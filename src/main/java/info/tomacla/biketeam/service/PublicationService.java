@@ -7,6 +7,8 @@ import info.tomacla.biketeam.common.PublishedStatus;
 import info.tomacla.biketeam.domain.publication.Publication;
 import info.tomacla.biketeam.domain.publication.PublicationIdTitlePostedAtProjection;
 import info.tomacla.biketeam.domain.publication.PublicationRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,8 @@ import java.util.Optional;
 
 @Service
 public class PublicationService {
+
+    private static final Logger log = LoggerFactory.getLogger(PublicationService.class);
 
     @Autowired
     private PublicationRepository publicationRepository;
@@ -33,6 +37,7 @@ public class PublicationService {
 
     public void publishPublications() {
         publicationRepository.findAllByPublishedStatusAndPublishedAtLessThan(PublishedStatus.UNPUBLISHED, ZonedDateTime.now(configurationService.getTimezone())).forEach(pub -> {
+            log.info("Publishing publication {}", pub.getId());
             pub.setPublishedStatus(PublishedStatus.PUBLISHED);
             publicationRepository.save(pub);
             facebookService.publish(pub);
@@ -52,6 +57,7 @@ public class PublicationService {
     }
 
     public void delete(String publicationId) {
+        log.info("Request publication deletion {}", publicationId);
         get(publicationId).ifPresent(publication -> publicationRepository.delete(publication));
     }
 

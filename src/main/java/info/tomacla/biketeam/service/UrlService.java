@@ -10,7 +10,7 @@ public class UrlService {
     private String siteUrl;
 
     public String getMapUrl(String mapId) {
-        return siteUrl + "/maps/" + mapId ;
+        return siteUrl + "/maps/" + mapId;
     }
 
     public String getMapFitUrl(String mapId) {

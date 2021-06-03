@@ -7,6 +7,8 @@ import info.tomacla.biketeam.common.PublishedStatus;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideIdTitleDateProjection;
 import info.tomacla.biketeam.domain.ride.RideRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +25,8 @@ import java.util.Optional;
 
 @Service
 public class RideService {
+
+    private static final Logger log = LoggerFactory.getLogger(RideService.class);
 
     @Autowired
     private FileService fileService;
@@ -56,6 +60,7 @@ public class RideService {
     public void publishRides() {
         rideRepository.findAllByPublishedStatusAndPublishedAtLessThan(PublishedStatus.UNPUBLISHED, ZonedDateTime.now(configurationService.getTimezone()))
                 .forEach(ride -> {
+                    log.info("Publishing ride {}", ride.getId());
                     ride.setPublishedStatus(PublishedStatus.PUBLISHED);
                     save(ride);
                     facebookService.publish(ride);
@@ -75,6 +80,7 @@ public class RideService {
     }
 
     public void delete(String rideId) {
+        log.info("Request ride deletion {}", rideId);
         get(rideId).ifPresent(ride -> rideRepository.delete(ride));
     }
 

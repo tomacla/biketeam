@@ -1,6 +1,8 @@
 package info.tomacla.biketeam.service;
 
 import info.tomacla.biketeam.common.FileExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,8 @@ import java.util.UUID;
 
 @Service
 public class FileService {
+
+    private static final Logger log = LoggerFactory.getLogger(FileService.class);
 
     private final String fileRepository;
 
@@ -60,6 +64,7 @@ public class FileService {
             Files.createDirectories(Path.of(fileRepository, directory));
             return Path.of(fileRepository, directory, fileName);
         } catch (IOException e) {
+            log.error("Unable to get file : " + fileName, e);
             throw new RuntimeException("Unable to get file : " + fileName, e);
         }
     }
@@ -68,6 +73,7 @@ public class FileService {
         try {
             Files.copy(file, Path.of(fileRepository, fileName), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
+            log.error("Unable to store file : " + fileName, e);
             throw new RuntimeException("Unable to store file : " + file, e);
         }
     }
@@ -77,6 +83,7 @@ public class FileService {
             Files.createDirectories(Path.of(fileRepository, directory));
             Files.copy(file, Path.of(fileRepository, directory, fileName), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
+            log.error("Unable to store file : " + fileName, e);
             throw new RuntimeException("Unable to store file : " + file.toString(), e);
         }
     }
@@ -85,6 +92,7 @@ public class FileService {
         try {
             return Files.createTempFile(getBiketeamTempPath(), UUID.randomUUID().toString(), ".tmp");
         } catch (IOException e) {
+            log.error("Unable to get temp file", e);
             throw new RuntimeException(e);
         }
     }
@@ -95,12 +103,15 @@ public class FileService {
             Files.copy(is, tmp, StandardCopyOption.REPLACE_EXISTING);
             return tmp;
         } catch (IOException e) {
+            log.error("Unable to get temp file from input stream", e);
             throw new RuntimeException(e);
         }
     }
 
     @PostConstruct
     public void initTmpDir() throws Exception {
+
+        log.info("Initializing appliation directories");
 
         Files.createDirectories(Path.of(fileRepository));
         Files.createDirectories(getBiketeamTempPath());

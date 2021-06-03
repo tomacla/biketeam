@@ -6,6 +6,8 @@ import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.map.MapType;
 import liquibase.util.file.FilenameUtils;
 import net.lingala.zip4j.ZipFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -25,13 +27,15 @@ import java.util.stream.Stream;
 @Service
 public class ArchiveService {
 
+    private static final Logger log = LoggerFactory.getLogger(ArchiveService.class);
+
     @Value("${archive.directory:undefined}")
     private String archiveDirectory;
 
     @Autowired
     private MapService mapService;
 
-    private ExecutorService executor = Executors.newFixedThreadPool(4);
+    private final ExecutorService executor = Executors.newFixedThreadPool(4);
 
     public boolean isActivated() {
         return !archiveDirectory.equals("undefined");
@@ -41,16 +45,22 @@ public class ArchiveService {
         if (isActivated()) {
             return Stream.of(new File(archiveDirectory).listFiles())
                     .filter(file -> !file.isDirectory())
-                    .filter(file -> file.getName().endsWith(".zip"))
                     .map(File::getName)
+                    .filter(name -> name.endsWith(".zip"))
                     .collect(Collectors.toList());
         }
         return new ArrayList<>();
     }
 
     public void importArchive(String archiveName) {
+
+        log.info("Request to import archive {}", archiveName);
+
         try {
             if (isActivated() && Files.exists(Path.of(archiveDirectory, archiveName))) {
+
+                log.info("Perform archive {} import", archiveName);
+
                 final Path targetArchive = Path.of(archiveDirectory, archiveName);
 
                 // create target directory
@@ -61,7 +71,7 @@ public class ArchiveService {
                 new ZipFile(targetArchive.toFile()).extractAll(unzipDestination.toString());
 
                 if (Files.exists(Path.of(unzipDestination.toString(), "descriptor.json"))) {
-                    final List<ImportMapElement> importMapElements = Json.parse(Path.of(unzipDestination.toString(), "descriptor.json"), new TypeReference<List<ImportMapElement>>() {
+                    final List<ImportMapElement> importMapElements = Json.parse(Path.of(unzipDestination.toString(), "descriptor.json"), new TypeReference<>() {
                     });
 
                     for (ImportMapElement importMapElement : importMapElements) {
@@ -72,6 +82,7 @@ public class ArchiveService {
 
             }
         } catch (IOException e) {
+            log.info("Error while importing archive " + archiveName, e);
             throw new RuntimeException(e);
         }
     }
@@ -127,9 +138,9 @@ public class ArchiveService {
 
     public static class ImportMap implements Runnable {
 
-        private Path workingDirectory;
-        private ImportMapElement element;
-        private MapService mapService;
+        private final Path workingDirectory;
+        private final ImportMapElement element;
+        private final MapService mapService;
 
         public ImportMap(Path workingDirectory, ImportMapElement element, MapService mapService) {
             this.workingDirectory = workingDirectory;
@@ -141,6 +152,8 @@ public class ArchiveService {
         public void run() {
             try {
 
+                log.info("Start import map {}", element.getFileName());
+
                 final InputStream fileInputStream = Files.newInputStream(Path.of(workingDirectory.toString(), element.getFileName()));
 
                 final Map newMap = mapService.save(fileInputStream, element.getName());
@@ -150,8 +163,10 @@ public class ArchiveService {
                 newMap.setVisible(element.isVisible());
                 mapService.save(newMap);
 
+                log.info("End import map {}", element.getFileName());
+
             } catch (Exception e) {
-                // TODO log
+                log.error("Error while importing map " + element.getFileName(), e);
             }
         }
 

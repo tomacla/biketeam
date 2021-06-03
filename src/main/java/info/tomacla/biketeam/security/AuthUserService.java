@@ -2,6 +2,8 @@ package info.tomacla.biketeam.security;
 
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -19,6 +21,8 @@ import java.util.Optional;
 @Service
 public class AuthUserService extends DefaultOAuth2UserService {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthUserService.class);
+
     @Autowired
     private UserService userService;
 
@@ -32,9 +36,14 @@ public class AuthUserService extends DefaultOAuth2UserService {
         Map<String, Object> attributes = user.getAttributes();
         Long stravaId = Long.valueOf((Integer) attributes.get("id"));
 
+        log.debug("Load user with strava id {}", stravaId);
+
         Optional<User> optionalUser = userService.getByStravaId(stravaId);
         User u;
         if (optionalUser.isEmpty()) {
+
+            log.debug("Register new user with strava id {}", stravaId);
+
             u = new User(
                     false,
                     (String) attributes.get("firstname"),
@@ -48,6 +57,8 @@ public class AuthUserService extends DefaultOAuth2UserService {
             userService.save(u);
 
         } else {
+
+            log.debug("Updating existing user with strava id {}", stravaId);
 
             u = optionalUser.get();
             u.setFirstName((String) attributes.get("firstname"));

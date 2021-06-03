@@ -191,7 +191,7 @@ public class Map {
         sb.append("Distance ").append(length).append("km").append(" - ");
         sb.append(positiveElevation).append("m D+").append(" - ");
         sb.append(type.getLabel());
-        if(!tags.isEmpty()) {
+        if (!tags.isEmpty()) {
             sb.append(" - ");
             tags.forEach(t -> sb.append(t).append(", "));
         }

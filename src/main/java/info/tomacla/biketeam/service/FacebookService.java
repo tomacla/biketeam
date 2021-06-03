@@ -6,15 +6,14 @@ import com.restfb.scope.ScopeBuilder;
 import com.restfb.types.Account;
 import com.restfb.types.GraphResponse;
 import info.tomacla.biketeam.common.Dates;
-import info.tomacla.biketeam.common.FileExtension;
-import info.tomacla.biketeam.common.FileRepositories;
 import info.tomacla.biketeam.domain.global.SiteIntegration;
 import info.tomacla.biketeam.domain.publication.Publication;
 import info.tomacla.biketeam.domain.ride.Ride;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -22,6 +21,8 @@ import java.util.Optional;
 
 @Service
 public class FacebookService {
+
+    private static final Logger log = LoggerFactory.getLogger(FacebookService.class);
 
     @Autowired
     private ConfigurationService configurationService;
@@ -36,6 +37,8 @@ public class FacebookService {
     private UrlService urlService;
 
     public void publish(Ride ride) {
+
+        log.info("Publish ride {} to facebook", ride.getId());
 
         StringBuilder sb = new StringBuilder();
         sb.append(ride.getTitle()).append(" - ").append(Dates.frenchDateFormat(ride.getDate())).append("\n");
@@ -61,6 +64,8 @@ public class FacebookService {
     }
 
     public void publish(Publication publication) {
+
+        log.info("Publish publication {} to facebook", publication.getId());
 
         StringBuilder sb = new StringBuilder();
         sb.append(publication.getTitle()).append("\n");
@@ -109,8 +114,8 @@ public class FacebookService {
                 }
 
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            log.error("Error while publishing to facebook : " + content, e);
         }
 
     }
@@ -134,9 +139,8 @@ public class FacebookService {
 
     public String getLoginUrl() {
 
-        final SiteIntegration siteIntegration = configurationService.getSiteIntegration();
-
         try {
+            final SiteIntegration siteIntegration = configurationService.getSiteIntegration();
             DefaultFacebookClient facebookClient = new DefaultFacebookClient(Version.LATEST);
 
             ScopeBuilder scopeBuilder = new ScopeBuilder();
@@ -147,6 +151,7 @@ public class FacebookService {
                     getRedirectUri(),
                     scopeBuilder);
         } catch (Exception e) {
+            log.error("Error while builing facebook login URL", e);
             throw new RuntimeException(e);
         }
 
@@ -154,9 +159,8 @@ public class FacebookService {
 
     public String getUserAccessToken(String code) {
 
-        final SiteIntegration siteIntegration = configurationService.getSiteIntegration();
-
         try {
+            final SiteIntegration siteIntegration = configurationService.getSiteIntegration();
             DefaultFacebookClient facebookClient = new DefaultFacebookClient(Version.LATEST);
 
             final FacebookClient.AccessToken accessToken = facebookClient.obtainUserAccessToken(
@@ -168,6 +172,7 @@ public class FacebookService {
 
             return accessToken.getAccessToken();
         } catch (Exception e) {
+            log.error("Error while getting user access token", e);
             throw new RuntimeException(e);
         }
     }

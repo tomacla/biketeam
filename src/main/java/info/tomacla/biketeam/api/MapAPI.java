@@ -6,7 +6,6 @@ import info.tomacla.biketeam.service.ConfigurationService;
 import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.service.UrlService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -31,8 +30,8 @@ public class MapAPI {
     @Autowired
     private MapService mapService;
 
-   @Autowired
-   private UrlService urlService;
+    @Autowired
+    private UrlService urlService;
 
     @ResponseBody
     @RequestMapping(value = "/android", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

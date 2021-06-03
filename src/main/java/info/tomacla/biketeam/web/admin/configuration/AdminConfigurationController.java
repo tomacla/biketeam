@@ -75,7 +75,7 @@ public class AdminConfigurationController extends AbstractController {
             siteDescription.setAddressPostalCode(form.getAddressPostalCode());
             siteDescription.setAddressCity(form.getAddressCity());
             siteDescription.setOther(form.getOther());
-            siteDescriptionRepository.save(siteDescription);
+            configurationService.save(siteDescription);
 
 
             addGlobalValues(principal, model, "Administration - Description");
@@ -118,7 +118,7 @@ public class AdminConfigurationController extends AbstractController {
 
             siteConfiguration.setTimezone(parser.getTimezone());
             siteConfiguration.setDefaultSearchTags(parser.getDefaultSearchTags());
-            siteConfigurationRepository.save(siteConfiguration);
+            configurationService.save(siteConfiguration);
 
             addGlobalValues(principal, model, "Administration - Configuration");
             model.addAttribute("formdata", form);
@@ -142,16 +142,13 @@ public class AdminConfigurationController extends AbstractController {
                                      Principal principal,
                                      Model model) {
 
-        try {
-            SiteIntegration siteIntegration = configurationService.getSiteIntegration();
-            final String userAccessToken = facebookService.getUserAccessToken(facebookCode);
-            siteIntegration.setFacebookAccessToken(userAccessToken);
+        SiteIntegration siteIntegration = configurationService.getSiteIntegration();
+        final String userAccessToken = facebookService.getUserAccessToken(facebookCode);
+        siteIntegration.setFacebookAccessToken(userAccessToken);
 
-            siteIntegrationRepository.save(siteIntegration);
+        configurationService.save(siteIntegration);
 
-        } finally {
-            return "redirect:/admin/integration";
-        }
+        return "redirect:/admin/integration";
 
     }
 
@@ -171,7 +168,7 @@ public class AdminConfigurationController extends AbstractController {
             siteIntegration.setFacebookAppSecret(null);
         }
 
-        siteIntegrationRepository.save(siteIntegration);
+        configurationService.save(siteIntegration);
 
         return "redirect:/admin/integration";
 
@@ -209,7 +206,7 @@ public class AdminConfigurationController extends AbstractController {
             siteIntegration.setFacebookPageId(form.getFacebookPageId());
             siteIntegration.setFacebookAppId(form.getFacebookAppId());
             siteIntegration.setFacebookAppSecret(form.getFacebookAppSecret());
-            siteIntegrationRepository.save(siteIntegration);
+            configurationService.save(siteIntegration);
 
             addGlobalValues(principal, model, "Administration - Intégrations");
             model.addAttribute("formdata", form);
