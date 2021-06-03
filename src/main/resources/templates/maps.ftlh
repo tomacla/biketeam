@@ -13,16 +13,16 @@
                 <div class="col-12 col-md-6">
                     <div class="input-group">
                         <span class="input-group-text">Distance de</span>
-                        <input autocomplete="off" type="number" required step="1" min="1" value="${formdata.lowerDistance?c}" name="lowerDistance" class="form-control" id="maps-filter-distance">
+                        <input onchange="setFieldValue('maps-filter-page', 0);" autocomplete="off" type="number" required step="1" min="1" value="${formdata.lowerDistance?c}" name="lowerDistance" class="form-control" id="maps-filter-distance">
                         <span class="input-group-text">à</span>
-                        <input autocomplete="off" type="number" required step="1" min="1" value="${formdata.upperDistance?c}" name="upperDistance" class="form-control">
+                        <input onchange="setFieldValue('maps-filter-page', 0);" autocomplete="off" type="number" required step="1" min="1" value="${formdata.upperDistance?c}" name="upperDistance" class="form-control">
                         <span class="input-group-text">km</span>
                     </div>
                 </div>
                 <div class="col-12 col-md-5">
                     <div class="input-group">
                         <label class="input-group-text" for="maps-filter-wind">Vent</label>
-                        <select name="windDirection" class="form-select" id="maps-filter-wind">
+                        <select onchange="setFieldValue('maps-filter-page', 0);" name="windDirection" class="form-select" id="maps-filter-wind">
                           <option <#if formdata.windDirection == ''>selected</#if> value="">---</option>
                           <option <#if formdata.windDirection == 'NORTH'>selected</#if> value="NORTH">Nord</option>
                           <option <#if formdata.windDirection == 'NORTH_EAST'>selected</#if> value="NORTH_EAST">Nord-Est</option>
@@ -38,7 +38,7 @@
                   <div class="col-12 col-md-6">
                       <div class="input-group">
                           <label class="input-group-text" for="maps-filter-tags" class="form-label">Tags</label>
-                          <select onchange="handleTagChange('maps-filter-tags', 'tags', 'maps-filter-tags-container', 'maps-filter-tags-field-container')" class="form-select" id="maps-filter-tags">
+                          <select onchange="setFieldValue('maps-filter-page', 0); handleTagChange('maps-filter-tags', 'tags', 'maps-filter-tags-container', 'maps-filter-tags-field-container', function() { setFieldValue('maps-filter-page', 0); })" class="form-select" id="maps-filter-tags">
                             <option value="">---</option>
                             <#list tags as tag>
                                 <option value="${tag}">${tag}</option>
@@ -53,12 +53,12 @@
                 <div class="col-12 col-md-5">
                     <div class="input-group">
                         <label class="input-group-text" for="maps-filter-sort">Tri</label>
-                        <select name="sort" class="form-select" id="maps-filter-sort">
+                        <select onchange="setFieldValue('maps-filter-page', 0);" name="sort" class="form-select" id="maps-filter-sort">
                           <option <#if formdata.sort == ''>selected</#if> value="">---</option>
-                          <option <#if formdata.sort == 'SHORT'>selected</#if> value="short">Plus courtes</option>
-                          <option <#if formdata.sort == 'LONG'>selected</#if> value="long">Plus longues</option>
-                          <option <#if formdata.sort == 'FLAT'>selected</#if> value="flat">Plus plates</option>
-                          <option <#if formdata.sort == 'HILLY'>selected</#if> value="hilly">Plus valonnées</option>
+                          <option <#if formdata.sort == 'SHORT'>selected</#if> value="SHORT">Plus courtes</option>
+                          <option <#if formdata.sort == 'LONG'>selected</#if> value="LONG">Plus longues</option>
+                          <option <#if formdata.sort == 'FLAT'>selected</#if> value="FLAT">Plus plates</option>
+                          <option <#if formdata.sort == 'HILLY'>selected</#if> value="HILLY">Plus valonnées</option>
                         </select>
                    </div>
                 </div>
@@ -117,7 +117,7 @@
     <script type="text/javascript">
 
        <#list formdata.tags as tag>
-            createTag('${tag}', 'tags', 'maps-filter-tags-container', 'maps-filter-tags-field-container');
+            createTag('${tag}', 'tags', 'maps-filter-tags-container', 'maps-filter-tags-field-container', function() { setFieldValue('maps-filter-page', 0); });
        </#list>
 
     </script>

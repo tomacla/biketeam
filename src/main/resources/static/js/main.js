@@ -109,11 +109,11 @@ function preventElementToSubmitForm(elementId, replacement) {
 
 /** TAGS **/
 
-function handleTagChange(containerId, fieldName, tagsContainerId, tagsFieldContainerId) {
+function handleTagChange(containerId, fieldName, tagsContainerId, tagsFieldContainerId, deleteCallback) {
     var tagSelect = document.getElementById(containerId);
     var newValue = tagSelect.value;
     if(newValue !== '' && getTags(tagsContainerId).indexOf(newValue) === -1) {
-        createTag(tagSelect.value, fieldName, tagsContainerId, tagsFieldContainerId);
+        createTag(tagSelect.value, fieldName, tagsContainerId, tagsFieldContainerId, deleteCallback);
     }
     tagSelect.value = '';
 }
@@ -133,7 +133,7 @@ function getTags(containerId) {
     return tags;
 }
 
-function createTag(label, fieldName, tagsContainerId, tagsFieldContainerId) {
+function createTag(label, fieldName, tagsContainerId, tagsFieldContainerId, deleteCallback) {
 
     if(label === null || label === '') {
         return;
@@ -164,6 +164,11 @@ function createTag(label, fieldName, tagsContainerId, tagsFieldContainerId) {
     button.addEventListener('click', function(event) {
         badgeContainer.removeChild(badge);
         fieldContainer.removeChild(input);
+
+        if(deleteCallback) {
+            deleteCallback();
+        }
+
     });
 
     badge.appendChild(button);
