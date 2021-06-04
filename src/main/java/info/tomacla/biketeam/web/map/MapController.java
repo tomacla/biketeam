@@ -2,6 +2,7 @@ package info.tomacla.biketeam.web.map;
 
 import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.map.MapSorterOption;
+import info.tomacla.biketeam.domain.map.MapType;
 import info.tomacla.biketeam.domain.map.WindDirection;
 import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.service.UrlService;
@@ -56,8 +57,11 @@ public class MapController extends AbstractController {
     @GetMapping
     public String getMaps(@RequestParam(value = "lowerDistance", required = false, defaultValue = "1") double lowerDistance,
                           @RequestParam(value = "upperDistance", required = false, defaultValue = "1000") double upperDistance,
+                          @RequestParam(value = "lowerPositiveElevation", required = false, defaultValue = "0") double lowerPositiveElevation,
+                          @RequestParam(value = "upperPositiveElevation", required = false, defaultValue = "3000") double upperPositiveElevation,
                           @RequestParam(value = "sort", required = false) MapSorterOption sort,
                           @RequestParam(value = "windDirection", required = false) WindDirection windDirection,
+                          @RequestParam(value = "type", required = false) MapType type,
                           @RequestParam(value = "tags", required = false) List<String> tags,
                           @RequestParam(value = "page", defaultValue = "0", required = false) int page,
                           @RequestParam(value = "pageSize", defaultValue = "9", required = false) int pageSize,
@@ -70,6 +74,8 @@ public class MapController extends AbstractController {
                 .withWindDirection(windDirection)
                 .withLowerDistance(lowerDistance)
                 .withUpperDistance(upperDistance)
+                .withLowerPositiveElevation(lowerPositiveElevation)
+                .withUpperPositiveElevation(upperPositiveElevation)
                 .withPage(page)
                 .withPageSize(pageSize)
                 .get();
@@ -79,6 +85,9 @@ public class MapController extends AbstractController {
         Page<Map> maps = mapService.searchMaps(form.getPage(), form.getPageSize(), parser.getSort(),
                 parser.getLowerDistance(),
                 parser.getUpperDistance(),
+                parser.getType(),
+                parser.getLowerPositiveElevation(),
+                parser.getUpperPositiveElevation(),
                 parser.getTags(),
                 parser.getWindDirection());
 

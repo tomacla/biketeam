@@ -88,11 +88,21 @@ public class MapService {
     }
 
     public Page<Map> searchMaps(int page, int pageSize, MapSorterOption sortOption,
-                                double lowerDistance, double upperDistance, List<String> tags, WindDirection windDirection) {
+                                double lowerDistance, double upperDistance, MapType type,
+                                double lowerPositiveElevation, double upperPositiveElevation,
+                                List<String> tags, WindDirection windDirection) {
         Sort sort = getPageSort(sortOption);
         Pageable pageable = PageRequest.of(page, pageSize, sort);
 
-        SearchMapSpecification spec = new SearchMapSpecification(lowerDistance, upperDistance, tags, windDirection);
+        SearchMapSpecification spec = new SearchMapSpecification(
+                lowerDistance,
+                upperDistance,
+                type,
+                lowerPositiveElevation,
+                upperPositiveElevation,
+                tags,
+                windDirection
+        );
 
         return mapRepository.findAll(spec, pageable);
 

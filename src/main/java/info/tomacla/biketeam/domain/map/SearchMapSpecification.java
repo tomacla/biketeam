@@ -14,14 +14,22 @@ public class SearchMapSpecification implements Specification<Map> {
 
     private final double lowerDistance;
     private final double upperDistance;
+    private final MapType type;
+    private final double lowerPositiveElevation;
+    private final double upperPositiveElevation;
     private final List<String> tags;
     private final WindDirection windDirection;
 
-    public SearchMapSpecification(double lowerDistance, double upperDistance, List<String> tags, WindDirection windDirection) {
+    public SearchMapSpecification(double lowerDistance, double upperDistance,
+                                  MapType type, double lowerPositiveElevation, double upperPositiveElevation,
+                                  List<String> tags, WindDirection windDirection) {
         this.lowerDistance = lowerDistance;
         this.upperDistance = upperDistance;
+        this.lowerPositiveElevation = lowerPositiveElevation;
+        this.upperPositiveElevation = upperPositiveElevation;
         this.tags = Objects.requireNonNullElse(tags, new ArrayList<>());
         this.windDirection = windDirection;
+        this.type = type;
     }
 
     @Override
@@ -29,6 +37,11 @@ public class SearchMapSpecification implements Specification<Map> {
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("length"), lowerDistance));
         predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("length"), upperDistance));
+        predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("positiveElevation"), lowerPositiveElevation));
+        predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("positiveElevation"), upperPositiveElevation));
+        if (type != null) {
+            predicates.add(criteriaBuilder.equal(root.get("type"), type));
+        }
         if (!tags.isEmpty()) {
             predicates.add(root.join("tags").in(tags));
         }

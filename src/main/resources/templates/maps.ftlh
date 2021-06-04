@@ -21,20 +21,40 @@
                 </div>
                 <div class="col-12 col-md-5">
                     <div class="input-group">
-                        <label class="input-group-text" for="maps-filter-wind">Vent</label>
-                        <select onchange="setFieldValue('maps-filter-page', 0);" name="windDirection" class="form-select" id="maps-filter-wind">
-                          <option <#if formdata.windDirection == ''>selected</#if> value="">---</option>
-                          <option <#if formdata.windDirection == 'NORTH'>selected</#if> value="NORTH">Nord</option>
-                          <option <#if formdata.windDirection == 'NORTH_EAST'>selected</#if> value="NORTH_EAST">Nord-Est</option>
-                          <option <#if formdata.windDirection == 'EAST'>selected</#if> value="EAST">Est</option>
-                          <option <#if formdata.windDirection == 'SOUTH_EAST'>selected</#if> value="SOUTH_EAST">Sud-Est</option>
-                          <option <#if formdata.windDirection == 'SOUTH'>selected</#if> value="SOUTH">Sud</option>
-                          <option <#if formdata.windDirection == 'SOUTH_WEST'>selected</#if> value="SOUTH_WEST">Sud-Ouest</option>
-                          <option <#if formdata.windDirection == 'WEST'>selected</#if> value="WEST">Ouest</option>
-                          <option <#if formdata.windDirection == 'NORTH_WEST'>selected</#if> value="NORTH_WEST">Nord-Ouest</option>
+                        <label class="input-group-text" for="maps-filter-type">Type</label>
+                        <select onchange="setFieldValue('maps-filter-page', 0);" name="type" class="form-select" id="maps-filter-type">
+                          <option <#if formdata.type == ''>selected</#if> value="">---</option>
+                          <option <#if formdata.type == 'ROAD'>selected</#if> value="ROAD">Route</option>
+                          <option <#if formdata.type == 'GRAVEL'>selected</#if> value="GRAVEL">Gravel</option>
+                          <option <#if formdata.type == 'MTB'>selected</#if> value="MTB">VTT</option>
                         </select>
                      </div>
                   </div>
+                  <div class="col-12 col-md-6">
+                      <div class="input-group">
+                          <span class="input-group-text">Dénivelé de</span>
+                          <input onchange="setFieldValue('maps-filter-page', 0);" autocomplete="off" type="number" required step="1" min="0" value="${formdata.lowerPositiveElevation?c}" name="lowerPositiveElevation" class="form-control" id="maps-filter-elevation">
+                          <span class="input-group-text">à</span>
+                          <input onchange="setFieldValue('maps-filter-page', 0);" autocomplete="off" type="number" required step="1" min="1" value="${formdata.upperPositiveElevation?c}" name="upperPositiveElevation" class="form-control">
+                          <span class="input-group-text">m</span>
+                      </div>
+                  </div>
+                  <div class="col-12 col-md-5">
+                      <div class="input-group">
+                          <label class="input-group-text" for="maps-filter-wind">Vent</label>
+                          <select onchange="setFieldValue('maps-filter-page', 0);" name="windDirection" class="form-select" id="maps-filter-wind">
+                            <option <#if formdata.windDirection == ''>selected</#if> value="">---</option>
+                            <option <#if formdata.windDirection == 'NORTH'>selected</#if> value="NORTH">Nord</option>
+                            <option <#if formdata.windDirection == 'NORTH_EAST'>selected</#if> value="NORTH_EAST">Nord-Est</option>
+                            <option <#if formdata.windDirection == 'EAST'>selected</#if> value="EAST">Est</option>
+                            <option <#if formdata.windDirection == 'SOUTH_EAST'>selected</#if> value="SOUTH_EAST">Sud-Est</option>
+                            <option <#if formdata.windDirection == 'SOUTH'>selected</#if> value="SOUTH">Sud</option>
+                            <option <#if formdata.windDirection == 'SOUTH_WEST'>selected</#if> value="SOUTH_WEST">Sud-Ouest</option>
+                            <option <#if formdata.windDirection == 'WEST'>selected</#if> value="WEST">Ouest</option>
+                            <option <#if formdata.windDirection == 'NORTH_WEST'>selected</#if> value="NORTH_WEST">Nord-Ouest</option>
+                          </select>
+                       </div>
+                    </div>
                   <div class="col-12 col-md-6">
                     <div class="input-group">
                         <label class="input-group-text" for="maps-filter-tags" class="form-label">Tags</label>

@@ -1,6 +1,7 @@
 package info.tomacla.biketeam.web.map;
 
 import info.tomacla.biketeam.domain.map.MapSorterOption;
+import info.tomacla.biketeam.domain.map.MapType;
 import info.tomacla.biketeam.domain.map.WindDirection;
 
 import java.util.ArrayList;
@@ -13,7 +14,10 @@ public class SearchMapForm {
     private int pageSize;
     private double lowerDistance;
     private double upperDistance;
+    private double lowerPositiveElevation;
+    private double upperPositiveElevation;
     private String sort;
+    private String type;
     private String windDirection;
     private List<String> tags;
 
@@ -22,8 +26,11 @@ public class SearchMapForm {
         setPageSize(9);
         setLowerDistance(1);
         setUpperDistance(1000);
+        setLowerPositiveElevation(0);
+        setUpperPositiveElevation(3000);
         setTags(new ArrayList<>());
         setWindDirection("");
+        setType("");
         setSort("");
     }
 
@@ -57,6 +64,30 @@ public class SearchMapForm {
 
     public void setUpperDistance(double upperDistance) {
         this.upperDistance = upperDistance;
+    }
+
+    public double getLowerPositiveElevation() {
+        return lowerPositiveElevation;
+    }
+
+    public void setLowerPositiveElevation(double lowerPositiveElevation) {
+        this.lowerPositiveElevation = lowerPositiveElevation;
+    }
+
+    public double getUpperPositiveElevation() {
+        return upperPositiveElevation;
+    }
+
+    public void setUpperPositiveElevation(double upperPositiveElevation) {
+        this.upperPositiveElevation = upperPositiveElevation;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = Objects.requireNonNullElse(type, "");
     }
 
     public String getSort() {
@@ -115,6 +146,14 @@ public class SearchMapForm {
             return form.getUpperDistance();
         }
 
+        public double getLowerPositiveElevation() {
+            return form.getLowerPositiveElevation();
+        }
+
+        public double getUpperPositiveElevation() {
+            return form.getUpperPositiveElevation();
+        }
+
         public MapSorterOption getSort() {
             if (form.getSort() == null || form.getSort().isBlank()) {
                 return null;
@@ -127,6 +166,13 @@ public class SearchMapForm {
                 return null;
             }
             return WindDirection.valueOf(form.getWindDirection());
+        }
+
+        public MapType getType() {
+            if (form.getType() == null || form.getType().isBlank()) {
+                return null;
+            }
+            return MapType.valueOf(form.getType());
         }
 
         public List<String> getTags() {
@@ -163,6 +209,16 @@ public class SearchMapForm {
             return this;
         }
 
+        public SearchMapFormBuilder withLowerPositiveElevation(double positiveElevation) {
+            form.setLowerPositiveElevation(positiveElevation);
+            return this;
+        }
+
+        public SearchMapFormBuilder withUpperPositiveElevation(double positiveElevation) {
+            form.setUpperPositiveElevation(positiveElevation);
+            return this;
+        }
+
         public SearchMapFormBuilder withSort(MapSorterOption sort) {
             if (sort != null) {
                 form.setSort(sort.name().toLowerCase());
@@ -173,6 +229,13 @@ public class SearchMapForm {
         public SearchMapFormBuilder withWindDirection(WindDirection windDirection) {
             if (windDirection != null) {
                 form.setWindDirection(windDirection.name());
+            }
+            return this;
+        }
+
+        public SearchMapFormBuilder withType(MapType mapType) {
+            if (mapType != null) {
+                form.setType(mapType.name());
             }
             return this;
         }
