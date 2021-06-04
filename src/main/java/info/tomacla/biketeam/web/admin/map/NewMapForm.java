@@ -12,14 +12,14 @@ public class NewMapForm {
     private String id;
     private String name;
     private String type;
-    private boolean visible;
+    private String visible;
     private List<String> tags;
 
     public NewMapForm() {
         setId(null);
         setName(null);
         setType(null);
-        setVisible(false);
+        setVisible(null);
         setTags(null);
     }
 
@@ -47,11 +47,11 @@ public class NewMapForm {
         this.type = Strings.requireNonBlankOrDefault(type, MapType.ROAD.name());
     }
 
-    public boolean isVisible() {
+    public String getVisible() {
         return visible;
     }
 
-    public void setVisible(boolean visible) {
+    public void setVisible(String visible) {
         this.visible = visible;
     }
 
@@ -88,7 +88,7 @@ public class NewMapForm {
         }
 
         public boolean isVisible() {
-            return form.isVisible();
+            return form.getVisible() != null && form.getVisible().equals("on");
         }
 
         public List<String> getTags() {
@@ -120,7 +120,7 @@ public class NewMapForm {
         }
 
         public NewMapFormBuilder withVisible(boolean visible) {
-            form.setVisible(visible);
+            form.setVisible(visible ? "on" : null);
             return this;
         }
 

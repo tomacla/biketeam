@@ -98,6 +98,9 @@ public class AdminConfigurationController extends AbstractController {
         EditSiteConfigurationForm form = EditSiteConfigurationForm.builder()
                 .withTimezone(configuration.getTimezone())
                 .withDefaultSearchTags(configuration.getDefaultSearchTags())
+                .withDefaultPage(configuration.getDefaultPage())
+                .withFeedVisible(configuration.isFeedVisible())
+                .withRidesVisible(configuration.isRidesVisible())
                 .get();
 
         addGlobalValues(principal, model, "Administration - Configuration");
@@ -118,6 +121,9 @@ public class AdminConfigurationController extends AbstractController {
 
             siteConfiguration.setTimezone(parser.getTimezone());
             siteConfiguration.setDefaultSearchTags(parser.getDefaultSearchTags());
+            siteConfiguration.setDefaultPage(parser.getDefaultPage());
+            siteConfiguration.setFeedVisible(parser.isFeedVisible());
+            siteConfiguration.setRidesVisible(parser.isRidesVisible());
             configurationService.save(siteConfiguration);
 
             addGlobalValues(principal, model, "Administration - Configuration");

@@ -9,12 +9,16 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link<#if springMacroRequestContext.requestUri == '/'> active</#if>" href="<@spring.url '/' />">Accueil</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/rides')> active</#if>" href="<@spring.url '/rides' />">Rides</a>
-        </li>
+        <#if _config.feedVisible>
+            <li class="nav-item">
+              <a class="nav-link<#if springMacroRequestContext.requestUri == '/'> active</#if>" href="<@spring.url '/' />">Accueil</a>
+            </li>
+        </#if>
+        <#if _config.ridesVisible>
+            <li class="nav-item">
+              <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/rides')> active</#if>" href="<@spring.url '/rides' />">Rides</a>
+            </li>
+        </#if>
         <li class="nav-item">
           <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/maps')> active</#if>" href="<@spring.url '/maps' />">Maps</a>
         </li>

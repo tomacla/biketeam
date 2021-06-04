@@ -29,8 +29,8 @@
                 </div>
 
                  <div class="mb-3">
-                    <div class="form-check mb-3">
-                      <input id="form-map-visible" name="visible" class="form-check-input" type="checkbox" id="flexCheckDefault"<#if formdata.visible> checked</#if>>
+                    <div class="form-check form-switch mb-3">
+                      <input id="form-map-visible" name="visible" class="form-check-input" type="checkbox" id="flexCheckDefault"<#if formdata.visible?? && formdata.visible == 'on'> checked</#if>>
                       <label class="form-check-label" for="form-map-visible">
                         La map est visible
                       </label>

@@ -1,6 +1,7 @@
 package info.tomacla.biketeam.web.admin.configuration;
 
 import info.tomacla.biketeam.common.Timezone;
+import info.tomacla.biketeam.domain.global.Page;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,10 +11,16 @@ public class EditSiteConfigurationForm {
 
     private String timezone;
     private List<String> defaultSearchTags;
+    private String defaultPage;
+    private String feedVisible;
+    private String ridesVisible;
 
     public EditSiteConfigurationForm() {
         setTimezone(Timezone.DEFAULT_TIMEZONE);
         setDefaultSearchTags(new ArrayList<>());
+        setDefaultPage("");
+        setFeedVisible(null);
+        setRidesVisible(null);
     }
 
     public String getTimezone() {
@@ -30,6 +37,30 @@ public class EditSiteConfigurationForm {
 
     public void setDefaultSearchTags(List<String> defaultSearchTags) {
         this.defaultSearchTags = Objects.requireNonNullElse(defaultSearchTags, new ArrayList<>());
+    }
+
+    public String getDefaultPage() {
+        return defaultPage;
+    }
+
+    public void setDefaultPage(String defaultPage) {
+        this.defaultPage = Objects.requireNonNullElse(defaultPage, Page.FEED.name());
+    }
+
+    public String getFeedVisible() {
+        return feedVisible;
+    }
+
+    public void setFeedVisible(String feedVisible) {
+        this.feedVisible = feedVisible;
+    }
+
+    public String getRidesVisible() {
+        return ridesVisible;
+    }
+
+    public void setRidesVisible(String ridesVisible) {
+        this.ridesVisible = ridesVisible;
     }
 
     public EditSiteConfigurationFormParser parser() {
@@ -56,6 +87,18 @@ public class EditSiteConfigurationForm {
             return form.getDefaultSearchTags();
         }
 
+        public Page getDefaultPage() {
+            return Page.valueOf(form.getDefaultPage());
+        }
+
+        public boolean isFeedVisible() {
+            return form.getFeedVisible() != null && form.getFeedVisible().equals("on");
+        }
+
+        public boolean isRidesVisible() {
+            return form.getRidesVisible() != null && form.getRidesVisible().equals("on");
+        }
+
     }
 
     public static class EditSiteConfigurationFormBuilder {
@@ -75,6 +118,21 @@ public class EditSiteConfigurationForm {
             if (tags != null) {
                 form.setDefaultSearchTags(tags);
             }
+            return this;
+        }
+
+        public EditSiteConfigurationFormBuilder withFeedVisible(boolean feedVisible) {
+            form.setFeedVisible(feedVisible ? "on" : null);
+            return this;
+        }
+
+        public EditSiteConfigurationFormBuilder withRidesVisible(boolean ridesVisible) {
+            form.setRidesVisible(ridesVisible ? "on" : null);
+            return this;
+        }
+
+        public EditSiteConfigurationFormBuilder withDefaultPage(Page defaultPage) {
+            form.setDefaultPage(defaultPage.name());
             return this;
         }
 

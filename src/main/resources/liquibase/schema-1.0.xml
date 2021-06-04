@@ -424,6 +424,18 @@
 
     </changeSet>
 
+    <changeSet id="ADD-PAGES-CONFIGURATION" author="tomacla">
+
+        <addColumn tableName="SITE_CONFIGURATION">
+            <column name="default_page" type="VARCHAR(30)" />
+            <column name="feed_visible" type="BOOLEAN" />
+            <column name="rides_visible" type="BOOLEAN" />
+        </addColumn>
+
+        <sql>update SITE_CONFIGURATION set default_page = 'FEED', feed_visible = TRUE, rides_visible = TRUE</sql>
+
+    </changeSet>
+
 </databaseChangeLog>
 
 

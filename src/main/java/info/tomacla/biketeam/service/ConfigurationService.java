@@ -78,6 +78,12 @@ public class ConfigurationService {
 
     public void save(SiteConfiguration siteConfiguration) {
         log.info("Site configuration is updated");
+
+        if((siteConfiguration.getDefaultPage().equals(Page.FEED) && !siteConfiguration.isFeedVisible())
+        || (siteConfiguration.getDefaultPage().equals(Page.RIDES) && !siteConfiguration.isRidesVisible())) {
+            siteConfiguration.setDefaultPage(Page.MAPS);
+        }
+
         siteConfigurationRepository.save(siteConfiguration);
     }
 
@@ -105,7 +111,8 @@ public class ConfigurationService {
 
         Optional<SiteConfiguration> siteConfiguration = siteConfigurationRepository.findById(1L);
         if (siteConfiguration.isEmpty()) {
-            siteConfigurationRepository.save(new SiteConfiguration(Timezone.DEFAULT_TIMEZONE, null));
+            siteConfigurationRepository.save(new SiteConfiguration(Timezone.DEFAULT_TIMEZONE, null,
+                    Page.FEED, true, true));
         }
 
         if (userService.getByStravaId(adminStravaId).isEmpty()) {

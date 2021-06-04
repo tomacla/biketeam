@@ -1,5 +1,7 @@
 package info.tomacla.biketeam.web.feed;
 
+import info.tomacla.biketeam.domain.global.Page;
+import info.tomacla.biketeam.domain.global.SiteConfiguration;
 import info.tomacla.biketeam.service.FeedService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,15 @@ public class FeedController extends AbstractController {
 
     @GetMapping
     public String getFeed(Principal principal, Model model) {
+
+        final SiteConfiguration siteConfiguration = configurationService.getSiteConfiguration();
+        if(siteConfiguration.getDefaultPage().equals(Page.MAPS)) {
+            return "redirect:/maps";
+        }
+        if(siteConfiguration.getDefaultPage().equals(Page.RIDES)) {
+            return "redirect:/rides";
+        }
+
         addGlobalValues(principal, model, "Accueil");
         model.addAttribute("feed", feedService.listFeed());
         return "root";
