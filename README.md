@@ -4,7 +4,7 @@ Easily create a website for bike groups.
 
 ## Demo
 
-See live demo [here](https://biketeam.tomacla.info)
+See live demo [here](https://demo.biketeam.info)
 
 ## Use sources
 
