@@ -11,6 +11,10 @@
         <appender-ref ref="CONSOLE" />
     </logger>
 
+    <logger name="org.springframework.context.support" level="ERROR" additivity="false">
+        <appender-ref ref="CONSOLE" />
+    </logger>
+
     <logger name="org.apache" level="ERROR" additivity="false">
         <appender-ref ref="CONSOLE" />
     </logger>
