@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "ride")
@@ -31,8 +30,11 @@ public class Ride {
     @Column(length = 8000)
     private String description;
     private boolean imaged;
-    @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Set<RideGroup> groups = new HashSet<>();
+    @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private final Set<RideGroup> groups = new HashSet<>();
+
+    @Transient
+    private int nextGroupIndex = 0;
 
     protected Ride() {
 
@@ -124,13 +126,17 @@ public class Ride {
     }
 
     public void addGroup(RideGroup group) {
-        group.setRide(this);
+        group.setRide(this, nextGroupIndex++);
         groups.add(group);
     }
 
     public void setGroups(Set<RideGroup> groups) {
         Lists.requireNonEmpty(groups, "groups is null");
-        this.groups = groups.stream().peek(g -> g.setRide(this)).collect(Collectors.toSet());
+        groups.forEach(this::addGroup);
+    }
+
+    public void clearGroups() {
+        groups.clear();
     }
 
     @Override

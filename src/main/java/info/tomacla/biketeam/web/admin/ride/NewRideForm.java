@@ -3,7 +3,6 @@ package info.tomacla.biketeam.web.admin.ride;
 import info.tomacla.biketeam.common.Dates;
 import info.tomacla.biketeam.common.Strings;
 import info.tomacla.biketeam.domain.map.Map;
-import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.ride.RideType;
 import info.tomacla.biketeam.domain.template.RideGroupTemplate;
@@ -198,7 +197,7 @@ public class NewRideForm {
             return Optional.empty();
         }
 
-        public Set<RideGroup> getGroups(Ride parent, MapService mapService) {
+        public Set<RideGroup> getGroups(MapService mapService) {
             return form.getGroups().stream().map(g -> {
                 NewRideGroupForm.NewRideGroupFormParser parser = g.parser();
                 String mapId = null;
@@ -213,10 +212,6 @@ public class NewRideForm {
                         parser.getMeetingTime(),
                         parser.getMeetingPoint().orElse(null),
                         new HashSet<>());
-                gg.setRide(parent);
-                if (!parser.getId().equals("new")) {
-                    gg.setId(parser.getId());
-                }
                 return gg;
             }).collect(Collectors.toSet());
         }
@@ -280,7 +275,6 @@ public class NewRideForm {
                     }
 
                     return NewRideGroupForm.builder()
-                            .withId(g.getId())
                             .withName(g.getName())
                             .withMapId(mapId)
                             .withMapName(mapName)

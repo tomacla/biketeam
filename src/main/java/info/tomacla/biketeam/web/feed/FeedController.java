@@ -24,10 +24,10 @@ public class FeedController extends AbstractController {
     public String getFeed(Principal principal, Model model) {
 
         final SiteConfiguration siteConfiguration = configurationService.getSiteConfiguration();
-        if(siteConfiguration.getDefaultPage().equals(Page.MAPS)) {
+        if (siteConfiguration.getDefaultPage().equals(Page.MAPS)) {
             return "redirect:/maps";
         }
-        if(siteConfiguration.getDefaultPage().equals(Page.RIDES)) {
+        if (siteConfiguration.getDefaultPage().equals(Page.RIDES)) {
             return "redirect:/rides";
         }
 

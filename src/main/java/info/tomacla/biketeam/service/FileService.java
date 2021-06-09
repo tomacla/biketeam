@@ -151,7 +151,7 @@ public class FileService {
                         try {
                             Files.delete(path);
                         } catch (IOException e) {
-                            log.error("Unable to delete file " + path.toString(), e);
+                            log.error("Unable to delete file " + path, e);
                         }
                     });
         } catch (IOException e) {

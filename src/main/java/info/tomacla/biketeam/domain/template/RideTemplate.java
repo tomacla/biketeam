@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "ride_template")
@@ -21,8 +20,11 @@ public class RideTemplate {
     private RideType type;
     @Column(length = 8000)
     private String description;
-    @OneToMany(mappedBy = "rideTemplate", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Set<RideGroupTemplate> groups = new HashSet<>();
+    @OneToMany(mappedBy = "rideTemplate", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private final Set<RideGroupTemplate> groups = new HashSet<>();
+
+    @Transient
+    private int nextGroupIndex = 0;
 
     protected RideTemplate() {
 
@@ -75,13 +77,17 @@ public class RideTemplate {
     }
 
     public void addGroup(RideGroupTemplate group) {
-        group.setRideTemplate(this);
+        group.setRideTemplate(this, nextGroupIndex++);
         groups.add(group);
     }
 
     public void setGroups(Set<RideGroupTemplate> groups) {
         Lists.requireNonEmpty(groups, "groups is null");
-        this.groups = groups.stream().peek(g -> g.setRideTemplate(this)).collect(Collectors.toSet());
+        groups.forEach(this::addGroup);
+    }
+
+    public void clearGroups() {
+        this.groups.clear();
     }
 
     @Override

@@ -56,7 +56,7 @@ public class RideGroup {
                      LocalTime meetingTime,
                      Point meetingPoint,
                      Set<User> participants) {
-        this.id = UUID.randomUUID().toString();
+        this.id = UUID.randomUUID().toString(); // tmp id
         setName(name);
         setLowerSpeed(lowerSpeed);
         setUpperSpeed(upperSpeed);
@@ -79,9 +79,6 @@ public class RideGroup {
         return ride;
     }
 
-    public void setRide(Ride ride) {
-        this.ride = Objects.requireNonNull(ride);
-    }
 
     public String getName() {
         return name;
@@ -159,16 +156,21 @@ public class RideGroup {
         this.participants = Objects.requireNonNullElse(participants, new HashSet<>());
     }
 
+    public void setRide(Ride ride, int index) {
+        this.ride = Objects.requireNonNull(ride);
+        this.id = ride.getId() + "-" + index;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RideGroup rideGroup = (RideGroup) o;
-        return id.equals(rideGroup.id) && ride.equals(rideGroup.ride);
+        return id.equals(rideGroup.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, ride);
+        return Objects.hash(id);
     }
 }

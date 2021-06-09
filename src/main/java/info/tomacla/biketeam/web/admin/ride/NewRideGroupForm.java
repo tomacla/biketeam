@@ -9,7 +9,6 @@ import java.util.Optional;
 
 public class NewRideGroupForm {
 
-    private String id;
     private String name;
     private double lowerSpeed;
     private double upperSpeed;
@@ -21,20 +20,11 @@ public class NewRideGroupForm {
     private String meetingTime;
 
     public NewRideGroupForm() {
-        setId(null);
         setName(null);
         setMapId(null);
         setMapName(null);
         setMeetingLocation(null);
         setMeetingTime("12:00");
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = Strings.requireNonBlankOrDefault(id, "new");
     }
 
     public String getName() {
@@ -125,10 +115,6 @@ public class NewRideGroupForm {
             this.form = form;
         }
 
-        public String getId() {
-            return form.getId();
-        }
-
         public String getName() {
             return form.getName();
         }
@@ -171,11 +157,6 @@ public class NewRideGroupForm {
 
         public NewRideGroupFormBuilder() {
             this.form = new NewRideGroupForm();
-        }
-
-        public NewRideGroupFormBuilder withId(String id) {
-            form.setId(id);
-            return this;
         }
 
         public NewRideGroupFormBuilder withName(String name) {

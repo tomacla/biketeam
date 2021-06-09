@@ -1,5 +1,52 @@
 <#include "_includes_head.ftlh">
 
+<script type="text/javascript">
+
+    function resetGroupIndexes() {
+        var groupContainer = document.getElementById('form-ride-groups');
+        var groups = [...groupContainer.getElementsByClassName("form-ride-group")];
+        groups.forEach(function(group, index) {
+
+                [...group.getElementsByTagName("input")].forEach(function(input) {
+
+                    input.setAttribute('name', input.name.replace(/\[[0-9]+\]/, '[' + index  +']'));
+                    input.setAttribute('id', input.id.replace(/-[0-9]+/, '-' + index  ));
+
+                    if(input.classList.contains('form-input-geocode')) {
+                        initGeoCode(input);
+                    }
+
+                });
+                [...group.getElementsByTagName("label")].forEach(function(label) {
+                    label.setAttribute('for', label.getAttribute('for').replace(/-[0-9]+/, '-' + index  ));
+                });
+                [...group.getElementsByTagName("button")].forEach(function(button) {
+                    button.setAttribute('id', button.id.replace(/-[0-9]+/, '-' + index  ));
+                });
+        });
+    }
+
+    function removeGroup(element) {
+        var groupIndex = parseInt(element.id.split('-').pop());
+        var groupContainer = document.getElementById('form-ride-groups');
+        var groups = [...groupContainer.getElementsByClassName("form-ride-group")];
+        if(groups.length === 1) {
+            alert('Il est impossible de supprimer le dernier groupe.');
+        } else {
+            groupContainer.removeChild(groups[groupIndex]);
+            resetGroupIndexes();
+        }
+    }
+
+    function addGroup() {
+        var groupContainer = document.getElementById('form-ride-groups');
+        var groupCopy = groupContainer.firstElementChild.cloneNode(true);
+        groupContainer.appendChild(groupCopy);
+        resetGroupIndexes();
+    }
+
+</script>
+
 <div class="row pt-2 justify-content-center">
 
     <#include "_includes_admin_aside.ftlh">
@@ -35,13 +82,13 @@
 
                 <hr/>
 
-                <h5>Groupes</h5>
+                <h5>Groupes <button onclick="addGroup();" type="button" class="btn btn-sm btn-secondary"><i class="bi bi-plus-circle-fill"></i> Ajouter</button></h5>
+
                 <div id="form-ride-groups">
                     <#list formdata.groups as group>
-                        <div class="border border-dark rounded p-2 m-2">
+                        <div class="form-ride-group border border-dark rounded p-2 m-2">
                             <div class="row">
                                 <div class="mb-3 col-6">
-                                    <input type="hidden" value="${group.id}" name="groups[${group?index}].id" id="form-ride-group-id-${group?index}">
                                     <label for="form-ride-group-name-${group?index}" class="form-label">Nom</label>
                                     <input type="text" autocomplete="off" required value="${group.name}" name="groups[${group?index}].name" id="form-ride-group-name-${group?index}" placeholder="G1 rapide" class="form-control">
                                 </div>
@@ -65,11 +112,14 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="mb-3">
+                                <div class="mb-3 col-8">
                                     <label for="form-ride-group-meetinglocation-${group?index}" class="form-label">Lieu de rendez vous</label>
                                     <input type="text" autocomplete="off" required value="${group.meetingLocation}" name="groups[${group?index}].meetingLocation" id="form-ride-group-meetinglocation-${group?index}" placeholder="Place des fêtes" class="form-input-geocode form-control">
                                     <input type="hidden" value="${group.meetingPointLat?c}" name="groups[${group?index}].meetingPointLat" id="form-ride-group-meetinglocation-${group?index}-lat">
                                     <input type="hidden" value="${group.meetingPointLng?c}" name="groups[${group?index}].meetingPointLng" id="form-ride-group-meetinglocation-${group?index}-lng">
+                                </div>
+                                <div class="mb-3 col-4 align-self-end text-end">
+                                    <button id="form-ride-group-delete-${group?index}" onclick="removeGroup(this);" type="button" class="btn btn-sm btn-secondary"><i class="bi bi-trash"></i> Supprimer</button>
                                 </div>
                            </div>
                         </div>

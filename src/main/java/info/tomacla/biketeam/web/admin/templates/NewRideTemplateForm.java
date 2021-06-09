@@ -3,7 +3,6 @@ package info.tomacla.biketeam.web.admin.templates;
 import info.tomacla.biketeam.common.Strings;
 import info.tomacla.biketeam.domain.ride.RideType;
 import info.tomacla.biketeam.domain.template.RideGroupTemplate;
-import info.tomacla.biketeam.domain.template.RideTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -106,7 +105,7 @@ public class NewRideTemplateForm {
             return form.getDescription();
         }
 
-        public Set<RideGroupTemplate> getGroups(RideTemplate parent) {
+        public Set<RideGroupTemplate> getGroups() {
             return form.getGroups().stream().map(g -> {
                 NewRideGroupTemplateForm.NewRideGroupTemplateFormParser parser = g.parser();
                 RideGroupTemplate gg = new RideGroupTemplate(parser.getName(),
@@ -115,10 +114,6 @@ public class NewRideTemplateForm {
                         parser.getMeetingLocation(),
                         parser.getMeetingTime(),
                         parser.getMeetingPoint().orElse(null));
-                gg.setRideTemplate(parent);
-                if (!parser.getId().equals("new")) {
-                    gg.setId(parser.getId());
-                }
                 return gg;
             }).collect(Collectors.toSet());
         }

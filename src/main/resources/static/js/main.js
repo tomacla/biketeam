@@ -5,9 +5,15 @@ var urlPattern = /(?:(?:https?|ftp):\/\/)?(?:\S+(?::\S*)?@)?(?:(?!10(?:\.\d{1,3}
 
 var geoCodeTimeouts = {};
 document.addEventListener("DOMContentLoaded", function() {
+    Array.from(document.getElementsByClassName('form-size-check')).forEach(initFormSizeCheck);
+    Array.from(document.getElementsByClassName('form-input-geocode')).forEach(initGeoCode);
+    Array.from(document.getElementsByClassName('form-map-control')).forEach(initMapAutoComplete);
+    Array.from(document.getElementsByClassName('wrap-content')).forEach(wrapContent);
+    Tags.init();
+});
 
-    Array.from(document.getElementsByClassName('form-size-check')).forEach(function(input) {
-        input.addEventListener('change', (event) => {
+function initFormSizeCheck(input) {
+    input.addEventListener('change', (event) => {
             var target = event.target;
             if (target.files && target.files[0]) {
                 if (target.files[0].size > (maxFileSizeInMB * 1024 * 1024)) {
@@ -16,11 +22,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             }
         });
+}
 
-    });
-
-
-    Array.from(document.getElementsByClassName('form-input-geocode')).forEach(function(input) {
+function initGeoCode(input) {
 
         input.addEventListener('keyup', function(event) {
 
@@ -42,63 +46,59 @@ document.addEventListener("DOMContentLoaded", function() {
            }
        });
 
-    });
+    }
 
-    Array.from(document.getElementsByClassName('form-map-control')).forEach(function(input) {
+function initMapAutoComplete(input) {
 
-        var autocompleteField = new Autocomplete(input, {
-            data: [],
-            maximumItems: 10,
-            treshold: 2,
-            highlightClass: 'text-warning',
-            onSelectItem: (selected) => {
-                var targetIdField = document.getElementById(input.getAttribute("data-target-id-field"));
-                var targetNameField = document.getElementById(input.getAttribute("data-target-name-field"));
-                targetIdField.value = selected.value;
-                targetNameField.value = selected.label;
-                input.value = '';
-            },
-            onInput: (fieldValue) => {
-                var xmlHttp = new XMLHttpRequest();
-                    xmlHttp.onreadystatechange = function() {
-                        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-                            var r = JSON.parse(xmlHttp.responseText);
-                            var result = [];
-                            Object.keys(r).forEach(function(key) {
-                                result.push({
-                                    label: r[key],
-                                    value: key
-                                });
+    var autocompleteField = new Autocomplete(input, {
+        data: [],
+        maximumItems: 10,
+        treshold: 2,
+        highlightClass: 'text-warning',
+        onSelectItem: (selected) => {
+            var targetIdField = document.getElementById(input.getAttribute("data-target-id-field"));
+            var targetNameField = document.getElementById(input.getAttribute("data-target-name-field"));
+            targetIdField.value = selected.value;
+            targetNameField.value = selected.label;
+            input.value = '';
+        },
+        onInput: (fieldValue) => {
+            var xmlHttp = new XMLHttpRequest();
+                xmlHttp.onreadystatechange = function() {
+                    if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+                        var r = JSON.parse(xmlHttp.responseText);
+                        var result = [];
+                        Object.keys(r).forEach(function(key) {
+                            result.push({
+                                label: r[key],
+                                value: key
                             });
-                            autocompleteField.setData(result);
-                        }
+                        });
+                        autocompleteField.setData(result);
                     }
-                    xmlHttp.open("GET", "/api/autocomplete/maps?q="+encodeURI(fieldValue), true); // true for asynchronous
-                    xmlHttp.send(null);
-            }
-        });
-
+                }
+                xmlHttp.open("GET", "/api/autocomplete/maps?q="+encodeURI(fieldValue), true); // true for asynchronous
+                xmlHttp.send(null);
+        }
     });
 
-    Array.from(document.getElementsByClassName('wrap-content')).forEach(function(contentContainer) {
+}
 
-          var text = contentContainer.innerHTML;
+function wrapContent(contentContainer) {
 
-          text = text.replace(urlPattern, function (url) {
-                             var protocol_pattern = /^(?:(?:https?|ftp):\/\/)/i;
-                             var href = protocol_pattern.test(url) ? url : 'http://' + url;
-                             return '<a class="link-dark" href="' + href + '">' + url + '</a>';
-                           });
+      var text = contentContainer.innerHTML;
 
-          text = text.replace(new RegExp('\r?\n','g'), "<br />");
+      text = text.replace(urlPattern, function (url) {
+                         var protocol_pattern = /^(?:(?:https?|ftp):\/\/)/i;
+                         var href = protocol_pattern.test(url) ? url : 'http://' + url;
+                         return '<a class="link-dark" href="' + href + '">' + url + '</a>';
+                       });
 
-          contentContainer.innerHTML = text;
+      text = text.replace(new RegExp('\r?\n','g'), "<br />");
 
-    });
+      contentContainer.innerHTML = text;
 
-    Tags.init();
-
-});
+}
 
 /** FORMS **/
 

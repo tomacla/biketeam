@@ -43,7 +43,8 @@ public class RideGroupTemplate {
                              String meetingLocation,
                              LocalTime meetingTime,
                              Point meetingPoint) {
-        this.id = UUID.randomUUID().toString();
+
+        this.id = UUID.randomUUID().toString(); // tmp id
         setName(name);
         setLowerSpeed(lowerSpeed);
         setUpperSpeed(upperSpeed);
@@ -64,8 +65,9 @@ public class RideGroupTemplate {
         return rideTemplate;
     }
 
-    public void setRideTemplate(RideTemplate ride) {
-        this.rideTemplate = Objects.requireNonNull(ride);
+    public void setRideTemplate(RideTemplate rideTemplate, int index) {
+        this.rideTemplate = Objects.requireNonNull(rideTemplate);
+        this.id = rideTemplate.getId() + "-" + index;
     }
 
     public String getName() {

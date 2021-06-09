@@ -79,8 +79,8 @@ public class ConfigurationService {
     public void save(SiteConfiguration siteConfiguration) {
         log.info("Site configuration is updated");
 
-        if((siteConfiguration.getDefaultPage().equals(Page.FEED) && !siteConfiguration.isFeedVisible())
-        || (siteConfiguration.getDefaultPage().equals(Page.RIDES) && !siteConfiguration.isRidesVisible())) {
+        if ((siteConfiguration.getDefaultPage().equals(Page.FEED) && !siteConfiguration.isFeedVisible())
+                || (siteConfiguration.getDefaultPage().equals(Page.RIDES) && !siteConfiguration.isRidesVisible())) {
             siteConfiguration.setDefaultPage(Page.MAPS);
         }
 

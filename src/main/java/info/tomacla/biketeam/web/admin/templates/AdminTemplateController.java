@@ -1,19 +1,19 @@
 package info.tomacla.biketeam.web.admin.templates;
 
-import info.tomacla.biketeam.domain.template.RideGroupTemplate;
 import info.tomacla.biketeam.domain.template.RideTemplate;
 import info.tomacla.biketeam.service.RideTemplateService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = "/admin/templates")
@@ -31,11 +31,10 @@ public class AdminTemplateController extends AbstractController {
     }
 
     @GetMapping(value = "/new")
-    public String newTemplate(@RequestParam(value = "numberOfGroups", required = false, defaultValue = "1") int numberOfGroups,
-                              Principal principal,
+    public String newTemplate(Principal principal,
                               Model model) {
 
-        NewRideTemplateForm form = NewRideTemplateForm.builder(numberOfGroups).get();
+        NewRideTemplateForm form = NewRideTemplateForm.builder(1).get();
 
         addGlobalValues(principal, model, "Administration - Nouveau template");
         model.addAttribute("formdata", form);
@@ -94,31 +93,8 @@ public class AdminTemplateController extends AbstractController {
                 target = new RideTemplate(parser.getName(), parser.getType(), parser.getDescription());
             }
 
-            Set<RideGroupTemplate> groups = parser.getGroups(target);
-            Set<String> groupIdsSet = groups.stream().map(RideGroupTemplate::getId).collect(Collectors.toSet());
-
-            // remove groups not in list
-            target.getGroups().removeIf(g -> !groupIdsSet.contains(g.getId()));
-            // update and groups in list
-            for (RideGroupTemplate g : groups) {
-                Optional<RideGroupTemplate> optionalGroup = target.getGroups().stream().filter(eg -> eg.getId().equals(g.getId())).findFirst();
-                if (optionalGroup.isEmpty()) {
-                    target.addGroup(new RideGroupTemplate(g.getName(),
-                            g.getLowerSpeed(),
-                            g.getUpperSpeed(),
-                            g.getMeetingLocation(),
-                            g.getMeetingTime(),
-                            g.getMeetingPoint()));
-                } else {
-                    RideGroupTemplate toModify = optionalGroup.get();
-                    toModify.setLowerSpeed(g.getLowerSpeed());
-                    toModify.setUpperSpeed(g.getUpperSpeed());
-                    toModify.setMeetingTime(g.getMeetingTime());
-                    toModify.setMeetingLocation(g.getMeetingLocation());
-                    toModify.setMeetingPoint(g.getMeetingPoint());
-                    toModify.setName(g.getName());
-                }
-            }
+            target.clearGroups();
+            parser.getGroups().forEach(target::addGroup);
 
             rideTemplateService.save(target);
 
