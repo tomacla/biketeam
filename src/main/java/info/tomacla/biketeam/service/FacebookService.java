@@ -42,6 +42,7 @@ public class FacebookService {
 
         StringBuilder sb = new StringBuilder();
         sb.append(ride.getTitle()).append(" - ").append(Dates.frenchDateFormat(ride.getDate())).append("\n");
+        sb.append(urlService.getRideUrl(ride.getId())).append("\n\n");
         sb.append(ride.getDescription()).append("\n\n");
         ride.getGroups().forEach(group -> {
             sb.append(group.getName()).append(" - ");
@@ -69,6 +70,7 @@ public class FacebookService {
 
         StringBuilder sb = new StringBuilder();
         sb.append(publication.getTitle()).append("\n");
+        sb.append(urlService.getUrl()).append("\n\n");
         sb.append(publication.getContent()).append("\n\n");
 
         final String content = sb.toString();

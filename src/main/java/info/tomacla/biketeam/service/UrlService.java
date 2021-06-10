@@ -9,6 +9,10 @@ public class UrlService {
     @Value("${site.url}")
     private String siteUrl;
 
+    public String getRideUrl(String mapId) {
+        return siteUrl + "/rides/" + mapId;
+    }
+
     public String getMapUrl(String mapId) {
         return siteUrl + "/maps/" + mapId;
     }
@@ -27,6 +31,10 @@ public class UrlService {
 
     public String getUrlWithSuffix(String suffix) {
         return siteUrl + suffix;
+    }
+
+    public String getUrl() {
+        return siteUrl;
     }
 
 
