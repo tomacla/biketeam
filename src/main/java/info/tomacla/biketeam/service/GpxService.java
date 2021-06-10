@@ -1,6 +1,7 @@
 package info.tomacla.biketeam.service;
 
 import info.tomacla.biketeam.common.FileRepositories;
+import info.tomacla.biketeam.common.Rounder;
 import info.tomacla.biketeam.common.Strings;
 import info.tomacla.biketeam.common.Vector;
 import info.tomacla.biketeam.domain.map.Map;
@@ -85,10 +86,10 @@ public class GpxService {
         Map newMap = new Map(
                 Strings.permatitleFromString(gpxPath.getName()),
                 gpxPath.getName(),
-                Math.round(10.0 * gpxPath.getDist()) / 10000.0f,
+                Rounder.round2Decimals(Math.round(10.0 * gpxPath.getDist()) / 10000.0),
                 MapType.ROAD,
-                (int) Math.round(gpxPath.getTotalElevation()),
-                (int) Math.round(gpxPath.getTotalElevationNegative()),
+                Rounder.round1Decimal(gpxPath.getTotalElevation()),
+                Rounder.round1Decimal(gpxPath.getTotalElevationNegative()),
                 new ArrayList<>(),
                 start,
                 end,
