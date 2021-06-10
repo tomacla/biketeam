@@ -55,7 +55,8 @@ public class Map {
 
     }
 
-    public Map(String name,
+    public Map(String id,
+               String name,
                double length,
                MapType type,
                double positiveElevation,
@@ -66,7 +67,7 @@ public class Map {
                WindDirection windDirection,
                boolean crossing,
                boolean visible) {
-        this.id = UUID.randomUUID().toString();
+        this.id = Objects.requireNonNullElse(id, UUID.randomUUID().toString());
         this.postedAt = LocalDate.now();
         setType(type);
         setName(name);
@@ -85,7 +86,7 @@ public class Map {
         return id;
     }
 
-    protected void setId(String id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -133,7 +134,7 @@ public class Map {
         return postedAt;
     }
 
-    protected void setPostedAt(LocalDate postedAt) {
+    public void setPostedAt(LocalDate postedAt) {
         this.postedAt = postedAt;
     }
 

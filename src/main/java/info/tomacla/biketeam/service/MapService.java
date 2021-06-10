@@ -39,13 +39,13 @@ public class MapService {
         mapRepository.save(map);
     }
 
-    public Map save(InputStream is, String defaultName) {
+    public Map save(InputStream is, String defaultName, String forceId) {
 
         log.info("Saving new map with default name {}", defaultName);
 
         Path gpx = fileService.getTempFileFromInputStream(is);
 
-        final Map newMap = gpxService.parseAndStore(gpx, defaultName);
+        final Map newMap = gpxService.parseAndStore(gpx, defaultName, forceId);
 
         return mapRepository.save(newMap);
 

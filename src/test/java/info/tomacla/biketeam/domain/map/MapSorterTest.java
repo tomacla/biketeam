@@ -15,7 +15,8 @@ public class MapSorterTest {
     @Test
     public void test() {
 
-        Map shortM = new Map("short",
+        Map shortM = new Map("1",
+                "short",
                 50.0,
                 MapType.ROAD,
                 100.0,
@@ -27,7 +28,7 @@ public class MapSorterTest {
                 false,
                 false);
 
-        Map longM = new Map("long",
+        Map longM = new Map("2","long",
                 100.0,
                 MapType.ROAD,
                 100.0,

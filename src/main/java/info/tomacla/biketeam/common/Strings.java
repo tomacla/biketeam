@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.common;
 
+import java.text.Normalizer;
 import java.util.Objects;
 
 public class Strings {
@@ -24,6 +25,16 @@ public class Strings {
             return defaultValue;
         }
         return s;
+    }
+
+    public static String permatitleFromString(String input) {
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+        normalized = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+        normalized = normalized.replaceAll("\\?", "");
+        normalized = normalized.replaceAll("\\#", "");
+        normalized = normalized.replaceAll("\\&", "");
+        normalized = normalized.replaceAll("\\s+", "_");
+        return normalized;
     }
 
 }

@@ -101,7 +101,11 @@ public class AdminMapController extends AbstractController {
 
         try {
 
-            final Map newMap = mapService.save(file.getInputStream(), FilenameUtils.removeExtension(file.getOriginalFilename()));
+            final Map newMap = mapService.save(
+                    file.getInputStream(),
+                    FilenameUtils.removeExtension(file.getOriginalFilename()),
+                    null
+            );
             return "redirect:/admin/maps/" + newMap.getId();
 
         } catch (Exception e) {

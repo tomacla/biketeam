@@ -17,8 +17,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -89,11 +93,29 @@ public class ArchiveService {
 
     public static class ImportMapElement {
 
+        private String permatitle;
         private String fileName;
         private String name;
         private MapType type;
         private boolean visible;
         private List<String> tags;
+        private String date;
+
+        public String getPermatitle() {
+            return permatitle;
+        }
+
+        public void setPermatitle(String permatitle) {
+            this.permatitle = permatitle;
+        }
+
+        public String getDate() {
+            return date;
+        }
+
+        public void setDate(String date) {
+            this.date = date;
+        }
 
         public String getFileName() {
             return fileName;
@@ -156,11 +178,18 @@ public class ArchiveService {
 
                 final InputStream fileInputStream = Files.newInputStream(Path.of(workingDirectory.toString(), element.getFileName()));
 
-                final Map newMap = mapService.save(fileInputStream, element.getName());
+                final String targetDate = Optional.ofNullable(element.getDate()).orElse(ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_DATE_TIME));
+
+                if(element.getPermatitle() != null) {
+                    mapService.delete(element.getPermatitle());
+                }
+
+                final Map newMap = mapService.save(fileInputStream, element.getName(), element.getPermatitle());
 
                 newMap.setType(element.getType());
                 newMap.setTags(element.getTags());
                 newMap.setVisible(element.isVisible());
+                newMap.setPostedAt(ZonedDateTime.parse(targetDate).toLocalDate());
                 mapService.save(newMap);
 
                 log.info("End import map {}", element.getFileName());

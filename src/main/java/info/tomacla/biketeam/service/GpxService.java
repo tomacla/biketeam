@@ -1,6 +1,7 @@
 package info.tomacla.biketeam.service;
 
 import info.tomacla.biketeam.common.FileRepositories;
+import info.tomacla.biketeam.common.Strings;
 import info.tomacla.biketeam.common.Vector;
 import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.map.MapType;
@@ -59,7 +60,7 @@ public class GpxService {
     @Autowired
     private TileMapProducer tileMapProducer;
 
-    public Map parseAndStore(Path gpx, String defaultName) {
+    public Map parseAndStore(Path gpx, String defaultName, String forceId) {
 
         GPXPath gpxPath = getGPXPath(gpx, defaultName);
 
@@ -82,6 +83,7 @@ public class GpxService {
         info.tomacla.biketeam.common.Point end = new info.tomacla.biketeam.common.Point(endPoint.getLatDeg(), endPoint.getLonDeg());
 
         Map newMap = new Map(
+                Strings.permatitleFromString(gpxPath.getName()),
                 gpxPath.getName(),
                 Math.round(10.0 * gpxPath.getDist()) / 10000.0f,
                 MapType.ROAD,
@@ -94,6 +96,10 @@ public class GpxService {
                 crossing,
                 false
         );
+
+        if (forceId != null) {
+            newMap.setId(forceId);
+        }
 
         fileService.store(gpx, FileRepositories.GPX_FILES, newMap.getId() + ".gpx");
         fileService.store(fit, FileRepositories.FIT_FILES, newMap.getId() + ".fit");
