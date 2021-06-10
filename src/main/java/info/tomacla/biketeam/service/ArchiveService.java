@@ -180,7 +180,7 @@ public class ArchiveService {
 
                 final String targetDate = Optional.ofNullable(element.getDate()).orElse(ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_DATE_TIME));
 
-                if(element.getPermatitle() != null) {
+                if (element.getPermatitle() != null) {
                     mapService.delete(element.getPermatitle());
                 }
 

@@ -38,6 +38,9 @@ public class RideService {
     private FacebookService facebookService;
 
     @Autowired
+    private MailService mailService;
+
+    @Autowired
     private ConfigurationService configurationService;
 
     public Optional<ImageDescriptor> getImage(String rideId) {
@@ -64,6 +67,7 @@ public class RideService {
                     ride.setPublishedStatus(PublishedStatus.PUBLISHED);
                     save(ride);
                     facebookService.publish(ride);
+                    mailService.publish(ride);
                 });
     }
 

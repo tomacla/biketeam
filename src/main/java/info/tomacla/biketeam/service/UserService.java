@@ -49,4 +49,8 @@ public class UserService {
             save(user);
         });
     }
+
+    public List<User> listUsersWithMailActivated() {
+        return userRepository.findByEmailNotNull();
+    }
 }

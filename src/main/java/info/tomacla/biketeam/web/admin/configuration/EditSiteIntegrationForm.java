@@ -8,6 +8,11 @@ public class EditSiteIntegrationForm {
     private String facebookAppId;
     private String facebookAppSecret;
     private String facebookPageId;
+    private String smtpHost;
+    private String smtpPort;
+    private String smtpUser;
+    private String smtpPassword;
+    private String smtpFrom;
 
     public String getMapBoxAPIKey() {
         return mapBoxAPIKey;
@@ -39,6 +44,51 @@ public class EditSiteIntegrationForm {
 
     public void setFacebookPageId(String facebookPageId) {
         this.facebookPageId = Strings.requireNonBlankOrDefault(facebookPageId, "");
+    }
+
+    public String getSmtpHost() {
+        return smtpHost;
+    }
+
+    public void setSmtpHost(String smtpHost) {
+        this.smtpHost = Strings.requireNonBlankOrDefault(smtpHost, "");
+        ;
+    }
+
+    public String getSmtpPort() {
+        return smtpPort;
+    }
+
+    public void setSmtpPort(String smtpPort) {
+        this.smtpPort = Strings.requireNonBlankOrDefault(smtpPort, "");
+        ;
+    }
+
+    public String getSmtpUser() {
+        return smtpUser;
+    }
+
+    public void setSmtpUser(String smtpUser) {
+        this.smtpUser = Strings.requireNonBlankOrDefault(smtpUser, "");
+        ;
+    }
+
+    public String getSmtpPassword() {
+        return smtpPassword;
+    }
+
+    public void setSmtpPassword(String smtpPassword) {
+        this.smtpPassword = Strings.requireNonBlankOrDefault(smtpPassword, "");
+        ;
+    }
+
+    public String getSmtpFrom() {
+        return smtpFrom;
+    }
+
+    public void setSmtpFrom(String smtpFrom) {
+        this.smtpFrom = Strings.requireNonBlankOrDefault(smtpFrom, "");
+        ;
     }
 
     public EditSiteIntegrationFormParser parser() {
@@ -73,6 +123,26 @@ public class EditSiteIntegrationForm {
             return form.getFacebookPageId();
         }
 
+        public String getSmtpHost() {
+            return form.getSmtpHost();
+        }
+
+        public String getSmtpPort() {
+            return form.getSmtpPort();
+        }
+
+        public String getSmtpUser() {
+            return form.getSmtpUser();
+        }
+
+        public String getSmtpPassword() {
+            return form.getSmtpPassword();
+        }
+
+        public String getSmtpFrom() {
+            return form.getSmtpFrom();
+        }
+
     }
 
     public static class EditSiteIntegrationFormBuilder {
@@ -100,6 +170,31 @@ public class EditSiteIntegrationForm {
 
         public EditSiteIntegrationFormBuilder withFacebookPageId(String facebookPageId) {
             form.setFacebookPageId(facebookPageId);
+            return this;
+        }
+
+        public EditSiteIntegrationFormBuilder withSmtpHost(String smtpHost) {
+            form.setSmtpHost(smtpHost);
+            return this;
+        }
+
+        public EditSiteIntegrationFormBuilder withSmtpPort(String smtpPort) {
+            form.setSmtpPort(smtpPort);
+            return this;
+        }
+
+        public EditSiteIntegrationFormBuilder withSmtpUser(String smtpUser) {
+            form.setSmtpUser(smtpUser);
+            return this;
+        }
+
+        public EditSiteIntegrationFormBuilder withSmtpPassword(String smtpPassword) {
+            form.setSmtpPassword(smtpPassword);
+            return this;
+        }
+
+        public EditSiteIntegrationFormBuilder withSmtpFrom(String smtpFrom) {
+            form.setSmtpFrom(smtpFrom);
             return this;
         }
 

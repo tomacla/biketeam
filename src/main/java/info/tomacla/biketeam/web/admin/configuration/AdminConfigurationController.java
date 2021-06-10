@@ -189,6 +189,11 @@ public class AdminConfigurationController extends AbstractController {
                 .withFacebookAppId(siteIntegration.getFacebookAppId())
                 .withFacebookAppSecret(siteIntegration.getFacebookAppSecret())
                 .withFacebookPageId(siteIntegration.getFacebookPageId())
+                .withSmtpFrom(siteIntegration.getSmtpFrom())
+                .withSmtpHost(siteIntegration.getSmtpHost())
+                .withSmtpPassword(siteIntegration.getSmtpPassword())
+                .withSmtpPort(siteIntegration.getSmtpPort())
+                .withSmtpUser(siteIntegration.getSmtpUser())
                 .get();
 
         addGlobalValues(principal, model, "Administration - Intégrations");
@@ -208,10 +213,17 @@ public class AdminConfigurationController extends AbstractController {
 
         try {
 
-            siteIntegration.setMapBoxAPIKey(form.getMapBoxAPIKey());
-            siteIntegration.setFacebookPageId(form.getFacebookPageId());
-            siteIntegration.setFacebookAppId(form.getFacebookAppId());
-            siteIntegration.setFacebookAppSecret(form.getFacebookAppSecret());
+            final EditSiteIntegrationForm.EditSiteIntegrationFormParser parser = form.parser();
+
+            siteIntegration.setMapBoxAPIKey(parser.getMapBoxAPIKey());
+            siteIntegration.setFacebookPageId(parser.getFacebookPageId());
+            siteIntegration.setFacebookAppId(parser.getFacebookAppId());
+            siteIntegration.setFacebookAppSecret(parser.getFacebookAppSecret());
+            siteIntegration.setSmtpPassword(parser.getSmtpPassword());
+            siteIntegration.setSmtpFrom(parser.getSmtpFrom());
+            siteIntegration.setSmtpHost(parser.getSmtpHost());
+            siteIntegration.setSmtpPort(parser.getSmtpPort());
+            siteIntegration.setSmtpUser(parser.getSmtpUser());
             configurationService.save(siteIntegration);
 
             addGlobalValues(principal, model, "Administration - Intégrations");

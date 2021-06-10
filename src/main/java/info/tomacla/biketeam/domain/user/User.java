@@ -31,6 +31,8 @@ public class User implements Serializable {
     private String profileImage;
     @ManyToMany(mappedBy = "participants", fetch = FetchType.LAZY)
     private Set<RideGroup> rideGroups;
+    @Column(name = "email")
+    private String email;
 
     protected User() {
 
@@ -129,6 +131,14 @@ public class User implements Serializable {
 
     public String getIdentity() {
         return getFirstName() + " " + getLastName();
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = Strings.requireNonBlankOrNull(email);
     }
 
     @Override

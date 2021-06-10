@@ -24,6 +24,16 @@ public class SiteIntegration {
     private String facebookAccessToken;
     @Column(name = "facebook_page_id")
     private String facebookPageId;
+    @Column(name = "smtp_host")
+    private String smtpHost;
+    @Column(name = "smtp_port")
+    private String smtpPort;
+    @Column(name = "smtp_user")
+    private String smtpUser;
+    @Column(name = "smtp_password")
+    private String smtpPassword;
+    @Column(name = "smtp_from")
+    private String smtpFrom;
 
     public SiteIntegration() {
 
@@ -89,6 +99,10 @@ public class SiteIntegration {
         this.facebookPageId = Strings.requireNonBlankOrNull(facebookPageId);
     }
 
+    public boolean isFacebookConfigured() {
+        return getFacebookConfigurationStep() == 4;
+    }
+
     public int getFacebookConfigurationStep() {
         if (facebookAppId != null && facebookAppSecret != null && facebookAccessToken != null && facebookPageId != null) {
             return 4;
@@ -100,6 +114,50 @@ public class SiteIntegration {
             return 2;
         }
         return 1;
+    }
+
+    public String getSmtpHost() {
+        return smtpHost;
+    }
+
+    public void setSmtpHost(String smtpHost) {
+        this.smtpHost = Strings.requireNonBlankOrNull(smtpHost);
+    }
+
+    public String getSmtpPort() {
+        return smtpPort;
+    }
+
+    public void setSmtpPort(String smtpPort) {
+        this.smtpPort = Strings.requireNonBlankOrNull(smtpPort);
+    }
+
+    public String getSmtpUser() {
+        return smtpUser;
+    }
+
+    public void setSmtpUser(String smtpUser) {
+        this.smtpUser = Strings.requireNonBlankOrNull(smtpUser);
+    }
+
+    public String getSmtpPassword() {
+        return smtpPassword;
+    }
+
+    public void setSmtpPassword(String smtpPassword) {
+        this.smtpPassword = Strings.requireNonBlankOrNull(smtpPassword);
+    }
+
+    public String getSmtpFrom() {
+        return smtpFrom;
+    }
+
+    public void setSmtpFrom(String smtpFrom) {
+        this.smtpFrom = Strings.requireNonBlankOrNull(smtpFrom);
+    }
+
+    public boolean isSmtpConfigured() {
+        return smtpHost != null && smtpFrom != null && smtpUser != null && smtpPassword != null && smtpPort != null;
     }
 
 }

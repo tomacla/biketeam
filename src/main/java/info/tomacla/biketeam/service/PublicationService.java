@@ -34,6 +34,8 @@ public class PublicationService {
     @Autowired
     private FileService fileService;
 
+    @Autowired
+    private MailService mailService;
 
     public void publishPublications() {
         publicationRepository.findAllByPublishedStatusAndPublishedAtLessThan(PublishedStatus.UNPUBLISHED, ZonedDateTime.now(configurationService.getTimezone())).forEach(pub -> {
@@ -41,6 +43,7 @@ public class PublicationService {
             pub.setPublishedStatus(PublishedStatus.PUBLISHED);
             publicationRepository.save(pub);
             facebookService.publish(pub);
+            mailService.publish(pub);
         });
     }
 

@@ -13,4 +13,6 @@ public interface UserRepository extends CrudRepository<User, String> {
 
     Optional<User> findByStravaId(Long stravaId);
 
+    List<User> findByEmailNotNull();
+
 }

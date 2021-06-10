@@ -436,6 +436,22 @@
 
     </changeSet>
 
+    <changeSet id="GITHUB-17-ADD-SMTP-INTEGRATION" author="tomacla">
+
+        <addColumn tableName="SITE_INTEGRATION">
+            <column name="smtp_host" type="VARCHAR(50)" />
+            <column name="smtp_port" type="VARCHAR(10)" />
+            <column name="smtp_user" type="VARCHAR(100)" />
+            <column name="smtp_password" type="VARCHAR(100)" />
+            <column name="smtp_from" type="VARCHAR(100)" />
+        </addColumn>
+
+        <addColumn tableName="USER">
+            <column name="email" type="VARCHAR(150)" />
+        </addColumn>
+
+    </changeSet>
+
 </databaseChangeLog>
 
 

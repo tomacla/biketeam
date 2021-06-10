@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class FacebookService {
+public class FacebookService implements ExternalPublicationService {
 
     private static final Logger log = LoggerFactory.getLogger(FacebookService.class);
 
@@ -84,38 +84,41 @@ public class FacebookService {
 
     private void publish(String content, Path image) {
 
+        final SiteIntegration siteIntegration = configurationService.getSiteIntegration();
+        if (!siteIntegration.isFacebookConfigured()) {
+            return;
+        }
+
         try {
-            final SiteIntegration siteIntegration = configurationService.getSiteIntegration();
-            if (siteIntegration.getFacebookConfigurationStep() == 4) {
-
-                final DefaultFacebookClient facebookClient = new DefaultFacebookClient(
-                        siteIntegration.getFacebookAccessToken(),
-                        Version.LATEST
-                );
-
-                final Optional<String> optionalPageAccessToken = getPageAccessToken(facebookClient);
-                if (optionalPageAccessToken.isPresent()) {
-
-                    final String token = optionalPageAccessToken.get();
-
-                    final FacebookClient publishClient = facebookClient.createClientWithAccessToken(token);
-
-                    if (image != null) {
-                        final BinaryAttachment attachment = BinaryAttachment.with(image.getFileName().toString(), Files.readAllBytes(image));
-                        publishClient.publish(siteIntegration.getFacebookPageId() + "/photos",
-                                GraphResponse.class,
-                                attachment,
-                                Parameter.with("message", content));
-                    } else {
-                        publishClient.publish(siteIntegration.getFacebookPageId() + "/feed",
-                                GraphResponse.class,
-                                Parameter.with("message", content));
-                    }
 
 
+            final DefaultFacebookClient facebookClient = new DefaultFacebookClient(
+                    siteIntegration.getFacebookAccessToken(),
+                    Version.LATEST
+            );
+
+            final Optional<String> optionalPageAccessToken = getPageAccessToken(facebookClient);
+            if (optionalPageAccessToken.isPresent()) {
+
+                final String token = optionalPageAccessToken.get();
+
+                final FacebookClient publishClient = facebookClient.createClientWithAccessToken(token);
+
+                if (image != null) {
+                    final BinaryAttachment attachment = BinaryAttachment.with(image.getFileName().toString(), Files.readAllBytes(image));
+                    publishClient.publish(siteIntegration.getFacebookPageId() + "/photos",
+                            GraphResponse.class,
+                            attachment,
+                            Parameter.with("message", content));
+                } else {
+                    publishClient.publish(siteIntegration.getFacebookPageId() + "/feed",
+                            GraphResponse.class,
+                            Parameter.with("message", content));
                 }
 
             }
+
+
         } catch (Exception e) {
             log.error("Error while publishing to facebook : " + content, e);
         }

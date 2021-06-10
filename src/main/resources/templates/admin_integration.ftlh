@@ -7,13 +7,41 @@
     <div class="col-12 col-md-8">
 
         <form name="form-integration" action="<@spring.url '/admin/integration' />" method="POST" class="border rounded p-4">
+             
              <h5>MapBox</h5>
              <div class="alert alert-info" role="alert">
                Si une clé mapbox est renseignée, elle sera utilisée pour les fonds de carte au lieu du fond OpenStreeMap par défaut.
              </div>
             <div class="mb-3">
               <label for="form-integration-mapbox" class="form-label">Mapbox API Key</label>
-              <input autocomplete="off" name="mapBoxAPIKey" value="${formdata.mapBoxAPIKey}" type="test" class="form-control" id="form-integration-mapBox">
+              <input autocomplete="off" name="mapBoxAPIKey" value="${formdata.mapBoxAPIKey}" type="text" class="form-control" id="form-integration-mapBox">
+            </div>
+
+            <hr/>
+            
+             <h5>Email</h5>
+             <div class="alert alert-info" role="alert">
+               Si la configuration email est renseignée, les utilisateurs pourront choisir de recevoir les rides et les publications par email.
+             </div>
+             <div class="mb-3">
+               <label for="form-integration-smtphost" class="form-label">Host SMTP</label>
+               <input autocomplete="off" name="smtpHost" value="${formdata.smtpHost}" type="text" class="form-control" id="form-integration-smtphost">
+             </div>
+             <div class="mb-3">
+                <label for="form-integration-smtpPort" class="form-label">Port SMTP</label>
+                <input autocomplete="off" name="smtpPort" value="${formdata.smtpPort}" type="text" class="form-control" id="form-integration-smtpPort">
+              </div>
+               <div class="mb-3">
+                  <label for="form-integration-smtpuser" class="form-label">Utilisateur</label>
+                  <input autocomplete="off" name="smtpUser" value="${formdata.smtpUser}" type="text" class="form-control" id="form-integration-smtpuser">
+                </div>
+             <div class="mb-3">
+                <label for="form-integration-smtppassword" class="form-label">Mot de passe</label>
+                <input autocomplete="off" name="smtpPassword" value="${formdata.smtpPassword}" type="password" class="form-control" id="form-integration-smtppassword">
+              </div>
+           <div class="mb-3">
+              <label for="form-integration-smtpFrom" class="form-label">Email de provenance (exemple : no-replay@domain.com)</label>
+              <input autocomplete="off" name="smtpFrom" value="${formdata.smtpFrom}" type="email" class="form-control" id="form-integration-smtpFrom">
             </div>
 
             <hr/>
@@ -48,11 +76,11 @@
 
                 <div class="mb-3">
                   <label for="form-integration-facebookAppId" class="form-label">App ID</label>
-                  <input autocomplete="off" name="facebookAppId" value="${formdata.facebookAppId}" type="test" class="form-control" id="form-integration-facebookAppId">
+                  <input autocomplete="off" name="facebookAppId" value="${formdata.facebookAppId}" type="text" class="form-control" id="form-integration-facebookAppId">
                 </div>
                 <div class="mb-3">
                   <label for="form-integration-facebookAppSecret" class="form-label">App Secret</label>
-                  <input autocomplete="off" name="facebookAppSecret" value="${formdata.facebookAppSecret}" type="test" class="form-control" id="form-integration-facebookAppSecret">
+                  <input autocomplete="off" name="facebookAppSecret" value="${formdata.facebookAppSecret}" type="text" class="form-control" id="form-integration-facebookAppSecret">
                 </div>
                 <input name="facebookPageId" value="" type="hidden">
 
@@ -73,7 +101,7 @@
 
                 <div class="mb-3">
                   <label for="form-integration-facebookPageId" class="form-label">Page ID</label>
-                  <input autocomplete="off" name="facebookPageId" value="${formdata.facebookPageId}" type="test" class="form-control" id="form-integration-facebookPageId">
+                  <input autocomplete="off" name="facebookPageId" value="${formdata.facebookPageId}" type="text" class="form-control" id="form-integration-facebookPageId">
                 </div>
 
             <#elseif facebookConfigurationStep == 4>

@@ -17,6 +17,17 @@
                     <dd>${user.city}</dd>
                 </#if>
             </dl>
+            <hr/>
+            <div class="alert alert-info" role="alert">
+               Pour recevoir les nouveaux rides et publications par email, saisissez l'adresse ci dessous.
+             </div>
+            <form name="form-user" action="<@spring.url '/users/me' />" method="POST">
+                <div class="mb-3">
+                    <label for="form-user-email" class="form-label">Email</label>
+                    <input autocomplete="off" name="email" value="${user.email!''}" type="email" class="form-control" id="form-user-email">
+                  </div>
+                  <button type="submit" class="btn btn-secondary">Enregistrer</button>
+            </form>
         </div>
 
     </div>
