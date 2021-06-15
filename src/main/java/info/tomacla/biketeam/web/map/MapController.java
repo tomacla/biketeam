@@ -4,6 +4,7 @@ import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.map.MapSorterOption;
 import info.tomacla.biketeam.domain.map.MapType;
 import info.tomacla.biketeam.domain.map.WindDirection;
+import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.service.UrlService;
 import info.tomacla.biketeam.web.AbstractController;
@@ -21,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Controller
-@RequestMapping(value = "/maps")
+@RequestMapping(value = "/{teamId}/maps")
 public class MapController extends AbstractController {
 
     @Autowired
@@ -31,31 +32,36 @@ public class MapController extends AbstractController {
     private UrlService urlService;
 
     @GetMapping(value = "/{mapId}")
-    public String getMap(@PathVariable("mapId") String mapId,
+    public String getMap(@PathVariable("teamId") String teamId,
+                         @PathVariable("mapId") String mapId,
                          Principal principal,
                          Model model) {
 
-        Optional<Map> optionalMap = mapService.get(mapId);
+        final Team team = checkTeam(teamId);
+
+        Optional<Map> optionalMap = mapService.get(teamId, mapId);
         if (optionalMap.isEmpty()) {
-            return "redirect:/maps";
+            return redirectToMaps(teamId);
         }
 
         Map map = optionalMap.get();
-        addOpenGraphValues(model,
+        addOpenGraphValues(team,
+                model,
                 map.getName(),
-                urlService.getMapImageUrl(map.getId()),
-                urlService.getMapUrl(map.getId()),
+                urlService.getMapImageUrl(map.getTeamId(), map.getId()),
+                urlService.getMapUrl(map.getTeamId(), map.getId()),
                 map.getDescription()
         );
 
-        addGlobalValues(principal, model, "Map " + map.getName());
+        addGlobalValues(principal, model, "Map " + map.getName(), team);
         model.addAttribute("map", map);
         return "map";
 
     }
 
     @GetMapping
-    public String getMaps(@RequestParam(value = "lowerDistance", required = false, defaultValue = "1") double lowerDistance,
+    public String getMaps(@PathVariable("teamId") String teamId,
+                          @RequestParam(value = "lowerDistance", required = false, defaultValue = "1") double lowerDistance,
                           @RequestParam(value = "upperDistance", required = false, defaultValue = "1000") double upperDistance,
                           @RequestParam(value = "lowerPositiveElevation", required = false, defaultValue = "0") double lowerPositiveElevation,
                           @RequestParam(value = "upperPositiveElevation", required = false, defaultValue = "3000") double upperPositiveElevation,
@@ -68,8 +74,10 @@ public class MapController extends AbstractController {
                           Principal principal,
                           Model model) {
 
+        final Team team = checkTeam(teamId);
+
         SearchMapForm form = SearchMapForm.builder()
-                .withTags(tags == null ? configurationService.getDefaultSearchTags() : tags)
+                .withTags(tags == null ? team.getConfiguration().getDefaultSearchTags() : tags)
                 .withSort(sort)
                 .withWindDirection(windDirection)
                 .withLowerDistance(lowerDistance)
@@ -78,11 +86,16 @@ public class MapController extends AbstractController {
                 .withUpperPositiveElevation(upperPositiveElevation)
                 .withPage(page)
                 .withPageSize(pageSize)
+                .withType(type)
                 .get();
 
         SearchMapForm.SearchMapFormParser parser = form.parser();
 
-        Page<Map> maps = mapService.searchMaps(form.getPage(), form.getPageSize(), parser.getSort(),
+        Page<Map> maps = mapService.searchMaps(
+                teamId,
+                form.getPage(),
+                form.getPageSize(),
+                parser.getSort(),
                 parser.getLowerDistance(),
                 parser.getUpperDistance(),
                 parser.getType(),
@@ -91,13 +104,12 @@ public class MapController extends AbstractController {
                 parser.getTags(),
                 parser.getWindDirection());
 
-        addGlobalValues(principal, model, "Maps");
+        addGlobalValues(principal, model, "Maps", team);
         model.addAttribute("maps", maps.getContent());
         model.addAttribute("pages", maps.getTotalPages());
-        model.addAttribute("tags", mapService.listTags());
+        model.addAttribute("tags", mapService.listTags(teamId));
         model.addAttribute("formdata", form);
         return "maps";
     }
-
 
 }

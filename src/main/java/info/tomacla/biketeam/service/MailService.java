@@ -3,9 +3,9 @@ package info.tomacla.biketeam.service;
 import info.tomacla.biketeam.common.Dates;
 import info.tomacla.biketeam.common.FileExtension;
 import info.tomacla.biketeam.common.ImageDescriptor;
-import info.tomacla.biketeam.domain.global.SiteDescription;
 import info.tomacla.biketeam.domain.publication.Publication;
 import info.tomacla.biketeam.domain.ride.Ride;
+import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,7 @@ public class MailService implements ExternalPublicationService {
     private static final Logger log = LoggerFactory.getLogger(MailService.class);
 
     @Autowired
-    private ConfigurationService configurationService;
+    private TeamService teamService;
 
     @Autowired
     private RideService rideService;
@@ -37,9 +37,7 @@ public class MailService implements ExternalPublicationService {
     @Autowired
     private SMTPService smtpService;
 
-    public void publish(Ride ride) {
-
-        final SiteDescription siteDescription = configurationService.getSiteDescription();
+    public void publish(Team team, Ride ride) {
 
         userService.listUsersWithMailActivated().forEach(user -> {
 
@@ -48,7 +46,7 @@ public class MailService implements ExternalPublicationService {
             StringBuilder sb = new StringBuilder();
             sb.append("<html>").append("<head></head>").append("<body>");
             sb.append("<p>").append(ride.getTitle()).append(" - ").append(Dates.frenchDateFormat(ride.getDate())).append("</p>");
-            sb.append("<p>").append(getHtmlLink(urlService.getRideUrl(ride.getId()))).append("</p>");
+            sb.append("<p>").append(getHtmlLink(urlService.getRideUrl(team.getId(), ride.getId()))).append("</p>");
             sb.append("<p>").append(ride.getDescription()).append("</p>");
             sb.append("<br/>");
             ride.getGroups().forEach(group -> {
@@ -57,30 +55,28 @@ public class MailService implements ExternalPublicationService {
                 sb.append("Départ ").append(Dates.formatTime(group.getMeetingTime())).append(" - ");
                 sb.append(group.getMeetingLocation()).append("<br/>");
                 if (group.getMapId() != null) {
-                    sb.append("Map : ").append(getHtmlLink(urlService.getMapUrl(group.getMapId()))).append("<br/>");
+                    sb.append("Map : ").append(getHtmlLink(urlService.getMapUrl(team.getId(), group.getMapId()))).append("<br/>");
                 }
                 sb.append("</p>");
             });
             if (ride.isImaged()) {
                 sb.append("<p><img src=\"cid:Image\" /></p>");
             }
-            sb.append("<br/>").append("<p>").append(siteDescription.getSitename()).append("</p>");
+            sb.append("<br/>").append("<p>").append(team.getName()).append("</p>");
             sb.append("</body>").append("</html>");
 
             final String content = sb.toString();
             if (ride.isImaged()) {
-                rideService.getImage(ride.getId()).ifPresent(rideImage -> this.publish(user, ride.getTitle(), content, rideImage.getPath()));
+                rideService.getImage(team.getId(), ride.getId()).ifPresent(rideImage -> this.publish(team, user, ride.getTitle(), content, rideImage.getPath()));
             } else {
-                this.publish(user, ride.getTitle(), content, null);
+                this.publish(team, user, ride.getTitle(), content, null);
             }
 
         });
 
     }
 
-    public void publish(Publication publication) {
-
-        final SiteDescription siteDescription = configurationService.getSiteDescription();
+    public void publish(Team team, Publication publication) {
 
         userService.listUsersWithMailActivated().forEach(user -> {
 
@@ -94,15 +90,15 @@ public class MailService implements ExternalPublicationService {
             if (publication.isImaged()) {
                 sb.append("<p><img src=\"cid:Image\" /></p>");
             }
-            sb.append("<br/>").append("<p>").append(siteDescription.getSitename()).append("</p>");
+            sb.append("<br/>").append("<p>").append(team.getName()).append("</p>");
             sb.append("</body>").append("</html>");
 
             final String content = sb.toString();
 
             if (publication.isImaged()) {
-                publicationService.getImage(publication.getId()).ifPresent(pubImage -> this.publish(user, publication.getTitle(), content, pubImage.getPath()));
+                publicationService.getImage(team.getId(), publication.getId()).ifPresent(pubImage -> this.publish(team, user, publication.getTitle(), content, pubImage.getPath()));
             } else {
-                this.publish(user, publication.getTitle(), content, null);
+                this.publish(team, user, publication.getTitle(), content, null);
             }
 
         });
@@ -113,7 +109,7 @@ public class MailService implements ExternalPublicationService {
         return "<a href=\"" + href + "\">" + href + "</a>";
     }
 
-    private void publish(User user, String subject, String content, Path image) {
+    private void publish(Team team, User user, String subject, String content, Path image) {
 
         try {
 
@@ -122,7 +118,7 @@ public class MailService implements ExternalPublicationService {
                 final FileExtension fileExtension = FileExtension.findByFileName(image.getFileName().toString()).get();
                 embedImage = ImageDescriptor.of(fileExtension, image);
             }
-            smtpService.send(user.getEmail(), user.getFirstName() + " " + user.getLastName(), subject, content, embedImage);
+            smtpService.send(team, user.getEmail(), user.getFirstName() + " " + user.getLastName(), subject, content, embedImage);
 
         } catch (Exception e) {
             log.error("Error while publishing by email : " + content, e);

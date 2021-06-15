@@ -10,6 +10,14 @@ document.addEventListener("DOMContentLoaded", function() {
     Array.from(document.getElementsByClassName('form-map-control')).forEach(initMapAutoComplete);
     Array.from(document.getElementsByClassName('wrap-content')).forEach(wrapContent);
     Tags.init();
+
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl, {
+        container: 'body'
+      })
+    })
+
 });
 
 function initFormSizeCheck(input) {
@@ -77,7 +85,7 @@ function initMapAutoComplete(input) {
                         autocompleteField.setData(result);
                     }
                 }
-                xmlHttp.open("GET", "/api/autocomplete/maps?q="+encodeURI(fieldValue), true); // true for asynchronous
+                xmlHttp.open("GET", "/api/" + input.getAttribute("data-team-id") + "/autocomplete/maps?q="+encodeURI(fieldValue), true); // true for asynchronous
                 xmlHttp.send(null);
         }
     });

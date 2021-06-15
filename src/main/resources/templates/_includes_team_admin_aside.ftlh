@@ -1,0 +1,11 @@
+<ul class="col-12 col-md-4 list-group mb-4">
+  <a href="<@spring.url '/' + team.id + '/admin' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri == '/' + team.id + '/admin'> list-group-item-secondary</#if>">Description</a>
+  <a href="<@spring.url '/' + team.id + '/admin/configuration' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri == '/' + team.id + '/admin/configuration'> list-group-item-secondary</#if>">Configuration</a>
+  <a href="<@spring.url '/' + team.id + '/admin/integration' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri == '/' + team.id + '/admin/integration'> list-group-item-secondary</#if>">Intégrations</a>
+  <a href="<@spring.url '/' + team.id + '/admin/logo' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri == '/' + team.id + '/admin/logo'> list-group-item-secondary</#if>">Logo</a>
+  <a href="<@spring.url '/' + team.id + '/admin/users' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri?starts_with('/' + team.id + '/admin/users')> list-group-item-secondary</#if>">Membres</a>
+  <a href="<@spring.url '/' + team.id + '/admin/templates' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri?starts_with('/' + team.id + '/admin/templates')> list-group-item-secondary</#if>">Templates</a>
+  <a href="<@spring.url '/' + team.id + '/admin/publications' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri?starts_with('/' + team.id + '/admin/publications')> list-group-item-secondary</#if>">Publications</a>
+  <a href="<@spring.url '/' + team.id + '/admin/rides' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri?starts_with('/' + team.id + '/admin/rides')> list-group-item-secondary</#if>">Rides</a>
+  <a href="<@spring.url '/' + team.id + '/admin/maps' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri?starts_with('/' + team.id + '/admin/maps')> list-group-item-secondary</#if>">Maps</a>
+</ul>

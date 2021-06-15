@@ -14,6 +14,8 @@ public class Publication {
 
     @Id
     private String id;
+    @Column(name = "team_id")
+    private String teamId;
     @Enumerated(EnumType.STRING)
     @Column(name = "published_status")
     private PublishedStatus publishedStatus;
@@ -30,11 +32,13 @@ public class Publication {
 
     }
 
-    public Publication(String title,
+    public Publication(String teamId,
+                       String title,
                        String content,
                        ZonedDateTime publishedAt,
                        boolean imaged) {
         this.id = UUID.randomUUID().toString();
+        setTeamId(teamId);
         this.postedAt = ZonedDateTime.now();
         this.publishedStatus = PublishedStatus.UNPUBLISHED;
         setPublishedAt(publishedAt);
@@ -49,6 +53,14 @@ public class Publication {
 
     protected void setId(String id) {
         this.id = id;
+    }
+
+    public String getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(String teamId) {
+        this.teamId = Objects.requireNonNull(teamId);
     }
 
     public PublishedStatus getPublishedStatus() {

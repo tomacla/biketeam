@@ -52,6 +52,7 @@ public class AuthUserService extends DefaultOAuth2UserService {
                     (String) attributes.get("username"),
                     (String) attributes.get("city"),
                     (String) attributes.get("profile_medium"),
+                    null,
                     null
             );
             userService.save(u);

@@ -6,125 +6,394 @@
             http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
 
-    <changeSet id="INITIAL-COMMIT" author="tomacla">
+    <changeSet id="schema-initial-version" author="tomacla">
 
-        <createTable tableName="GLOBAL_DATA">
-            <column name="ID" type="BIGINT">
+        <createTable tableName="team">
+            <column name="id" type="VARCHAR(20)">
                 <constraints nullable="false"/>
             </column>
-            <column name="ADDRESS_POSTAL_CITY" type="VARCHAR(255)"/>
-            <column name="ADDRESS_POSTAL_CODE" type="VARCHAR(10)"/>
-            <column name="ADDRESS_STREET_LINE" type="VARCHAR(255)"/>
-            <column name="SITENAME" type="VARCHAR(2000)"/>
-            <column name="DESCRIPTION" type="VARCHAR(2000)"/>
-            <column name="PHONE_NUMBER" type="VARCHAR(255)"/>
-            <column name="EMAIL" type="VARCHAR(255)"/>
-            <column name="FACEBOOK" type="VARCHAR(255)"/>
-            <column name="TWITTER" type="VARCHAR(255)"/>
-            <column name="MAP_BOX_API_KEY" type="VARCHAR(255)"/>
-            <column name="OTHER" type="VARCHAR(2000)"/>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="city" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="country" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="DATE">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
 
-        <addPrimaryKey tableName="GLOBAL_DATA" columnNames="ID"/>
+        <addPrimaryKey tableName="team" columnNames="id"/>
 
-        <createTable tableName="MAP">
-            <column name="ID" type="VARCHAR(255)">
+        <createTable tableName="team_description">
+            <column name="team_id" type="VARCHAR(20)">
                 <constraints nullable="false"/>
             </column>
-            <column name="CROSSING" type="BOOLEAN">
-                <constraints nullable="false"/>
-            </column>
-            <column name="END_POINT_LAT" type="DOUBLE"/>
-            <column name="END_POINT_LNG" type="DOUBLE"/>
-            <column name="LENGTH" type="DOUBLE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="NAME" type="VARCHAR(255)"/>
-            <column name="NEGATIVE_ELEVATION" type="DOUBLE"/>
-            <column name="POSITIVE_ELEVATION" type="DOUBLE"/>
-            <column name="POSTED_AT" type="DATE"/>
-            <column name="START_POINT_LAT" type="DOUBLE"/>
-            <column name="START_POINT_LNG" type="DOUBLE"/>
-            <column name="VISIBLE" type="BOOLEAN">
-                <constraints nullable="false"/>
-            </column>
-            <column name="WIND_DIRECTION" type="VARCHAR(15)"/>
+            <column name="address_postal_city" type="VARCHAR(255)"/>
+            <column name="address_postal_code" type="VARCHAR(10)"/>
+            <column name="address_street_line" type="VARCHAR(255)"/>
+            <column name="description" type="VARCHAR(2000)"/>
+            <column name="phone_number" type="VARCHAR(255)"/>
+            <column name="email" type="VARCHAR(255)"/>
+            <column name="facebook" type="VARCHAR(255)"/>
+            <column name="twitter" type="VARCHAR(255)"/>
+            <column name="other" type="VARCHAR(2000)"/>
         </createTable>
 
-        <addPrimaryKey tableName="MAP" columnNames="ID"/>
+        <addPrimaryKey tableName="team_description" columnNames="team_id"/>
 
-        <createTable tableName="MAP_TAGS">
-            <column name="MAP_ID" type="VARCHAR(255)">
+        <createTable tableName="team_integration">
+            <column name="team_id" type="VARCHAR(20)">
                 <constraints nullable="false"/>
             </column>
-            <column name="TAGS" type="VARCHAR(255)"/>
+            <column name="facebook_access_token" type="VARCHAR(300)"/>
+            <column name="facebook_page_id" type="VARCHAR(100)"/>
         </createTable>
 
-        <createIndex tableName="MAP_TAGS" indexName="MAP_TAGS_MAP_ID">
-            <column name="MAP_ID"/>
+        <addPrimaryKey tableName="team_integration" columnNames="team_id"/>
+
+        <createTable tableName="team_configuration">
+            <column name="team_id" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="timezone" type="VARCHAR(50)"/>
+            <column name="default_page" type="VARCHAR(30)"/>
+            <column name="feed_visible" type="BOOLEAN"/>
+            <column name="rides_visible" type="BOOLEAN"/>
+        </createTable>
+
+        <createTable tableName="team_configuration_default_search_tags">
+            <column name="team_configuration_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="default_search_tags" type="VARCHAR(255)"/>
+        </createTable>
+
+        <addPrimaryKey tableName="team_configuration" columnNames="team_id"/>
+
+        <addForeignKeyConstraint baseTableName="team_integration"
+                                 baseColumnNames="team_id"
+                                 constraintName="fk_team_integration_team"
+                                 referencedTableName="team"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="team_configuration"
+                                 baseColumnNames="team_id"
+                                 constraintName="fk_team_configuration_team"
+                                 referencedTableName="team"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="team_description"
+                                 baseColumnNames="team_id"
+                                 constraintName="fk_team_description_team"
+                                 referencedTableName="team"
+                                 referencedColumnNames="id"/>
+
+        <createTable tableName="map">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="team_id" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="crossing" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="length" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="negative_elevation" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="positive_elevation" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="posted_at" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_point_lat" type="DOUBLE"/>
+            <column name="start_point_lng" type="DOUBLE"/>
+            <column name="end_point_lat" type="DOUBLE"/>
+            <column name="end_point_lng" type="DOUBLE"/>
+            <column name="visible" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="wind_direction" type="VARCHAR(15)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="map" columnNames="id"/>
+
+        <createIndex tableName="map" indexName="map_team_id">
+            <column name="team_id"/>
         </createIndex>
 
-        <addForeignKeyConstraint baseTableName="MAP_TAGS"
-                                 baseColumnNames="MAP_ID"
-                                 constraintName="FK_MAP_TAGS_MAP_ID"
-                                 referencedTableName="MAP"
-                                 referencedColumnNames="ID"/>
+        <addForeignKeyConstraint baseTableName="map"
+                                 baseColumnNames="team_id"
+                                 constraintName="fk_map_team"
+                                 referencedTableName="team"
+                                 referencedColumnNames="id"/>
 
-        <createTable tableName="PUBLICATION">
-            <column name="ID" type="VARCHAR(255)">
+        <createTable tableName="map_tags">
+            <column name="map_id" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="CONTENT" type="VARCHAR(8000)"/>
-            <column name="IMAGED" type="BOOLEAN">
-                <constraints nullable="false"/>
-            </column>
-            <column name="POSTED_AT" type="TIMESTAMP"/>
-            <column name="TITLE" type="VARCHAR(255)"/>
+            <column name="tags" type="VARCHAR(255)"/>
         </createTable>
 
-        <addPrimaryKey tableName="PUBLICATION" columnNames="ID"/>
-
-        <createTable tableName="RIDE">
-            <column name="ID" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="DATE" type="DATE"/>
-            <column name="DESCRIPTION" type="VARCHAR(8000)"/>
-            <column name="IMAGED" type="BOOLEAN">
-                <constraints nullable="false"/>
-            </column>
-            <column name="TITLE" type="VARCHAR(255)"/>
-            <column name="TYPE" type="INTEGER"/>
-        </createTable>
-
-        <addPrimaryKey tableName="RIDE" columnNames="ID"/>
-
-        <createTable tableName="RIDE_GROUP">
-            <column name="ID" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="LOWER_SPEED" type="DOUBLE"/>
-            <column name="UPPER_SPEED" type="DOUBLE"/>
-            <column name="MAP_ID" type="VARCHAR(255)"/>
-            <column name="MEETING_LOCATION" type="VARCHAR(255)"/>
-            <column name="MEETING_POINT_LAT" type="DOUBLE"/>
-            <column name="MEETING_POINT_LNG" type="DOUBLE"/>
-            <column name="MEETING_TIME" type="TIME"/>
-            <column name="NAME" type="VARCHAR(255)"/>
-            <column name="RIDE_ID" type="VARCHAR(255)"/>
-        </createTable>
-
-        <addPrimaryKey tableName="RIDE_GROUP" columnNames="ID"/>
-
-        <createIndex tableName="RIDE_GROUP" indexName="RIDE_GROUP_RIDE_ID">
-            <column name="RIDE_ID"/>
+        <createIndex tableName="map_tags" indexName="map_tags_map_id">
+            <column name="map_id"/>
         </createIndex>
 
-        <addForeignKeyConstraint baseTableName="RIDE_GROUP"
-                                 baseColumnNames="RIDE_ID"
-                                 constraintName="FK_RIDE_GROUP_RIDE_ID"
-                                 referencedTableName="RIDE"
-                                 referencedColumnNames="ID"/>
+        <addForeignKeyConstraint baseTableName="map_tags"
+                                 baseColumnNames="map_id"
+                                 constraintName="fk_map_tags_map_id"
+                                 referencedTableName="map"
+                                 referencedColumnNames="id"/>
+
+        <createTable tableName="publication">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="team_id" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="VARCHAR(8000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="imaged" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="posted_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="published_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="published_status" type="VARCHAR(25)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="publication" columnNames="id"/>
+
+        <createIndex tableName="publication" indexName="publication_team_id">
+            <column name="team_id"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="publication"
+                                 baseColumnNames="team_id"
+                                 constraintName="fk_publication_team"
+                                 referencedTableName="team"
+                                 referencedColumnNames="id"/>
+
+        <createTable tableName="ride">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="team_id" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(8000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="imaged" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(25)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="published_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="published_status" type="VARCHAR(25)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="ride" columnNames="id"/>
+
+        <createIndex tableName="ride" indexName="ride_team_id">
+            <column name="team_id"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="ride"
+                                 baseColumnNames="team_id"
+                                 constraintName="fk_ride_team"
+                                 referencedTableName="team"
+                                 referencedColumnNames="id"/>
+
+        <createTable tableName="ride_group">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="lower_speed" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="upper_speed" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="map_id" type="VARCHAR(255)"/>
+            <column name="meeting_location" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="meeting_point_lat" type="DOUBLE"/>
+            <column name="meeting_point_lng" type="DOUBLE"/>
+            <column name="meeting_time" type="TIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ride_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="ride_group" columnNames="id"/>
+
+        <createIndex tableName="ride_group" indexName="ride_group_ride_id">
+            <column name="ride_id"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="ride_group"
+                                 baseColumnNames="ride_id"
+                                 constraintName="fk_ride_group_ride_id"
+                                 referencedTableName="ride"
+                                 referencedColumnNames="id"/>
+        
+        <createTable tableName="user">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="admin" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(255)"/>
+            <column name="last_name" type="VARCHAR(255)"/>
+            <column name="strava_id" type="BIGINT"/>
+            <column name="strava_user_name" type="VARCHAR(255)"/>
+            <column name="city" type="VARCHAR(255)"/>
+            <column name="profile_image" type="VARCHAR(255)"/>
+            <column name="email" type="VARCHAR(150)"/>
+
+        </createTable>
+
+        <addPrimaryKey tableName="user" columnNames="id"/>
+
+        <createTable tableName="ride_group_participant">
+            <column name="ride_group_id" type="VARCHAR(255)"/>
+            <column name="user_id" type="VARCHAR(255)"/>
+        </createTable>
+
+        <createTable tableName="user_roles">
+            <column name="user_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="team_id" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="user_roles" columnNames="user_id, team_id"/>
+
+        <createIndex tableName="user_roles" indexName="user_roles_user_id">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex tableName="USER_ROLES" indexName="user_roles_team_id">
+            <column name="team_id"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="user_roles"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_user_roles_user_id"
+                                 referencedTableName="user"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="user_roles"
+                                 baseColumnNames="team_id"
+                                 constraintName="fk_user_roles_team_id"
+                                 referencedTableName="team"
+                                 referencedColumnNames="id"/>
+
+        <createTable tableName="ride_template">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="team_id" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(8000)"/>
+            <column name="type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="ride_template" columnNames="id"/>
+
+        <createIndex tableName="ride_template" indexName="ride_template_team_id">
+            <column name="team_id"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="ride_template"
+                                 baseColumnNames="team_id"
+                                 constraintName="fk_ride_template_team"
+                                 referencedTableName="team"
+                                 referencedColumnNames="id"/>
+
+        <createTable tableName="ride_group_template">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="lower_speed" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="upper_speed" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="meeting_location" type="VARCHAR(255)"/>
+            <column name="meeting_point_lat" type="DOUBLE"/>
+            <column name="meeting_point_lng" type="DOUBLE"/>
+            <column name="meeting_time" type="TIME"/>
+            <column name="ride_template_id" type="VARCHAR(255)"/>
+        </createTable>
+
+        <addPrimaryKey tableName="ride_group_template" columnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="ride_group_template"
+                                 baseColumnNames="ride_template_id"
+                                 constraintName="fk_ride_group_template_ride_template_id"
+                                 referencedTableName="ride_template"
+                                 referencedColumnNames="id"/>
 
         <createTable tableName="oauth2_authorized_client">
             <column name="client_registration_id" type="varchar(100)">
@@ -145,15 +414,15 @@
             <column name="access_token_expires_at" type="timestamp">
                 <constraints nullable="false"/>
             </column>
-            <column name="access_token_scopes" type="varchar(1000)" />
-            <column name="refresh_token_value" type="blob" />
-            <column name="refresh_token_issued_at" type="timestamp" />
+            <column name="access_token_scopes" type="varchar(1000)"/>
+            <column name="refresh_token_value" type="blob"/>
+            <column name="refresh_token_issued_at" type="timestamp"/>
             <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
         </createTable>
 
-        <addPrimaryKey tableName="oauth2_authorized_client" columnNames="client_registration_id, principal_name" />
+        <addPrimaryKey tableName="oauth2_authorized_client" columnNames="client_registration_id, principal_name"/>
 
         <createTable tableName="SPRING_SESSION">
             <column name="PRIMARY_ID" type="varchar(36)">
@@ -174,10 +443,10 @@
             <column name="EXPIRY_TIME" type="bigint">
                 <constraints nullable="false"/>
             </column>
-            <column name="PRINCIPAL_NAME" type="varchar(100)" />
+            <column name="PRINCIPAL_NAME" type="varchar(100)"/>
         </createTable>
 
-        <addPrimaryKey tableName="SPRING_SESSION" columnNames="PRIMARY_ID" />
+        <addPrimaryKey tableName="SPRING_SESSION" columnNames="PRIMARY_ID"/>
 
         <createIndex tableName="SPRING_SESSION" indexName="SPRING_SESSION_ID" unique="true">
             <column name="SESSION_ID"/>
@@ -203,254 +472,25 @@
             </column>
         </createTable>
 
-        <addPrimaryKey tableName="SPRING_SESSION_ATTRIBUTES" columnNames="SESSION_PRIMARY_ID, ATTRIBUTE_NAME" />
+        <addPrimaryKey tableName="SPRING_SESSION_ATTRIBUTES" columnNames="SESSION_PRIMARY_ID, ATTRIBUTE_NAME"/>
 
         <addForeignKeyConstraint baseTableName="SPRING_SESSION_ATTRIBUTES"
                                  baseColumnNames="SESSION_PRIMARY_ID"
                                  constraintName="SPRING_SESSION_ATTRIBUTES_FK"
                                  referencedTableName="SPRING_SESSION"
                                  referencedColumnNames="PRIMARY_ID"
-                                onDelete="CASCADE"/>
+                                 onDelete="CASCADE"/>
 
-        <createTable tableName="USER">
-            <column name="ID" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="ADMIN" type="BOOLEAN">
-                <constraints nullable="false"/>
-            </column>
-            <column name="FIRST_NAME" type="VARCHAR(255)"/>
-            <column name="LAST_NAME" type="VARCHAR(255)"/>
-            <column name="STRAVA_ID" type="BIGINT"/>
-            <column name="STRAVA_USER_NAME" type="VARCHAR(255)"/>
-            <column name="CITY" type="VARCHAR(255)"/>
-            <column name="PROFILE_IMAGE" type="VARCHAR(255)"/>
-
-        </createTable>
-
-        <addPrimaryKey tableName="USER" columnNames="ID" />
-
-
-    </changeSet>
-
-    <changeSet id="GITHUB-1-RIDE-PARTICIPANTS" author="tomacla">
-
-        <createTable tableName="ride_group_participant">
-            <column name="ride_group_id" type="VARCHAR(255)" />
-            <column name="user_id" type="VARCHAR(255)" />
-        </createTable>
-
-        <sql>delete from SPRING_SESSION_ATTRIBUTES</sql>
-        <sql>delete from SPRING_SESSION</sql>
-        <sql>delete from oauth2_authorized_client</sql>
-
-    </changeSet>
-
-    <changeSet id="GITHUB-3-PUBLISH-DATES" author="tomacla">
-
-        <addColumn tableName="PUBLICATION">
-            <column name="PUBLISHED_AT" type="TIMESTAMP"/>
-        </addColumn>
-
-        <sql>update publication set published_at = posted_at;</sql>
-
-        <addColumn tableName="RIDE">
-            <column name="PUBLISHED_AT" type="TIMESTAMP"/>
-        </addColumn>
-
-        <sql>update ride set published_at = to_timestamp(DATE);</sql>
-
-    </changeSet>
-
-    <changeSet id="SPLT-GLOBAL-DATA" author="tomacla">
-
-        <createTable tableName="SITE_DESCRIPTION">
-            <column name="ID" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
-            <column name="ADDRESS_POSTAL_CITY" type="VARCHAR(255)"/>
-            <column name="ADDRESS_POSTAL_CODE" type="VARCHAR(10)"/>
-            <column name="ADDRESS_STREET_LINE" type="VARCHAR(255)"/>
-            <column name="SITENAME" type="VARCHAR(2000)"/>
-            <column name="DESCRIPTION" type="VARCHAR(2000)"/>
-            <column name="PHONE_NUMBER" type="VARCHAR(255)"/>
-            <column name="EMAIL" type="VARCHAR(255)"/>
-            <column name="FACEBOOK" type="VARCHAR(255)"/>
-            <column name="TWITTER" type="VARCHAR(255)"/>
-            <column name="OTHER" type="VARCHAR(2000)"/>
-        </createTable>
-
-        <addPrimaryKey tableName="SITE_DESCRIPTION" columnNames="ID"/>
-
-        <createTable tableName="SITE_INTEGRATION">
-            <column name="ID" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
-            <column name="MAP_BOX_API_KEY" type="VARCHAR(255)"/>
-        </createTable>
-
-        <addPrimaryKey tableName="SITE_INTEGRATION" columnNames="ID"/>
-
-        <createTable tableName="SITE_CONFIGURATION">
-            <column name="ID" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
-            <column name="TIMEZONE" type="VARCHAR(50)"/>
-            <column name="SOUND_ENABLED" type="BOOLEAN"/>
-        </createTable>
-
-        <addPrimaryKey tableName="SITE_CONFIGURATION" columnNames="ID"/>
-
-        <sql>insert into SITE_DESCRIPTION select ID, ADDRESS_POSTAL_CITY, ADDRESS_POSTAL_CODE,
-            ADDRESS_STREET_LINE, SITENAME, DESCRIPTION, PHONE_NUMBER, EMAIL, FACEBOOK, TWITTER, OTHER from GLOBAL_DATA</sql>
-
-        <sql>insert into SITE_INTEGRATION select ID, MAP_BOX_API_KEY from GLOBAL_DATA</sql>
-
-        <dropTable tableName="GLOBAL_DATA" />
-
-    </changeSet>
-
-    <changeSet id="GITHUB-8-DEFAULT-SEARCH-TAGS" author="tomacla">
-
-        <createTable tableName="SITE_CONFIGURATION_DEFAULT_SEARCH_TAGS">
-            <column name="SITE_CONFIGURATION_ID" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="DEFAULT_SEARCH_TAGS" type="VARCHAR(255)"/>
-        </createTable>
-
-    </changeSet>
-
-    <changeSet id="GITHUB-2-PAGINATION-AND-FEED" author="tomacla">
-
-        <createView viewName="FEED" replaceIfExists="true">
-            select id as id, 'RIDE' as type, published_at as published_at, title as title, description as content, imaged as imaged FROM ride
+        <createView viewName="feed" replaceIfExists="true">
+            select id as id, team_id as team_id, 'RIDE' as type, published_at as published_at, title as title,
+            description as content, imaged as imaged FROM ride where published_status = 'PUBLISHED'
             UNION
-            select id as id, 'PUBLICATION' as type, published_at as published_at, title as title, content as content, imaged as imaged FROM publication
+            select id as id, team_id as team_id, 'PUBLICATION' as type, published_at as published_at, title as title,
+            content as content, imaged as imaged FROM publication where published_status = 'PUBLISHED'
         </createView>
 
     </changeSet>
 
-    <changeSet id="DROP-TURKEY-SOUND" author="tomacla">
-
-        <dropColumn tableName="SITE_CONFIGURATION" columnName="SOUND_ENABLED" />
-
-    </changeSet>
-
-
-    <changeSet id="GITHUB-4-RIDE-TEMPLATES" author="tomacla">
-
-        <createTable tableName="RIDE_TEMPLATE">
-            <column name="ID" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="NAME" type="VARCHAR(255)"/>
-            <column name="DESCRIPTION" type="VARCHAR(8000)"/>
-            <column name="TYPE" type="INTEGER"/>
-        </createTable>
-
-        <addPrimaryKey tableName="RIDE_TEMPLATE" columnNames="ID"/>
-
-        <createTable tableName="RIDE_GROUP_TEMPLATE">
-            <column name="ID" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="LOWER_SPEED" type="DOUBLE"/>
-            <column name="UPPER_SPEED" type="DOUBLE"/>
-            <column name="MEETING_LOCATION" type="VARCHAR(255)"/>
-            <column name="MEETING_POINT_LAT" type="DOUBLE"/>
-            <column name="MEETING_POINT_LNG" type="DOUBLE"/>
-            <column name="MEETING_TIME" type="TIME"/>
-            <column name="NAME" type="VARCHAR(255)"/>
-            <column name="RIDE_TEMPLATE_ID" type="VARCHAR(255)"/>
-        </createTable>
-
-        <addPrimaryKey tableName="RIDE_GROUP_TEMPLATE" columnNames="ID"/>
-
-        <addForeignKeyConstraint baseTableName="RIDE_GROUP_TEMPLATE"
-                                 baseColumnNames="RIDE_TEMPLATE_ID"
-                                 constraintName="FK_RIDE_GROUP_TEMPLATE_RIDE_TEMPLATE_ID"
-                                 referencedTableName="RIDE_TEMPLATE"
-                                 referencedColumnNames="ID"/>
-
-    </changeSet>
-    
-    <changeSet id="GITHUB-14-PUBLICATION-TASK" author="tomacla">
-
-        <dropColumn tableName="RIDE" columnName="type" />
-        <addColumn tableName="RIDE">
-            <column name="type" type="VARCHAR(25)"/>
-        </addColumn>
-
-        <sql>update RIDE set type = 'REGULAR'</sql>
-
-        <addColumn tableName="PUBLICATION">
-            <column name="published_status" type="VARCHAR(25)" />
-        </addColumn>
-
-        <addColumn tableName="RIDE">
-            <column name="published_status" type="VARCHAR(25)" />
-        </addColumn>
-
-        <sql>update PUBLICATION set published_status = 'UNPUBLISHED'</sql>
-        <sql>update RIDE set published_status = 'UNPUBLISHED'</sql>
-        <sql><![CDATA[ update PUBLICATION set published_status = 'PUBLISHED' where published_at < NOW() ]]></sql>
-        <sql><![CDATA[ update RIDE set published_status = 'PUBLISHED' where published_at < NOW() ]]></sql>
-
-        <createView viewName="FEED" replaceIfExists="true">
-            select id as id, 'RIDE' as type, published_at as published_at, title as title, description as content, imaged as imaged FROM ride where published_status = 'PUBLISHED'
-            UNION
-            select id as id, 'PUBLICATION' as type, published_at as published_at, title as title, content as content, imaged as imaged FROM publication where published_status = 'PUBLISHED'
-        </createView>
-
-    </changeSet>
-    
-    <changeSet id="GITHUB-15-FACEBOOK-INTEGRATION" author="tomacla">
-        <addColumn tableName="SITE_INTEGRATION">
-            <column name="facebook_app_id" type="VARCHAR(100)" />
-            <column name="facebook_app_secret" type="VARCHAR(100)" />
-            <column name="facebook_access_token" type="VARCHAR(300)" />
-            <column name="facebook_page_id" type="VARCHAR(100)" />
-        </addColumn>
-    </changeSet>
-
-    <changeSet id="ADD-MAP-TYPE" author="tomacla">
-
-        <addColumn tableName="MAP">
-            <column name="type" type="VARCHAR(30)" />
-        </addColumn>
-
-        <sql>update MAP set type = 'ROAD'</sql>
-
-    </changeSet>
-
-    <changeSet id="ADD-PAGES-CONFIGURATION" author="tomacla">
-
-        <addColumn tableName="SITE_CONFIGURATION">
-            <column name="default_page" type="VARCHAR(30)" />
-            <column name="feed_visible" type="BOOLEAN" />
-            <column name="rides_visible" type="BOOLEAN" />
-        </addColumn>
-
-        <sql>update SITE_CONFIGURATION set default_page = 'FEED', feed_visible = TRUE, rides_visible = TRUE</sql>
-
-    </changeSet>
-
-    <changeSet id="GITHUB-17-ADD-SMTP-INTEGRATION" author="tomacla">
-
-        <addColumn tableName="SITE_INTEGRATION">
-            <column name="smtp_host" type="VARCHAR(50)" />
-            <column name="smtp_port" type="VARCHAR(10)" />
-            <column name="smtp_user" type="VARCHAR(100)" />
-            <column name="smtp_password" type="VARCHAR(100)" />
-            <column name="smtp_from" type="VARCHAR(100)" />
-        </addColumn>
-
-        <addColumn tableName="USER">
-            <column name="email" type="VARCHAR(150)" />
-        </addColumn>
-
-    </changeSet>
 
 </databaseChangeLog>
 

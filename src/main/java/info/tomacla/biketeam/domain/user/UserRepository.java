@@ -15,4 +15,6 @@ public interface UserRepository extends CrudRepository<User, String> {
 
     List<User> findByEmailNotNull();
 
+    List<User> findByRoles_Id_TeamId(String teamId);
+
 }

@@ -2,11 +2,11 @@ package info.tomacla.biketeam.service;
 
 import info.tomacla.biketeam.common.Attachment;
 import info.tomacla.biketeam.common.ImageDescriptor;
-import info.tomacla.biketeam.domain.global.SiteDescription;
-import info.tomacla.biketeam.domain.global.SiteIntegration;
+import info.tomacla.biketeam.domain.team.Team;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import javax.mail.*;
@@ -22,15 +22,17 @@ import java.util.Properties;
 public class SMTPService {
 
     @Autowired
-    private ConfigurationService configurationService;
+    private TeamService teamService;
+
+    @Autowired
+    private Environment env;
 
     protected static final Logger log = LoggerFactory.getLogger(SMTPService.class);
 
-    public void send(String to, String name, String subject, String message, String cc, ImageDescriptor embedImage, List<Attachment> files) {
+    public void send(Team team, String to, String name, String subject, String message, String cc, ImageDescriptor embedImage, List<Attachment> files) {
 
-        final SiteIntegration siteIntegration = configurationService.getSiteIntegration();
-        final SiteDescription siteDescription = configurationService.getSiteDescription();
-        if (!siteIntegration.isSmtpConfigured()) {
+        Properties props = getSmtpProperties();
+        if (props == null) {
             return;
         }
 
@@ -38,33 +40,24 @@ public class SMTPService {
 
             log.info("Sending mail to {} - {} : [{}]", to, name, subject);
 
-            Properties props = new Properties();
-            props.put("mail.smtp.host", siteIntegration.getSmtpHost());
-            props.put("mail.smtp.port", siteIntegration.getSmtpPort());
-            props.put("mail.smtp.auth", "true");
-            props.put("mail.smtp.starttls.required", "true");
-            props.put("mail.smtp.starttls.enable", "true");
-            props.put("mail.username", siteIntegration.getSmtpUser());
-            props.put("mail.password", siteIntegration.getSmtpPassword());
-
             Authenticator auth = new javax.mail.Authenticator() {
                 @Override
                 protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(siteIntegration.getSmtpUser(), siteIntegration.getSmtpPassword());
+                    return new PasswordAuthentication(env.getProperty("smtp.username"), env.getProperty("smtp.password"));
                 }
             };
 
             Session session = Session.getInstance(props, auth);
 
             MimeMessage msg = new MimeMessage(session);
-            msg.setSubject(subject + " - " + siteDescription.getSitename(), "UTF-8");
+            msg.setSubject(subject + " - " + team.getName(), "UTF-8");
 
             msg.addHeader("Content-Transfer-Encoding", "8bit");
             msg.addHeader("Content-type", "text/HTML; charset=UTF-8");
             msg.addHeader("format", "flowed");
             msg.setSentDate(new Date());
-            msg.setFrom(new InternetAddress(siteIntegration.getSmtpFrom(), siteDescription.getSitename()));
-            msg.setReplyTo(InternetAddress.parse(siteIntegration.getSmtpFrom(), false));
+            msg.setFrom(new InternetAddress(env.getProperty("smtp.from"), team.getName()));
+            msg.setReplyTo(InternetAddress.parse(env.getProperty("smtp.from"), false));
             msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to, false));
             if (cc != null) {
                 msg.setRecipients(Message.RecipientType.CC, InternetAddress.parse(cc, false));
@@ -110,16 +103,37 @@ public class SMTPService {
 
     }
 
-    public void send(String to, String name, String subject, String message) {
-        this.send(to, name, subject, message, null, null, null);
+    public void send(Team team, String to, String name, String subject, String message) {
+        this.send(team, to, name, subject, message, null, null, null);
     }
 
-    public void send(String to, String name, String subject, String message, ImageDescriptor embedImage) {
-        this.send(to, name, subject, message, null, embedImage, null);
+    public void send(Team team, String to, String name, String subject, String message, ImageDescriptor embedImage) {
+        this.send(team, to, name, subject, message, null, embedImage, null);
     }
 
-    public void send(String to, String name, String subject, String message, String cc) {
-        this.send(to, name, subject, message, cc, null, null);
+    public void send(Team team, String to, String name, String subject, String message, String cc) {
+        this.send(team, to, name, subject, message, cc, null, null);
+    }
+
+    private Properties getSmtpProperties() {
+
+        if (env.containsProperty("smtp.host") && env.containsProperty("smtp.port")
+                && env.containsProperty("smtp.username") && env.containsProperty("smtp.password")
+                && env.containsProperty("smtp.from")) {
+            Properties props = new Properties();
+            props.put("mail.smtp.host", env.getProperty("smtp.host"));
+            props.put("mail.smtp.port", env.getProperty("smtp.port"));
+            props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.starttls.required", "true");
+            props.put("mail.smtp.starttls.enable", "true");
+            props.put("mail.username", env.getProperty("smtp.username"));
+            props.put("mail.password", env.getProperty("smtp.password"));
+            return props;
+        }
+
+        return null;
+
+
     }
 
 }

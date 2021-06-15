@@ -39,9 +39,9 @@ public class FileService {
         return Optional.empty();
     }
 
-    public Optional<FileExtension> exists(String directory, String fileName, List<FileExtension> extensions) {
+    public Optional<FileExtension> exists(String directory, String teamId, String fileName, List<FileExtension> extensions) {
         for (FileExtension extension : extensions) {
-            if (exists(directory, fileName + extension.getExtension())) {
+            if (exists(directory, teamId, fileName + extension.getExtension())) {
                 return Optional.of(extension);
             }
         }
@@ -52,21 +52,30 @@ public class FileService {
         return Files.exists(Path.of(fileRepository, fileName));
     }
 
-    public boolean exists(String directory, String fileName) {
-        return Files.exists(Path.of(fileRepository, directory, fileName));
+    public boolean exists(String directory, String teamId, String fileName) {
+        return Files.exists(Path.of(fileRepository, directory, teamId, fileName));
     }
 
     public Path get(String fileName) {
         return Path.of(fileRepository, fileName);
     }
 
-    public Path get(String directory, String fileName) {
+    public Path get(String directory, String teamId, String fileName) {
         try {
-            Files.createDirectories(Path.of(fileRepository, directory));
-            return Path.of(fileRepository, directory, fileName);
+            Files.createDirectories(Path.of(fileRepository, directory, teamId));
+            return Path.of(fileRepository, directory, teamId, fileName);
         } catch (IOException e) {
             log.error("Unable to get file : " + fileName, e);
             throw new RuntimeException("Unable to get file : " + fileName, e);
+        }
+    }
+
+    public void delete(String directory, String teamId, String fileName) {
+        try {
+            Files.deleteIfExists(Path.of(fileRepository, directory, teamId, fileName));
+        } catch (IOException e) {
+            log.error("Unable to delete file : " + fileName, e);
+            throw new RuntimeException("Unable to delete file : " + fileName, e);
         }
     }
 
@@ -79,10 +88,20 @@ public class FileService {
         }
     }
 
-    public void store(Path file, String directory, String fileName) {
+    public void store(Path file, String directory, String teamId, String fileName) {
         try {
-            Files.createDirectories(Path.of(fileRepository, directory));
-            Files.copy(file, Path.of(fileRepository, directory, fileName), StandardCopyOption.REPLACE_EXISTING);
+            Files.createDirectories(Path.of(fileRepository, directory, teamId));
+            Files.copy(file, Path.of(fileRepository, directory, teamId, fileName), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            log.error("Unable to store file : " + fileName, e);
+            throw new RuntimeException("Unable to store file : " + file.toString(), e);
+        }
+    }
+
+    public void store(InputStream file, String directory, String teamId, String fileName) {
+        try {
+            Files.createDirectories(Path.of(fileRepository, directory, teamId));
+            Files.copy(file, Path.of(fileRepository, directory, teamId, fileName), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             log.error("Unable to store file : " + fileName, e);
             throw new RuntimeException("Unable to store file : " + file.toString(), e);
@@ -118,17 +137,12 @@ public class FileService {
     }
 
     @PostConstruct
-    public void initTmpDir() throws Exception {
+    public void init() throws Exception {
 
         log.info("Initializing appliation directories");
 
         Files.createDirectories(Path.of(fileRepository));
         Files.createDirectories(getTmpDirectory());
-
-        // copy default logo
-        if (!Files.exists(Path.of(fileRepository, "logo.png")) && !Files.exists(Path.of(fileRepository, "logo.jpg"))) {
-            Files.copy(getClass().getResourceAsStream("/default-logo.png"), Path.of(fileRepository, "logo.png"), StandardCopyOption.REPLACE_EXISTING);
-        }
 
     }
 

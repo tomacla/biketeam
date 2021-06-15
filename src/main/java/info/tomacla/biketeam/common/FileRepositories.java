@@ -7,5 +7,6 @@ public interface FileRepositories {
     String MAP_IMAGES = "map-images";
     String GPX_FILES = "gpx";
     String FIT_FILES = "fit";
+    String MISC_IMAGES = "misc";
 
 }

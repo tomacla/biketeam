@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -41,16 +42,16 @@ public class RideService {
     private MailService mailService;
 
     @Autowired
-    private ConfigurationService configurationService;
+    private TeamService teamService;
 
-    public Optional<ImageDescriptor> getImage(String rideId) {
+    public Optional<ImageDescriptor> getImage(String teamId, String rideId) {
 
-        Optional<FileExtension> fileExtensionExists = fileService.exists(FileRepositories.RIDE_IMAGES, rideId, FileExtension.byPriority());
+        Optional<FileExtension> fileExtensionExists = fileService.exists(FileRepositories.RIDE_IMAGES, teamId, rideId, FileExtension.byPriority());
 
         if (fileExtensionExists.isPresent()) {
 
             final FileExtension extension = fileExtensionExists.get();
-            final Path path = fileService.get(FileRepositories.RIDE_IMAGES, rideId + extension.getExtension());
+            final Path path = fileService.get(FileRepositories.RIDE_IMAGES, teamId, rideId + extension.getExtension());
 
             return Optional.of(ImageDescriptor.of(extension, path));
 
@@ -61,48 +62,66 @@ public class RideService {
     }
 
     public void publishRides() {
-        rideRepository.findAllByPublishedStatusAndPublishedAtLessThan(PublishedStatus.UNPUBLISHED, ZonedDateTime.now(configurationService.getTimezone()))
-                .forEach(ride -> {
-                    log.info("Publishing ride {}", ride.getId());
-                    ride.setPublishedStatus(PublishedStatus.PUBLISHED);
-                    save(ride);
-                    facebookService.publish(ride);
-                    mailService.publish(ride);
-                });
+        teamService.list().forEach(team ->
+            rideRepository.findAllByTeamIdAndPublishedStatusAndPublishedAtLessThan(
+                    team.getId(),
+                    PublishedStatus.UNPUBLISHED,
+                    ZonedDateTime.now(ZoneId.of(team.getConfiguration().getTimezone()))
+            ).forEach(ride -> {
+                log.info("Publishing ride {} for team {}", ride.getId(), team.getId());
+                ride.setPublishedStatus(PublishedStatus.PUBLISHED);
+                save(ride);
+                facebookService.publish(team, ride);
+                mailService.publish(team, ride);
+            })
+        );
+
     }
 
     public void save(Ride ride) {
         rideRepository.save(ride);
     }
 
-    public List<RideIdTitleDateProjection> listRides() {
-        return rideRepository.findAllByOrderByDateDesc();
+    public List<RideIdTitleDateProjection> listRides(String teamId) {
+        return rideRepository.findAllByTeamIdOrderByDateDesc(teamId);
     }
 
-    public Optional<Ride> get(String rideId) {
-        return rideRepository.findById(rideId);
+    public Optional<Ride> get(String teamId, String rideId) {
+        final Optional<Ride> optionalRide = rideRepository.findById(rideId);
+        if (optionalRide.isPresent() && optionalRide.get().getTeamId().equals(teamId)) {
+            return optionalRide;
+        }
+        return Optional.empty();
     }
 
-    public void delete(String rideId) {
+    public void delete(String teamId, String rideId) {
         log.info("Request ride deletion {}", rideId);
-        get(rideId).ifPresent(ride -> rideRepository.delete(ride));
+        final Optional<Ride> optionalRide = get(teamId, rideId);
+        if (optionalRide.isPresent()) {
+            final Ride ride = optionalRide.get();
+            getImage(ride.getTeamId(), ride.getId()).ifPresent(image ->
+                    fileService.delete(FileRepositories.RIDE_IMAGES, ride.getTeamId(), ride.getId() + image.getExtension().getExtension())
+            );
+            rideRepository.delete(ride);
+        }
     }
 
-    public Page<Ride> searchRides(int page, int pageSize,
+    public Page<Ride> searchRides(String teamId, int page, int pageSize,
                                   LocalDate from, LocalDate to) {
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by("date").descending());
-        return rideRepository.findByDateBetweenAndPublishedStatus(
+        return rideRepository.findByTeamIdAndDateBetweenAndPublishedStatus(
+                teamId,
                 from,
                 to,
                 PublishedStatus.PUBLISHED,
                 pageable);
     }
 
-    public void saveImage(String rideId, InputStream is, String fileName) {
+    public void saveImage(String teamId, String rideId, InputStream is, String fileName) {
         Optional<FileExtension> optionalFileExtension = FileExtension.findByFileName(fileName);
         if (optionalFileExtension.isPresent()) {
             Path newImage = fileService.getTempFileFromInputStream(is);
-            fileService.store(newImage, FileRepositories.RIDE_IMAGES, rideId + optionalFileExtension.get().getExtension());
+            fileService.store(newImage, FileRepositories.RIDE_IMAGES, teamId, rideId + optionalFileExtension.get().getExtension());
         }
     }
 

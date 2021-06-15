@@ -5,8 +5,10 @@ import info.tomacla.biketeam.domain.user.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +19,15 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Value("${admin.strava-id}")
+    private Long adminStravaId;
+
+    @Value("${admin.first-name}")
+    private String adminFirstName;
+
+    @Value("${admin.last-name}")
+    private String adminLastName;
 
     public Optional<User> getByStravaId(Long stravaId) {
         return userRepository.findByStravaId(stravaId);
@@ -32,6 +43,10 @@ public class UserService {
 
     public List<User> listUsers() {
         return userRepository.findAll();
+    }
+
+    public Object listUsers(String teamId) {
+        return userRepository.findByRoles_Id_TeamId(teamId);
     }
 
     public void promote(String userId) {
@@ -53,4 +68,25 @@ public class UserService {
     public List<User> listUsersWithMailActivated() {
         return userRepository.findByEmailNotNull();
     }
+
+    @PostConstruct
+    public void init() {
+
+        log.info("Initializing application data");
+
+        if (getByStravaId(adminStravaId).isEmpty()) {
+            save(new User(true,
+                    adminFirstName,
+                    adminLastName,
+                    adminStravaId,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null));
+        }
+
+    }
+
+
 }

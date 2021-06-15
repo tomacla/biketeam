@@ -2,13 +2,11 @@ package info.tomacla.biketeam.web;
 
 
 import info.tomacla.biketeam.common.Dates;
-import info.tomacla.biketeam.domain.global.SiteConfiguration;
-import info.tomacla.biketeam.domain.global.SiteDescription;
-import info.tomacla.biketeam.domain.global.SiteIntegration;
+import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.security.LocalDefaultOAuth2User;
 import info.tomacla.biketeam.service.ArchiveService;
-import info.tomacla.biketeam.service.ConfigurationService;
+import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -25,7 +23,7 @@ import java.util.stream.Collectors;
 public abstract class AbstractController {
 
     @Autowired
-    protected ConfigurationService configurationService;
+    protected TeamService teamService;
 
     @Autowired
     protected UserService userService;
@@ -33,35 +31,34 @@ public abstract class AbstractController {
     @Autowired
     private ArchiveService archiveService;
 
-    // FIXME do this automatically
-    protected void addGlobalValues(Principal principal, Model model, String pageTitle) {
+    // TODO do this automatically with annotation or other way
+    protected void addGlobalValues(Principal principal, Model model, String pageTitle, Team team) {
 
-        SiteDescription desc = configurationService.getSiteDescription();
-        SiteConfiguration config = configurationService.getSiteConfiguration();
-        SiteIntegration integ = configurationService.getSiteIntegration();
-
-        model.addAttribute("_sitename", desc.getSitename());
-        model.addAttribute("_description", desc.getDescription());
         model.addAttribute("_pagetitle", pageTitle);
-        model.addAttribute("_desc", desc);
-        model.addAttribute("_config", config);
-        model.addAttribute("_integ", integ);
         model.addAttribute("_date_formatter", Dates.frenchFormatter);
         model.addAttribute("_authenticated", false);
-        model.addAttribute("_archive_support", archiveService.isActivated());
+        model.addAttribute("_admin", false);
+        model.addAttribute("_team_admin", false);
 
         getUserFromPrincipal(principal).ifPresent(user -> {
             model.addAttribute("_authenticated", true);
             model.addAttribute("_admin", user.isAdmin());
-            model.addAttribute("_strava_id", user.getStravaId());
-            model.addAttribute("_identity", user.getIdentity());
             model.addAttribute("_profile_image", user.getProfileImage());
             model.addAttribute("_user_id", user.getId());
+            model.addAttribute("_identity", user.getIdentity());
+            if (team != null) {
+                model.addAttribute("_team_admin", user.isAdmin(team.getId()));
+            }
         });
+
+        if (team != null) {
+            model.addAttribute("team", team);
+        }
 
     }
 
     protected void addOpenGraphValues(
+            Team team,
             Model model,
             String title,
             String image,
@@ -69,9 +66,9 @@ public abstract class AbstractController {
             String description) {
 
         Map<String, String> og = new HashMap<>();
-        if (configurationService.getSiteDescription().getTwitter() != null) {
+        if (team.getDescription().getTwitter() != null) {
             og.put("twitter:image:src", image);
-            og.put("twitter:site", "@" + configurationService.getSiteDescription().getTwitter());
+            og.put("twitter:site", "@" + team.getDescription().getTwitter());
             og.put("twitter:card", "summary_large_image");
             og.put("twitter:title", title);
             og.put("twitter:description", description);
@@ -81,7 +78,7 @@ public abstract class AbstractController {
         og.put("og:image:alt", "Détails");
         og.put("og:image:width", "1200");
         og.put("og:image:height", "600");
-        og.put("og:site_name", configurationService.getSiteDescription().getSitename());
+        og.put("og:site_name", team.getName());
         og.put("og:type", "object");
         og.put("og:title", title);
         og.put("og:url", url);
@@ -100,9 +97,48 @@ public abstract class AbstractController {
         return Optional.empty();
     }
 
+    protected void checkAdmin(Principal principal, String teamId) {
+        boolean admin = false;
+        final Optional<User> optionalUser = getUserFromPrincipal(principal);
+        if (optionalUser.isPresent()) {
+            final User user = optionalUser.get();
+            admin = user.isAdmin() || user.isAdmin(teamId);
+        }
+        if (!admin) {
+            throw new IllegalStateException("User is not admin");
+        }
+    }
+
     protected List<String> getAllAvailableTimeZones() {
         return ZoneId.getAvailableZoneIds().stream().map(ZoneId::of).map(ZoneId::toString).sorted().collect(Collectors.toList());
     }
 
+    protected Team checkTeam(String teamId) {
+        return teamService.get(teamId).orElseThrow(() -> new IllegalArgumentException("Unknown team " + teamId));
+    }
+
+    protected String redirectToRides(String teamId) {
+        return "redirect:/" + teamId + "/rides";
+    }
+
+    protected String redirectToRide(String teamId, String rideId) {
+        return "redirect:/" + teamId + "/rides/" + rideId;
+    }
+
+    protected String redirectToMaps(String teamId) {
+        return "redirect:/" + teamId + "/maps";
+    }
+
+    protected String redirectToMap(String teamId, String mapId) {
+        return "redirect:/" + teamId + "/maps/" + mapId;
+    }
+
+    protected String redirectToFeed(String teamId) {
+        return "redirect:/" + teamId;
+    }
+
+    protected String redirectToHome() {
+        return "redirect:/";
+    }
 
 }

@@ -2,6 +2,7 @@ package info.tomacla.biketeam.web.ride;
 
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
+import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.service.RideService;
 import info.tomacla.biketeam.web.AbstractController;
@@ -20,35 +21,41 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 @Controller
-@RequestMapping(value = "/rides")
+@RequestMapping(value = "/{teamId}/rides")
 public class RideController extends AbstractController {
 
     @Autowired
     private RideService rideService;
 
     @GetMapping(value = "/{rideId}")
-    public String getRide(@PathVariable("rideId") String rideId,
+    public String getRide(@PathVariable("teamId") String teamId,
+                          @PathVariable("rideId") String rideId,
                           Principal principal,
                           Model model) {
 
-        Optional<Ride> optionalRide = rideService.get(rideId);
+        final Team team = checkTeam(teamId);
+
+        Optional<Ride> optionalRide = rideService.get(teamId, rideId);
         if (optionalRide.isEmpty()) {
-            return "redirect:/rides";
+            return redirectToRides(teamId);
         }
 
         Ride ride = optionalRide.get();
-        addGlobalValues(principal, model, "Ride " + ride.getTitle());
+        addGlobalValues(principal, model, "Ride " + ride.getTitle(), team);
         model.addAttribute("ride", ride);
         return "ride";
     }
 
     @GetMapping
-    public String getRides(@RequestParam(value = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+    public String getRides(@PathVariable("teamId") String teamId,
+                           @RequestParam(value = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
                            @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
                            @RequestParam(value = "page", defaultValue = "0", required = false) int page,
                            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
                            Principal principal,
                            Model model) {
+
+        final Team team = checkTeam(teamId);
 
         SearchRideForm form = SearchRideForm.builder()
                 .withFrom(from)
@@ -60,13 +67,14 @@ public class RideController extends AbstractController {
         final SearchRideForm.SearchRideFormParser parser = form.parser();
 
         Page<Ride> rides = rideService.searchRides(
+                teamId,
                 parser.getPage(),
                 parser.getPageSize(),
                 parser.getFrom(),
                 parser.getTo()
         );
 
-        addGlobalValues(principal, model, "Rides");
+        addGlobalValues(principal, model, "Rides", team);
         model.addAttribute("rides", rides.getContent());
         model.addAttribute("pages", rides.getTotalPages());
         model.addAttribute("formdata", form);
@@ -75,14 +83,17 @@ public class RideController extends AbstractController {
     }
 
     @GetMapping(value = "/{rideId}/add-participant/{groupId}/{userId}")
-    public String addParticipantToRide(@PathVariable("rideId") String rideId,
+    public String addParticipantToRide(@PathVariable("teamId") String teamId,
+                                       @PathVariable("rideId") String rideId,
                                        @PathVariable("groupId") String groupId,
                                        @PathVariable("userId") String userId,
                                        Principal principal, Model model) {
 
-        Optional<Ride> optionalRide = rideService.get(rideId);
+        checkTeam(teamId);
+
+        Optional<Ride> optionalRide = rideService.get(teamId, rideId);
         if (optionalRide.isEmpty()) {
-            return "redirect:/rides";
+            return redirectToRides(teamId);
         }
 
         Ride ride = optionalRide.get();
@@ -102,18 +113,21 @@ public class RideController extends AbstractController {
 
         }
 
-        return "redirect:/rides/" + rideId;
+        return redirectToRide(teamId, rideId);
     }
 
     @GetMapping(value = "/{rideId}/remove-participant/{groupId}/{userId}")
-    public String removeParticipantToRide(@PathVariable("rideId") String rideId,
+    public String removeParticipantToRide(@PathVariable("teamId") String teamId,
+                                          @PathVariable("rideId") String rideId,
                                           @PathVariable("groupId") String groupId,
                                           @PathVariable("userId") String userId,
                                           Principal principal, Model model) {
 
-        Optional<Ride> optionalRide = rideService.get(rideId);
+        checkTeam(teamId);
+
+        Optional<Ride> optionalRide = rideService.get(teamId, rideId);
         if (optionalRide.isEmpty()) {
-            return "redirect:/rides";
+            return redirectToRides(teamId);
         }
 
         Ride ride = optionalRide.get();
@@ -133,7 +147,7 @@ public class RideController extends AbstractController {
 
         }
 
-        return "redirect:/rides/" + rideId;
+        return redirectToRide(teamId, rideId);
     }
 
 

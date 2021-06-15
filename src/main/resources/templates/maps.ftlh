@@ -4,7 +4,7 @@
 
     <div class="col-12 mb-4">
 
-        <form id="maps-filter" action="<@spring.url '/maps' />" method="GET" class="border rounded p-2">
+        <form id="maps-filter" action="<@spring.url '/' + team.id + '/maps' />" method="GET" class="border rounded p-2">
 
             <input type="hidden" id="maps-filter-page" name="page" value="${formdata.page}">
             <input type="hidden" id="maps-filter-pageSize" name="pageSize" value="${formdata.pageSize}">
@@ -98,7 +98,7 @@
             <#list maps as map>
                   <div class="col-12 col-md-4">
                     <div class="card">
-                        <img src="<@spring.url '/api/maps/${map.id}/image' />" class="card-img-top" alt="${map.id} image">
+                        <img src="<@spring.url '/api/' + team.id + '/maps/${map.id}/image' />" class="card-img-top" alt="${map.id} image">
                         <div class="card-body">
                           <h5 class="card-title">${map.name}</h5>
                           <p class="card-text">
@@ -110,9 +110,9 @@
                         <div class="card-footer d-flex justify-content-between align-items-center">
                             <span class="small text-muted">Ajoutée le ${map.postedAt.format(_date_formatter)}</span>
                             <div class="btn-group" role="group">
-                                <a download="${map.name}.gpx" href="<@spring.url '/api/maps/${map.id}/gpx' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-download"></i> GPX</a>
-                                <a download="${map.name}.fit" href="<@spring.url '/api/maps/${map.id}/fit' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-download"></i> FIT</a>
-                                <a href="<@spring.url '/maps/${map.id}' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-map"></i> Voir</a>
+                                <a download="${map.name}.gpx" href="<@spring.url '/api/' + team.id + '/maps/${map.id}/gpx' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-download"></i> GPX</a>
+                                <a download="${map.name}.fit" href="<@spring.url '/api/' + team.id + '/maps/${map.id}/fit' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-download"></i> FIT</a>
+                                <a href="<@spring.url '/' + team.id + '/maps/${map.id}' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-map"></i> Voir</a>
                             </div>
                         </div>
                     </div>

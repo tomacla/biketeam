@@ -2,7 +2,6 @@ package info.tomacla.biketeam.domain.feed;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;
-import java.util.Objects;
 
 @Entity
 @Table(name = "feed")
@@ -10,6 +9,8 @@ public class Feed {
 
     @Id
     private String id;
+    @Column(name = "team_id")
+    private String teamId;
     @Enumerated(EnumType.STRING)
     private FeedType type;
     @Column(name = "published_at")
@@ -22,24 +23,20 @@ public class Feed {
 
     }
 
-    public Feed(String id,
-                FeedType type,
-                ZonedDateTime publishedAt,
-                String title,
-                String content) {
-        this.id = Objects.requireNonNull(id);
-        this.type = Objects.requireNonNull(type);
-        this.publishedAt = Objects.requireNonNull(publishedAt);
-        this.title = Objects.requireNonNull(title);
-        this.content = Objects.requireNonNull(content);
-    }
-
     public String getId() {
         return id;
     }
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(String teamId) {
+        this.teamId = teamId;
     }
 
     public FeedType getType() {
@@ -82,19 +79,21 @@ public class Feed {
         this.imaged = imaged;
     }
 
-    public String getDetailsUrl() {
+    // TODO should be url service
+    public String getDetailsUrl(String teamId) {
         if (type.equals(FeedType.RIDE)) {
-            return "/rides/" + getId();
+            return "/" + teamId + "/rides/" + getId();
         }
         return null;
     }
 
-    public String getImageUrl() {
+    // TODO should be url service
+    public String getImageUrl(String teamId) {
         if (imaged) {
             if (type.equals(FeedType.RIDE)) {
-                return "/api/rides/" + getId() + "/image";
+                return "/api/" + teamId + "/rides/" + getId() + "/image";
             }
-            return "/api/publications/" + getId() + "/image";
+            return "/api/" + teamId + "/publications/" + getId() + "/image";
         }
         return null;
     }

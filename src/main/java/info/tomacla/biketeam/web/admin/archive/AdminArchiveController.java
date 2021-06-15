@@ -26,7 +26,7 @@ public class AdminArchiveController extends AbstractController {
             archiveService.importArchive(archive);
         }
 
-        addGlobalValues(principal, model, "Administration - Archives");
+        addGlobalValues(principal, model, "Administration - Archives", null);
         model.addAttribute("archives", archiveService.listArchives());
 
         return "admin_archives";

@@ -1,8 +1,7 @@
 package info.tomacla.biketeam.api;
 
-import info.tomacla.biketeam.common.FileExtension;
-import info.tomacla.biketeam.common.FileRepositories;
-import info.tomacla.biketeam.service.FileService;
+import info.tomacla.biketeam.common.ImageDescriptor;
+import info.tomacla.biketeam.service.PublicationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,25 +15,24 @@ import java.nio.file.Files;
 import java.util.Optional;
 
 @RestController
-@RequestMapping(value = "/api/publications")
+@RequestMapping(value = "/api/{teamId}/publications")
 public class PublicationAPI {
 
     @Autowired
-    private FileService fileService;
+    private PublicationService publicationService;
 
     @ResponseBody
     @RequestMapping(value = "/{publicationId}/image", method = RequestMethod.GET)
-    public ResponseEntity<byte[]> getPublicationImage(@PathVariable("publicationId") String publicationId) {
-        Optional<FileExtension> fileExtensionExists = fileService.exists(FileRepositories.PUBLICATION_IMAGES, publicationId, FileExtension.byPriority());
-        if (fileExtensionExists.isPresent()) {
+    public ResponseEntity<byte[]> getPublicationImage(@PathVariable("teamId") String teamId, @PathVariable("publicationId") String publicationId) {
+        final Optional<ImageDescriptor> image = publicationService.getImage(teamId, publicationId);
+        if (image.isPresent()) {
             try {
 
-                FileExtension extension = fileExtensionExists.get();
                 HttpHeaders headers = new HttpHeaders();
-                headers.add("Content-Type", extension.getMediaType());
+                headers.add("Content-Type", image.get().getExtension().getMediaType());
 
                 return new ResponseEntity<>(
-                        Files.readAllBytes(fileService.get(FileRepositories.PUBLICATION_IMAGES, publicationId + extension.getExtension())),
+                        Files.readAllBytes(image.get().getPath()),
                         headers,
                         HttpStatus.OK
                 );

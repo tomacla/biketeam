@@ -13,21 +13,19 @@ import java.util.List;
 @Repository
 public interface MapRepository extends PagingAndSortingRepository<Map, String>, JpaSpecificationExecutor<Map> {
 
-    List<Map> findAll();
+    List<Map> findAllByTeamId(String teamId);
 
-    Page<Map> findDistinctByLengthBetweenAndWindDirectionAndTagsInAndVisibleTrue(double lowerDistance, double upperDistance, WindDirection windDirection, List<String> tags, Pageable pageable);
+    List<MapIdNamePostedAtVisibleProjection> findAllByTeamIdOrderByPostedAtDesc(String teamId);
 
-    Page<Map> findByLengthBetweenAndWindDirectionAndVisibleTrue(double lowerDistance, double upperDistance, WindDirection windDirection, Pageable pageable);
+    List<MapIdNamePostedAtVisibleProjection> findAllByTeamIdAndNameContainingIgnoreCaseOrderByPostedAtDesc(String teamId, String namePart);
 
-    List<MapIdNamePostedAtVisibleProjection> findAllByOrderByPostedAtDesc();
+    Page<Map> findByTeamId(String teamId, Pageable pageable);
 
-    List<MapIdNamePostedAtVisibleProjection> findAllByNameContainingIgnoreCaseOrderByPostedAtDesc(String namePart);
+    @Query(value = "select distinct mt.tags from map_tags mt, map m where m.team_id = :teamId and m.id = mt.map_id order by mt.tags", nativeQuery = true)
+    List<String> findAllDistinctTags(@Param("teamId") String teamId);
 
-    @Query(value = "select distinct tags from map_tags order by tags", nativeQuery = true)
-    List<String> findAllDistinctTags();
-
-    @Query(value = "select distinct tags from map_tags where LOWER(tags) LIKE %:tagPart% order by tags", nativeQuery = true)
-    List<String> findDistinctTagsContainer(@Param("tagPart") String tagPart);
+    @Query(value = "select distinct mt.tags from map_tags mt, map m where m.team_id = :teamId and m.id = mt.map_id and LOWER(mt.tags) LIKE %:tagPart% order by mt.tags", nativeQuery = true)
+    List<String> findDistinctTagsContainer(@Param("teamId") String teamId, @Param("tagPart") String tagPart);
 
 
 }

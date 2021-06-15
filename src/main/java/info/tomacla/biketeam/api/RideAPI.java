@@ -15,7 +15,7 @@ import java.nio.file.Files;
 import java.util.Optional;
 
 @RestController
-@RequestMapping(value = "/api/rides")
+@RequestMapping(value = "/api/{teamId}/rides")
 public class RideAPI {
 
     @Autowired
@@ -23,8 +23,8 @@ public class RideAPI {
 
     @ResponseBody
     @RequestMapping(value = "/{rideId}/image", method = RequestMethod.GET)
-    public ResponseEntity<byte[]> getRideImage(@PathVariable("rideId") String rideId) {
-        final Optional<ImageDescriptor> image = rideService.getImage(rideId);
+    public ResponseEntity<byte[]> getRideImage(@PathVariable("teamId") String teamId, @PathVariable("rideId") String rideId) {
+        final Optional<ImageDescriptor> image = rideService.getImage(teamId, rideId);
         if (image.isPresent()) {
             try {
 

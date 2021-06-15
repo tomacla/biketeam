@@ -1,47 +1,45 @@
 package info.tomacla.biketeam.web.feed;
 
-import info.tomacla.biketeam.domain.global.Page;
-import info.tomacla.biketeam.domain.global.SiteConfiguration;
+import info.tomacla.biketeam.domain.team.Page;
+import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.domain.team.TeamConfiguration;
 import info.tomacla.biketeam.service.FeedService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.security.Principal;
-import java.util.List;
 
 @Controller
-@RequestMapping(value = "/")
+@RequestMapping(value = "/{teamId}")
 public class FeedController extends AbstractController {
 
     @Autowired
     private FeedService feedService;
 
     @GetMapping
-    public String getFeed(Principal principal, Model model) {
+    public String getFeed(@PathVariable("teamId") String teamId,
+                          Principal principal,
+                          Model model) {
 
-        final SiteConfiguration siteConfiguration = configurationService.getSiteConfiguration();
-        if (siteConfiguration.getDefaultPage().equals(Page.MAPS)) {
-            return "redirect:/maps";
+        final Team team = checkTeam(teamId);
+
+        final TeamConfiguration teamConfiguration = team.getConfiguration();
+        if (teamConfiguration.getDefaultPage().equals(Page.MAPS)) {
+            return redirectToMaps(teamId);
         }
-        if (siteConfiguration.getDefaultPage().equals(Page.RIDES)) {
-            return "redirect:/rides";
+        if (teamConfiguration.getDefaultPage().equals(Page.RIDES)) {
+            return redirectToRides(teamId);
         }
 
-        addGlobalValues(principal, model, "Accueil");
-        model.addAttribute("feed", feedService.listFeed());
-        return "root";
+        addGlobalValues(principal, model, "Accueil", team);
+        model.addAttribute("feed", feedService.listFeed(teamId));
+        return "team_root";
     }
 
-    @GetMapping(value = "/login-error")
-    public String loginError(Principal principal, Model model) {
-        addGlobalValues(principal, model, "Accueil");
-        model.addAttribute("errors", List.of("Erreur de connexion"));
-        model.addAttribute("feed", feedService.listFeed());
-        return "root";
-    }
 
 }
