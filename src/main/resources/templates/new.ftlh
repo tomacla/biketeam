@@ -1,7 +1,8 @@
 <#include "_includes_head.ftlh">
 
 <div class="mt-4 row">
-    <div class="col-4">
+
+    <div class="col-12 col-md-4">
         <h2>Créer une team</h2>
         <ul class="mt-4 lead">
             <li>Hébergez vos maps</li>
@@ -10,7 +11,7 @@
         </ul>
     </div>
 
-    <div class="col-8">
+    <div class="col-12 col-md-8">
 
         <#if _authenticated>
             <form method="POST" action="<@spring.url '/new' />">

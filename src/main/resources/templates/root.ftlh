@@ -10,7 +10,7 @@
 
 <p class="small lead text-center">Déjà sur Biketeam</p>
 
-<div class="row row-cols-4 row-cols-sm-4 g-4">
+<div class="row row-cols-1 row-cols-md-4 g-4">
     <#list teams as team>
         <div class="col">
             <div class="card">
