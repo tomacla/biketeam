@@ -10,7 +10,7 @@
             <dl>
                 <#if user.stravaId??>
                     <dt>Strava</dt>
-                    <dd><a class="link-dark" href="https://www.strava.com/athletes/${_strava_id?c}" target="_blank">${(user.stravaId?c)}</a></dd>
+                    <dd><a class="link-dark" href="https://www.strava.com/athletes/${user.stravaId?c}" target="_blank">${(user.stravaId?c)}</a></dd>
                 </#if>
                 <#if user.city??>
                     <dt>Ville</dt>
@@ -37,7 +37,7 @@
         <#if user.rideGroups?? && user.rideGroups?size != 0>
             <ul class="list-group">
                 <#list user.rideGroups as group>
-                    <li class="list-group-item">${group.ride.date.format(_date_formatter)} - ${group.ride.title} - ${group.name}</li>
+                    <li class="list-group-item"><img src="<@spring.url '/api/' + group.ride.teamId + '/image' />" height="20" alt="Team image"> ${group.ride.date.format(_date_formatter)} - ${group.ride.title} - ${group.name}</li>
                 </#list>
             </ul>
         <#else>

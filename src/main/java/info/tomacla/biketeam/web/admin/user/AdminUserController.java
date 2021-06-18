@@ -15,7 +15,7 @@ public class AdminUserController extends AbstractController {
 
     @GetMapping
     public String getUsers(Principal principal, Model model) {
-        addGlobalValues(principal, model, "Administration - Utilisateurs");
+        addGlobalValues(principal, model, "Administration - Utilisateurs", null);
         model.addAttribute("users", userService.listUsers());
         return "admin_users";
     }
@@ -25,7 +25,7 @@ public class AdminUserController extends AbstractController {
                           @RequestParam("stravaId") Long stravaId) {
 
         User user = new User(false, "Inconnu", "Inconnu", stravaId,
-                null, null, null, null);
+                null, null, null, null, null);
 
         userService.save(user);
 

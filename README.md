@@ -4,7 +4,7 @@ Easily create a website for bike groups.
 
 ## Demo
 
-See live demo [here](https://demo.biketeam.info)
+See live demo [here](https://www.biketeam.info)
 
 ## Use sources
 
@@ -36,27 +36,35 @@ Copy following lines and set your values.
 
 ```
 site.url=http[s]://your-domain
-file.repository=./data/repository
+## Spring Datasource and JPA config : compatible with almost all SGBD
+## This sample is for HSQLDB
 spring.datasource.url=jdbc:hsqldb:file:./data/db
+spring.datasource.driver-class-name=org.hsqldb.jdbc.JDBCDriver
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.HSQLDialect
+## Spring security with Strava
 spring.security.oauth2.client.registration.strava.client-id=xxx
 spring.security.oauth2.client.registration.strava.client-secret=xxx
 spring.security.oauth2.client.registration.strava.redirect-uri=http[s]://your-domain/login/oauth2/code/strava
 spring.security.oauth2.client.provider.strava.token-uri=https://www.strava.com/oauth/token?client_id=xxx&client_secret=xxx
+## User used at primary admin
 admin.strava-id=xxx
 admin.first-name=admin
 admin.last-name=admin
+## Directories (archive to import, file to store)
+archive.directory=/home/thomas/Projects/biketeam/archives
+file.repository=./data/repository
+## Mapbox integration
+mapbox.api-key=xx
+## Facebook integration (optional)
+facebook.app-id=xx
+facebook.app-secret=xx
+## SMTP integration (optional)
+smtp.username=xx
+smtp.password=xx
+smtp.from=xx
+smtp.host=xx
+smtp.port=xx
 ```
-
-* site.url : domain where your site is deployed
-* file.repository : define a local path to a writable repository
-* spring.datasource.url : change the path to a writable repository
-* spring.security.oauth2.client.registration.strava.client-id : strava app client id
-* spring.security.oauth2.client.registration.strava.client-secret : strava pp client secret
-* spring.security.oauth2.client.registration.strava.redirect-uri : callback URI after authentication (should be http[s]://your-domain/login/oauth2/code/strava)
-* spring.security.oauth2.client.provider.strava.token-uri : just change client_id and client_secret parameters to the right values
-* admin.strava-id : this is your strava user id
-* admin.first-name : your first name
-* admin.last-name : your last name
 
 ### With docker
 

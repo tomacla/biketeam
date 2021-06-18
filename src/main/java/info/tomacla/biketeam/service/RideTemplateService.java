@@ -19,20 +19,24 @@ public class RideTemplateService {
     @Autowired
     private RideTemplateRepository rideTemplateRepository;
 
-    public List<RideTemplateIdNameProjection> listTemplates() {
-        return rideTemplateRepository.findAllByOrderByNameAsc();
+    public List<RideTemplateIdNameProjection> listTemplates(String teamId) {
+        return rideTemplateRepository.findAllByTeamIdOrderByNameAsc(teamId);
     }
 
-    public Optional<RideTemplate> get(String templateId) {
-        return rideTemplateRepository.findById(templateId);
+    public Optional<RideTemplate> get(String teamId, String templateId) {
+        final Optional<RideTemplate> optionalRideTemplate = rideTemplateRepository.findById(templateId);
+        if (optionalRideTemplate.isPresent() && optionalRideTemplate.get().getTeamId().equals(teamId)) {
+            return optionalRideTemplate;
+        }
+        return Optional.empty();
     }
 
     public void save(RideTemplate template) {
         rideTemplateRepository.save(template);
     }
 
-    public void delete(String templateId) {
+    public void delete(String teamId, String templateId) {
         log.info("Request ride template deletion {}", templateId);
-        get(templateId).ifPresent(template -> rideTemplateRepository.delete(template));
+        get(teamId, templateId).ifPresent(template -> rideTemplateRepository.delete(template));
     }
 }

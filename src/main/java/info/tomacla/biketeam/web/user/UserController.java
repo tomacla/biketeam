@@ -27,7 +27,7 @@ public class UserController extends AbstractController {
 
         final User user = optionalConnectedUser.get();
 
-        addGlobalValues(principal, model, "Mon profil");
+        addGlobalValues(principal, model, "Mon profil", null);
         model.addAttribute("user", user);
         return "user";
 
@@ -49,7 +49,7 @@ public class UserController extends AbstractController {
 
         userService.save(user);
 
-        addGlobalValues(principal, model, "Mon profil");
+        addGlobalValues(principal, model, "Mon profil", null);
         model.addAttribute("user", user);
         return "user";
 

@@ -1,34 +1,51 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
-    <a class="navbar-brand" href="<@spring.url '/' />">
-        <img src="<@spring.url '/api/logo' />" alt="Logo" height="24" class="d-inline-block align-center">
-        ${_sitename}
-    </a>
+    <#if team??>
+        <a class="navbar-brand" href="<@spring.url '/' + team.id />">
+            ${team.name}
+        </a>
+    <#else>
+        <a class="navbar-brand" href="<@spring.url '/' />">
+            Biketeam
+        </a>
+    </#if>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
-        <#if _config.feedVisible>
-            <li class="nav-item">
-              <a class="nav-link<#if springMacroRequestContext.requestUri == '/'> active</#if>" href="<@spring.url '/' />">Accueil</a>
+        <#if team??>
+            <#if _team_admin>
+                <li class="nav-item border-end">
+                  <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/' + team.id + '/admin')> active</#if>" href="<@spring.url '/' + team.id + '/admin' />"><i class="bi bi-shield-lock"></i> Gérer</a>
+                </li>
+            </#if>
+            <#if team.configuration.feedVisible>
+                <li class="nav-item">
+                  <a class="nav-link<#if springMacroRequestContext.requestUri == '/' + team.id> active</#if>" href="<@spring.url '/' + team.id />">Accueil</a>
+                </li>
+            </#if>
+            <#if team.configuration.ridesVisible>
+                <li class="nav-item">
+                  <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/' + team.id + '/rides')> active</#if>" href="<@spring.url '/' + team.id + '/rides' />">Rides</a>
+                </li>
+            </#if>
+            <li class="nav-item border-end">
+              <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/' + team.id + '/maps')> active</#if>" href="<@spring.url '/' + team.id + '/maps' />">Maps</a>
             </li>
         </#if>
-        <#if _config.ridesVisible>
-            <li class="nav-item">
-              <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/rides')> active</#if>" href="<@spring.url '/rides' />">Rides</a>
+        <#if team??>
+            <li class="nav-item border-end">
+                <a class="nav-link" href="<@spring.url '/' />">Biketeam</a>
             </li>
         </#if>
-        <li class="nav-item">
-          <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/maps')> active</#if>" href="<@spring.url '/maps' />">Maps</a>
-        </li>
         <#if _authenticated>
-            <li class="nav-item border-start">
+            <li class="nav-item">
                <a class="nav-link" href="<@spring.url '/users/me' />"><img class="rounded" height="24" src="${_profile_image}" alt="profile"> ${_identity}</a>
             </li>
             <#if _admin>
                 <li class="nav-item">
-                  <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/admin')> active</#if>" href="<@spring.url '/admin' />"><i class="bi bi-gear"></i> <span class="d-md-none">Administration</span></a>
+                  <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/admin')> active</#if>" href="<@spring.url '/admin/users' />"><i class="bi bi-gear"></i> <span class="d-md-none">Administration</span></a>
                 </li>
             </#if>
             <li class="nav-item">

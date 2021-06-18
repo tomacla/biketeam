@@ -10,8 +10,8 @@ import java.util.List;
 @Repository
 public interface PublicationRepository extends CrudRepository<Publication, String> {
 
-    List<Publication> findAllByPublishedStatusAndPublishedAtLessThan(PublishedStatus publishedStatus, ZonedDateTime now);
+    List<Publication> findAllByTeamIdAndPublishedStatusAndPublishedAtLessThan(String teamId, PublishedStatus publishedStatus, ZonedDateTime now);
 
-    List<PublicationIdTitlePostedAtProjection> findAllByOrderByPostedAtDesc();
+    List<PublicationIdTitlePostedAtProjection> findAllByTeamIdOrderByPostedAtDesc(String teamId);
 
 }

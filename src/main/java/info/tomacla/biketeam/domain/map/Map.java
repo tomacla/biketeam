@@ -16,6 +16,8 @@ public class Map {
 
     @Id
     private String id;
+    @Column(name = "team_id")
+    private String teamId;
     private String name;
     private double length;
     @Column(name = "type")
@@ -56,6 +58,7 @@ public class Map {
     }
 
     public Map(String id,
+               String teamId,
                String name,
                double length,
                MapType type,
@@ -68,6 +71,7 @@ public class Map {
                boolean crossing,
                boolean visible) {
         this.id = Objects.requireNonNullElse(id, UUID.randomUUID().toString());
+        setTeamId(teamId);
         this.postedAt = LocalDate.now();
         setType(type);
         setName(name);
@@ -88,6 +92,14 @@ public class Map {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(String teamId) {
+        this.teamId = Objects.requireNonNull(teamId);
     }
 
     public String getName() {

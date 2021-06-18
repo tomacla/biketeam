@@ -16,12 +16,15 @@ public class RideTemplate {
 
     @Id
     private String id;
+    @Column(name = "team_id")
+    private String teamId;
     private String name;
+    @Enumerated(EnumType.STRING)
     private RideType type;
     @Column(length = 8000)
     private String description;
     @OneToMany(mappedBy = "rideTemplate", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private final Set<RideGroupTemplate> groups = new HashSet<>();
+    private Set<RideGroupTemplate> groups;
 
     @Transient
     private int nextGroupIndex = 0;
@@ -30,14 +33,18 @@ public class RideTemplate {
 
     }
 
-    public RideTemplate(String name,
+    public RideTemplate(String teamId,
+                        String name,
                         RideType type,
-                        String description) {
+                        String description,
+                        Set<RideGroupTemplate> groups) {
 
         this.id = UUID.randomUUID().toString();
+        setTeamId(teamId);
         setName(name);
         setType(type);
         setDescription(description);
+        this.groups = Objects.requireNonNullElse(groups, new HashSet<>());
     }
 
     public String getId() {
@@ -46,6 +53,14 @@ public class RideTemplate {
 
     protected void setId(String id) {
         this.id = id;
+    }
+
+    public String getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(String teamId) {
+        this.teamId = Objects.requireNonNull(teamId);
     }
 
     public String getName() {

@@ -7,6 +7,7 @@ import info.tomacla.biketeam.common.Vector;
 import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.map.MapType;
 import info.tomacla.biketeam.domain.map.WindDirection;
+import info.tomacla.biketeam.domain.team.Team;
 import io.github.glandais.GPXDataComputer;
 import io.github.glandais.GPXPathEnhancer;
 import io.github.glandais.fit.FitFileWriter;
@@ -21,6 +22,7 @@ import io.github.glandais.srtm.GPXElevationFixer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
@@ -33,9 +35,6 @@ import java.util.List;
 public class GpxService {
 
     private static final Logger log = LoggerFactory.getLogger(GpxService.class);
-
-    @Autowired
-    private ConfigurationService configurationService;
 
     @Autowired
     private FileService fileService;
@@ -61,7 +60,10 @@ public class GpxService {
     @Autowired
     private TileMapProducer tileMapProducer;
 
-    public Map parseAndStore(Path gpx, String defaultName, String forceId) {
+    @Value("${mapbox.api-key}")
+    private String mapBoxAPIKey;
+
+    public Map parseAndStore(Team team, Path gpx, String defaultName, String forceId) {
 
         GPXPath gpxPath = getGPXPath(gpx, defaultName);
 
@@ -72,7 +74,7 @@ public class GpxService {
         Vector wind = new Vector(windRaw.getX(), windRaw.getY());
         boolean crossing = gpxDataComputer.isCrossing(gpxPath);
 
-        Path staticMap = getStaticMap(gpxPath);
+        Path staticMap = getStaticMap(team, gpxPath);
 
         Path fit = getFit(gpxPath);
 
@@ -85,6 +87,7 @@ public class GpxService {
 
         Map newMap = new Map(
                 Strings.permatitleFromString(gpxPath.getName()),
+                team.getId(),
                 gpxPath.getName(),
                 Rounder.round2Decimals(Math.round(10.0 * gpxPath.getDist()) / 10000.0),
                 MapType.ROAD,
@@ -102,18 +105,18 @@ public class GpxService {
             newMap.setId(forceId);
         }
 
-        fileService.store(gpx, FileRepositories.GPX_FILES, newMap.getId() + ".gpx");
-        fileService.store(fit, FileRepositories.FIT_FILES, newMap.getId() + ".fit");
-        fileService.store(staticMap, FileRepositories.MAP_IMAGES, newMap.getId() + ".png");
+        fileService.store(gpx, FileRepositories.GPX_FILES, team.getId(), newMap.getId() + ".gpx");
+        fileService.store(fit, FileRepositories.FIT_FILES, team.getId(), newMap.getId() + ".fit");
+        fileService.store(staticMap, FileRepositories.MAP_IMAGES, team.getId(), newMap.getId() + ".png");
 
         return newMap;
 
     }
 
-    public void generateImage(String mapId, Path gpxFile) {
+    public void generateImage(Team team, String mapId, Path gpxFile) {
         GPXPath gpxPath = getGPXPath(gpxFile, "");
-        Path staticMapImage = getStaticMap(gpxPath);
-        fileService.store(staticMapImage, FileRepositories.MAP_IMAGES, mapId + ".png");
+        Path staticMapImage = getStaticMap(team, gpxPath);
+        fileService.store(staticMapImage, FileRepositories.MAP_IMAGES, team.getId(), mapId + ".png");
     }
 
     private GPXPath getGPXPath(Path path, String defaultName) {
@@ -146,10 +149,9 @@ public class GpxService {
         }
     }
 
-    private Path getStaticMap(GPXPath path) {
+    private Path getStaticMap(Team team, GPXPath path) {
         try {
-            String mapBoxAPIKey = configurationService.getSiteIntegration().getMapBoxAPIKey();
-            String tileUrl = mapBoxAPIKey != null ? "https://api.mapbox.com/styles/v1/mapbox/outdoors-v11/tiles/256/{z}/{x}/{y}?access_token=" + mapBoxAPIKey : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+            String tileUrl = "https://api.mapbox.com/styles/v1/mapbox/outdoors-v11/tiles/256/{z}/{x}/{y}?access_token=" + mapBoxAPIKey;
 
             TileMapImage tileMap = tileMapProducer.createTileMap(path, tileUrl, 0, 768, 512);
             Path staticMap = fileService.getTempFile("staticmap", ".png");

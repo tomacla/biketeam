@@ -2,8 +2,9 @@ package info.tomacla.biketeam.api;
 
 import info.tomacla.biketeam.api.dto.AndroidMapDTO;
 import info.tomacla.biketeam.api.dto.GarminMapDTO;
-import info.tomacla.biketeam.service.ConfigurationService;
+import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.service.MapService;
+import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.service.UrlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,17 +16,18 @@ import org.springframework.web.server.ServerErrorException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "/api/maps")
+@RequestMapping(value = "/api/{teamId}/maps")
 public class MapAPI {
 
     @Autowired
-    private ConfigurationService configurationService;
+    private TeamService teamService;
 
     @Autowired
     private MapService mapService;
@@ -35,9 +37,11 @@ public class MapAPI {
 
     @ResponseBody
     @RequestMapping(value = "/android", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<AndroidMapDTO> mapsAndroid() {
+    public List<AndroidMapDTO> mapsAndroid(@PathVariable("teamId") String teamId) {
 
-        return mapService.listMaps(50).stream()
+        Team team = teamService.get(teamId).orElseThrow(() -> new IllegalArgumentException("Unknown team"));
+
+        return mapService.listMaps(teamId, 50).stream()
                 .map(m -> {
                     AndroidMapDTO dto = new AndroidMapDTO();
                     dto.setId(m.getId());
@@ -46,7 +50,7 @@ public class MapAPI {
                     dto.setTags(m.getTags());
                     dto.setNegativeElevation(Math.round(m.getNegativeElevation()));
                     dto.setPositiveElevation(Math.round(m.getPositiveElevation()));
-                    dto.setTime(m.getPostedAt().atStartOfDay(configurationService.getTimezone()).toEpochSecond());
+                    dto.setTime(m.getPostedAt().atStartOfDay(ZoneId.of(team.getConfiguration().getTimezone())).toEpochSecond());
                     dto.setType(m.getType().getLabel().toLowerCase());
                     return dto;
                 }).collect(Collectors.toList());
@@ -55,13 +59,13 @@ public class MapAPI {
 
     @ResponseBody
     @RequestMapping(value = "/garmin", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Map<String, List<GarminMapDTO>> mapsGarmin() {
+    public Map<String, List<GarminMapDTO>> mapsGarmin(@PathVariable("teamId") String teamId) {
 
-        return Map.of("tracks", mapService.listMaps(50).stream()
+        return Map.of("tracks", mapService.listMaps(teamId, 50).stream()
                 .map(m -> {
                     GarminMapDTO dto = new GarminMapDTO();
                     dto.setTitle(m.getName());
-                    dto.setUrl(urlService.getMapFitUrl(m.getId()));
+                    dto.setUrl(urlService.getMapFitUrl(teamId, m.getId()));
                     return dto;
                 }).collect(Collectors.toList()));
 
@@ -69,8 +73,8 @@ public class MapAPI {
 
     @ResponseBody
     @RequestMapping(value = "/{mapId}/gpx", method = RequestMethod.GET, produces = "application/gpx+xml")
-    public byte[] getMapGpxFile(@PathVariable("mapId") String mapId) {
-        final Optional<Path> gpxFile = mapService.getGpxFile(mapId);
+    public byte[] getMapGpxFile(@PathVariable("teamId") String teamId, @PathVariable("mapId") String mapId) {
+        final Optional<Path> gpxFile = mapService.getGpxFile(teamId, mapId);
         if (gpxFile.isPresent()) {
             try {
                 return Files.readAllBytes(gpxFile.get());
@@ -83,8 +87,8 @@ public class MapAPI {
 
     @ResponseBody
     @RequestMapping(value = "/{mapId}/fit", method = RequestMethod.GET, produces = "application/fit")
-    public byte[] getFitFile(@PathVariable("mapId") String mapId) {
-        final Optional<Path> fitFile = mapService.getFitFile(mapId);
+    public byte[] getFitFile(@PathVariable("teamId") String teamId, @PathVariable("mapId") String mapId) {
+        final Optional<Path> fitFile = mapService.getFitFile(teamId, mapId);
         if (fitFile.isPresent()) {
             try {
                 return Files.readAllBytes(fitFile.get());
@@ -97,8 +101,8 @@ public class MapAPI {
 
     @ResponseBody
     @RequestMapping(value = "/{mapId}/image", method = RequestMethod.GET, produces = "image/png")
-    public byte[] getMapImage(@PathVariable("mapId") String mapId) {
-        final Optional<Path> imageFile = mapService.getImageFile(mapId);
+    public byte[] getMapImage(@PathVariable("teamId") String teamId, @PathVariable("mapId") String mapId) {
+        final Optional<Path> imageFile = mapService.getImageFile(teamId, mapId);
         if (imageFile.isPresent()) {
             try {
                 return Files.readAllBytes(imageFile.get());
@@ -111,8 +115,8 @@ public class MapAPI {
 
     @ResponseStatus(value = HttpStatus.OK)
     @RequestMapping(value = "/{mapId}/image/refresh", method = RequestMethod.GET)
-    public void refreshImage(@PathVariable("mapId") String mapId) {
-        mapService.generateImage(mapId);
+    public void refreshImage(@PathVariable("teamId") String teamId, @PathVariable("mapId") String mapId) {
+        mapService.generateImage(teamId, mapId);
     }
 
 }

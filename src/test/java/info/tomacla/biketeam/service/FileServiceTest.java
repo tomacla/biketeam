@@ -15,10 +15,10 @@ public class FileServiceTest {
     public void testStore() throws Exception {
         FileService fileService = create();
         Path source = Paths.get(fileService.getClass().getClassLoader().getResource("image-test.jpg").toURI());
-        assertFalse(fileService.exists("test-store", "new-file"));
-        fileService.store(source, "test-store", "new-file");
-        assertTrue(fileService.exists("test-store", "new-file"));
-        fileService.get("test-store", "new-file");
+        assertFalse(fileService.exists("test-store", "teamid", "new-file"));
+        fileService.store(source, "test-store", "teamid","new-file");
+        assertTrue(fileService.exists("test-store", "teamid","new-file"));
+        fileService.get("test-store", "teamid","new-file");
     }
 
     private FileService create() {

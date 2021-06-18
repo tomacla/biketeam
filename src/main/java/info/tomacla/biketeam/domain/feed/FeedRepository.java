@@ -10,6 +10,6 @@ import java.time.ZonedDateTime;
 @Repository
 public interface FeedRepository extends PagingAndSortingRepository<Feed, String> {
 
-    Page<Feed> findAllByPublishedAtLessThan(ZonedDateTime now, Pageable pageable);
+    Page<Feed> findAllByTeamIdAndPublishedAtLessThan(String teamId, ZonedDateTime now, Pageable pageable);
 
 }

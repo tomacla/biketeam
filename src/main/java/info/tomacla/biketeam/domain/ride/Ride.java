@@ -18,6 +18,8 @@ public class Ride {
 
     @Id
     private String id;
+    @Column(name = "team_id")
+    private String teamId;
     @Enumerated(EnumType.STRING)
     @Column(name = "published_status")
     private PublishedStatus publishedStatus;
@@ -31,7 +33,7 @@ public class Ride {
     private String description;
     private boolean imaged;
     @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private final Set<RideGroup> groups = new HashSet<>();
+    private Set<RideGroup> groups;
 
     @Transient
     private int nextGroupIndex = 0;
@@ -40,14 +42,17 @@ public class Ride {
 
     }
 
-    public Ride(RideType type,
+    public Ride(String teamId,
+                RideType type,
                 LocalDate date,
                 ZonedDateTime publishedAt,
                 String title,
                 String description,
-                boolean imaged) {
+                boolean imaged,
+                Set<RideGroup> groups) {
 
         this.id = UUID.randomUUID().toString();
+        setTeamId(teamId);
         this.publishedStatus = PublishedStatus.UNPUBLISHED;
         setType(type);
         setDate(date);
@@ -55,6 +60,7 @@ public class Ride {
         setTitle(title);
         setDescription(description);
         setImaged(imaged);
+        this.groups = Objects.requireNonNullElse(groups, new HashSet<>());
     }
 
     public String getId() {
@@ -63,6 +69,14 @@ public class Ride {
 
     protected void setId(String id) {
         this.id = id;
+    }
+
+    public String getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(String teamId) {
+        this.teamId = Objects.requireNonNull(teamId);
     }
 
     public PublishedStatus getPublishedStatus() {

@@ -6,12 +6,13 @@ import com.restfb.scope.ScopeBuilder;
 import com.restfb.types.Account;
 import com.restfb.types.GraphResponse;
 import info.tomacla.biketeam.common.Dates;
-import info.tomacla.biketeam.domain.global.SiteIntegration;
 import info.tomacla.biketeam.domain.publication.Publication;
 import info.tomacla.biketeam.domain.ride.Ride;
+import info.tomacla.biketeam.domain.team.Team;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Files;
@@ -25,7 +26,7 @@ public class FacebookService implements ExternalPublicationService {
     private static final Logger log = LoggerFactory.getLogger(FacebookService.class);
 
     @Autowired
-    private ConfigurationService configurationService;
+    private TeamService teamService;
 
     @Autowired
     private RideService rideService;
@@ -36,13 +37,16 @@ public class FacebookService implements ExternalPublicationService {
     @Autowired
     private UrlService urlService;
 
-    public void publish(Ride ride) {
+    @Autowired
+    private Environment env;
+
+    public void publish(Team team, Ride ride) {
 
         log.info("Publish ride {} to facebook", ride.getId());
 
         StringBuilder sb = new StringBuilder();
         sb.append(ride.getTitle()).append(" - ").append(Dates.frenchDateFormat(ride.getDate())).append("\n");
-        sb.append(urlService.getRideUrl(ride.getId())).append("\n\n");
+        sb.append(urlService.getRideUrl(team.getId(), ride.getId())).append("\n\n");
         sb.append(ride.getDescription()).append("\n\n");
         ride.getGroups().forEach(group -> {
             sb.append(group.getName()).append(" - ");
@@ -50,21 +54,21 @@ public class FacebookService implements ExternalPublicationService {
             sb.append("Départ ").append(Dates.formatTime(group.getMeetingTime())).append(" - ");
             sb.append(group.getMeetingLocation()).append("\n");
             if (group.getMapId() != null) {
-                sb.append("Map : ").append(urlService.getMapUrl(group.getMapId())).append("\n");
+                sb.append("Map : ").append(urlService.getMapUrl(team.getId(), group.getMapId())).append("\n");
             }
             sb.append("\n");
         });
 
         final String content = sb.toString();
         if (ride.isImaged()) {
-            rideService.getImage(ride.getId()).ifPresent(rideImage -> this.publish(content, rideImage.getPath()));
+            rideService.getImage(team.getId(), ride.getId()).ifPresent(rideImage -> this.publish(team, content, rideImage.getPath()));
         } else {
-            this.publish(content, null);
+            this.publish(team, content, null);
         }
 
     }
 
-    public void publish(Publication publication) {
+    public void publish(Team team, Publication publication) {
 
         log.info("Publish publication {} to facebook", publication.getId());
 
@@ -75,29 +79,27 @@ public class FacebookService implements ExternalPublicationService {
 
         final String content = sb.toString();
         if (publication.isImaged()) {
-            publicationService.getImage(publication.getId()).ifPresent(pubImage -> this.publish(content, pubImage.getPath()));
+            publicationService.getImage(team.getId(), publication.getId()).ifPresent(pubImage -> this.publish(team, content, pubImage.getPath()));
         } else {
-            this.publish(content, null);
+            this.publish(team, content, null);
         }
 
     }
 
-    private void publish(String content, Path image) {
+    private void publish(Team team, String content, Path image) {
 
-        final SiteIntegration siteIntegration = configurationService.getSiteIntegration();
-        if (!siteIntegration.isFacebookConfigured()) {
+        if (!team.getIntegration().isFacebookConfigured()) {
             return;
         }
 
         try {
 
-
             final DefaultFacebookClient facebookClient = new DefaultFacebookClient(
-                    siteIntegration.getFacebookAccessToken(),
+                    team.getIntegration().getFacebookAccessToken(),
                     Version.LATEST
             );
 
-            final Optional<String> optionalPageAccessToken = getPageAccessToken(facebookClient);
+            final Optional<String> optionalPageAccessToken = getPageAccessToken(team, facebookClient);
             if (optionalPageAccessToken.isPresent()) {
 
                 final String token = optionalPageAccessToken.get();
@@ -106,12 +108,12 @@ public class FacebookService implements ExternalPublicationService {
 
                 if (image != null) {
                     final BinaryAttachment attachment = BinaryAttachment.with(image.getFileName().toString(), Files.readAllBytes(image));
-                    publishClient.publish(siteIntegration.getFacebookPageId() + "/photos",
+                    publishClient.publish(team.getIntegration().getFacebookPageId() + "/photos",
                             GraphResponse.class,
                             attachment,
                             Parameter.with("message", content));
                 } else {
-                    publishClient.publish(siteIntegration.getFacebookPageId() + "/feed",
+                    publishClient.publish(team.getIntegration().getFacebookPageId() + "/feed",
                             GraphResponse.class,
                             Parameter.with("message", content));
                 }
@@ -125,15 +127,13 @@ public class FacebookService implements ExternalPublicationService {
 
     }
 
-    private Optional<String> getPageAccessToken(DefaultFacebookClient facebookClient) {
-
-        final SiteIntegration siteIntegration = configurationService.getSiteIntegration();
+    private Optional<String> getPageAccessToken(Team team, DefaultFacebookClient facebookClient) {
 
         Connection<Account> connection = facebookClient.fetchConnection("/me/accounts", Account.class);
 
         for (List<Account> accounts : connection) {
             for (Account account : accounts) {
-                if (account.getId().equals(siteIntegration.getFacebookPageId())) {
+                if (account.getId().equals(team.getIntegration().getFacebookPageId())) {
                     return Optional.of(account.getAccessToken());
                 }
             }
@@ -142,19 +142,20 @@ public class FacebookService implements ExternalPublicationService {
         return Optional.empty();
     }
 
-    public String getLoginUrl() {
+    public String getLoginUrl(String teamId) {
 
         try {
-            final SiteIntegration siteIntegration = configurationService.getSiteIntegration();
+
             DefaultFacebookClient facebookClient = new DefaultFacebookClient(Version.LATEST);
 
             ScopeBuilder scopeBuilder = new ScopeBuilder();
             scopeBuilder.addPermission(FacebookPermissions.PAGES_MANAGE_POSTS);
 
             return facebookClient.getLoginDialogUrl(
-                    siteIntegration.getFacebookAppId(),
+                    env.getProperty("facebook.app-id"),
                     getRedirectUri(),
-                    scopeBuilder);
+                    scopeBuilder,
+                    Parameter.with("state", teamId));
         } catch (Exception e) {
             log.error("Error while builing facebook login URL", e);
             throw new RuntimeException(e);
@@ -165,12 +166,12 @@ public class FacebookService implements ExternalPublicationService {
     public String getUserAccessToken(String code) {
 
         try {
-            final SiteIntegration siteIntegration = configurationService.getSiteIntegration();
+
             DefaultFacebookClient facebookClient = new DefaultFacebookClient(Version.LATEST);
 
             final FacebookClient.AccessToken accessToken = facebookClient.obtainUserAccessToken(
-                    siteIntegration.getFacebookAppId(),
-                    siteIntegration.getFacebookAppSecret(),
+                    env.getProperty("facebook.app-id"),
+                    env.getProperty("facebook.app-secret"),
                     getRedirectUri(),
                     code
             );
@@ -183,7 +184,7 @@ public class FacebookService implements ExternalPublicationService {
     }
 
     private String getRedirectUri() {
-        return urlService.getUrlWithSuffix("/admin/integration/facebook/login/");
+        return urlService.getUrlWithSuffix("/integration/facebook/login/");
     }
 
 }

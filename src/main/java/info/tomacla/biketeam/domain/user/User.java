@@ -33,6 +33,8 @@ public class User implements Serializable {
     private Set<RideGroup> rideGroups;
     @Column(name = "email")
     private String email;
+    @OneToMany(mappedBy = "id.userId", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private Set<UserRole> roles;
 
     protected User() {
 
@@ -45,7 +47,8 @@ public class User implements Serializable {
                 String stravaUserName,
                 String city,
                 String profileImage,
-                Set<RideGroup> rideGroups) {
+                Set<RideGroup> rideGroups,
+                Set<UserRole> roles) {
         this.id = UUID.randomUUID().toString();
         setAdmin(admin);
         setStravaId(stravaId);
@@ -55,6 +58,7 @@ public class User implements Serializable {
         setCity(city);
         setProfileImage(profileImage);
         setRideGroups(rideGroups);
+        this.roles = Objects.requireNonNullElse(roles, new HashSet<>());
     }
 
     public String getId() {
@@ -139,6 +143,48 @@ public class User implements Serializable {
 
     public void setEmail(String email) {
         this.email = Strings.requireNonBlankOrNull(email);
+    }
+
+    public Set<UserRole> getRoles() {
+        return roles;
+    }
+
+    public void addRole(UserRole role) {
+        this.roles.add(role);
+    }
+
+    public void removeRole(UserRole role) {
+        this.roles.remove(role);
+    }
+
+    public void setRoles(Set<UserRole> roles) {
+        roles.forEach(this::addRole);
+    }
+
+    public void setAdmin(String teamId) {
+        this.roles.add(UserRole.admin(getId(), teamId));
+    }
+
+    public void setMember(String teamId) {
+        this.roles.add(UserRole.member(getId(), teamId));
+    }
+
+    public boolean isAdmin(String teamId) {
+        for (UserRole role : this.roles) {
+            if (role.isAdmin(teamId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isMember(String teamId) {
+        for (UserRole role : this.roles) {
+            if (role.isMember(teamId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
