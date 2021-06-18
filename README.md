@@ -28,6 +28,10 @@ Go to [this page](https://www.strava.com/settings/api) and create you app.
 
 Write down client-id and client-secret.
 
+#### Install PostgreSQL and create a database
+
+Follow instructions to install PostgreSQL and create a database and a user.
+
 #### Create a custom configuration file
 
 Create file for custom configuration for example `application-custom.properties`.
@@ -36,11 +40,13 @@ Copy following lines and set your values.
 
 ```
 site.url=http[s]://your-domain
-## Spring Datasource and JPA config : compatible with almost all SGBD
-## This sample is for HSQLDB
-spring.datasource.url=jdbc:hsqldb:file:./data/db
-spring.datasource.driver-class-name=org.hsqldb.jdbc.JDBCDriver
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.HSQLDialect
+## Spring Datasource and JPA config : postgresql
+## database and username must be created before startup
+spring.datasource.url=jdbc:postgresql://localhost:5432/biketeam
+spring.datasource.username=xxx
+spring.datasource.password=xxx
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQL10Dialect
 ## Spring security with Strava
 spring.security.oauth2.client.registration.strava.client-id=xxx
 spring.security.oauth2.client.registration.strava.client-secret=xxx

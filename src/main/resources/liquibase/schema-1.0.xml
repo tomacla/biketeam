@@ -281,7 +281,7 @@
                                  referencedTableName="ride"
                                  referencedColumnNames="id"/>
         
-        <createTable tableName="user">
+        <createTable tableName="user_account">
             <column name="id" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
@@ -298,7 +298,7 @@
 
         </createTable>
 
-        <addPrimaryKey tableName="user" columnNames="id"/>
+        <addPrimaryKey tableName="user_account" columnNames="id"/>
 
         <createTable tableName="ride_group_participant">
             <column name="ride_group_id" type="VARCHAR(255)"/>
@@ -330,7 +330,7 @@
         <addForeignKeyConstraint baseTableName="user_roles"
                                  baseColumnNames="user_id"
                                  constraintName="fk_user_roles_user_id"
-                                 referencedTableName="user"
+                                 referencedTableName="user_account"
                                  referencedColumnNames="id"/>
 
         <addForeignKeyConstraint baseTableName="user_roles"
@@ -405,7 +405,7 @@
             <column name="access_token_type" type="varchar(100)">
                 <constraints nullable="false"/>
             </column>
-            <column name="access_token_value" type="blob">
+            <column name="access_token_value" type="longblob">
                 <constraints nullable="false"/>
             </column>
             <column name="access_token_issued_at" type="timestamp">
@@ -415,7 +415,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="access_token_scopes" type="varchar(1000)"/>
-            <column name="refresh_token_value" type="blob"/>
+            <column name="refresh_token_value" type="longblob"/>
             <column name="refresh_token_issued_at" type="timestamp"/>
             <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
