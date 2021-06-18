@@ -101,7 +101,7 @@
                     </div>
                     <div class="col-6 mb-3">
                       <label for="form-ride-file" class="form-label">Image associée (PNG ou JPG)</label>
-                      <input autocomplete="off" name="file" accept=".png, .jpg" class="form-control form-size-check" type="file" id="form-ride-file">
+                      <input autocomplete="off" name="file" accept=".png,.jpg,.jpeg" class="form-control form-size-check" type="file" id="form-ride-file">
                     </div>
                 </div>
 

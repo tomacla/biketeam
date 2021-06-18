@@ -99,9 +99,7 @@ public class RideService {
         final Optional<Ride> optionalRide = get(teamId, rideId);
         if (optionalRide.isPresent()) {
             final Ride ride = optionalRide.get();
-            getImage(ride.getTeamId(), ride.getId()).ifPresent(image ->
-                    fileService.delete(FileRepositories.RIDE_IMAGES, ride.getTeamId(), ride.getId() + image.getExtension().getExtension())
-            );
+            deleteImage(ride.getTeamId(), ride.getId());
             rideRepository.delete(ride);
         }
     }
@@ -120,9 +118,16 @@ public class RideService {
     public void saveImage(String teamId, String rideId, InputStream is, String fileName) {
         Optional<FileExtension> optionalFileExtension = FileExtension.findByFileName(fileName);
         if (optionalFileExtension.isPresent()) {
+            this.deleteImage(teamId, rideId);
             Path newImage = fileService.getTempFileFromInputStream(is);
             fileService.store(newImage, FileRepositories.RIDE_IMAGES, teamId, rideId + optionalFileExtension.get().getExtension());
         }
+    }
+
+    public void deleteImage(String teamId, String rideId) {
+        getImage(teamId,rideId).ifPresent(image ->
+                fileService.delete(FileRepositories.RIDE_IMAGES, teamId, rideId + image.getExtension().getExtension())
+        );
     }
 
 }

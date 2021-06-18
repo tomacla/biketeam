@@ -76,11 +76,15 @@ public class PublicationService {
         final Optional<Publication> optionalPublication = get(teamId, publicationId);
         if (optionalPublication.isPresent()) {
             final Publication publication = optionalPublication.get();
-            getImage(publication.getTeamId(), publication.getId()).ifPresent(image ->
-                    fileService.delete(FileRepositories.PUBLICATION_IMAGES, publication.getTeamId(), publication.getId() + image.getExtension().getExtension())
-            );
+            deleteImage(publication.getTeamId(), publication.getId());
             publicationRepository.delete(publication);
         }
+    }
+
+    public void deleteImage(String teamId, String publicationId) {
+        getImage(teamId, publicationId).ifPresent(image ->
+                fileService.delete(FileRepositories.PUBLICATION_IMAGES, teamId, publicationId + image.getExtension().getExtension())
+        );
     }
 
     public Optional<ImageDescriptor> getImage(String teamId, String publicationId) {
@@ -103,6 +107,7 @@ public class PublicationService {
     public void saveImage(String teamId, String publicationId, InputStream is, String fileName) {
         Optional<FileExtension> optionalFileExtension = FileExtension.findByFileName(fileName);
         if (optionalFileExtension.isPresent()) {
+            deleteImage(teamId, publicationId);
             Path newImage = fileService.getTempFileFromInputStream(is);
             fileService.store(newImage, FileRepositories.PUBLICATION_IMAGES, teamId, publicationId + optionalFileExtension.get().getExtension());
         }

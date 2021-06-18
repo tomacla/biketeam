@@ -14,7 +14,7 @@
 
                 <div class="mb-3">
                   <label for="form-logo-file" class="form-label">Nouveau logo (PNG ou JPEG)</label>
-                  <input name="file" accept=".png,.jpg" class="form-control form-size-check" type="file" id="form-logo-file">
+                  <input name="file" accept=".png,.jpg,.jpeg" class="form-control form-size-check" type="file" id="form-logo-file">
                 </div>
                 <button type="submit" class="btn btn-secondary">Enregistrer</button>
         </form>

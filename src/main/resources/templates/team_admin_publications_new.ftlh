@@ -41,7 +41,7 @@
                 </#if>
                 <div class="mb-3">
                   <label for="form-publication-file" class="form-label">Image associée (PNG ou JPEG)</label>
-                  <input autocomplete="off" name="file" accept=".png,.jpg" class="form-control form-size-check" type="file" id="form-publication-file">
+                  <input autocomplete="off" name="file" accept=".png,.jpg,.jpeg" class="form-control form-size-check" type="file" id="form-publication-file">
                 </div>
 
                 <button type="submit" class="btn btn-secondary">Enregistrer</button>

@@ -69,9 +69,16 @@ public class TeamService {
     public void saveImage(String teamId, InputStream is, String fileName) {
         Optional<FileExtension> optionalFileExtension = FileExtension.findByFileName(fileName);
         if (optionalFileExtension.isPresent()) {
+            deleteImage(teamId);
             Path newImage = fileService.getTempFileFromInputStream(is);
             fileService.store(newImage, FileRepositories.MISC_IMAGES, teamId, "logo" + optionalFileExtension.get().getExtension());
         }
+    }
+
+    public void deleteImage(String teamId) {
+        getImage(teamId).ifPresent(image ->
+                fileService.delete(FileRepositories.MISC_IMAGES, teamId, "logo" + image.getExtension().getExtension())
+        );
     }
 
     public Optional<ImageDescriptor> getImage(String teamId) {

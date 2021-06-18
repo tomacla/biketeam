@@ -37,7 +37,7 @@ public class SearchMapSpecification implements Specification<Map> {
     @Override
     public Predicate toPredicate(Root<Map> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
         List<Predicate> predicates = new ArrayList<>();
-        predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("teamId"), teamId));
+        predicates.add(criteriaBuilder.equal(root.get("teamId"), teamId));
         predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("length"), lowerDistance));
         predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("length"), upperDistance));
         predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("positiveElevation"), lowerPositiveElevation));
