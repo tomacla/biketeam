@@ -33,6 +33,10 @@ public class UrlService {
         return siteUrl + suffix;
     }
 
+    public String getTeamUrl(String teamId) {
+        return siteUrl + "/" + teamId;
+    }
+
     public String getUrl() {
         return siteUrl;
     }

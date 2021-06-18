@@ -85,7 +85,7 @@ public class MailService implements ExternalPublicationService {
             StringBuilder sb = new StringBuilder();
             sb.append("<html>").append("<head></head>").append("<body>");
             sb.append("<p>").append(publication.getTitle()).append("</p>");
-            sb.append("<p>").append(getHtmlLink(urlService.getUrl())).append("</p>");
+            sb.append("<p>").append(getHtmlLink(urlService.getTeamUrl(team.getId()))).append("</p>");
             sb.append("<p>").append(publication.getContent()).append("</p>");
             if (publication.isImaged()) {
                 sb.append("<p><img src=\"cid:Image\" /></p>");

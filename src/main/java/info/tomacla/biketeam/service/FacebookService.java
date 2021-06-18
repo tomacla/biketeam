@@ -74,7 +74,7 @@ public class FacebookService implements ExternalPublicationService {
 
         StringBuilder sb = new StringBuilder();
         sb.append(publication.getTitle()).append("\n");
-        sb.append(urlService.getUrl()).append("\n\n");
+        sb.append(urlService.getTeamUrl(team.getId())).append("\n\n");
         sb.append(publication.getContent()).append("\n\n");
 
         final String content = sb.toString();
