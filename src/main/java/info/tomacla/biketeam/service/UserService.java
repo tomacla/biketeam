@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.service;
 
+import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.user.UserRepository;
 import org.slf4j.Logger;
@@ -45,8 +46,8 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public Object listUsers(String teamId) {
-        return userRepository.findByRoles_Id_TeamId(teamId);
+    public List<User> listUsers(Team team) {
+        return userRepository.findByRoles_Team(team);
     }
 
     public void promote(String userId) {

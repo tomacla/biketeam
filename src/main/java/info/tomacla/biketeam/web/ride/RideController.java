@@ -3,6 +3,7 @@ package info.tomacla.biketeam.web.ride;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.domain.user.Role;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.service.RideService;
 import info.tomacla.biketeam.web.AbstractController;
@@ -35,9 +36,9 @@ public class RideController extends AbstractController {
 
         final Team team = checkTeam(teamId);
 
-        Optional<Ride> optionalRide = rideService.get(teamId, rideId);
+        Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
         if (optionalRide.isEmpty()) {
-            return redirectToRides(teamId);
+            return redirectToRides(team.getId());
         }
 
         Ride ride = optionalRide.get();
@@ -67,7 +68,7 @@ public class RideController extends AbstractController {
         final SearchRideForm.SearchRideFormParser parser = form.parser();
 
         Page<Ride> rides = rideService.searchRides(
-                teamId,
+                team.getId(),
                 parser.getPage(),
                 parser.getPageSize(),
                 parser.getFrom(),
@@ -89,11 +90,11 @@ public class RideController extends AbstractController {
                                        @PathVariable("userId") String userId,
                                        Principal principal, Model model) {
 
-        checkTeam(teamId);
+        final Team team = checkTeam(teamId);
 
-        Optional<Ride> optionalRide = rideService.get(teamId, rideId);
+        Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
         if (optionalRide.isEmpty()) {
-            return redirectToRides(teamId);
+            return redirectToRides(team.getId());
         }
 
         Ride ride = optionalRide.get();
@@ -107,13 +108,19 @@ public class RideController extends AbstractController {
             User connectedUser = optionalConnectedUser.get();
 
             if (user.equals(connectedUser) || connectedUser.isAdmin()) {
+
+                if (!team.isAdminOrMember(user.getId())) {
+                    team.addRole(user, Role.MEMBER);
+                    teamService.save(team);
+                }
+
                 rideGroup.addParticipant(user);
                 rideService.save(ride);
             }
 
         }
 
-        return redirectToRide(teamId, rideId);
+        return redirectToRide(team.getId(), rideId);
     }
 
     @GetMapping(value = "/{rideId}/remove-participant/{groupId}/{userId}")
@@ -123,11 +130,11 @@ public class RideController extends AbstractController {
                                           @PathVariable("userId") String userId,
                                           Principal principal, Model model) {
 
-        checkTeam(teamId);
+        final Team team = checkTeam(teamId);
 
-        Optional<Ride> optionalRide = rideService.get(teamId, rideId);
+        Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
         if (optionalRide.isEmpty()) {
-            return redirectToRides(teamId);
+            return redirectToRides(team.getId());
         }
 
         Ride ride = optionalRide.get();
@@ -147,7 +154,7 @@ public class RideController extends AbstractController {
 
         }
 
-        return redirectToRide(teamId, rideId);
+        return redirectToRide(team.getId(), rideId);
     }
 
 

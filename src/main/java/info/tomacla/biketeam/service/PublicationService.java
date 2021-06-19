@@ -5,7 +5,7 @@ import info.tomacla.biketeam.common.FileRepositories;
 import info.tomacla.biketeam.common.ImageDescriptor;
 import info.tomacla.biketeam.common.PublishedStatus;
 import info.tomacla.biketeam.domain.publication.Publication;
-import info.tomacla.biketeam.domain.publication.PublicationIdTitlePostedAtProjection;
+import info.tomacla.biketeam.domain.publication.PublicationIdTitlePublishedAtProjection;
 import info.tomacla.biketeam.domain.publication.PublicationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -41,22 +40,22 @@ public class PublicationService {
 
     public void publishPublications() {
         teamService.list().forEach(team ->
-            publicationRepository.findAllByTeamIdAndPublishedStatusAndPublishedAtLessThan(
-                    team.getId(),
-                    PublishedStatus.UNPUBLISHED,
-                    ZonedDateTime.now(ZoneId.of(team.getConfiguration().getTimezone()))
-            ).forEach(pub -> {
-                log.info("Publishing publication {}", pub.getId());
-                pub.setPublishedStatus(PublishedStatus.PUBLISHED);
-                publicationRepository.save(pub);
-                facebookService.publish(team, pub);
-                mailService.publish(team, pub);
-            })
+                publicationRepository.findAllByTeamIdAndPublishedStatusAndPublishedAtLessThan(
+                        team.getId(),
+                        PublishedStatus.UNPUBLISHED,
+                        ZonedDateTime.now(team.getZoneId())
+                ).forEach(pub -> {
+                    log.info("Publishing publication {}", pub.getId());
+                    pub.setPublishedStatus(PublishedStatus.PUBLISHED);
+                    publicationRepository.save(pub);
+                    facebookService.publish(team, pub);
+                    mailService.publish(team, pub);
+                })
         );
     }
 
-    public List<PublicationIdTitlePostedAtProjection> listPublications(String teamId) {
-        return publicationRepository.findAllByTeamIdOrderByPostedAtDesc(teamId);
+    public List<PublicationIdTitlePublishedAtProjection> listPublications(String teamId) {
+        return publicationRepository.findAllByTeamIdOrderByPublishedAtDesc(teamId);
     }
 
     public Optional<Publication> get(String teamId, String publicationId) {

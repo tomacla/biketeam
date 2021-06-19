@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.domain.user;
 
+import info.tomacla.biketeam.domain.team.Team;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,6 +16,6 @@ public interface UserRepository extends CrudRepository<User, String> {
 
     List<User> findByEmailNotNull();
 
-    List<User> findByRoles_Id_TeamId(String teamId);
+    List<User> findByRoles_Team(Team team);
 
 }

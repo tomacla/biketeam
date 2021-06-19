@@ -34,8 +34,8 @@ public class AdminTeamConfigurationController extends AbstractController {
     public String getSiteDescription(@PathVariable("teamId") String teamId,
                                      Principal principal, Model model) {
 
-        checkAdmin(principal, teamId);
         final Team team = checkTeam(teamId);
+        checkAdmin(principal, team.getId());
 
         final TeamDescription teamDescription = team.getDescription();
 
@@ -61,8 +61,8 @@ public class AdminTeamConfigurationController extends AbstractController {
                                         Principal principal, Model model,
                                         EditTeamDescriptionForm form) {
 
-        checkAdmin(principal, teamId);
         final Team team = checkTeam(teamId);
+        checkAdmin(principal, team.getId());
 
         final TeamDescription teamDescription = team.getDescription();
 
@@ -96,8 +96,8 @@ public class AdminTeamConfigurationController extends AbstractController {
     public String getSiteConfiguration(@PathVariable("teamId") String teamId,
                                        Principal principal, Model model) {
 
-        checkAdmin(principal, teamId);
         final Team team = checkTeam(teamId);
+        checkAdmin(principal, team.getId());
 
         final TeamConfiguration teamConfiguration = team.getConfiguration();
 
@@ -112,7 +112,7 @@ public class AdminTeamConfigurationController extends AbstractController {
         addGlobalValues(principal, model, "Administration - Configuration", team);
         model.addAttribute("formdata", form);
         model.addAttribute("timezones", getAllAvailableTimeZones());
-        model.addAttribute("tags", mapService.listTags(teamId));
+        model.addAttribute("tags", mapService.listTags(team.getId()));
         return "team_admin_configuration";
     }
 
@@ -122,8 +122,8 @@ public class AdminTeamConfigurationController extends AbstractController {
                                           Model model,
                                           EditTeamConfigurationForm form) {
 
-        checkAdmin(principal, teamId);
         final Team team = checkTeam(teamId);
+        checkAdmin(principal, team.getId());
 
         final TeamConfiguration teamConfiguration = team.getConfiguration();
 
@@ -140,14 +140,14 @@ public class AdminTeamConfigurationController extends AbstractController {
             addGlobalValues(principal, model, "Administration - Configuration", team);
             model.addAttribute("formdata", form);
             model.addAttribute("timezones", getAllAvailableTimeZones());
-            model.addAttribute("tags", mapService.listTags(teamId));
+            model.addAttribute("tags", mapService.listTags(team.getId()));
             return "team_admin_configuration";
 
         } catch (Exception e) {
             addGlobalValues(principal, model, "Administration - Configuration", team);
             model.addAttribute("formdata", form);
             model.addAttribute("timezones", getAllAvailableTimeZones());
-            model.addAttribute("tags", mapService.listTags(teamId));
+            model.addAttribute("tags", mapService.listTags(team.getId()));
             return "team_admin_configuration";
 
         }
@@ -159,8 +159,8 @@ public class AdminTeamConfigurationController extends AbstractController {
                                        Principal principal,
                                        Model model) {
 
-        checkAdmin(principal, teamId);
         final Team team = checkTeam(teamId);
+        checkAdmin(principal, team.getId());
 
         final TeamIntegration teamIntegration = team.getIntegration();
 
@@ -181,8 +181,8 @@ public class AdminTeamConfigurationController extends AbstractController {
     public String getSiteIntegration(@PathVariable("teamId") String teamId,
                                      Principal principal, Model model) {
 
-        checkAdmin(principal, teamId);
         final Team team = checkTeam(teamId);
+        checkAdmin(principal, team.getId());
 
         final TeamIntegration teamIntegration = team.getIntegration();
 
@@ -194,7 +194,7 @@ public class AdminTeamConfigurationController extends AbstractController {
         model.addAttribute("formdata", form);
         model.addAttribute("facebookConfigurationStep", teamIntegration.getFacebookConfigurationStep());
         if (teamIntegration.getFacebookConfigurationStep() == 1) {
-            model.addAttribute("facebookUrl", facebookService.getLoginUrl(teamId));
+            model.addAttribute("facebookUrl", facebookService.getLoginUrl(team.getId()));
         }
         return "team_admin_integration";
     }
@@ -204,8 +204,8 @@ public class AdminTeamConfigurationController extends AbstractController {
                                         Principal principal, Model model,
                                         EditTeamIntegrationForm form) {
 
-        checkAdmin(principal, teamId);
         final Team team = checkTeam(teamId);
+        checkAdmin(principal, team.getId());
 
         final TeamIntegration teamIntegration = team.getIntegration();
 
@@ -220,7 +220,7 @@ public class AdminTeamConfigurationController extends AbstractController {
             model.addAttribute("formdata", form);
             model.addAttribute("facebookConfigurationStep", teamIntegration.getFacebookConfigurationStep());
             if (teamIntegration.getFacebookConfigurationStep() == 1) {
-                model.addAttribute("facebookUrl", facebookService.getLoginUrl(teamId));
+                model.addAttribute("facebookUrl", facebookService.getLoginUrl(team.getId()));
             }
             return "team_admin_integration";
 
@@ -230,7 +230,7 @@ public class AdminTeamConfigurationController extends AbstractController {
             model.addAttribute("formdata", form);
             model.addAttribute("facebookConfigurationStep", teamIntegration.getFacebookConfigurationStep());
             if (teamIntegration.getFacebookConfigurationStep() == 1) {
-                model.addAttribute("facebookUrl", facebookService.getLoginUrl(teamId));
+                model.addAttribute("facebookUrl", facebookService.getLoginUrl(team.getId()));
             }
             return "team_admin_integration";
         }
@@ -243,7 +243,7 @@ public class AdminTeamConfigurationController extends AbstractController {
                           Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, teamId);
+        checkAdmin(principal, team.getId());
 
         addGlobalValues(principal, model, "Administration - Logo", team);
         return "team_admin_logo";
@@ -255,10 +255,10 @@ public class AdminTeamConfigurationController extends AbstractController {
                              @RequestParam("file") MultipartFile file) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, teamId);
+        checkAdmin(principal, team.getId());
 
         try {
-            teamService.saveImage(teamId, file.getInputStream(), file.getOriginalFilename());
+            teamService.saveImage(team.getId(), file.getInputStream(), file.getOriginalFilename());
         } catch (Exception e) {
             model.addAttribute("errors", List.of(e.getMessage()));
         } finally {

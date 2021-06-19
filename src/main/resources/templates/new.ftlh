@@ -17,11 +17,17 @@
             <form method="POST" action="<@spring.url '/new' />">
                 <div class="mb-3 ">
                     <label for="new-team-name" class="form-label">Nom</label>
-                    <input autocomplete="off" required value="${formdata.name}" name="name" type="text" class="form-control" id="new-team-name" placeholder="Ma team">
+                    <input data-target-id-field="new-team-id" minLength="2" autocomplete="off" required value="${formdata.name}" name="name" type="text" class="form-control form-unique-id" id="new-team-name" placeholder="Ma team">
+                    <div id="new-team-name-help" class="form-text">Le nom d'usage de la team.</div>
+                </div>
+                <div class="mb-3 ">
+                    <label for="new-team-id" class="form-label">Identifiant unique</label>
+                    <input data-target-id-field="new-team-id" minLength="2" maxLength="19" autocomplete="off" required value="${formdata.id}" name="id" type="text" class="form-control form-unique-id" id="new-team-id" placeholder="ma_team">
+                    <div id="new-team-name-help" class="form-text">Non modifiable une fois que la team est créée.</div>
                 </div>
                 <div class="mb-3 ">
                     <label for="new-team-description" class="form-label">Description</label>
-                    <textarea autocomplete="off" name="description" rows="3" class="form-control" id="new-team-description">${formdata.description}</textarea>
+                    <textarea required autocomplete="off" name="description" rows="3" class="form-control" id="new-team-description">${formdata.description}</textarea>
                 </div>
                 <div class="mb-3 row">
                     <div class="col">

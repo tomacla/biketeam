@@ -16,7 +16,6 @@ import org.springframework.web.server.ServerErrorException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -50,7 +49,7 @@ public class MapAPI {
                     dto.setTags(m.getTags());
                     dto.setNegativeElevation(Math.round(m.getNegativeElevation()));
                     dto.setPositiveElevation(Math.round(m.getPositiveElevation()));
-                    dto.setTime(m.getPostedAt().atStartOfDay(ZoneId.of(team.getConfiguration().getTimezone())).toEpochSecond());
+                    dto.setTime(m.getPostedAt().atStartOfDay(team.getZoneId()).toEpochSecond());
                     dto.setType(m.getType().getLabel().toLowerCase());
                     return dto;
                 }).collect(Collectors.toList());

@@ -5,7 +5,14 @@
     <div class="col-12 mb-4">
 
         <div class="border rounded p-2">
-            <h4>${map.name}<small class="text-muted"> - Ajoutée le ${map.postedAt.format(_date_formatter)}</small></h4>
+            <div class="d-flex flex-row justify-content-between">
+                <h4>${map.name}<small class="text-muted"> - Ajoutée le ${map.postedAt.format(_date_formatter)}</small></h4>
+                <div>
+                    <#if _team_admin>
+                        <a href="<@spring.url '/' + team.id + '/admin/maps/${map.id}' />" class="btn btn-sm btn-secondary"><i class="bi-pencil bi"></i> Editer</a>
+                    </#if>
+                </div>
+            </div>
             <ul class="list-inline">
                 <li class="list-inline-item"><i class="bi bi-arrow-left-right"></i> ${map.length}km</li>
                 <li class="list-inline-item"><i class="bi bi-arrow-up"></i> ${map.positiveElevation}m</li>

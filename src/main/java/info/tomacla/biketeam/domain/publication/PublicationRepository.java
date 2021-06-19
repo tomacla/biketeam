@@ -12,6 +12,6 @@ public interface PublicationRepository extends CrudRepository<Publication, Strin
 
     List<Publication> findAllByTeamIdAndPublishedStatusAndPublishedAtLessThan(String teamId, PublishedStatus publishedStatus, ZonedDateTime now);
 
-    List<PublicationIdTitlePostedAtProjection> findAllByTeamIdOrderByPostedAtDesc(String teamId);
+    List<PublicationIdTitlePublishedAtProjection> findAllByTeamIdOrderByPublishedAtDesc(String teamId);
 
 }

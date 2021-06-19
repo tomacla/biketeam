@@ -12,6 +12,8 @@ public class StringsTest {
         assertEquals("a_full_title", Strings.permatitleFromString("a  full title"));
         assertEquals("un_enumere_en_francais", Strings.permatitleFromString("un énuméré en français"));
         assertEquals("With_Char_not_wanted", Strings.permatitleFromString("With ? Char # not & wanted"));
+        assertEquals("N-Peloton", Strings.permatitleFromString("N-Peloton"));
+        assertEquals(".-_.-_", Strings.permatitleFromString("!\"#$%&'.()*+-,/:;<=>?@[\\]_^`{|}~!\"#$%&'.()*+-,/:;<=>?@[\\]_^`{|}~"));
     }
 
 }

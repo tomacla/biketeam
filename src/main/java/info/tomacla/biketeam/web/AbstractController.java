@@ -39,6 +39,7 @@ public abstract class AbstractController {
         model.addAttribute("_authenticated", false);
         model.addAttribute("_admin", false);
         model.addAttribute("_team_admin", false);
+        model.addAttribute("_team_member", false);
 
         getUserFromPrincipal(principal).ifPresent(user -> {
             model.addAttribute("_authenticated", true);
@@ -48,6 +49,7 @@ public abstract class AbstractController {
             model.addAttribute("_identity", user.getIdentity());
             if (team != null) {
                 model.addAttribute("_team_admin", user.isAdmin(team.getId()));
+                model.addAttribute("_team_member", user.isMember(team.getId()));
             }
         });
 

@@ -4,7 +4,7 @@ import info.tomacla.biketeam.common.PublishedStatus;
 
 import java.time.ZonedDateTime;
 
-public interface PublicationIdTitlePostedAtProjection {
+public interface PublicationIdTitlePublishedAtProjection {
 
     String getId();
 

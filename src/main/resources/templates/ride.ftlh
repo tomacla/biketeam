@@ -5,7 +5,14 @@
     <div class="col-12 col-md-5 mb-4">
 
         <div class="border rounded p-2">
-            <h4>${ride.title}</h4>
+            <div class="d-flex flex-row justify-content-between">
+                <h4>${ride.title}</h4>
+                <div>
+                    <#if _team_admin>
+                        <a href="<@spring.url '/' + team.id + '/admin/rides/${ride.id}' />" class="btn btn-sm btn-secondary"><i class="bi-pencil bi"></i> Editer</a>
+                    </#if>
+                </div>
+            </div>
             <h5 class="text-muted">${ride.date.format(_date_formatter)}</h5>
             <#if ride.imaged>
               <img src="<@spring.url '/api/' + team.id + '/rides/${ride.id}/image' />" class="d-block shadow rounded w-100 h-auto mx-auto" alt="${ride.id} image">
@@ -24,7 +31,7 @@
                     <h6 class="card-subtitle mb-2 text-muted">Heure de départ : ${group.meetingTime}</h6>
                     <ul class="list-unstyled">
                         <li>Allure : ${group.lowerSpeed}/${group.upperSpeed} km/h</li>
-                        <li>Lieu de rendez vous : <#if (group.meetingPoint)??><a class="text-reset" target="_blank" href="https://www.google.com/maps/search/?api=1&query=${group.meetingPoint.lat?c},${group.meetingPoint.lng?c}"></#if>${group.meetingLocation}<#if (group.meetingPoint)??></a></#if></li>
+                        <li>Lieu de rendez vous : <#if (group.meetingPoint)??><a class="link-dark" target="_blank" href="https://www.google.com/maps/search/?api=1&query=${group.meetingPoint.lat?c},${group.meetingPoint.lng?c}"></#if>${group.meetingLocation}<#if (group.meetingPoint)??></a></#if></li>
                     </ul>
                     <#if (group.mapId)??>
                         <div class="w-50 shadow rounded border d-flex flex-column justify-content-center">
@@ -43,9 +50,9 @@
                     <div class="card-footer">
                         <div class="d-flex justify-content-between">
                             <#if group.hasParticipant(_user_id)>
-                                <a href="<@spring.url '/' + team.id + '/rides/${ride.id}/remove-participant/${group.id}/${_user_id}' />" class="btn btn-sm btn-success"><i class="bi-emoji-laughing-fill bi"></i> J'y vais</a>
+                                <a href="<@spring.url '/' + team.id + '/rides/${ride.id}/remove-participant/${group.id}/${_user_id}' />" class="btn btn-sm btn-success"><i class="bi-bicycle bi"></i> J'y vais</a>
                             <#else>
-                                <a href="<@spring.url '/' + team.id + '/rides/${ride.id}/add-participant/${group.id}/${_user_id}' />" class="btn btn-sm btn-outline-secondary"><i class="bi-emoji-laughing-fill bi"></i> J'y vais</a>
+                                <a href="<@spring.url '/' + team.id + '/rides/${ride.id}/add-participant/${group.id}/${_user_id}' />" class="btn btn-sm btn-outline-success"><i class="bi-bicycle bi"></i> J'y vais</a>
                              </#if>
                             <div class="d-flex">
                                 <#list group.participants as participant>

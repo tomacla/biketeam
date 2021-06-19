@@ -3,14 +3,19 @@ package info.tomacla.biketeam.service;
 import info.tomacla.biketeam.common.FileExtension;
 import info.tomacla.biketeam.common.FileRepositories;
 import info.tomacla.biketeam.common.ImageDescriptor;
+import info.tomacla.biketeam.domain.feed.Feed;
+import info.tomacla.biketeam.domain.feed.FeedRepository;
 import info.tomacla.biketeam.domain.team.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,8 +30,11 @@ public class TeamService {
     @Autowired
     private FileService fileService;
 
+    @Autowired
+    private FeedRepository feedRepository;
+
     public Optional<Team> get(String teamId) {
-        return teamRepository.findById(teamId);
+        return teamRepository.findById(teamId.toLowerCase());
     }
 
     public TeamConfiguration getConfiguration(String teamId) {
@@ -39,6 +47,14 @@ public class TeamService {
 
     public TeamDescription getDescription(String teamId) {
         return get(teamId).orElseThrow(() -> new IllegalArgumentException("Unknown team ID")).getDescription();
+    }
+
+    public List<Feed> listFeed(String teamId) {
+        Team team = get(teamId).orElseThrow(() -> new IllegalArgumentException("Unknown team ID"));
+        return feedRepository.findAllByTeamIdAndPublishedAtLessThan(
+                teamId,
+                ZonedDateTime.now(team.getZoneId()),
+                PageRequest.of(0, 15, Sort.by("publishedAt").descending())).getContent();
     }
 
     public void save(Team team) {
@@ -97,4 +113,9 @@ public class TeamService {
         return Optional.empty();
 
     }
+
+    public boolean idExists(String id) {
+        return teamRepository.findById(id).isPresent();
+    }
+
 }

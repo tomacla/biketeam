@@ -1,14 +1,19 @@
 package info.tomacla.biketeam.domain.user;
 
+import info.tomacla.biketeam.domain.team.Team;
+
 import javax.persistence.*;
-import java.util.Objects;
 
 @Entity
-@Table(name = "user_roles")
+@Table(name = "user_role")
 public class UserRole {
 
-    @EmbeddedId
-    private UserRoleKey id;
+    @Id
+    private String id;
+    @ManyToOne(fetch = FetchType.EAGER)
+    private User user;
+    @ManyToOne(fetch = FetchType.EAGER)
+    private Team team;
     @Enumerated(EnumType.STRING)
     private Role role;
 
@@ -16,19 +21,18 @@ public class UserRole {
 
     }
 
-    public UserRole(String userId, String teamId, Role role) {
-        UserRoleKey key = new UserRoleKey();
-        key.setUserId(userId);
-        key.setTeamId(teamId);
-        this.id = key;
+    public UserRole(Team team, User user, Role role) {
+        this.id = team.getId() + "-" + user.getId();
+        this.setTeam(team);
+        this.setUser(user);
         this.role = role;
     }
 
-    public UserRoleKey getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UserRoleKey id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -40,32 +44,20 @@ public class UserRole {
         this.role = role;
     }
 
-    public static UserRole admin(String userId, String teamId) {
-        return new UserRole(userId, teamId, Role.ADMIN);
+    public User getUser() {
+        return user;
     }
 
-    public static UserRole member(String userId, String teamId) {
-        return new UserRole(userId, teamId, Role.MEMBER);
+    public void setUser(User user) {
+        this.user = user;
     }
 
-    public boolean isAdmin(String teamId) {
-        return this.role.equals(Role.ADMIN) && this.getId().getTeamId().equals(teamId);
+    public Team getTeam() {
+        return team;
     }
 
-    public boolean isMember(String teamId) {
-        return this.role.equals(Role.MEMBER) && this.getId().getTeamId().equals(teamId);
+    public void setTeam(Team team) {
+        this.team = team;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        UserRole userRole = (UserRole) o;
-        return id.equals(userRole.id) && role == userRole.role;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, role);
-    }
 }

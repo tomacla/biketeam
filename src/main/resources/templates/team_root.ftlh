@@ -5,6 +5,22 @@
     <aside class="col-12 col-md-4">
 
         <section class="border p-2 mb-4 rounded">
+            <div class="d-flex flex-row justify-content-between">
+                <h5>${team.name}</h5>
+                <div>
+                    <#if _authenticated>
+                        <#if _team_admin>
+                            <button disabled class="btn btn-sm btn-success"><i class="bi-shield-fill bi"></i> Admin</button>
+                        <#elseif _team_member>
+                            <a href="<@spring.url '/' + team.id + '/leave/' + _user_id />" class="btn btn-sm btn-success"><i class="bi-person-fill bi"></i> Membre</a>
+                        <#else>
+                            <a href="<@spring.url '/' + team.id + '/join/' + _user_id />" class="btn btn-sm btn-outline-success"><i class="bi-person-plus-fill bi"></i> Rejoindre</a>
+                        </#if>
+                    <#else>
+                        <a href="<@spring.url '/oauth2/authorization/strava' />" class="btn btn-sm btn-outline-success"><i class="bi-person-plus-fill bi"></i> Rejoindre</a>
+                    </#if>
+                </div>
+            </div>
             <img src="<@spring.url '/api/' + team.id + '/image' />" class="d-block w-50 h-auto mx-auto my-4" alt="Team logo">
             <p class="lead">
               ${team.description.description}
@@ -44,22 +60,20 @@
                             <#elseif feedItem.type == 'PUBLICATION'>
                                 <i class="bi bi-newspaper"></i>
                             </#if>
-                            <#if (feedItem.detailsUrl)??>
-                                <a class="text-reset text-decoration-none" href="<@spring.url feedItem.detailsUrl />">
-                            </#if>
                             <#if feedItem.type == 'RIDE'>
                                 Ride
                             <#elseif feedItem.type == 'PUBLICATION'>
                                 Publication
                             </#if>
-                            <#if (feedItem.detailsUrl)??>
-                                </a>
-                            </#if>
                             </h5>
                             <small class="text-muted">Ajouté le ${feedItem.publishedAt.format(_date_formatter)}</small>
                         </div>
                         <div class="card-body">
-                          <h5 class="card-title">${feedItem.title}</h5>
+                        <#if (feedItem.getDetailsUrl(team.id))??>
+                            <h5 class="card-title"><a class="link-dark" href="<@spring.url feedItem.getDetailsUrl(team.id) />">${feedItem.title}</a></h5>
+                        <#else>
+                            <h5 class="card-title">${feedItem.title}</h5>
+                        </#if>
                           <p class="card-text wrap-content">${feedItem.content}</p>
                           <#if (feedItem.getImageUrl(team.id))??>
                             <img src="<@spring.url feedItem.getImageUrl(team.id) />" class="d-block shadow rounded w-50 h-auto mx-auto" alt="${feedItem.title} image">
@@ -67,7 +81,7 @@
                         </div>
                         <#if (feedItem.getDetailsUrl(team.id))??>
                         <div class="card-footer text-center">
-                            <a href="<@spring.url feedItem.getDetailsUrl(team.id) />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye"></i> Voir plus</a>
+                            <a href="<@spring.url feedItem.getDetailsUrl(team.id) />" class="btn btn-secondary btn-sm" role="button">Voir</a>
                         </div>
                         </#if>
                     </div>

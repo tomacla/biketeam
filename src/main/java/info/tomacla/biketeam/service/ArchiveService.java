@@ -64,7 +64,11 @@ public class ArchiveService {
                 final Path targetArchive = Path.of(archiveDirectory, archiveName);
 
                 // create target directory
-                final String teamId = FilenameUtils.removeExtension(archiveName);
+                final String teamId = FilenameUtils.removeExtension(archiveName).toLowerCase();
+                if (!teamService.idExists(teamId)) {
+                    log.warn("Unable to import archive on unknown team {}", teamId);
+                    return;
+                }
                 Path unzipDestination = Path.of(archiveDirectory, teamId);
                 Files.createDirectories(unzipDestination);
 
@@ -188,7 +192,7 @@ public class ArchiveService {
 
                 final InputStream fileInputStream = Files.newInputStream(Path.of(workingDirectory.toString(), element.getFileName()));
 
-                final String targetDate = Optional.ofNullable(element.getDate()).orElse(ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_DATE_TIME));
+                final String targetDate = Optional.ofNullable(element.getDate()).orElse(ZonedDateTime.now(team.getZoneId()).truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_DATE_TIME));
 
                 if (element.getPermatitle() != null) {
                     mapService.delete(team.getId(), element.getPermatitle());

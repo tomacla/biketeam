@@ -3,12 +3,13 @@
 var maxFileSizeInMB = 1;
 var urlPattern = /(?:(?:https?|ftp):\/\/)?(?:\S+(?::\S*)?@)?(?:(?!10(?:\.\d{1,3}){3})(?!127(?:\.\d{1,3}){3})(?!169\.254(?:\.\d{1,3}){2})(?!192\.168(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\x{00a1}\-\x{ffff}0-9]+-?)*[a-z\x{00a1}\-\x{ffff}0-9]+)(?:\.(?:[a-z\x{00a1}\-\x{ffff}0-9]+-?)*[a-z\x{00a1}\-\x{ffff}0-9]+)*(?:\.(?:[a-z\x{00a1}\-\x{ffff}]{2,})))(?::\d{2,5})?(?:\/[^\s]*)?/ig;
 
-var geoCodeTimeouts = {};
+
 document.addEventListener("DOMContentLoaded", function() {
     Array.from(document.getElementsByClassName('form-size-check')).forEach(initFormSizeCheck);
     Array.from(document.getElementsByClassName('form-input-geocode')).forEach(initGeoCode);
     Array.from(document.getElementsByClassName('form-map-control')).forEach(initMapAutoComplete);
     Array.from(document.getElementsByClassName('wrap-content')).forEach(wrapContent);
+    Array.from(document.getElementsByClassName('form-unique-id')).forEach(initUniqueIdField);
     Tags.init();
 
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
@@ -32,6 +33,7 @@ function initFormSizeCheck(input) {
         });
 }
 
+var geoCodeTimeouts = {};
 function initGeoCode(input) {
 
         input.addEventListener('keyup', function(event) {
@@ -50,6 +52,28 @@ function initGeoCode(input) {
                            document.getElementById(input.id + '-lng').value = geocodeResponse.point.lng;
                        }
                    });
+               }, 1000);
+           }
+       });
+
+    }
+
+var uniqueIdTimeout = undefined;
+function initUniqueIdField(input) {
+
+        input.addEventListener('keyup', function(event) {
+
+           if(uniqueIdTimeout) {
+               clearTimeout(uniqueIdTimeout);
+               uniqueIdTimeout = undefined;
+           }
+
+           if(input.value.length > 2) {
+               uniqueIdTimeout = setTimeout(function() {
+                    uniqueId(input.value, function(response) {
+                        var targetIdField = document.getElementById(input.getAttribute("data-target-id-field"));
+                        targetIdField.value = response;
+                    })
                }, 1000);
            }
        });
@@ -85,7 +109,7 @@ function initMapAutoComplete(input) {
                         autocompleteField.setData(result);
                     }
                 }
-                xmlHttp.open("GET", "/api/" + input.getAttribute("data-team-id") + "/autocomplete/maps?q="+encodeURI(fieldValue), true); // true for asynchronous
+                xmlHttp.open("GET", "/api/" + input.getAttribute("data-team-id") + "/autocomplete/maps?q="+encodeURIComponent(fieldValue), true); // true for asynchronous
                 xmlHttp.send(null);
         }
     });
@@ -205,7 +229,20 @@ function geoCode(toGeoCode, callback) {
             }
         }
     }
-    xmlHttp.open("GET", "https://api-adresse.data.gouv.fr/search/?q="+encodeURI(toGeoCode), true); // true for asynchronous
+    xmlHttp.open("GET", "https://api-adresse.data.gouv.fr/search/?q="+encodeURIComponent(toGeoCode), true); // true for asynchronous
+    xmlHttp.send(null);
+}
+
+function uniqueId(toUnique, callback) {
+
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() {
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+            var r = xmlHttp.responseText;
+            callback(r);
+        }
+    }
+    xmlHttp.open("GET", "/api/autocomplete/permatitle?title="+encodeURIComponent(toUnique), true); // true for asynchronous
     xmlHttp.send(null);
 }
 

@@ -21,16 +21,24 @@
 
         <#if users?size gt 0>
             <ul class="list-group">
+                <li class="list-group-item list-group-item-secondary d-flex justify-content-between align-items-center">
+                    <div>Identité<span class="text-muted"> - ID Strava</span></div>
+                    <div>Administrateur</div>
+                </li>
                 <#list users as user>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>${user.firstName!'inconnu'} ${user.lastName!'inconnu'}<span class="text-muted"> - <a class="link-dark" href="https://www.strava.com/athletes/${user.stravaId?c}" target="_blank">${(user.stravaId?c)}</a></span><#if user.admin> <i class="bi bi-shield-fill"></i></#if></div>
-                        <div class="btn-group" role="group">
-                            <#if user.admin>
-                                <a href="<@spring.url '/admin/users/relegate/${user.id}' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-shield-slash"></i></a>
-                            <#else>
-                                <a href="<@spring.url '/admin/users/promote/${user.id}' />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-shield"></i></a>
-                            </#if>
-                        </div>
+                        <div><#if user.profileImage??><img src="${user.profileImage}" alt="User photo" width="30" height="30" class="rounded"> </#if>${user.firstName!'inconnu'} ${user.lastName!'inconnu'}<span class="text-muted"> - <a class="link-dark" href="https://www.strava.com/athletes/${user.stravaId?c}" target="_blank">${(user.stravaId?c)}</a></span><#if user.admin> <i class="bi bi-shield-fill"></i></#if></div>
+                        <#if user.id == _user_id>
+                            <button role="button" disabled="true" class="btn btn-sm btn-success"><i class="bi bi-shield-fill"></i></button>
+                        <#else>
+                            <div class="btn-group" role="group">
+                                <#if user.admin>
+                                    <a href="<@spring.url '/admin/users/relegate/${user.id}' />" class="btn btn-success btn-sm" role="button"><i class="bi bi-shield-fill"></i></a>
+                                <#else>
+                                    <a href="<@spring.url '/admin/users/promote/${user.id}' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-shield"></i></a>
+                                </#if>
+                            </div>
+                        </#if>
                     </li>
                 </#list>
             </ul>

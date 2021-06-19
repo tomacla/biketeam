@@ -37,7 +37,7 @@
         <#if user.rideGroups?? && user.rideGroups?size != 0>
             <ul class="list-group">
                 <#list user.rideGroups as group>
-                    <li class="list-group-item"><img src="<@spring.url '/api/' + group.ride.teamId + '/image' />" height="20" alt="Team image"> ${group.ride.date.format(_date_formatter)} - ${group.ride.title} - ${group.name}</li>
+                    <li class="list-group-item"><img src="<@spring.url '/api/' + group.ride.teamId + '/image' />" height="20" alt="Team image"> <a class="link-dark" href="<@spring.url '/${group.ride.teamId}/rides/${group.ride.id}' />">${group.ride.date.format(_date_formatter)} - ${group.ride.title} - ${group.name}</a></li>
                 </#list>
             </ul>
         <#else>

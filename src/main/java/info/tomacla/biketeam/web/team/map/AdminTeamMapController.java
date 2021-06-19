@@ -27,11 +27,11 @@ public class AdminTeamMapController extends AbstractController {
     public String getMaps(@PathVariable("teamId") String teamId,
                           Principal principal, Model model) {
 
-        checkAdmin(principal, teamId);
         final Team team = checkTeam(teamId);
+        checkAdmin(principal, team.getId());
 
         addGlobalValues(principal, model, "Administration - Maps", team);
-        model.addAttribute("maps", mapService.listMaps(teamId));
+        model.addAttribute("maps", mapService.listMaps(team.getId()));
         return "team_admin_maps";
     }
 
@@ -41,12 +41,12 @@ public class AdminTeamMapController extends AbstractController {
                           Principal principal,
                           Model model) {
 
-        checkAdmin(principal, teamId);
         final Team team = checkTeam(teamId);
+        checkAdmin(principal, team.getId());
 
-        Optional<Map> optionalMap = mapService.get(teamId, mapId);
+        Optional<Map> optionalMap = mapService.get(team.getId(), mapId);
         if (optionalMap.isEmpty()) {
-            return redirectToAdminMaps(teamId);
+            return redirectToAdminMaps(team.getId());
         }
 
         Map map = optionalMap.get();
@@ -62,7 +62,7 @@ public class AdminTeamMapController extends AbstractController {
         addGlobalValues(principal, model, "Administration - Modifier la map", team);
         model.addAttribute("formdata", form);
         model.addAttribute("map", map);
-        model.addAttribute("tags", mapService.listTags(teamId));
+        model.addAttribute("tags", mapService.listTags(team.getId()));
         return "team_admin_maps_new";
 
     }
@@ -74,14 +74,14 @@ public class AdminTeamMapController extends AbstractController {
                           Model model,
                           NewMapForm form) {
 
-        checkAdmin(principal, teamId);
         final Team team = checkTeam(teamId);
+        checkAdmin(principal, team.getId());
 
         try {
 
-            Optional<Map> optionalMap = mapService.get(teamId, mapId);
+            Optional<Map> optionalMap = mapService.get(team.getId(), mapId);
             if (optionalMap.isEmpty()) {
-                return redirectToAdminMaps(teamId);
+                return redirectToAdminMaps(team.getId());
             }
 
             final NewMapForm.NewMapFormParser parser = form.parser();
@@ -94,13 +94,13 @@ public class AdminTeamMapController extends AbstractController {
 
             mapService.save(map);
 
-            return redirectToAdminMaps(teamId);
+            return redirectToAdminMaps(team.getId());
 
         } catch (Exception e) {
             addGlobalValues(principal, model, "Administration - Modifier la map", team);
             model.addAttribute("errors", List.of(e.getMessage()));
             model.addAttribute("formdata", form);
-            model.addAttribute("tags", mapService.listTags(teamId));
+            model.addAttribute("tags", mapService.listTags(team.getId()));
             return "team_admin_maps_new";
         }
 
@@ -113,8 +113,8 @@ public class AdminTeamMapController extends AbstractController {
                             Principal principal,
                             @RequestParam("file") MultipartFile file) {
 
-        checkAdmin(principal, teamId);
         final Team team = checkTeam(teamId);
+        checkAdmin(principal, team.getId());
 
         try {
 
@@ -124,13 +124,13 @@ public class AdminTeamMapController extends AbstractController {
                     FilenameUtils.removeExtension(file.getOriginalFilename()),
                     null
             );
-            return redirectToAdminMap(teamId, newMap.getId());
+            return redirectToAdminMap(team.getId(), newMap.getId());
 
         } catch (Exception e) {
 
             addGlobalValues(principal, model, "Administration - Maps", team);
             model.addAttribute("errors", List.of(e.getMessage()));
-            model.addAttribute("maps", mapService.listMaps(teamId));
+            model.addAttribute("maps", mapService.listMaps(team.getId()));
             return "team_admin_maps";
 
         }
@@ -143,15 +143,16 @@ public class AdminTeamMapController extends AbstractController {
                             Principal principal,
                             Model model) {
 
-        checkAdmin(principal, teamId);
+        final Team team = checkTeam(teamId);
+        checkAdmin(principal, team.getId());
 
         try {
-            mapService.delete(teamId, mapId);
+            mapService.delete(team.getId(), mapId);
         } catch (Exception e) {
             model.addAttribute("errors", List.of(e.getMessage()));
         }
 
-        return redirectToAdminMaps(teamId);
+        return redirectToAdminMaps(team.getId());
     }
 
     private String redirectToAdminMaps(String teamId) {

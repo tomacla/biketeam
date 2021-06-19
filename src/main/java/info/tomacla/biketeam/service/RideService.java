@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -63,17 +62,17 @@ public class RideService {
 
     public void publishRides() {
         teamService.list().forEach(team ->
-            rideRepository.findAllByTeamIdAndPublishedStatusAndPublishedAtLessThan(
-                    team.getId(),
-                    PublishedStatus.UNPUBLISHED,
-                    ZonedDateTime.now(ZoneId.of(team.getConfiguration().getTimezone()))
-            ).forEach(ride -> {
-                log.info("Publishing ride {} for team {}", ride.getId(), team.getId());
-                ride.setPublishedStatus(PublishedStatus.PUBLISHED);
-                save(ride);
-                facebookService.publish(team, ride);
-                mailService.publish(team, ride);
-            })
+                rideRepository.findAllByTeamIdAndPublishedStatusAndPublishedAtLessThan(
+                        team.getId(),
+                        PublishedStatus.UNPUBLISHED,
+                        ZonedDateTime.now(team.getZoneId())
+                ).forEach(ride -> {
+                    log.info("Publishing ride {} for team {}", ride.getId(), team.getId());
+                    ride.setPublishedStatus(PublishedStatus.PUBLISHED);
+                    save(ride);
+                    facebookService.publish(team, ride);
+                    mailService.publish(team, ride);
+                })
         );
 
     }
@@ -125,7 +124,7 @@ public class RideService {
     }
 
     public void deleteImage(String teamId, String rideId) {
-        getImage(teamId,rideId).ifPresent(image ->
+        getImage(teamId, rideId).ifPresent(image ->
                 fileService.delete(FileRepositories.RIDE_IMAGES, teamId, rideId + image.getExtension().getExtension())
         );
     }

@@ -2,6 +2,7 @@ package info.tomacla.biketeam.domain.user;
 
 import info.tomacla.biketeam.common.Strings;
 import info.tomacla.biketeam.domain.ride.RideGroup;
+import info.tomacla.biketeam.domain.team.Team;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -33,7 +34,7 @@ public class User implements Serializable {
     private Set<RideGroup> rideGroups;
     @Column(name = "email")
     private String email;
-    @OneToMany(mappedBy = "id.userId", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<UserRole> roles;
 
     protected User() {
@@ -149,29 +150,29 @@ public class User implements Serializable {
         return roles;
     }
 
+    public void setRoles(Set<UserRole> roles) {
+        this.roles = roles;
+    }
+
+    public void clearRoles() {
+        this.roles.clear();
+    }
+
     public void addRole(UserRole role) {
         this.roles.add(role);
     }
 
-    public void removeRole(UserRole role) {
-        this.roles.remove(role);
+    public void addRole(Team team, Role role) {
+        this.roles.add(new UserRole(team, this, role));
     }
 
-    public void setRoles(Set<UserRole> roles) {
-        roles.forEach(this::addRole);
-    }
-
-    public void setAdmin(String teamId) {
-        this.roles.add(UserRole.admin(getId(), teamId));
-    }
-
-    public void setMember(String teamId) {
-        this.roles.add(UserRole.member(getId(), teamId));
+    public void removeRole(String teamId) {
+        this.roles.removeIf(r -> r.getTeam().getId().equals(teamId));
     }
 
     public boolean isAdmin(String teamId) {
         for (UserRole role : this.roles) {
-            if (role.isAdmin(teamId)) {
+            if (role.getTeam().getId().equals(teamId) && role.getRole().equals(Role.ADMIN)) {
                 return true;
             }
         }
@@ -180,23 +181,16 @@ public class User implements Serializable {
 
     public boolean isMember(String teamId) {
         for (UserRole role : this.roles) {
-            if (role.isMember(teamId)) {
+            if (role.getTeam().getId().equals(teamId) && role.getRole().equals(Role.MEMBER)) {
                 return true;
             }
         }
         return false;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return id.equals(user.id);
+    public boolean isAdminOrMember(String teamId) {
+        return isAdmin(teamId) || isMember(teamId);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
+
 }

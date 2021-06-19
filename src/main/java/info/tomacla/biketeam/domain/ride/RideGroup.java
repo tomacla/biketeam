@@ -79,7 +79,6 @@ public class RideGroup {
         return ride;
     }
 
-
     public String getName() {
         return name;
     }

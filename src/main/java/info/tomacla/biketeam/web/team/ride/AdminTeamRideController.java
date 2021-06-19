@@ -36,12 +36,12 @@ public class AdminTeamRideController extends AbstractController {
     @GetMapping
     public String getRides(@PathVariable("teamId") String teamId, Principal principal, Model model) {
 
-        checkAdmin(principal, teamId);
         final Team team = checkTeam(teamId);
+        checkAdmin(principal, team.getId());
 
         addGlobalValues(principal, model, "Administration - Rides", team);
-        model.addAttribute("rides", rideService.listRides(teamId));
-        model.addAttribute("templates", rideTemplateService.listTemplates(teamId));
+        model.addAttribute("rides", rideService.listRides(team.getId()));
+        model.addAttribute("templates", rideTemplateService.listTemplates(team.getId()));
         return "team_admin_rides";
     }
 
@@ -51,13 +51,13 @@ public class AdminTeamRideController extends AbstractController {
                           Principal principal,
                           Model model) {
 
-        checkAdmin(principal, teamId);
         final Team team = checkTeam(teamId);
+        checkAdmin(principal, team.getId());
 
         NewRideForm form = null;
 
         if (templateId != null && !templateId.startsWith("empty-")) {
-            Optional<RideTemplate> optionalTemplate = rideTemplateService.get(teamId, templateId);
+            Optional<RideTemplate> optionalTemplate = rideTemplateService.get(team.getId(), templateId);
             if (optionalTemplate.isPresent()) {
                 form = NewRideForm.builder(optionalTemplate.get()).get();
             }
@@ -85,12 +85,12 @@ public class AdminTeamRideController extends AbstractController {
                            Principal principal,
                            Model model) {
 
-        checkAdmin(principal, teamId);
         final Team team = checkTeam(teamId);
+        checkAdmin(principal, team.getId());
 
-        Optional<Ride> optionalRide = rideService.get(teamId, rideId);
+        Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
         if (optionalRide.isEmpty()) {
-            return redirectToAdminRides(teamId);
+            return redirectToAdminRides(team.getId());
         }
 
         Ride ride = optionalRide.get();
@@ -102,7 +102,7 @@ public class AdminTeamRideController extends AbstractController {
                 .withType(ride.getType())
                 .withPublishedAt(ride.getPublishedAt())
                 .withTitle(ride.getTitle())
-                .withGroups(ride.getGroups(), teamId, mapService)
+                .withGroups(ride.getGroups(), team.getId(), mapService)
                 .get();
 
         addGlobalValues(principal, model, "Administration - Modifier le ride", team);
@@ -119,20 +119,20 @@ public class AdminTeamRideController extends AbstractController {
                            Model model,
                            NewRideForm form) {
 
-        checkAdmin(principal, teamId);
         final Team team = checkTeam(teamId);
+        checkAdmin(principal, team.getId());
 
         try {
 
             boolean isNew = rideId.equals("new");
-            final ZoneId timezone = ZoneId.of(team.getConfiguration().getTimezone());
+            final ZoneId timezone = team.getZoneId();
 
             NewRideForm.NewRideFormParser parser = form.parser();
             Ride target;
             if (!isNew) {
-                Optional<Ride> optionalRide = rideService.get(teamId, rideId);
+                Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
                 if (optionalRide.isEmpty()) {
-                    return redirectToAdminRides(teamId);
+                    return redirectToAdminRides(team.getId());
                 }
                 target = optionalRide.get();
                 target.setDate(parser.getDate());
@@ -141,24 +141,24 @@ public class AdminTeamRideController extends AbstractController {
                 target.setDescription(parser.getDescription());
                 target.setType(parser.getType());
             } else {
-                target = new Ride(teamId, parser.getType(), parser.getDate(), parser.getPublishedAt(timezone),
+                target = new Ride(team.getId(), parser.getType(), parser.getDate(), parser.getPublishedAt(timezone),
                         parser.getTitle(), parser.getDescription(), parser.getFile().isPresent(), null);
             }
 
             target.clearGroups();
-            parser.getGroups(teamId, mapService).forEach(target::addGroup);
+            parser.getGroups(team.getId(), mapService).forEach(target::addGroup);
 
             if (parser.getFile().isPresent()) {
                 target.setImaged(true);
                 MultipartFile uploadedFile = parser.getFile().get();
-                rideService.saveImage(teamId, target.getId(), form.getFile().getInputStream(), uploadedFile.getOriginalFilename());
+                rideService.saveImage(team.getId(), target.getId(), form.getFile().getInputStream(), uploadedFile.getOriginalFilename());
             }
 
             rideService.save(target);
 
             addGlobalValues(principal, model, "Administration - Rides", team);
-            model.addAttribute("rides", rideService.listRides(teamId));
-            model.addAttribute("templates", rideTemplateService.listTemplates(teamId));
+            model.addAttribute("rides", rideService.listRides(team.getId()));
+            model.addAttribute("templates", rideTemplateService.listTemplates(team.getId()));
             return "team_admin_rides";
 
 
@@ -178,15 +178,16 @@ public class AdminTeamRideController extends AbstractController {
                              Principal principal,
                              Model model) {
 
-        checkAdmin(principal, teamId);
+        final Team team = checkTeam(teamId);
+        checkAdmin(principal, team.getId());
 
         try {
-            rideService.delete(teamId, rideId);
+            rideService.delete(team.getId(), rideId);
         } catch (Exception e) {
             model.addAttribute("errors", List.of(e.getMessage()));
         }
 
-        return redirectToAdminRides(teamId);
+        return redirectToAdminRides(team.getId());
 
     }
 

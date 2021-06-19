@@ -32,13 +32,11 @@ public class Dates {
     }
 
     public static String formatZonedDate(ZonedDateTime temporal) {
-        var target = temporal == null ? ZonedDateTime.now() : temporal;
-        return formatDate(target.toLocalDate());
+        return formatDate(temporal.toLocalDate());
     }
 
     public static String formatZonedTime(ZonedDateTime temporal) {
-        var target = temporal == null ? ZonedDateTime.now() : temporal;
-        return formatTime(target.toLocalTime());
+        return formatTime(temporal.toLocalTime());
     }
 
     public static String frenchDateFormat(LocalDate temporal) {

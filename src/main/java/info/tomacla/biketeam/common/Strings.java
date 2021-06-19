@@ -30,9 +30,7 @@ public class Strings {
     public static String permatitleFromString(String input) {
         String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
         normalized = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
-        normalized = normalized.replaceAll("\\?", "");
-        normalized = normalized.replaceAll("\\#", "");
-        normalized = normalized.replaceAll("\\&", "");
+        normalized = normalized.replaceAll("[\\\\!?#&$%'()*+,/:;<=>@\\[\\]\"^`{|}~]+", "");
         normalized = normalized.replaceAll("\\s+", "_");
         return normalized;
     }

@@ -19,11 +19,11 @@
                 </div>
               <div class="card-body">
 
-                <h5 class="card-title">${team.name}</h5>
+                <h5 class="card-title"><a class="link-dark" href="<@spring.url '/' + team.id />">${team.name}</a></h5>
                 <h6 class="text-muted">${team.city}, ${team.country}</h6>
               </div>
               <div class="card-footer text-center">
-                  <a href="<@spring.url '/' + team.id />" class="btn btn-secondary">Voir</a>
+                  <a href="<@spring.url '/' + team.id />" class="btn btn-secondary btn-sm">Voir</a>
                 </div>
             </div>
         </div>

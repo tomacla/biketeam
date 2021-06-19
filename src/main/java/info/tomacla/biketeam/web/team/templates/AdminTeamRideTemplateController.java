@@ -28,11 +28,11 @@ public class AdminTeamRideTemplateController extends AbstractController {
     public String getTemplates(@PathVariable("teamId") String teamId,
                                Principal principal, Model model) {
 
-        checkAdmin(principal, teamId);
         final Team team = checkTeam(teamId);
+        checkAdmin(principal, team.getId());
 
         addGlobalValues(principal, model, "Administration - Templates", team);
-        model.addAttribute("templates", rideTemplateService.listTemplates(teamId));
+        model.addAttribute("templates", rideTemplateService.listTemplates(team.getId()));
         return "team_admin_templates";
     }
 
@@ -41,8 +41,8 @@ public class AdminTeamRideTemplateController extends AbstractController {
                               Principal principal,
                               Model model) {
 
-        checkAdmin(principal, teamId);
         final Team team = checkTeam(teamId);
+        checkAdmin(principal, team.getId());
 
         NewRideTemplateForm form = NewRideTemplateForm.builder(1).get();
 
@@ -58,12 +58,12 @@ public class AdminTeamRideTemplateController extends AbstractController {
                                Principal principal,
                                Model model) {
 
-        checkAdmin(principal, teamId);
         final Team team = checkTeam(teamId);
+        checkAdmin(principal, team.getId());
 
-        Optional<RideTemplate> optionalTemplate = rideTemplateService.get(teamId, templateId);
+        Optional<RideTemplate> optionalTemplate = rideTemplateService.get(team.getId(), templateId);
         if (optionalTemplate.isEmpty()) {
-            return redirectToAdminTemplates(teamId);
+            return redirectToAdminTemplates(team.getId());
         }
 
         RideTemplate rideTemplate = optionalTemplate.get();
@@ -89,8 +89,8 @@ public class AdminTeamRideTemplateController extends AbstractController {
                                Model model,
                                NewRideTemplateForm form) {
 
-        checkAdmin(principal, teamId);
         final Team team = checkTeam(teamId);
+        checkAdmin(principal, team.getId());
 
         try {
 
@@ -99,16 +99,16 @@ public class AdminTeamRideTemplateController extends AbstractController {
             NewRideTemplateForm.NewRideTemplateFormParser parser = form.parser();
             RideTemplate target;
             if (!isNew) {
-                Optional<RideTemplate> optionalTemplate = rideTemplateService.get(teamId, templateId);
+                Optional<RideTemplate> optionalTemplate = rideTemplateService.get(team.getId(), templateId);
                 if (optionalTemplate.isEmpty()) {
-                    return redirectToAdminTemplates(teamId);
+                    return redirectToAdminTemplates(team.getId());
                 }
                 target = optionalTemplate.get();
                 target.setName(parser.getName());
                 target.setDescription(parser.getDescription());
                 target.setType(parser.getType());
             } else {
-                target = new RideTemplate(teamId, parser.getName(), parser.getType(), parser.getDescription(), null);
+                target = new RideTemplate(team.getId(), parser.getName(), parser.getType(), parser.getDescription(), null);
             }
 
             target.clearGroups();
@@ -117,7 +117,7 @@ public class AdminTeamRideTemplateController extends AbstractController {
             rideTemplateService.save(target);
 
             addGlobalValues(principal, model, "Administration - Templates", team);
-            model.addAttribute("templates", rideTemplateService.listTemplates(teamId));
+            model.addAttribute("templates", rideTemplateService.listTemplates(team.getId()));
             return "team_admin_templates";
 
 
@@ -136,15 +136,16 @@ public class AdminTeamRideTemplateController extends AbstractController {
                                  Principal principal,
                                  Model model) {
 
-        checkAdmin(principal, teamId);
+        final Team team = checkTeam(teamId);
+        checkAdmin(principal, team.getId());
 
         try {
-            rideTemplateService.delete(teamId, templateId);
+            rideTemplateService.delete(team.getId(), templateId);
         } catch (Exception e) {
             model.addAttribute("errors", List.of(e.getMessage()));
         }
 
-        return redirectToAdminTemplates(teamId);
+        return redirectToAdminTemplates(team.getId());
 
     }
 

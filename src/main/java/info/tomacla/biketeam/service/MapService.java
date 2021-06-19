@@ -155,7 +155,7 @@ public class MapService {
 
     public void generateImage(String teamId, String mapId) {
         teamService.get(teamId).ifPresent(team ->
-            this.getGpxFile(teamId, mapId).ifPresent(gpxFile -> gpxService.generateImage(team, mapId, gpxFile))
+                this.getGpxFile(teamId, mapId).ifPresent(gpxFile -> gpxService.generateImage(team, mapId, gpxFile))
         );
     }
 

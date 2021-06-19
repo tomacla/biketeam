@@ -1,103 +1,93 @@
 package info.tomacla.biketeam.web.team;
 
-import info.tomacla.biketeam.common.Strings;
+import info.tomacla.biketeam.domain.team.Page;
 import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.domain.team.TeamConfiguration;
+import info.tomacla.biketeam.domain.user.Role;
 import info.tomacla.biketeam.domain.user.User;
-import info.tomacla.biketeam.domain.user.UserRole;
-import info.tomacla.biketeam.service.FacebookService;
-import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.web.AbstractController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
-import java.util.List;
+import java.util.Optional;
 
 @Controller
-@RequestMapping(value = "/")
+@RequestMapping(value = "/{teamId}")
 public class TeamController extends AbstractController {
 
-    @Autowired
-    protected TeamService teamService;
-
-    @Autowired
-    private FacebookService facebookService;
-
     @GetMapping
-    public String getTeams(Principal principal, Model model) {
-        addGlobalValues(principal, model, "Accueil", null);
-        model.addAttribute("teams", teamService.list());
-        return "root";
-    }
+    public String getFeed(@PathVariable("teamId") String teamId,
+                          Principal principal,
+                          Model model) {
 
-    @GetMapping(value = "new")
-    public String newTeam(Principal principal, Model model) {
-        addGlobalValues(principal, model, "Créer une team", null);
-        model.addAttribute("formdata", NewTeamForm.builder().get());
-        model.addAttribute("timezones", getAllAvailableTimeZones());
-        return "new";
-    }
-
-    @PostMapping(value = "new")
-    public String submitNewTeam(NewTeamForm form, Principal principal, Model model) {
-
-        try {
-
-            final User targetAdmin = getUserFromPrincipal(principal).orElseThrow(() -> new IllegalStateException("User not authenticated"));
-
-            final Team newTeam = new Team(Strings.permatitleFromString(form.getName()),
-                    form.getName(),
-                    form.getCity(),
-                    form.getCountry(),
-                    form.getDescription(),
-                    null);
-
-            newTeam.addRole(UserRole.admin(targetAdmin.getId(), newTeam.getId()));
-
-            teamService.save(newTeam);
-            teamService.initTeamImage(newTeam);
-
-            return "redirect:/" + newTeam.getId();
-
-        } catch (Exception e) {
-            addGlobalValues(principal, model, "Créer une team", null);
-            model.addAttribute("formdata", form);
-            model.addAttribute("timezones", getAllAvailableTimeZones());
-            return "new";
-        }
-
-
-    }
-
-    @GetMapping(value = "/login-error")
-    public String loginError(Principal principal, Model model) {
-        addGlobalValues(principal, model, "Accueil", null);
-        model.addAttribute("errors", List.of("Erreur de connexion"));
-        model.addAttribute("teams", teamService.list());
-        return "root";
-    }
-
-    @GetMapping(value = "/integration/facebook/login")
-    public String getSiteIntegration(@RequestParam("state") String teamId,
-                                     @RequestParam("code") String facebookCode,
-                                     Principal principal,
-                                     Model model) {
-
-        checkAdmin(principal, teamId);
         final Team team = checkTeam(teamId);
 
-        final String userAccessToken = facebookService.getUserAccessToken(facebookCode);
-        team.getIntegration().setFacebookAccessToken(userAccessToken);
+        final TeamConfiguration teamConfiguration = team.getConfiguration();
+        if (teamConfiguration.getDefaultPage().equals(Page.MAPS)) {
+            return redirectToMaps(team.getId());
+        }
+        if (teamConfiguration.getDefaultPage().equals(Page.RIDES)) {
+            return redirectToRides(team.getId());
+        }
 
-        teamService.save(team);
+        addGlobalValues(principal, model, "Accueil", team);
+        model.addAttribute("feed", teamService.listFeed(team.getId()));
+        return "team_root";
+    }
 
-        return "redirect:/" + teamId + "/admin/integration";
+    @GetMapping(value = "/join/{userId}")
+    public String joinTeam(@PathVariable("teamId") String teamId,
+                           @PathVariable("userId") String userId,
+                           Principal principal, Model model) {
 
+        final Team team = checkTeam(teamId);
+
+        Optional<User> optionalUser = userService.get(userId);
+        Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
+
+        if (optionalConnectedUser.isPresent() && optionalUser.isPresent()) {
+
+            User user = optionalUser.get();
+            User connectedUser = optionalConnectedUser.get();
+
+            if (user.equals(connectedUser) || connectedUser.isAdmin()) {
+                team.addRole(user, Role.MEMBER);
+                teamService.save(team);
+            }
+
+        }
+
+        return redirectToFeed(team.getId());
+    }
+
+    @GetMapping(value = "/leave/{userId}")
+    public String leaveTeam(@PathVariable("teamId") String teamId,
+                            @PathVariable("userId") String userId,
+                            Principal principal, Model model) {
+
+        final Team team = checkTeam(teamId);
+
+        Optional<User> optionalUser = userService.get(userId);
+        Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
+
+        if (optionalConnectedUser.isPresent() && optionalUser.isPresent()) {
+
+            User user = optionalUser.get();
+            User connectedUser = optionalConnectedUser.get();
+
+            if (user.equals(connectedUser) || connectedUser.isAdmin()) {
+                team.removeRole(userId);
+                user.removeRole(team.getId()); // needed for hibernate
+                teamService.save(team);
+            }
+
+        }
+
+        return redirectToFeed(team.getId());
     }
 
 }

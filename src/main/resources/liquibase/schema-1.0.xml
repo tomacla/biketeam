@@ -99,6 +99,9 @@
             <column name="team_id" type="VARCHAR(20)">
                 <constraints nullable="false"/>
             </column>
+            <column name="posted_at" type="DATE">
+                <constraints nullable="false"/>
+            </column>
             <column name="crossing" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
@@ -112,9 +115,6 @@
                 <constraints nullable="false"/>
             </column>
             <column name="positive_elevation" type="DOUBLE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="posted_at" type="DATE">
                 <constraints nullable="false"/>
             </column>
             <column name="start_point_lat" type="DOUBLE"/>
@@ -174,13 +174,10 @@
             <column name="imaged" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
-            <column name="posted_at" type="TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
             <column name="title" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="published_at" type="TIMESTAMP">
+            <column name="published_at" type="timestamp with time zone">
                 <constraints nullable="false"/>
             </column>
             <column name="published_status" type="VARCHAR(25)">
@@ -222,7 +219,7 @@
             <column name="type" type="VARCHAR(25)">
                 <constraints nullable="false"/>
             </column>
-            <column name="published_at" type="TIMESTAMP">
+            <column name="published_at" type="timestamp with time zone">
                 <constraints nullable="false"/>
             </column>
             <column name="published_status" type="VARCHAR(25)">
@@ -305,7 +302,10 @@
             <column name="user_id" type="VARCHAR(255)"/>
         </createTable>
 
-        <createTable tableName="user_roles">
+        <createTable tableName="user_role">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
             <column name="user_id" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
@@ -317,25 +317,25 @@
             </column>
         </createTable>
 
-        <addPrimaryKey tableName="user_roles" columnNames="user_id, team_id"/>
+        <addPrimaryKey tableName="user_role" columnNames="id"/>
 
-        <createIndex tableName="user_roles" indexName="user_roles_user_id">
+        <createIndex tableName="user_role" indexName="user_role_user_id">
             <column name="user_id"/>
         </createIndex>
 
-        <createIndex tableName="USER_ROLES" indexName="user_roles_team_id">
+        <createIndex tableName="user_role" indexName="user_role_team_id">
             <column name="team_id"/>
         </createIndex>
 
-        <addForeignKeyConstraint baseTableName="user_roles"
+        <addForeignKeyConstraint baseTableName="user_role"
                                  baseColumnNames="user_id"
-                                 constraintName="fk_user_roles_user_id"
+                                 constraintName="fk_user_role_user_id"
                                  referencedTableName="user_account"
                                  referencedColumnNames="id"/>
 
-        <addForeignKeyConstraint baseTableName="user_roles"
+        <addForeignKeyConstraint baseTableName="user_role"
                                  baseColumnNames="team_id"
-                                 constraintName="fk_user_roles_team_id"
+                                 constraintName="fk_user_role_team_id"
                                  referencedTableName="team"
                                  referencedColumnNames="id"/>
 

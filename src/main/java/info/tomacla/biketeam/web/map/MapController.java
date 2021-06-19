@@ -39,9 +39,9 @@ public class MapController extends AbstractController {
 
         final Team team = checkTeam(teamId);
 
-        Optional<Map> optionalMap = mapService.get(teamId, mapId);
+        Optional<Map> optionalMap = mapService.get(team.getId(), mapId);
         if (optionalMap.isEmpty()) {
-            return redirectToMaps(teamId);
+            return redirectToMaps(team.getId());
         }
 
         Map map = optionalMap.get();
@@ -92,7 +92,7 @@ public class MapController extends AbstractController {
         SearchMapForm.SearchMapFormParser parser = form.parser();
 
         Page<Map> maps = mapService.searchMaps(
-                teamId,
+                team.getId(),
                 form.getPage(),
                 form.getPageSize(),
                 parser.getSort(),
@@ -107,7 +107,7 @@ public class MapController extends AbstractController {
         addGlobalValues(principal, model, "Maps", team);
         model.addAttribute("maps", maps.getContent());
         model.addAttribute("pages", maps.getTotalPages());
-        model.addAttribute("tags", mapService.listTags(teamId));
+        model.addAttribute("tags", mapService.listTags(team.getId()));
         model.addAttribute("formdata", form);
         return "maps";
     }

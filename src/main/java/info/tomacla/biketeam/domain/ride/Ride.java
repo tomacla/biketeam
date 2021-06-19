@@ -33,6 +33,7 @@ public class Ride {
     private String description;
     private boolean imaged;
     @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OrderBy("id ASC")
     private Set<RideGroup> groups;
 
     @Transient

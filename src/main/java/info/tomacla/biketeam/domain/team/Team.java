@@ -1,10 +1,13 @@
 package info.tomacla.biketeam.domain.team;
 
 import info.tomacla.biketeam.common.Timezone;
+import info.tomacla.biketeam.domain.user.Role;
+import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.user.UserRole;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
@@ -30,7 +33,7 @@ public class Team {
     @OneToOne(mappedBy = "team", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private TeamIntegration integration;
-    @OneToMany(mappedBy = "id.teamId", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<UserRole> roles;
 
     protected Team() {
@@ -39,7 +42,7 @@ public class Team {
 
     public Team(String id, String name, String city, String country,
                 String defaultDescription, Set<UserRole> roles) {
-        setId(id);
+        setId(id.toLowerCase());
         setName(name);
         setCity(city);
         setCountry(country);
@@ -138,8 +141,46 @@ public class Team {
         this.roles = roles;
     }
 
+    public void clearRoles() {
+        this.roles.clear();
+    }
+
     public void addRole(UserRole role) {
         this.roles.add(role);
+    }
+
+    public void addRole(User user, Role role) {
+        this.roles.add(new UserRole(this, user, role));
+    }
+
+    public void removeRole(String userId) {
+        this.roles.removeIf(r -> r.getUser().getId().equals(userId));
+    }
+
+    public boolean isAdmin(String userId) {
+        for (UserRole role : this.roles) {
+            if (role.getUser().getId().equals(userId) && role.getRole().equals(Role.ADMIN)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isMember(String userId) {
+        for (UserRole role : this.roles) {
+            if (role.getUser().getId().equals(userId) && role.getRole().equals(Role.MEMBER)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isAdminOrMember(String userId) {
+        return isAdmin(userId) || isMember(userId);
+    }
+
+    public ZoneId getZoneId() {
+        return ZoneId.of(getConfiguration().getTimezone());
     }
 
 }
