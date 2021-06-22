@@ -47,48 +47,8 @@
 
     </aside>
 
-    <div class="col-12 col-md-8">
-
-        <div class="row pb-4 g-4">
-            <#list feed as feedItem>
-                  <div class="col-12">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="m-0 p-0">
-                            <#if feedItem.type == 'RIDE'>
-                                <i class="bi bi-bicycle"></i>
-                            <#elseif feedItem.type == 'PUBLICATION'>
-                                <i class="bi bi-newspaper"></i>
-                            </#if>
-                            <#if feedItem.type == 'RIDE'>
-                                Ride
-                            <#elseif feedItem.type == 'PUBLICATION'>
-                                Publication
-                            </#if>
-                            </h5>
-                            <small class="text-muted">Ajouté le ${feedItem.publishedAt.format(_date_formatter)}</small>
-                        </div>
-                        <div class="card-body">
-                        <#if (feedItem.getDetailsUrl(team.id))??>
-                            <h5 class="card-title"><a class="link-dark" href="<@spring.url feedItem.getDetailsUrl(team.id) />">${feedItem.title}</a></h5>
-                        <#else>
-                            <h5 class="card-title">${feedItem.title}</h5>
-                        </#if>
-                          <p class="card-text wrap-content">${feedItem.content}</p>
-                          <#if (feedItem.getImageUrl(team.id))??>
-                            <img src="<@spring.url feedItem.getImageUrl(team.id) />" class="d-block shadow rounded w-50 h-auto mx-auto" alt="${feedItem.title} image">
-                          </#if>
-                        </div>
-                        <#if (feedItem.getDetailsUrl(team.id))??>
-                        <div class="card-footer text-center">
-                            <a href="<@spring.url feedItem.getDetailsUrl(team.id) />" class="btn btn-secondary btn-sm" role="button">Voir</a>
-                        </div>
-                        </#if>
-                    </div>
-                  </div>
-            </#list>
-        </div>
-
+    <div class="col-12 col-md-8 pb-4">
+            <@common.displayFeed false />
     </div>
 
 </div>

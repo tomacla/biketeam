@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.web;
 
+import info.tomacla.biketeam.domain.feed.Feed;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.Role;
 import info.tomacla.biketeam.domain.user.User;
@@ -15,7 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = "/")
@@ -29,6 +34,17 @@ public class RootController extends AbstractController {
 
     @GetMapping
     public String getTeams(Principal principal, Model model) {
+
+        final Optional<User> userFromPrincipal = getUserFromPrincipal(principal);
+        if (userFromPrincipal.isPresent()) {
+            final User user = userFromPrincipal.get();
+            final Set<String> teamIds = user.getRoles().stream().map(ur -> ur.getTeam().getId()).collect(Collectors.toSet());
+            final List<Feed> feeds = teamService.listFeed(teamIds);
+            model.addAttribute("feed", feeds);
+        } else {
+            model.addAttribute("feed", new ArrayList<>());
+        }
+
         addGlobalValues(principal, model, "Accueil", null);
         model.addAttribute("teams", teamService.list());
         return "root";

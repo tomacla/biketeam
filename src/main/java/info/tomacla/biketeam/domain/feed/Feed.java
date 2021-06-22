@@ -11,6 +11,8 @@ public class Feed {
     private String id;
     @Column(name = "team_id")
     private String teamId;
+    @Column(name = "team_name")
+    private String teamName;
     @Enumerated(EnumType.STRING)
     private FeedType type;
     @Column(name = "published_at")
@@ -37,6 +39,14 @@ public class Feed {
 
     public void setTeamId(String teamId) {
         this.teamId = teamId;
+    }
+
+    public String getTeamName() {
+        return teamName;
+    }
+
+    public void setTeamName(String teamName) {
+        this.teamName = teamName;
     }
 
     public FeedType getType() {
@@ -80,7 +90,7 @@ public class Feed {
     }
 
     // TODO should be url service
-    public String getDetailsUrl(String teamId) {
+    public String getDetailsUrl() {
         if (type.equals(FeedType.RIDE)) {
             return "/" + teamId + "/rides/" + getId();
         }
@@ -88,7 +98,7 @@ public class Feed {
     }
 
     // TODO should be url service
-    public String getImageUrl(String teamId) {
+    public String getImageUrl() {
         if (imaged) {
             if (type.equals(FeedType.RIDE)) {
                 return "/api/" + teamId + "/rides/" + getId() + "/image";

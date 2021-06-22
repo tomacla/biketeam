@@ -491,6 +491,20 @@
 
     </changeSet>
 
+    <changeSet id="GITHUB-40-CROSS-FEED-TEAM" author="tomacla">
+
+        <dropView viewName="feed" />
+
+        <createView viewName="feed" replaceIfExists="true">
+            select r.id as id, r.team_id as team_id, t.name as team_name, 'RIDE' as type, r.published_at as published_at, r.title as title,
+            r.description as content, r.imaged as imaged FROM ride r, team t where t.id = r.team_id and r.published_status = 'PUBLISHED'
+            UNION
+            select p.id as id, p.team_id as team_id, t.name as team_name, 'PUBLICATION' as type, p.published_at as published_at, p.title as title,
+            p.content as content, p.imaged as imaged FROM publication p, team t where t.id = p.team_id and p.published_status = 'PUBLISHED'
+        </createView>
+
+    </changeSet>
+
 
 </databaseChangeLog>
 

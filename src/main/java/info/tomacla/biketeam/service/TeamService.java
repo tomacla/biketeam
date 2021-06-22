@@ -15,9 +15,11 @@ import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class TeamService {
@@ -50,10 +52,16 @@ public class TeamService {
     }
 
     public List<Feed> listFeed(String teamId) {
-        Team team = get(teamId).orElseThrow(() -> new IllegalArgumentException("Unknown team ID"));
         return feedRepository.findAllByTeamIdAndPublishedAtLessThan(
                 teamId,
-                ZonedDateTime.now(team.getZoneId()),
+                ZonedDateTime.now(ZoneOffset.UTC), // TODO should be user timezone and not UTC
+                PageRequest.of(0, 15, Sort.by("publishedAt").descending())).getContent();
+    }
+
+    public List<Feed> listFeed(Set<String> teamIds) {
+        return feedRepository.findAllByTeamIdInAndPublishedAtLessThan(
+                teamIds,
+                ZonedDateTime.now(ZoneOffset.UTC), // TODO should be user timezone and not UTC
                 PageRequest.of(0, 15, Sort.by("publishedAt").descending())).getContent();
     }
 
