@@ -108,7 +108,7 @@
                           </p>
                         </div>
                         <div class="card-footer d-flex justify-content-between align-items-center">
-                            <span class="small text-muted">Ajoutée le ${map.postedAt.format(_date_formatter)}</span>
+                            <span class="small text-muted">${map.postedAt.format(_date_formatter)}</span>
                             <div class="btn-group" role="group">
                                 <a download="${map.name}.gpx" href="<@spring.url '/api/' + team.id + '/maps/${map.id}/gpx' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-download"></i> GPX</a>
                                 <a download="${map.name}.fit" href="<@spring.url '/api/' + team.id + '/maps/${map.id}/fit' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-download"></i> FIT</a>
