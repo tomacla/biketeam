@@ -1,10 +1,8 @@
 package info.tomacla.biketeam.web.team;
 
 import info.tomacla.biketeam.common.Timezone;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Objects;
-import java.util.Optional;
 
 public class NewTeamForm {
 
@@ -14,7 +12,6 @@ public class NewTeamForm {
     private String country;
     private String description;
     private String timezone;
-    private MultipartFile file;
 
     public NewTeamForm() {
         setId(null);
@@ -22,7 +19,6 @@ public class NewTeamForm {
         setCountry(null);
         setName(null);
         setTimezone(null);
-        setFile(null);
         setDescription(null);
     }
 
@@ -74,18 +70,6 @@ public class NewTeamForm {
         this.timezone = Objects.requireNonNullElse(timezone, Timezone.DEFAULT_TIMEZONE);
     }
 
-    public MultipartFile getFile() {
-        return file;
-    }
-
-    public void setFile(MultipartFile file) {
-        this.file = file;
-    }
-
-    public boolean fileSet() {
-        return file != null && !file.isEmpty();
-    }
-
     public static NewTeamFormBuilder builder() {
         return new NewTeamFormBuilder();
     }
@@ -124,13 +108,6 @@ public class NewTeamForm {
 
         public String getTimezone() {
             return form.getTimezone();
-        }
-
-        public Optional<MultipartFile> getFile() {
-            if (form.fileSet()) {
-                return Optional.of(form.getFile());
-            }
-            return Optional.empty();
         }
 
     }

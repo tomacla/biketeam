@@ -88,7 +88,7 @@ public class NewRideGroupTemplateForm {
     }
 
     public void setMeetingTime(String meetingTime) {
-        this.meetingTime = Strings.requireNonBlankOrDefault(meetingTime, Dates.formatTime());
+        this.meetingTime = Strings.requireNonBlankOrDefault(meetingTime, "12:00");
     }
 
     public static NewRideGroupTemplateFormBuilder builder() {

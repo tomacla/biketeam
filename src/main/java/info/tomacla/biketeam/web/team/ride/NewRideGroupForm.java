@@ -25,6 +25,8 @@ public class NewRideGroupForm {
         setMapName(null);
         setMeetingLocation(null);
         setMeetingTime("12:00");
+        setLowerSpeed(28);
+        setUpperSpeed(30);
     }
 
     public String getName() {

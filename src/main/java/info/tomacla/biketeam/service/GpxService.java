@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -91,6 +92,7 @@ public class GpxService {
                 gpxPath.getName(),
                 Rounder.round2Decimals(Math.round(10.0 * gpxPath.getDist()) / 10000.0),
                 MapType.ROAD,
+                LocalDate.now(team.getZoneId()),
                 Rounder.round1Decimal(gpxPath.getTotalElevation()),
                 Rounder.round1Decimal(gpxPath.getTotalElevationNegative()),
                 new ArrayList<>(),

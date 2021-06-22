@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -110,7 +111,7 @@ public class AdminTeamPublicationController extends AbstractController {
 
         boolean published = false;
 
-        NewPublicationForm.NewPublicationFormBuilder builder = NewPublicationForm.builder();
+        NewPublicationForm.NewPublicationFormBuilder builder = NewPublicationForm.builder(ZonedDateTime.now(team.getZoneId()));
         if (!publicationId.equals("new")) {
 
             Optional<Publication> optionalPublication = publicationService.get(team.getId(), publicationId);

@@ -20,9 +20,9 @@
         </form>
 
         <figure class="figure w-25 border rounded my-3">
-                    <img src="<@spring.url '/api/' + team.id + '/image' />" class="figure-img img-fluid rounded" alt="Team logo">
-                   <figcaption class="figure-caption text-center">Logo actuel.</figcaption>
-                </figure>
+            <img src="<@spring.url '/api/' + team.id + '/image' />" class="figure-img img-fluid rounded" alt="Team logo">
+           <figcaption class="figure-caption text-center">Logo actuel.</figcaption>
+        </figure>
 
     </div>
 

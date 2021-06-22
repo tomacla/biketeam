@@ -143,7 +143,7 @@ public class User implements Serializable {
     }
 
     public void setEmail(String email) {
-        this.email = Strings.requireNonBlankOrNull(email);
+        this.email = Strings.requireEmailOrNull(email);
     }
 
     public Set<UserRole> getRoles() {

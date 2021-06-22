@@ -62,6 +62,7 @@ public class Map {
                String name,
                double length,
                MapType type,
+               LocalDate postedAt,
                double positiveElevation,
                double negativeElevation,
                List<String> tags,
@@ -72,7 +73,7 @@ public class Map {
                boolean visible) {
         this.id = Objects.requireNonNullElse(id, UUID.randomUUID().toString());
         setTeamId(teamId);
-        this.postedAt = LocalDate.now();
+        setPostedAt(postedAt);
         setType(type);
         setName(name);
         setLength(length);

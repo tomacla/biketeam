@@ -55,6 +55,7 @@ public class RootController extends AbstractController {
                     parser.getName(),
                     parser.getCity(),
                     parser.getCountry(),
+                    parser.getTimezone(),
                     parser.getDescription(),
                     null);
 

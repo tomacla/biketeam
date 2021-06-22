@@ -66,8 +66,8 @@ public class UserService {
         });
     }
 
-    public List<User> listUsersWithMailActivated() {
-        return userRepository.findByEmailNotNull();
+    public List<User> listUsersWithMailActivated(Team team) {
+        return userRepository.findByEmailNotNullAndRoles_Team(team);
     }
 
     @PostConstruct

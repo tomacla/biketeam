@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,17 +60,17 @@ public class AdminTeamRideController extends AbstractController {
         if (templateId != null && !templateId.startsWith("empty-")) {
             Optional<RideTemplate> optionalTemplate = rideTemplateService.get(team.getId(), templateId);
             if (optionalTemplate.isPresent()) {
-                form = NewRideForm.builder(optionalTemplate.get()).get();
+                form = NewRideForm.builder(optionalTemplate.get(), ZonedDateTime.now(team.getZoneId())).get();
             }
         }
 
         if (form == null && templateId.startsWith("empty-")) {
             int numberOfGroups = Integer.parseInt(templateId.replace("empty-", ""));
-            form = NewRideForm.builder(numberOfGroups).get();
+            form = NewRideForm.builder(numberOfGroups, ZonedDateTime.now(team.getZoneId())).get();
         }
 
         if (form == null) {
-            form = NewRideForm.builder(1).get();
+            form = NewRideForm.builder(1, ZonedDateTime.now(team.getZoneId())).get();
         }
 
         addGlobalValues(principal, model, "Administration - Nouveau ride", team);
@@ -95,7 +96,7 @@ public class AdminTeamRideController extends AbstractController {
 
         Ride ride = optionalRide.get();
 
-        NewRideForm form = NewRideForm.builder(ride.getGroups().size())
+        NewRideForm form = NewRideForm.builder(ride.getGroups().size(), ZonedDateTime.now(team.getZoneId()))
                 .withId(ride.getId())
                 .withDate(ride.getDate())
                 .withDescription(ride.getDescription())

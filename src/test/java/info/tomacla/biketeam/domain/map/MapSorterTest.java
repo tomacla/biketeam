@@ -4,6 +4,7 @@ import info.tomacla.biketeam.common.Point;
 import info.tomacla.biketeam.common.Vector;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,6 +21,7 @@ public class MapSorterTest {
                 "short",
                 50.0,
                 MapType.ROAD,
+                LocalDate.now(),
                 100.0,
                 -100.0,
                 new ArrayList<>(),
@@ -32,6 +34,7 @@ public class MapSorterTest {
         Map longM = new Map("team","2","long",
                 100.0,
                 MapType.ROAD,
+                LocalDate.now(),
                 100.0,
                 -100.0,
                 new ArrayList<>(),

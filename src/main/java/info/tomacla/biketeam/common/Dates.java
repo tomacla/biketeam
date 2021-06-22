@@ -13,22 +13,12 @@ public class Dates {
     public static final DateTimeFormatter frenchFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(Locale.FRANCE);
     public static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
-    public static String formatTime() {
-        return formatTime(null);
-    }
-
     public static String formatTime(LocalTime temporal) {
-        var target = temporal == null ? LocalTime.now() : temporal;
-        return target.truncatedTo(ChronoUnit.SECONDS).format(timeFormatter);
-    }
-
-    public static String formatDate() {
-        return formatDate(null);
+        return temporal.truncatedTo(ChronoUnit.SECONDS).format(timeFormatter);
     }
 
     public static String formatDate(LocalDate temporal) {
-        var target = temporal == null ? LocalDate.now() : temporal;
-        return target.format(DateTimeFormatter.ISO_LOCAL_DATE);
+        return temporal.format(DateTimeFormatter.ISO_LOCAL_DATE);
     }
 
     public static String formatZonedDate(ZonedDateTime temporal) {
@@ -40,8 +30,7 @@ public class Dates {
     }
 
     public static String frenchDateFormat(LocalDate temporal) {
-        var target = temporal == null ? LocalDate.now() : temporal;
-        return target.format(frenchFormatter);
+        return temporal.format(frenchFormatter);
     }
 
 }

@@ -4,6 +4,7 @@ import info.tomacla.biketeam.common.Dates;
 import info.tomacla.biketeam.common.Strings;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -56,7 +57,7 @@ public class NewPublicationForm {
     }
 
     public void setPublishedAtDate(String publishedAtDate) {
-        this.publishedAtDate = Strings.requireNonBlankOrDefault(publishedAtDate, Dates.formatDate());
+        this.publishedAtDate = Strings.requireNonBlankOrDefault(publishedAtDate, Dates.formatDate(LocalDate.now()));
     }
 
     public String getPublishedAtTime() {
@@ -64,7 +65,7 @@ public class NewPublicationForm {
     }
 
     public void setPublishedAtTime(String publishedAtTime) {
-        this.publishedAtTime = Strings.requireNonBlankOrDefault(publishedAtTime, Dates.formatTime());
+        this.publishedAtTime = Strings.requireNonBlankOrDefault(publishedAtTime, "12:00");
     }
 
     public MultipartFile getFile() {
@@ -83,8 +84,8 @@ public class NewPublicationForm {
         return new NewPublicationFormParser(this);
     }
 
-    public static NewPublicationFormBuilder builder() {
-        return new NewPublicationFormBuilder();
+    public static NewPublicationFormBuilder builder(ZonedDateTime defaultPublishedAt) {
+        return new NewPublicationFormBuilder(defaultPublishedAt);
     }
 
     public static class NewPublicationFormParser {
@@ -124,8 +125,9 @@ public class NewPublicationForm {
 
         private final NewPublicationForm form;
 
-        public NewPublicationFormBuilder() {
+        public NewPublicationFormBuilder(ZonedDateTime defaultPublishedAt) {
             this.form = new NewPublicationForm();
+            withPublishedAt(defaultPublishedAt);
         }
 
         public NewPublicationFormBuilder withId(String id) {

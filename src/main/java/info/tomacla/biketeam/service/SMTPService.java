@@ -3,6 +3,7 @@ package info.tomacla.biketeam.service;
 import info.tomacla.biketeam.common.Attachment;
 import info.tomacla.biketeam.common.ImageDescriptor;
 import info.tomacla.biketeam.domain.team.Team;
+import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +14,7 @@ import javax.mail.*;
 import javax.mail.internet.*;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 @Service
 public class SMTPService {
@@ -29,7 +27,15 @@ public class SMTPService {
 
     protected static final Logger log = LoggerFactory.getLogger(SMTPService.class);
 
-    public void send(Team team, String to, String name, String subject, String message, String cc, ImageDescriptor embedImage, List<Attachment> files) {
+    public void sendDirectly(Team team, Set<String> tos, String subject, String message, ImageDescriptor embedImage) {
+        tos.forEach(to -> this.send(team, Set.of(to), null, null, subject, message, embedImage, null));
+    }
+
+    public void sendHiddenly(Team team, Set<String> tos, String subject, String message, ImageDescriptor embedImage) {
+        this.send(team, null, null, tos, subject, message, embedImage, null);
+    }
+
+    private void send(Team team, Set<String> tos, Set<String> ccs, Set<String> bccs, String subject, String message, ImageDescriptor embedImage, List<Attachment> files) {
 
         Properties props = getSmtpProperties();
         if (props == null) {
@@ -38,7 +44,7 @@ public class SMTPService {
 
         try {
 
-            log.info("Sending mail to {} - {} : [{}]", to, name, subject);
+            log.info("Sending mail to {} {} {} : [{}]", tos, ccs, bccs, subject);
 
             Authenticator auth = new javax.mail.Authenticator() {
                 @Override
@@ -58,9 +64,19 @@ public class SMTPService {
             msg.setSentDate(new Date());
             msg.setFrom(new InternetAddress(env.getProperty("smtp.from"), team.getName()));
             msg.setReplyTo(InternetAddress.parse(env.getProperty("smtp.from"), false));
-            msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to, false));
-            if (cc != null) {
-                msg.setRecipients(Message.RecipientType.CC, InternetAddress.parse(cc, false));
+
+            if (tos != null && !tos.isEmpty()) {
+                msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(Strings.join(tos, ','), false));
+            } else {
+                msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(env.getProperty("smtp.from"), false));
+            }
+
+            if (ccs != null) {
+                msg.setRecipients(Message.RecipientType.CC, InternetAddress.parse(Strings.join(ccs, ','), false));
+            }
+
+            if (bccs != null) {
+                msg.setRecipients(Message.RecipientType.BCC, InternetAddress.parse(Strings.join(bccs, ','), false));
             }
 
             Multipart multipart = new MimeMultipart("related");
@@ -103,17 +119,6 @@ public class SMTPService {
 
     }
 
-    public void send(Team team, String to, String name, String subject, String message) {
-        this.send(team, to, name, subject, message, null, null, null);
-    }
-
-    public void send(Team team, String to, String name, String subject, String message, ImageDescriptor embedImage) {
-        this.send(team, to, name, subject, message, null, embedImage, null);
-    }
-
-    public void send(Team team, String to, String name, String subject, String message, String cc) {
-        this.send(team, to, name, subject, message, cc, null, null);
-    }
 
     private Properties getSmtpProperties() {
 
@@ -132,7 +137,6 @@ public class SMTPService {
         }
 
         return null;
-
 
     }
 

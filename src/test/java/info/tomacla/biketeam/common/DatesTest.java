@@ -9,7 +9,6 @@ public class DatesTest {
 
     @Test
     public void test() {
-        assertNotNull(Dates.formatTime());
         assertEquals("12:32", Dates.formatTime(LocalTime.of(12,32)));
         assertEquals("12:32", Dates.formatTime(LocalTime.of(12,32, 28)));
         assertEquals("2021-05-12", Dates.formatDate(LocalDate.of(2021,05,12)));

@@ -13,6 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class MailService implements ExternalPublicationService {
@@ -39,9 +42,10 @@ public class MailService implements ExternalPublicationService {
 
     public void publish(Team team, Ride ride) {
 
-        userService.listUsersWithMailActivated().forEach(user -> {
+        final List<User> recipients = userService.listUsersWithMailActivated(team);
+        if (recipients.size() > 0) {
 
-            log.info("Publish ride {} to {}", ride.getId(), user.getEmail());
+            log.info("Publish ride {} to {} recipients", ride.getId(), recipients.size());
 
             StringBuilder sb = new StringBuilder();
             sb.append("<html>").append("<head></head>").append("<body>");
@@ -67,41 +71,39 @@ public class MailService implements ExternalPublicationService {
 
             final String content = sb.toString();
             if (ride.isImaged()) {
-                rideService.getImage(team.getId(), ride.getId()).ifPresent(rideImage -> this.publish(team, user, ride.getTitle(), content, rideImage.getPath()));
+                rideService.getImage(team.getId(), ride.getId()).ifPresent(rideImage -> this.publish(team, recipients, ride.getTitle(), content, rideImage.getPath()));
             } else {
-                this.publish(team, user, ride.getTitle(), content, null);
+                this.publish(team, recipients, ride.getTitle(), content, null);
             }
 
-        });
+        }
 
     }
 
     public void publish(Team team, Publication publication) {
 
-        userService.listUsersWithMailActivated().forEach(user -> {
+        final List<User> recipients = userService.listUsersWithMailActivated(team);
 
-            log.info("Publish publication {} to {}", publication.getId(), user.getEmail());
+        log.info("Publish publication {} to {} recipients", publication.getId(), recipients.size());
 
-            StringBuilder sb = new StringBuilder();
-            sb.append("<html>").append("<head></head>").append("<body>");
-            sb.append("<p>").append(publication.getTitle()).append("</p>");
-            sb.append("<p>").append(getHtmlLink(urlService.getTeamUrl(team.getId()))).append("</p>");
-            sb.append("<p>").append(publication.getContent()).append("</p>");
-            if (publication.isImaged()) {
-                sb.append("<p><img src=\"cid:Image\" /></p>");
-            }
-            sb.append("<br/>").append("<p>").append(team.getName()).append("</p>");
-            sb.append("</body>").append("</html>");
+        StringBuilder sb = new StringBuilder();
+        sb.append("<html>").append("<head></head>").append("<body>");
+        sb.append("<p>").append(publication.getTitle()).append("</p>");
+        sb.append("<p>").append(getHtmlLink(urlService.getTeamUrl(team.getId()))).append("</p>");
+        sb.append("<p>").append(publication.getContent()).append("</p>");
+        if (publication.isImaged()) {
+            sb.append("<p><img src=\"cid:Image\" /></p>");
+        }
+        sb.append("<br/>").append("<p>").append(team.getName()).append("</p>");
+        sb.append("</body>").append("</html>");
 
-            final String content = sb.toString();
+        final String content = sb.toString();
 
-            if (publication.isImaged()) {
-                publicationService.getImage(team.getId(), publication.getId()).ifPresent(pubImage -> this.publish(team, user, publication.getTitle(), content, pubImage.getPath()));
-            } else {
-                this.publish(team, user, publication.getTitle(), content, null);
-            }
-
-        });
+        if (publication.isImaged()) {
+            publicationService.getImage(team.getId(), publication.getId()).ifPresent(pubImage -> this.publish(team, recipients, publication.getTitle(), content, pubImage.getPath()));
+        } else {
+            this.publish(team, recipients, publication.getTitle(), content, null);
+        }
 
     }
 
@@ -109,16 +111,18 @@ public class MailService implements ExternalPublicationService {
         return "<a href=\"" + href + "\">" + href + "</a>";
     }
 
-    private void publish(Team team, User user, String subject, String content, Path image) {
+    private void publish(Team team, List<User> recipients, String subject, String content, Path image) {
 
         try {
+
+            final Set<String> tos = recipients.stream().map(u -> u.getEmail()).collect(Collectors.toSet());
 
             ImageDescriptor embedImage = null;
             if (image != null) {
                 final FileExtension fileExtension = FileExtension.findByFileName(image.getFileName().toString()).get();
                 embedImage = ImageDescriptor.of(fileExtension, image);
             }
-            smtpService.send(team, user.getEmail(), user.getFirstName() + " " + user.getLastName(), subject, content, embedImage);
+            smtpService.sendHiddenly(team, tos, subject, content, embedImage);
 
         } catch (Exception e) {
             log.error("Error while publishing by email : " + content, e);

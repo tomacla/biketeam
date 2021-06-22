@@ -1,6 +1,5 @@
 package info.tomacla.biketeam.domain.team;
 
-import info.tomacla.biketeam.common.Timezone;
 import info.tomacla.biketeam.domain.user.Role;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.user.UserRole;
@@ -40,14 +39,20 @@ public class Team {
 
     }
 
-    public Team(String id, String name, String city, String country,
-                String defaultDescription, Set<UserRole> roles) {
+    public Team(String id,
+                String name,
+                String city,
+                String country,
+                String timezone,
+                String defaultDescription,
+                Set<UserRole> roles) {
+
         setId(id.toLowerCase());
         setName(name);
         setCity(city);
         setCountry(country);
         this.roles = Objects.requireNonNullElse(roles, new HashSet<>());
-        this.createdAt = LocalDate.now();
+        this.createdAt = LocalDate.now(ZoneId.of(timezone));
 
         TeamDescription description = new TeamDescription();
         description.setTeam(this);
@@ -56,7 +61,7 @@ public class Team {
 
         TeamConfiguration configuration = new TeamConfiguration();
         configuration.setTeam(this);
-        configuration.setTimezone(Timezone.DEFAULT_TIMEZONE);
+        configuration.setTimezone(timezone);
         configuration.setDefaultSearchTags(new ArrayList<>());
         configuration.setFeedVisible(true);
         configuration.setRidesVisible(true);

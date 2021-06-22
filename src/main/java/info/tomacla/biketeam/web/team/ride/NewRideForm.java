@@ -91,7 +91,7 @@ public class NewRideForm {
     }
 
     public void setDate(String date) {
-        this.date = Strings.requireNonBlankOrDefault(date, Dates.formatDate());
+        this.date = Strings.requireNonBlankOrDefault(date, "");
     }
 
     public String getPublishedAtDate() {
@@ -99,7 +99,7 @@ public class NewRideForm {
     }
 
     public void setPublishedAtDate(String publishedAtDate) {
-        this.publishedAtDate = Strings.requireNonBlankOrDefault(publishedAtDate, Dates.formatDate());
+        this.publishedAtDate = Strings.requireNonBlankOrDefault(publishedAtDate, Dates.formatDate(LocalDate.now()));
     }
 
     public String getPublishedAtTime() {
@@ -107,7 +107,7 @@ public class NewRideForm {
     }
 
     public void setPublishedAtTime(String publishedAtTime) {
-        this.publishedAtTime = Strings.requireNonBlankOrDefault(publishedAtTime, Dates.formatTime());
+        this.publishedAtTime = Strings.requireNonBlankOrDefault(publishedAtTime, "12:00");
     }
 
     public String getTitle() {
@@ -146,12 +146,12 @@ public class NewRideForm {
         this.groups = Objects.requireNonNullElse(groups, new ArrayList<>());
     }
 
-    public static NewRideFormBuilder builder(int numberOfGroups) {
-        return new NewRideFormBuilder(numberOfGroups);
+    public static NewRideFormBuilder builder(int numberOfGroups, ZonedDateTime defaultDate) {
+        return new NewRideFormBuilder(numberOfGroups, defaultDate);
     }
 
-    public static NewRideFormBuilder builder(RideTemplate template) {
-        return new NewRideFormBuilder(template);
+    public static NewRideFormBuilder builder(RideTemplate template, ZonedDateTime defaultDate) {
+        return new NewRideFormBuilder(template, defaultDate);
     }
 
     public NewRideFormParser parser() {
@@ -222,12 +222,16 @@ public class NewRideForm {
 
         private final NewRideForm form;
 
-        public NewRideFormBuilder(int numberOfGroups) {
+        public NewRideFormBuilder(int numberOfGroups, ZonedDateTime defaultDate) {
             this.form = new NewRideForm(numberOfGroups);
+            withPublishedAt(defaultDate);
+            withDate(defaultDate.toLocalDate());
         }
 
-        public NewRideFormBuilder(RideTemplate template) {
+        public NewRideFormBuilder(RideTemplate template, ZonedDateTime defaultDate) {
             this.form = new NewRideForm(template);
+            withPublishedAt(defaultDate);
+            withDate(defaultDate.toLocalDate());
         }
 
         public NewRideFormBuilder withId(String id) {
