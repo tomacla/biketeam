@@ -50,7 +50,7 @@
             </#if>
             <#if team??>
                 <li class="nav-item">
-                    <a class="nav-link" href="<@spring.url '/' />"><i class="bi bi-house"></i></a>
+                    <a class="nav-link" href="<@spring.url '/' />"><i class="bi bi-house"></i> <span class="d-md-none">Biketeam</span></a>
                 </li>
             </#if>
             <li class="nav-item">
