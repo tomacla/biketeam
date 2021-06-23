@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.web;
 
+import info.tomacla.biketeam.common.Country;
 import info.tomacla.biketeam.domain.feed.Feed;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.Role;
@@ -8,6 +9,7 @@ import info.tomacla.biketeam.service.FacebookService;
 import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.web.team.NewTeamForm;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -33,21 +34,24 @@ public class RootController extends AbstractController {
     private FacebookService facebookService;
 
     @GetMapping
-    public String getTeams(Principal principal, Model model) {
+    public String getRoot(Principal principal, Model model) {
 
         final Optional<User> userFromPrincipal = getUserFromPrincipal(principal);
         if (userFromPrincipal.isPresent()) {
             final User user = userFromPrincipal.get();
             final Set<String> teamIds = user.getRoles().stream().map(ur -> ur.getTeam().getId()).collect(Collectors.toSet());
             final List<Feed> feeds = teamService.listFeed(teamIds);
+            addGlobalValues(principal, model, "Accueil", null);
             model.addAttribute("feed", feeds);
+            model.addAttribute("user", user);
+            model.addAttribute("userTeams", user.getRoles().stream().map(ur -> ur.getTeam()).collect(Collectors.toList()));
+            return "root_auth";
         } else {
-            model.addAttribute("feed", new ArrayList<>());
+            addGlobalValues(principal, model, "Accueil", null);
+            model.addAttribute("teams", teamService.getLast4());
+            return "root";
         }
 
-        addGlobalValues(principal, model, "Accueil", null);
-        model.addAttribute("teams", teamService.list());
-        return "root";
     }
 
     @GetMapping(value = "new")
@@ -93,11 +97,47 @@ public class RootController extends AbstractController {
 
     }
 
+    @GetMapping("/teams")
+    public String searchTeams(@RequestParam(value = "name", required = false) String name,
+                              @RequestParam(value = "country", required = false) Country country,
+                              @RequestParam(value = "city", required = false) String city,
+                              @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+                              @RequestParam(value = "pageSize", defaultValue = "12", required = false) int pageSize,
+                              Principal principal,
+                              Model model) {
+
+        SearchTeamForm form = SearchTeamForm.builder()
+                .withName(name)
+                .withCity(city)
+                .withCountry(country)
+                .withPage(page)
+                .withPageSize(pageSize)
+                .get();
+
+        final SearchTeamForm.SearchTeamFormParser parser = form.parser();
+
+        Page<Team> teams = teamService.searchTeams(
+                parser.getPage(),
+                parser.getPageSize(),
+                parser.getName(),
+                parser.getCity(),
+                parser.getCountry()
+        );
+
+        addGlobalValues(principal, model, "Groupes", null);
+        model.addAttribute("teams", teams.getContent());
+        model.addAttribute("pages", teams.getTotalPages());
+        model.addAttribute("formdata", form);
+
+        return "teams";
+
+    }
+
     @GetMapping(value = "/login-error")
     public String loginError(Principal principal, Model model) {
         addGlobalValues(principal, model, "Accueil", null);
         model.addAttribute("errors", List.of("Erreur de connexion"));
-        model.addAttribute("teams", teamService.list());
+        model.addAttribute("teams", teamService.getLast4());
         return "root";
     }
 

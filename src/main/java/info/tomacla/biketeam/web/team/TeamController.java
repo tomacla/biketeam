@@ -1,8 +1,8 @@
 package info.tomacla.biketeam.web.team;
 
-import info.tomacla.biketeam.domain.team.Page;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.TeamConfiguration;
+import info.tomacla.biketeam.domain.team.WebPage;
 import info.tomacla.biketeam.domain.user.Role;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.web.AbstractController;
@@ -27,10 +27,10 @@ public class TeamController extends AbstractController {
         final Team team = checkTeam(teamId);
 
         final TeamConfiguration teamConfiguration = team.getConfiguration();
-        if (teamConfiguration.getDefaultPage().equals(Page.MAPS)) {
+        if (teamConfiguration.getDefaultPage().equals(WebPage.MAPS)) {
             return redirectToMaps(team.getId());
         }
-        if (teamConfiguration.getDefaultPage().equals(Page.RIDES)) {
+        if (teamConfiguration.getDefaultPage().equals(WebPage.RIDES)) {
             return redirectToRides(team.getId());
         }
 

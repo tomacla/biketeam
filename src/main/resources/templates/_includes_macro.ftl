@@ -9,51 +9,60 @@
 
 <#macro displayFeed withTeam>
     <div class="row g-4">
-        <#list feed as feedItem>
-              <div class="col-12">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="m-0 p-0">
-                        <#if feedItem.type == 'RIDE'>
-                            <i class="bi bi-bicycle"></i>
-                        <#elseif feedItem.type == 'PUBLICATION'>
-                            <i class="bi bi-newspaper"></i>
+        <#if feed?size != 0>
+            <#list feed as feedItem>
+                  <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="m-0 p-0">
+                            <#if feedItem.type == 'RIDE'>
+                                <i class="bi bi-bicycle"></i>
+                            <#elseif feedItem.type == 'PUBLICATION'>
+                                <i class="bi bi-newspaper"></i>
+                            </#if>
+                            <#if withTeam>
+                                <a class="link-dark" href="<@spring.url '/${feedItem.teamId}' />">${feedItem.teamName}</a> -
+                            </#if>
+                            <#if feedItem.type == 'RIDE'>
+                                Ride
+                            <#elseif feedItem.type == 'PUBLICATION'>
+                                Publication
+                            </#if>
+                            </h5>
+                            <small class="text-muted">Ajouté le ${feedItem.publishedAt.format(_date_formatter)}</small>
+                        </div>
+                        <div class="card-body">
+                        <#if (feedItem.detailsUrl)??>
+                            <h5 class="card-title"><a class="link-dark" href="<@spring.url feedItem.detailsUrl />">${feedItem.title}</a></h5>
+                        <#else>
+                            <h5 class="card-title">${feedItem.title}</h5>
                         </#if>
-                        <#if withTeam>
-                            <a class="link-dark" href="<@spring.url '/${feedItem.teamId}' />">${feedItem.teamName}</a> -
+                          <p class="card-text wrap-content">${feedItem.content}</p>
+                          <#if (feedItem.imageUrl)??>
+                            <img src="<@spring.url feedItem.imageUrl />" class="d-block shadow rounded w-50 h-auto mx-auto" alt="${feedItem.title} image">
+                          </#if>
+                        </div>
+                        <#if (feedItem.detailsUrl)??>
+                        <div class="card-footer text-center">
+                            <a href="<@spring.url feedItem.detailsUrl />" class="btn btn-secondary btn-sm" role="button">Voir</a>
+                        </div>
                         </#if>
-                        <#if feedItem.type == 'RIDE'>
-                            Ride
-                        <#elseif feedItem.type == 'PUBLICATION'>
-                            Publication
-                        </#if>
-                        </h5>
-                        <small class="text-muted">Ajouté le ${feedItem.publishedAt.format(_date_formatter)}</small>
                     </div>
-                    <div class="card-body">
-                    <#if (feedItem.detailsUrl)??>
-                        <h5 class="card-title"><a class="link-dark" href="<@spring.url feedItem.detailsUrl />">${feedItem.title}</a></h5>
-                    <#else>
-                        <h5 class="card-title">${feedItem.title}</h5>
-                    </#if>
-                      <p class="card-text wrap-content">${feedItem.content}</p>
-                      <#if (feedItem.imageUrl)??>
-                        <img src="<@spring.url feedItem.imageUrl />" class="d-block shadow rounded w-50 h-auto mx-auto" alt="${feedItem.title} image">
-                      </#if>
-                    </div>
-                    <#if (feedItem.detailsUrl)??>
-                    <div class="card-footer text-center">
-                        <a href="<@spring.url feedItem.detailsUrl />" class="btn btn-secondary btn-sm" role="button">Voir</a>
-                    </div>
-                    </#if>
-                </div>
-              </div>
-        </#list>
+                  </div>
+            </#list>
+        <#else>
+            <div class="alert alert-warning" role="alert">
+               Ce groupe n'a pas d'actualité récente.
+             </div>
+        </#if>
     </div>
 </#macro>
 
-<#macro countrySelect selected name id>
-    <select required class="form-select" name="${name}" id="${id}">
+<#macro countrySelect selected name id required>
+    <select<#if required> required</#if> class="form-select" name="${name}" id="${id}">
+        <#if !required>
+            <option value="">---</option>
+        </#if>
         <option<#if selected == 'AF'> selected</#if> value="AF">Afghanistan</option>
         <option<#if selected == 'AL'> selected</#if> value="AL">Albanie</option>
         <option<#if selected == 'DZ'> selected</#if> value="DZ">Algérie</option>

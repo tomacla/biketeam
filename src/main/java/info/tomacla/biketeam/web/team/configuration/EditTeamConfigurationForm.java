@@ -1,7 +1,7 @@
 package info.tomacla.biketeam.web.team.configuration;
 
 import info.tomacla.biketeam.common.Timezone;
-import info.tomacla.biketeam.domain.team.Page;
+import info.tomacla.biketeam.domain.team.WebPage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +44,7 @@ public class EditTeamConfigurationForm {
     }
 
     public void setDefaultPage(String defaultPage) {
-        this.defaultPage = Objects.requireNonNullElse(defaultPage, Page.FEED.name());
+        this.defaultPage = Objects.requireNonNullElse(defaultPage, WebPage.FEED.name());
     }
 
     public String getFeedVisible() {
@@ -87,8 +87,8 @@ public class EditTeamConfigurationForm {
             return form.getDefaultSearchTags();
         }
 
-        public Page getDefaultPage() {
-            return Page.valueOf(form.getDefaultPage());
+        public WebPage getDefaultPage() {
+            return WebPage.valueOf(form.getDefaultPage());
         }
 
         public boolean isFeedVisible() {
@@ -131,7 +131,7 @@ public class EditTeamConfigurationForm {
             return this;
         }
 
-        public EditTeamConfigurationFormBuilder withDefaultPage(Page defaultPage) {
+        public EditTeamConfigurationFormBuilder withDefaultPage(WebPage defaultPage) {
             form.setDefaultPage(defaultPage.name());
             return this;
         }

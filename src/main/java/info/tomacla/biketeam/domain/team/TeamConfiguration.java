@@ -30,7 +30,7 @@ public class TeamConfiguration {
     private List<String> defaultSearchTags;
     @Column(name = "default_page")
     @Enumerated(EnumType.STRING)
-    private Page defaultPage;
+    private WebPage defaultPage;
     @Column(name = "feed_visible")
     private boolean feedVisible;
     @Column(name = "rides_visible")
@@ -41,7 +41,7 @@ public class TeamConfiguration {
     }
 
     public TeamConfiguration(String timezone, List<String> defaultSearchTags,
-                             Page defaultPage, boolean feedVisible, boolean ridesVisible) {
+                             WebPage defaultPage, boolean feedVisible, boolean ridesVisible) {
         setTimezone(timezone);
         setDefaultSearchTags(defaultSearchTags);
         setDefaultPage(defaultPage);
@@ -82,11 +82,11 @@ public class TeamConfiguration {
         this.defaultSearchTags = Objects.requireNonNullElse(defaultSearchTags, new ArrayList<>());
     }
 
-    public Page getDefaultPage() {
+    public WebPage getDefaultPage() {
         return defaultPage;
     }
 
-    public void setDefaultPage(Page defaultPage) {
+    public void setDefaultPage(WebPage defaultPage) {
         this.defaultPage = Objects.requireNonNull(defaultPage);
     }
 

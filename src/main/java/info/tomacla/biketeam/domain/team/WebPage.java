@@ -1,6 +1,6 @@
 package info.tomacla.biketeam.domain.team;
 
-public enum Page {
+public enum WebPage {
 
     FEED, RIDES, MAPS
 

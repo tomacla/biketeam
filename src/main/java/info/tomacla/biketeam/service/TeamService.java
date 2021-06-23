@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.service;
 
+import info.tomacla.biketeam.common.Country;
 import info.tomacla.biketeam.common.FileExtension;
 import info.tomacla.biketeam.common.FileRepositories;
 import info.tomacla.biketeam.common.ImageDescriptor;
@@ -9,7 +10,9 @@ import info.tomacla.biketeam.domain.team.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -70,9 +73,9 @@ public class TeamService {
 
         TeamConfiguration teamConfiguration = team.getConfiguration();
 
-        if ((teamConfiguration.getDefaultPage().equals(Page.FEED) && !teamConfiguration.isFeedVisible())
-                || (teamConfiguration.getDefaultPage().equals(Page.RIDES) && !teamConfiguration.isRidesVisible())) {
-            teamConfiguration.setDefaultPage(Page.MAPS);
+        if ((teamConfiguration.getDefaultPage().equals(WebPage.FEED) && !teamConfiguration.isFeedVisible())
+                || (teamConfiguration.getDefaultPage().equals(WebPage.RIDES) && !teamConfiguration.isRidesVisible())) {
+            teamConfiguration.setDefaultPage(WebPage.MAPS);
         }
 
         teamRepository.save(team);
@@ -80,6 +83,10 @@ public class TeamService {
 
     public List<Team> list() {
         return teamRepository.findAll();
+    }
+
+    public List<Team> getLast4() {
+        return teamRepository.findAll(PageRequest.of(0, 4, Sort.by("createdAt").descending())).getContent();
     }
 
     public void initTeamImage(Team newTeam) {
@@ -123,7 +130,22 @@ public class TeamService {
     }
 
     public boolean idExists(String id) {
-        return teamRepository.findById(id).isPresent();
+        return get(id).isPresent();
+    }
+
+    public Page<Team> searchTeams(int page, int pageSize, String name, String city, Country country) {
+
+        Sort sort = Sort.by("name").ascending();
+        Pageable pageable = PageRequest.of(page, pageSize, sort);
+
+        SearchTeamSpecification spec = new SearchTeamSpecification(
+                name,
+                city,
+                country
+        );
+
+        return teamRepository.findAll(spec, pageable);
+
     }
 
 }

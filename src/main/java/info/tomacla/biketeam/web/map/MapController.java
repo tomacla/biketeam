@@ -93,8 +93,8 @@ public class MapController extends AbstractController {
 
         Page<Map> maps = mapService.searchMaps(
                 team.getId(),
-                form.getPage(),
-                form.getPageSize(),
+                parser.getPage(),
+                parser.getPageSize(),
                 parser.getSort(),
                 parser.getLowerDistance(),
                 parser.getUpperDistance(),

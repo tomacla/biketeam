@@ -7,6 +7,7 @@ import info.tomacla.biketeam.domain.user.UserRole;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
@@ -52,7 +53,7 @@ public class Team {
         setCity(city);
         setCountry(country);
         this.roles = Objects.requireNonNullElse(roles, new HashSet<>());
-        this.createdAt = LocalDate.now(ZoneId.of(timezone));
+        this.createdAt = LocalDate.now(ZoneOffset.UTC);
 
         TeamDescription description = new TeamDescription();
         description.setTeam(this);
@@ -65,7 +66,7 @@ public class Team {
         configuration.setDefaultSearchTags(new ArrayList<>());
         configuration.setFeedVisible(true);
         configuration.setRidesVisible(true);
-        configuration.setDefaultPage(Page.FEED);
+        configuration.setDefaultPage(WebPage.FEED);
         setConfiguration(configuration);
 
         TeamIntegration teamIntegration = new TeamIntegration();
