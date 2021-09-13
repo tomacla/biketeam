@@ -45,6 +45,17 @@
              </#if>
         </section>
 
+        <section class="border p-2 mb-4 rounded">
+            <h5>Membres (${team.roles?size})</h5>
+            <#list team.roles as role>
+                <#if role.user.profileImage??>
+                    <div style="width:30px; height:30px;" data-bs-toggle="tooltip" data-bs-placement="top" title="${role.user.identity}" class="d-inline-block rounded"><img class="w-100 h-100 d-block" src="${role.user.profileImage}" alt="${role.user.identity}"></div>
+                <#else>
+                    <div style="width:30px; height:30px; background:grey;" data-bs-toggle="tooltip" data-bs-placement="top" title="${role.user.identity}" class="d-inline-block rounded"></div>
+                </#if>
+            </#list>
+        </section>
+
     </aside>
 
     <div class="col-12 col-md-8 pb-4">

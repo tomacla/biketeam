@@ -20,7 +20,7 @@
                     <div class="list-group-item list-group-item-secondary">Mes groupes</div>
                     <#list userTeams as userTeam>
                         <a href="<@spring.url '/${userTeam.id}' />" class="list-group-item list-group-item-action">
-                            ${userTeam.name}
+                            <img src="<@spring.url '/api/' + userTeam.id + '/image' />" height="18" alt="Team image"> ${userTeam.name}
                         </a>
                     </#list>
                 </div>

@@ -14,22 +14,19 @@
                   <div class="col-12">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="m-0 p-0">
-                            <#if feedItem.type == 'RIDE'>
-                                <i class="bi bi-bicycle"></i>
-                            <#elseif feedItem.type == 'PUBLICATION'>
-                                <i class="bi bi-newspaper"></i>
-                            </#if>
-                            <#if withTeam>
-                                <a class="link-dark" href="<@spring.url '/${feedItem.teamId}' />">${feedItem.teamName}</a> -
-                            </#if>
-                            <#if feedItem.type == 'RIDE'>
-                                Ride
-                            <#elseif feedItem.type == 'PUBLICATION'>
-                                Publication
-                            </#if>
-                            </h5>
-                            <small class="text-muted">Ajouté le ${feedItem.publishedAt.format(_date_formatter)}</small>
+                            <h6 class="m-0 p-0 w-25">
+                                <#if withTeam>
+                                    <a class="link-dark text-decoration-none" href="<@spring.url '/${feedItem.teamId}' />"><img src="<@spring.url '/api/' + feedItem.teamId + '/image' />" height="18" alt="Team image"> ${feedItem.teamName}</a>
+                                </#if>
+                            </h6>
+                            <h6 class="m-0 p-0 text-center">
+                                <#if feedItem.type == 'RIDE'>
+                                    <i class="bi bi-bicycle"></i> Ride
+                                <#elseif feedItem.type == 'PUBLICATION'>
+                                    <i class="bi bi-newspaper"></i> Publication
+                                </#if>
+                            </h6>
+                            <div class="w-25 text-end small text-muted">${feedItem.publishedAt.format(_date_formatter)}</div>
                         </div>
                         <div class="card-body">
                         <#if (feedItem.detailsUrl)??>

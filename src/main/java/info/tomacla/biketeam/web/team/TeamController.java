@@ -34,7 +34,7 @@ public class TeamController extends AbstractController {
             return redirectToRides(team.getId());
         }
 
-        addGlobalValues(principal, model, "Accueil", team);
+        addGlobalValues(principal, model, team.getName(), team);
         model.addAttribute("feed", teamService.listFeed(team.getId()));
         return "team_root";
     }
