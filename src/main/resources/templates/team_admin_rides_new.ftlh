@@ -171,7 +171,7 @@
 
                  <hr/>
 
-                <button type="submit" class="btn btn-secondary">Ajouter</button>
+                <button type="submit" class="btn btn-secondary">Enregistrer</button>
         </form>
 
     </div>

@@ -4,6 +4,7 @@ import info.tomacla.biketeam.common.PublishedStatus;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.template.RideTemplate;
+import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.service.RideService;
 import info.tomacla.biketeam.service.RideTemplateService;
@@ -18,7 +19,10 @@ import java.security.Principal;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = "/{teamId}/admin/rides")
@@ -137,7 +141,10 @@ public class AdminTeamRideController extends AbstractController {
                 }
                 target = optionalRide.get();
                 target.setDate(parser.getDate());
-                target.setPublishedAt(parser.getPublishedAt(timezone));
+                if (target.getPublishedStatus().equals(PublishedStatus.UNPUBLISHED)) {
+                    // do not change published date if already published
+                    target.setPublishedAt(parser.getPublishedAt(timezone));
+                }
                 target.setTitle(parser.getTitle());
                 target.setDescription(parser.getDescription());
                 target.setType(parser.getType());
@@ -146,8 +153,22 @@ public class AdminTeamRideController extends AbstractController {
                         parser.getTitle(), parser.getDescription(), parser.getFile().isPresent(), null);
             }
 
+            // save participants
+            final Map<String, Set<User>> participantsByName = target.getGroups().stream()
+                    .collect(Collectors.toMap(
+                            g -> g.getName(),
+                            g -> g.getParticipants()
+                    ));
+
             target.clearGroups();
             parser.getGroups(team.getId(), mapService).forEach(target::addGroup);
+
+            // restore participants
+            target.getGroups().forEach(group -> {
+                if (participantsByName.containsKey(group.getName())) {
+                    participantsByName.get(group.getName()).forEach(group::addParticipant);
+                }
+            });
 
             if (parser.getFile().isPresent()) {
                 target.setImaged(true);
