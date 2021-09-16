@@ -12,7 +12,7 @@
             <ul class="list-group mt-4">
                 <li class="list-group-item list-group-item-secondary d-flex justify-content-between align-items-center">
                     <div>Publication<span class="text-muted"> - Date de publication</span></div>
-                    <#if rides?size gt 20>
+                    <#if publications?size gt 20>
                         <div class="btn-group btn-group-sm" role="group">
                             <button onclick="previousPage()" type="button" class="btn btn-outline-secondary"><i class="bi bi-caret-left-fill"></i></button>
                             <button onclick="nextPage()" type="button" class="btn btn-outline-secondary"><i class="bi bi-caret-right-fill"></i></button>
