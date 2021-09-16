@@ -166,6 +166,24 @@ public class User implements Serializable {
         this.roles.add(new UserRole(team, this, role));
     }
 
+    public boolean hasTeam(Team team) {
+        for (UserRole userRole : this.roles) {
+            if(userRole.getTeam().getId().equals(team.getId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasRole(Team team, Role role) {
+        for (UserRole userRole : this.roles) {
+            if(userRole.getRole().equals(role) && userRole.getTeam().getId().equals(team.getId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void removeRole(String teamId) {
         this.roles.removeIf(r -> r.getTeam().getId().equals(teamId));
     }

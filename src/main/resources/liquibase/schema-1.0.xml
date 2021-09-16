@@ -505,6 +505,16 @@
 
     </changeSet>
 
+    <changeSet id="FIX-DUPLICATE-STRAVA" author="tomacla">
+
+        <addUniqueConstraint
+                columnNames="strava_id"
+                constraintName="unique_strava_id"
+                tableName="user_account"
+        />
+
+    </changeSet>
+
 
 </databaseChangeLog>
 

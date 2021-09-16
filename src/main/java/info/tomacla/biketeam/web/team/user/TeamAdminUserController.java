@@ -33,10 +33,12 @@ public class TeamAdminUserController extends AbstractController {
         final Team team = checkTeam(teamId);
         checkAdmin(principal, team.getId());
 
-        User user = new User(false, "Inconnu", "Inconnu", stravaId,
-                null, null, null, null, null);
+        User user = userService.getByStravaId(stravaId).orElse(new User(false, "Inconnu", "Inconnu", stravaId,
+                null, null, null, null, null));
 
-        user.addRole(team, Role.MEMBER);
+        if (!user.hasTeam(team)) {
+            user.addRole(team, Role.MEMBER);
+        }
 
         userService.save(user);
 
