@@ -6,6 +6,12 @@
 
         <form id="rides-filter" action="<@spring.url '/' + team.id + '/rides' />" method="GET" class="border rounded p-2">
 
+            <#if _team_admin>
+                <div class="text-end">
+                    <a href="<@spring.url '/' + team.id + '/admin/rides' />" class="btn btn-outline-secondary btn-sm"><i class="bi bi-plus-circle"></i> Nouveau</a>
+                 </div>
+             </#if>
+
             <div class="row mt-3">
                  <div class="col-3 text-end">
                     <label for="rides-filter-from" class="form-label">Du</label>

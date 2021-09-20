@@ -2,8 +2,13 @@
 
 <div class="row pt-2 justify-content-center">
 
-    <div class="col-12 mb-4">
+    <#if _team_admin>
+                  <div class="mb-2 text-end">
+                      <a href="<@spring.url '/' + team.id + '/admin/maps' />" class="btn btn-outline-secondary btn-sm"><i class="bi bi-plus-circle"></i> Nouveau</a>
+                   </div>
+               </#if>
 
+    <div class="col-12 mb-4">
         <form id="maps-filter" action="<@spring.url '/' + team.id + '/maps' />" method="GET" class="border rounded p-2">
 
             <input type="hidden" id="maps-filter-page" name="page" value="${formdata.page}">
@@ -81,6 +86,7 @@
                 <div class="col-12 col-md-1 text-end">
                     <button type="submit" class="btn btn-secondary btn-sm">Valider</button>
                 </div>
+
             </div>
 
          </form>
