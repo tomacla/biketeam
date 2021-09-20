@@ -26,7 +26,7 @@ public class UrlService {
     }
 
     public String getMapImageUrl(String teamId, String mapId) {
-        return siteUrl + "/api/" + teamId + "maps/" + mapId + "/image";
+        return siteUrl + "/api/" + teamId + "/maps/" + mapId + "/image";
     }
 
     public String getUrlWithSuffix(String suffix) {
