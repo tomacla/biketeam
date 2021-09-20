@@ -56,7 +56,7 @@
                              </#if>
                             <div class="d-flex">
                                 <#list group.participants as participant>
-                                    <img src="${participant.profileImage}" alt="${participant.identity}" width="30" height="30" class="d-block rounded">
+                                    <img data-bs-toggle="tooltip" data-bs-placement="top" title="${participant.identity}" src="${participant.profileImage}" alt="${participant.identity}" width="30" height="30" class="d-block rounded">
                                 </#list>
                             </div>
                         </div>
