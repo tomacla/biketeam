@@ -7,6 +7,7 @@ import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.security.LocalDefaultOAuth2User;
 import info.tomacla.biketeam.service.ArchiveService;
 import info.tomacla.biketeam.service.TeamService;
+import info.tomacla.biketeam.service.UrlService;
 import info.tomacla.biketeam.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -31,6 +32,9 @@ public abstract class AbstractController {
     @Autowired
     private ArchiveService archiveService;
 
+    @Autowired
+    private UrlService urlService;
+
     // TODO do this automatically with annotation or other way
     protected void addGlobalValues(Principal principal, Model model, String pageTitle, Team team) {
 
@@ -40,6 +44,8 @@ public abstract class AbstractController {
         model.addAttribute("_admin", false);
         model.addAttribute("_team_admin", false);
         model.addAttribute("_team_member", false);
+        model.addAttribute("_domains", teamService.findAllTeamWithDomain());
+        model.addAttribute("_siteUrl", urlService.getSiteUrl());
 
         getUserFromPrincipal(principal).ifPresent(user -> {
             model.addAttribute("_authenticated", true);
@@ -119,28 +125,31 @@ public abstract class AbstractController {
         return teamService.get(teamId).orElseThrow(() -> new IllegalArgumentException("Unknown team " + teamId));
     }
 
-    protected String redirectToRides(String teamId) {
-        return "redirect:/" + teamId + "/rides";
+    protected String redirectToRides(Team team) {
+        return createRedirect(team, "/rides");
     }
 
-    protected String redirectToRide(String teamId, String rideId) {
-        return "redirect:/" + teamId + "/rides/" + rideId;
+    protected String redirectToRide(Team team, String rideId) {
+        return createRedirect(team, "/rides/" + rideId);
     }
 
-    protected String redirectToMaps(String teamId) {
-        return "redirect:/" + teamId + "/maps";
+    protected String redirectToMaps(Team team) {
+        return createRedirect(team, "/maps");
     }
 
-    protected String redirectToMap(String teamId, String mapId) {
-        return "redirect:/" + teamId + "/maps/" + mapId;
+    protected String redirectToMap(Team team, String mapId) {
+        return createRedirect(team, "/maps/" + mapId);
     }
 
-    protected String redirectToFeed(String teamId) {
-        return "redirect:/" + teamId;
+    protected String redirectToFeed(Team team) {
+        return createRedirect(team, "/");
     }
 
-    protected String redirectToHome() {
-        return "redirect:/";
+    protected String createRedirect(Team team, String suffix) {
+        if (team.getConfiguration().isDomainConfigured()) {
+            return "redirect:" + suffix;
+        }
+        return "redirect:/" + team.getId() + suffix;
     }
 
 }

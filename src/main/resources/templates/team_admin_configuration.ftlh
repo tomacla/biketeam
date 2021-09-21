@@ -6,7 +6,7 @@
 
     <div class="col-12 col-md-8">
 
-        <form name="form-configuration" action="<@spring.url '/' + team.id + '/admin/configuration' />" method="POST" class="border rounded p-4">
+        <form name="form-configuration" action="<@common.teamUrl team.id '/admin/configuration' />" method="POST" class="border rounded p-4">
 
                 <div class="mb-3">
                        <label for="form-configuration-defaultpage" class="form-label">Page par défaut</label>

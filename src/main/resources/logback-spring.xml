@@ -8,31 +8,31 @@
     </appender>
 
     <logger name="org.springframework.boot" level="ERROR" additivity="false">
-        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="CONSOLE"/>
     </logger>
 
     <logger name="org.springframework.context.support" level="ERROR" additivity="false">
-        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="CONSOLE"/>
     </logger>
 
     <logger name="org.apache" level="ERROR" additivity="false">
-        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="CONSOLE"/>
     </logger>
 
     <logger name="hsqldb.db" level="ERROR" additivity="false">
-        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="CONSOLE"/>
     </logger>
 
     <logger name="io.github.glandais" level="WARN" additivity="false">
-        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="CONSOLE"/>
     </logger>
 
     <logger name="info.tomacla.biketeam" level="INFO" additivity="false">
-        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="CONSOLE"/>
     </logger>
 
     <root level="INFO">
-        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="CONSOLE"/>
     </root>
 
 

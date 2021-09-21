@@ -35,6 +35,8 @@ public class TeamConfiguration {
     private boolean feedVisible;
     @Column(name = "rides_visible")
     private boolean ridesVisible;
+    @Column
+    private String domain;
 
     protected TeamConfiguration() {
 
@@ -104,6 +106,18 @@ public class TeamConfiguration {
 
     public void setRidesVisible(boolean ridesVisible) {
         this.ridesVisible = ridesVisible;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
+    public boolean isDomainConfigured() {
+        return this.domain != null;
     }
 
 }

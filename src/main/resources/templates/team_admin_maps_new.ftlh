@@ -7,7 +7,7 @@
     <div class="col-12 col-md-8">
     
         <form enctype="multipart/form-data" name="form-map"
-            action="<@spring.url '/' + team.id +'/admin/maps/' + formdata.id />"
+            action="<@common.teamUrl team.id '/admin/maps/' + formdata.id />"
             method="POST" class="border rounded p-4">
 
                 <div class="mb-3 row">
@@ -65,7 +65,7 @@
                     <i class="bi bi-arrow-down"></i> ${map.negativeElevation}m
                   </p>
 
-                 <img src="<@spring.url '/api/' + team.id +'/maps/${map.id}/image' />" class="d-block shadow rounded w-75 h-auto mx-auto" alt="${map.id} image">
+                 <img src="<@common.teamUrl team.id '/maps/${map.id}/image' />" class="d-block shadow rounded w-75 h-auto mx-auto" alt="${map.id} image">
 
 
         </form>

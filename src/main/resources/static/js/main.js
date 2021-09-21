@@ -19,6 +19,22 @@ document.addEventListener("DOMContentLoaded", function() {
       })
     })
 
+    if (typeof URLSearchParams !== 'undefined') {
+
+        var params = new URLSearchParams(location.search);
+        params.delete('sso');
+        params.delete('logout');
+
+        var paramsStr = params.toString();
+        if(paramsStr !== '') {
+            window.history.replaceState({}, '', `${location.pathname}?${paramsStr}`);
+        } else {
+            window.history.replaceState({}, '', `${location.pathname}`);
+        }
+
+
+    }
+
 });
 
 function initFormSizeCheck(input) {
@@ -109,7 +125,7 @@ function initMapAutoComplete(input) {
                         autocompleteField.setData(result);
                     }
                 }
-                xmlHttp.open("GET", "/api/" + input.getAttribute("data-team-id") + "/autocomplete/maps?q="+encodeURIComponent(fieldValue), true); // true for asynchronous
+                xmlHttp.open("GET", input.getAttribute("data-team-id") + "/maps/autocomplete?q="+encodeURIComponent(fieldValue), true); // true for asynchronous
                 xmlHttp.send(null);
         }
     });
@@ -242,7 +258,7 @@ function uniqueId(toUnique, callback) {
             callback(r);
         }
     }
-    xmlHttp.open("GET", "/api/autocomplete/permatitle?title="+encodeURIComponent(toUnique), true); // true for asynchronous
+    xmlHttp.open("GET", "/autocomplete/permatitle?title="+encodeURIComponent(toUnique), true); // true for asynchronous
     xmlHttp.send(null);
 }
 

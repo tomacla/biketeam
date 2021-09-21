@@ -10,7 +10,7 @@
           Le logo est utilisé sur la page d'accueil, dans la barre de navigation et comme icône de favori.
         </div>
 
-        <form enctype="multipart/form-data" name="form-logo" action="<@spring.url '/' + team.id +  '/admin/logo' />" method="POST" class="border rounded p-4">
+        <form enctype="multipart/form-data" name="form-logo" action="<@common.teamUrl team.id '/admin/logo' />" method="POST" class="border rounded p-4">
 
                 <div class="mb-3">
                   <label for="form-logo-file" class="form-label">Nouveau logo (PNG ou JPEG)</label>
@@ -20,7 +20,7 @@
         </form>
 
         <figure class="figure w-25 border rounded my-3">
-            <img src="<@spring.url '/api/' + team.id + '/image' />" class="figure-img img-fluid rounded" alt="Team logo">
+            <img src="<@common.teamUrl team.id '/image' />" class="figure-img img-fluid rounded" alt="Team logo">
            <figcaption class="figure-caption text-center">Logo actuel.</figcaption>
         </figure>
 

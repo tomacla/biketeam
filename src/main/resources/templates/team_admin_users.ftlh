@@ -6,7 +6,7 @@
 
     <div class="col-12 col-md-8">
 
-        <form enctype="multipart/form-data" method="POST" action="<@spring.url '/' + team.id + '/admin/users' />" class="row mb-0">
+        <form enctype="multipart/form-data" method="POST" action="<@common.teamUrl team.id '/admin/users' />" class="row mb-0">
             <div class="col-auto p-2">
               <label for="form-user-stravaid" class="form-label">Strava ID</label>
             </div>
@@ -33,9 +33,9 @@
                         <#else>
                             <div class="btn-group" role="group">
                                 <#if user.isAdmin(team.id)>
-                                    <a href="<@spring.url '/' + team.id +'/admin/users/relegate/${user.id}' />" class="btn btn-success btn-sm" role="button"><i class="bi bi-shield-fill"></i></a>
+                                    <a href="<@common.teamUrl team.id '/admin/users/relegate/${user.id}' />" class="btn btn-success btn-sm" role="button"><i class="bi bi-shield-fill"></i></a>
                                 <#else>
-                                    <a href="<@spring.url '/' + team.id +'/admin/users/promote/${user.id}' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-shield"></i></a>
+                                    <a href="<@common.teamUrl team.id '/admin/users/promote/${user.id}' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-shield"></i></a>
                                 </#if>
                             </div>
                         </#if>

@@ -21,8 +21,10 @@ import java.nio.file.Path;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class TeamService {
@@ -146,6 +148,12 @@ public class TeamService {
 
         return teamRepository.findAll(spec, pageable);
 
+    }
+
+    public Map<String, String> findAllTeamWithDomain() {
+        return teamRepository.findAllTeamWithDomain()
+                .stream()
+                .collect(Collectors.toMap(TeamIdDomainProjection::getId, TeamIdDomainProjection::getDomain));
     }
 
 }

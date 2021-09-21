@@ -21,7 +21,7 @@
             <div class="alert alert-info" role="alert">
                Pour recevoir les nouveaux rides et publications de vos groupes par email, saisissez votre adresse ci dessous.
              </div>
-            <form name="form-user" action="<@spring.url '/users/me' />" method="POST">
+            <form name="form-user" action="<@common.teamUrl '' '/users/me' />" method="POST">
                 <div class="mb-3">
                     <label for="form-user-email" class="form-label">Email</label>
                     <input autocomplete="off" name="email" value="${user.email!''}" type="email" class="form-control" id="form-user-email">
@@ -38,7 +38,7 @@
             <ul class="list-group">
                 <div class="list-group-item list-group-item-secondary">Mes rides</div>
                 <#list user.rideGroups as group>
-                    <li class="list-group-item"><img src="<@spring.url '/api/' + group.ride.teamId + '/image' />" height="20" alt="Team image"> <a class="link-dark" href="<@spring.url '/${group.ride.teamId}/rides/${group.ride.id}' />">${group.ride.date.format(_date_formatter)} - ${group.ride.title} - ${group.name}</a></li>
+                    <li class="list-group-item"><img src="<@common.teamUrl group.ride.teamId  '/image' />" height="20" alt="Team image"> <a class="link-dark" href="<@common.teamUrl group.ride.teamId '/rides/${group.ride.id}' />">${group.ride.date.format(_date_formatter)} - ${group.ride.title} - ${group.name}</a></li>
                 </#list>
             </ul>
         <#else>

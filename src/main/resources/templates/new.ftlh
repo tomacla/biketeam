@@ -7,7 +7,7 @@
         <h2 class="border-bottom pb-2 mb-4">Créer mon groupe</h2>
 
         <#if _authenticated>
-            <form method="POST" action="<@spring.url '/new' />">
+            <form method="POST" action="<@common.teamUrl '' '/new' />">
                 <div class="mb-3 ">
                     <label for="new-team-name" class="form-label">Nom</label>
                     <input data-target-id-field="new-team-id" minLength="2" autocomplete="off" required value="${formdata.name}" name="name" type="text" class="form-control form-unique-id" id="new-team-name" placeholder="Groupe de vélo">
@@ -48,7 +48,7 @@
             </form>
         <#else>
             <p>Commencez par vous authentifier</p>
-            <a href="<@spring.url '/oauth2/authorization/strava' />"><img height="40" src="<@spring.url '/css/btn_strava_connectwith_light.png' />" alt="connect with strava"></a>
+            <a href="<@common.teamUrl '' '/oauth2/authorization/strava' />"><img height="40" src="<@common.teamUrl '' '/css/btn_strava_connectwith_light.png' />" alt="connect with strava"></a>
         </#if>
 
     </div>

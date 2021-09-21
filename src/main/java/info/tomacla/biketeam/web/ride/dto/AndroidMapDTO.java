@@ -1,4 +1,4 @@
-package info.tomacla.biketeam.api.dto;
+package info.tomacla.biketeam.web.ride.dto;
 
 import java.util.List;
 

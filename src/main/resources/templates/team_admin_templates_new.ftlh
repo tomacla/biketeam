@@ -56,7 +56,7 @@
         <form id="form-ride"
             enctype="multipart/form-data"
             name="form-ride"
-            action="<@spring.url '/' + team.id + '/admin/templates/' + formdata.id />"
+            action="<@common.teamUrl team.id '/admin/templates/' + formdata.id />"
             method="POST"
             class="border rounded p-4">
 

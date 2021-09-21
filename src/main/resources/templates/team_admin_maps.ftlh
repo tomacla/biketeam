@@ -6,7 +6,7 @@
 
     <div class="col-12 col-md-8">
 
-        <form enctype="multipart/form-data" method="POST" action="<@spring.url '/' + team.id + '/admin/maps/new' />" class="row mb-0">
+        <form enctype="multipart/form-data" method="POST" action="<@common.teamUrl team.id '/admin/maps/new' />" class="row mb-0">
             <div class="col-auto p-2">
               <label for="form-map-gpx" class="form-label">Fichier GPX</label>
             </div>
@@ -35,8 +35,8 @@
                     <li class="d-none list-group-item list-group-item-map justify-content-between align-items-center">
                         <div>${map.name}<span class="text-muted"> - ${map.postedAt.format(_date_formatter)}</span><#if !map.visible> - <i class="bi bi-eye-slash"></i></#if></div>
                         <div class="btn-group" role="group">
-                            <a href="<@spring.url '/' + team.id +'/admin/maps/${map.id}' />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-pencil"></i></a>
-                            <a href="<@spring.url '/' + team.id +'/admin/maps/delete/${map.id}' />" class="btn btn-danger btn-sm" role="button"><i class="bi bi-trash"></i></a>
+                            <a href="<@common.teamUrl team.id '/admin/maps/${map.id}' />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-pencil"></i></a>
+                            <a href="<@common.teamUrl team.id '/admin/maps/delete/${map.id}' />" class="btn btn-danger btn-sm" role="button"><i class="bi bi-trash"></i></a>
                         </div>
                     </li>
                 </#list>

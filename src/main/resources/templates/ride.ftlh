@@ -9,13 +9,13 @@
                 <h4>${ride.title}</h4>
                 <div>
                     <#if _team_admin>
-                        <a href="<@spring.url '/' + team.id + '/admin/rides/${ride.id}' />" class="btn btn-sm btn-secondary"><i class="bi-pencil bi"></i> Editer</a>
+                        <a href="<@common.teamUrl team.id '/admin/rides/${ride.id}' />" class="btn btn-sm btn-secondary"><i class="bi-pencil bi"></i> Editer</a>
                     </#if>
                 </div>
             </div>
             <h5 class="text-muted">${ride.date.format(_date_formatter)}</h5>
             <#if ride.imaged>
-              <img src="<@spring.url '/api/' + team.id + '/rides/${ride.id}/image' />" class="d-block shadow rounded w-100 h-auto mx-auto" alt="${ride.id} image">
+              <img src="<@common.teamUrl team.id '/rides/${ride.id}/image' />" class="d-block shadow rounded w-100 h-auto mx-auto" alt="${ride.id} image">
             </#if>
             <p class="mt-4 wrap-content">${ride.description}</p>
         </div>
@@ -35,11 +35,11 @@
                     </ul>
                     <#if (group.mapId)??>
                         <div class="w-50 shadow rounded border d-flex flex-column justify-content-center">
-                            <img src="<@spring.url '/api/' + team.id + '/maps/${group.mapId}/image' />" class="d-block w-100 h-auto" alt="${group.mapId} image">
+                            <img src="<@common.teamUrl team.id '/maps/${group.mapId}/image' />" class="d-block w-100 h-auto" alt="${group.mapId} image">
                             <div class="btn-group" role="group">
-                                <a download="${ride.title}-${group.name}.gpx" href="<@spring.url '/api/' + team.id + '/maps/${group.mapId}/gpx' />" class="btn btn-light" role="button"><i class="bi bi-download"></i> GPX</a>
-                                <a download="${ride.title}-${group.name}.fit" href="<@spring.url '/api/' + team.id + '/maps/${group.mapId}/fit' />" class="btn btn-light" role="button"><i class="bi bi-download"></i> FIT</a>
-                                <a href="<@spring.url '/' + team.id + '/maps/${group.mapId}' />" class="btn btn-light" role="button"><i class="bi bi-map"></i> Voir</a>
+                                <a download="${ride.title}-${group.name}.gpx" href="<@common.teamUrl team.id '/maps/${group.mapId}/gpx' />" class="btn btn-light" role="button"><i class="bi bi-download"></i> GPX</a>
+                                <a download="${ride.title}-${group.name}.fit" href="<@common.teamUrl team.id '/maps/${group.mapId}/fit' />" class="btn btn-light" role="button"><i class="bi bi-download"></i> FIT</a>
+                                <a href="<@common.teamUrl team.id '/maps/${group.mapId}' />" class="btn btn-light" role="button"><i class="bi bi-map"></i> Voir</a>
                             </div>
                         </div>
                     <#else>
@@ -50,9 +50,9 @@
                     <div class="card-footer">
                         <div class="d-flex justify-content-between">
                             <#if group.hasParticipant(_user_id)>
-                                <a href="<@spring.url '/' + team.id + '/rides/${ride.id}/remove-participant/${group.id}/${_user_id}' />" class="btn btn-sm btn-success"><i class="bi-bicycle bi"></i> J'y vais</a>
+                                <a href="<@common.teamUrl team.id '/rides/${ride.id}/remove-participant/${group.id}/${_user_id}' />" class="btn btn-sm btn-success"><i class="bi-bicycle bi"></i> J'y vais</a>
                             <#else>
-                                <a href="<@spring.url '/' + team.id + '/rides/${ride.id}/add-participant/${group.id}/${_user_id}' />" class="btn btn-sm btn-outline-success"><i class="bi-bicycle bi"></i> J'y vais</a>
+                                <a href="<@common.teamUrl team.id '/rides/${ride.id}/add-participant/${group.id}/${_user_id}' />" class="btn btn-sm btn-outline-success"><i class="bi-bicycle bi"></i> J'y vais</a>
                              </#if>
                             <div class="d-flex">
                                 <#list group.participants as participant>

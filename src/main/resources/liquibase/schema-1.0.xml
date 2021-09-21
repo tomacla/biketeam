@@ -514,6 +514,14 @@
         />
 
     </changeSet>
+    
+    <changeSet id="GITHUB-50-add-exposed-domain" author="tomacl">
+
+        <addColumn tableName="team_configuration">
+            <column name="domain" type="VARCHAR(100)"/>
+        </addColumn>
+
+    </changeSet>
 
 
 </databaseChangeLog>

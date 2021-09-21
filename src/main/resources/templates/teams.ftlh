@@ -4,7 +4,7 @@
 
     <div class="col-12 mb-4">
 
-        <form id="teams-filter" action="<@spring.url '/teams' />" method="GET" class="border rounded p-2">
+        <form id="teams-filter" action="<@common.teamUrl '' '/teams' />" method="GET" class="border rounded p-2">
 
             <input type="hidden" id="teams-filter-page" name="page" value="${formdata.page}">
             <input type="hidden" id="teams-filter-pageSize" name="pageSize" value="${formdata.pageSize}">
@@ -49,11 +49,11 @@
                      <div class="col">
                          <div class="card h-100">
                              <div class="card-header bg-white px-0 py-2 mb-3">
-                             <div style="height:180px; width:100%;  background-image: url('<@spring.url '/api/' + team.id + '/image' />');background-repeat: no-repeat;background-position: 50% 50%; background-size: contain;"></div>
+                             <div style="height:180px; width:100%;  background-image: url('<@common.teamUrl team.id '/image' />');background-repeat: no-repeat;background-position: 50% 50%; background-size: contain;"></div>
                              </div>
                            <div class="card-body">
 
-                             <h5 class="card-title"><a class="link-dark" href="<@spring.url '/' + team.id />">${team.name}</a></h5>
+                             <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl team.id '' />">${team.name}</a></h5>
                              <h6 class="text-muted">${team.city}, ${team.country}</h6>
                            </div>
                          </div>

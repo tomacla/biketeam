@@ -62,7 +62,7 @@
         <form id="form-ride"
             enctype="multipart/form-data"
             name="form-ride"
-            action="<@spring.url '/' + team.id + '/admin/rides/' + formdata.id />"
+            action="<@common.teamUrl team.id '/admin/rides/' + formdata.id />"
             method="POST"
             class="border rounded p-4">
 
@@ -144,7 +144,7 @@
                         <div class="row">
                             <div class="mb-3 col-6">
                                 <label for="form-ride-group-map-${group?index}" class="form-label">Map</label>
-                                <input id="search-map-field-${group?index}" type="text" data-target-name-field="form-ride-group-mapname-${group?index}" data-team-id="${team.id}" data-target-id-field="form-ride-group-mapid-${group?index}" autocomplete="off" value="" class="form-control form-map-control">
+                                <input id="search-map-field-${group?index}" type="text" data-target-name-field="form-ride-group-mapname-${group?index}" data-team-id="<@common.teamUrlPrefix team.id />" data-target-id-field="form-ride-group-mapid-${group?index}" autocomplete="off" value="" class="form-control form-map-control">
                             </div>
                             <div class="mb-3 col-6">
                                 <label for="form-ride-group-map-${group?index}" class="form-label text-muted">&nbsp;</label>

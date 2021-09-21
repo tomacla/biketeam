@@ -12,16 +12,16 @@
                         <#if _team_admin>
                             <button disabled class="btn btn-sm btn-success"><i class="bi-shield-fill bi"></i> Admin</button>
                         <#elseif _team_member>
-                            <a href="<@spring.url '/' + team.id + '/leave/' + _user_id />" class="btn btn-sm btn-success"><i class="bi-person-fill bi"></i> Membre</a>
+                            <a href="<@common.teamUrl team.id '/leave/' + _user_id />" class="btn btn-sm btn-success"><i class="bi-person-fill bi"></i> Membre</a>
                         <#else>
-                            <a href="<@spring.url '/' + team.id + '/join/' + _user_id />" class="btn btn-sm btn-outline-success"><i class="bi-person-plus-fill bi"></i> Rejoindre</a>
+                            <a href="<@common.teamUrl team.id '/join/' + _user_id />" class="btn btn-sm btn-outline-success"><i class="bi-person-plus-fill bi"></i> Rejoindre</a>
                         </#if>
                     <#else>
-                        <a href="<@spring.url '/oauth2/authorization/strava' />" class="btn btn-sm btn-outline-success"><i class="bi-person-plus-fill bi"></i> Rejoindre</a>
+                        <a href="<@common.teamUrl '' '/oauth2/authorization/strava' />" class="btn btn-sm btn-outline-success"><i class="bi-person-plus-fill bi"></i> Rejoindre</a>
                     </#if>
                 </div>
             </div>
-            <img src="<@spring.url '/api/' + team.id + '/image' />" class="d-block w-50 h-auto mx-auto my-4" alt="Team logo">
+            <img src="<@common.teamUrl team.id '/image' />" class="d-block w-50 h-auto mx-auto my-4" alt="Team logo">
             <p class="lead">
               ${team.description.description}
             </p>

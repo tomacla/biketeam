@@ -1,3 +1,6 @@
+<#macro teamUrlPrefix teamId><#if teamId != '' && _domains[teamId]??>${_domains[teamId]}<#else>${_siteUrl}<#if teamId != ''>/${teamId}</#if></#if></#macro>
+<#macro teamUrl teamId targetUrl><@common.teamUrlPrefix teamId />${targetUrl}</#macro>
+
 <#macro pagination page pages pageFieldId formId>
   <div class="btn-group btn-group-sm" role="group">
     <button <#if page == 0>disabled</#if> onclick="setFieldValue('${pageFieldId}', 0); forceSubmitForm('${formId}');" type="button" class="btn btn-outline-secondary"><i class="bi bi-skip-backward-fill"></i></button>
@@ -16,7 +19,7 @@
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h6 class="m-0 p-0 w-25">
                                 <#if withTeam>
-                                    <a class="link-dark text-decoration-none" href="<@spring.url '/${feedItem.teamId}' />"><img src="<@spring.url '/api/' + feedItem.teamId + '/image' />" height="18" alt="Team image"> ${feedItem.teamName}</a>
+                                    <a class="link-dark text-decoration-none" href="<@common.teamUrl feedItem.teamId '' />"><img src="<@common.teamUrl feedItem.teamId '/image' />" height="18" alt="Team image"> ${feedItem.teamName}</a>
                                 </#if>
                             </h6>
                             <h6 class="m-0 p-0 text-center">
@@ -29,20 +32,22 @@
                             <div class="w-25 text-end small text-muted">${feedItem.publishedAt.format(_date_formatter)}</div>
                         </div>
                         <div class="card-body">
-                        <#if (feedItem.detailsUrl)??>
-                            <h5 class="card-title"><a class="link-dark" href="<@spring.url feedItem.detailsUrl />">${feedItem.title}</a></h5>
+                        <#if feedItem.type == 'RIDE'>
+                            <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl feedItem.teamId '/rides/'+ feedItem.id />">${feedItem.title}</a></h5>
                         <#else>
                             <h5 class="card-title">${feedItem.title}</h5>
                         </#if>
                           <p class="card-text wrap-content">${feedItem.content}</p>
-                          <#if (feedItem.imageUrl)??>
-                            <img src="<@spring.url feedItem.imageUrl />" class="d-block shadow rounded w-50 h-auto mx-auto" alt="${feedItem.title} image">
+                          <#if feedItem.imaged && feedItem.type == 'RIDE'>
+                            <img src="<@common.teamUrl feedItem.teamId '/rides/${feedItem.id}/image' />" class="d-block shadow rounded w-50 h-auto mx-auto" alt="${feedItem.title} image">
+                          <#elseif feedItem.imaged && feedItem.type == 'PUBLICATION'>
+                            <img src="<@common.teamUrl feedItem.teamId '/publications/${feedItem.id}/image' />" class="d-block shadow rounded w-50 h-auto mx-auto" alt="${feedItem.title} image">
                           </#if>
                         </div>
-                        <#if (feedItem.detailsUrl)??>
-                        <div class="card-footer text-center">
-                            <a href="<@spring.url feedItem.detailsUrl />" class="btn btn-secondary btn-sm" role="button">Voir</a>
-                        </div>
+                        <#if feedItem.type == 'RIDE'>
+                            <div class="card-footer text-center">
+                                <a href="<@common.teamUrl feedItem.teamId '/rides/'+ feedItem.id />" class="btn btn-secondary btn-sm" role="button">Voir</a>
+                            </div>
                         </#if>
                     </div>
                   </div>

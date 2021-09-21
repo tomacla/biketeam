@@ -63,7 +63,7 @@ public class AdminTeamRideTemplateController extends AbstractController {
 
         Optional<RideTemplate> optionalTemplate = rideTemplateService.get(team.getId(), templateId);
         if (optionalTemplate.isEmpty()) {
-            return redirectToAdminTemplates(team.getId());
+            return redirectToAdminTemplates(team);
         }
 
         RideTemplate rideTemplate = optionalTemplate.get();
@@ -101,7 +101,7 @@ public class AdminTeamRideTemplateController extends AbstractController {
             if (!isNew) {
                 Optional<RideTemplate> optionalTemplate = rideTemplateService.get(team.getId(), templateId);
                 if (optionalTemplate.isEmpty()) {
-                    return redirectToAdminTemplates(team.getId());
+                    return redirectToAdminTemplates(team);
                 }
                 target = optionalTemplate.get();
                 target.setName(parser.getName());
@@ -145,12 +145,12 @@ public class AdminTeamRideTemplateController extends AbstractController {
             model.addAttribute("errors", List.of(e.getMessage()));
         }
 
-        return redirectToAdminTemplates(team.getId());
+        return redirectToAdminTemplates(team);
 
     }
 
-    private String redirectToAdminTemplates(String teamId) {
-        return "redirect:/" + teamId + "/admin/templates";
+    private String redirectToAdminTemplates(Team team) {
+        return createRedirect(team, "/admin/templates");
     }
 
 }

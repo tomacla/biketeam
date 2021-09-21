@@ -12,7 +12,7 @@
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <div>${archive}</div>
                         <div class="btn-group" role="group">
-                            <a href="<@spring.url '/admin/archives?archive=${archive}' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-file-arrow-up"></i></a>
+                            <a href="<@common.teamUrl '' '/admin/archives?archive=${archive}' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-file-arrow-up"></i></a>
                         </div>
                     </li>
                 </#list>

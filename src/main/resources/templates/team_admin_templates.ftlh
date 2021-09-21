@@ -6,7 +6,7 @@
 
     <div class="col-12 col-md-8">
 
-        <a class="btn btn-secondary" href="<@spring.url '/' + team.id + '/admin/templates/new' />"><i class="bi bi-plus"></i> Nouveau template</a>
+        <a class="btn btn-secondary" href="<@common.teamUrl team.id '/admin/templates/new' />"><i class="bi bi-plus"></i> Nouveau template</a>
 
         <hr/>
 
@@ -20,8 +20,8 @@
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <div>${template.name}</div>
                         <div class="btn-group" role="group">
-                            <a href="<@spring.url '/' + team.id +'/admin/templates/${template.id}' />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-pencil"></i></a>
-                            <a href="<@spring.url '/' + team.id +'/admin/templates/delete/${template.id}' />" class="btn btn-danger btn-sm" role="button"><i class="bi bi-trash"></i></a>
+                            <a href="<@common.teamUrl team.id '/admin/templates/${template.id}' />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-pencil"></i></a>
+                            <a href="<@common.teamUrl team.id '/admin/templates/delete/${template.id}' />" class="btn btn-danger btn-sm" role="button"><i class="bi bi-trash"></i></a>
                         </div>
                     </li>
                 </#list>

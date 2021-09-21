@@ -6,7 +6,7 @@
 
     <div class="col-12 col-md-8">
 
-        <form enctype="multipart/form-data" method="GET" action="<@spring.url '/' + team.id + '/admin/rides/new' />" class="row mb-0">
+        <form enctype="multipart/form-data" method="GET" action="<@common.teamUrl team.id '/admin/rides/new' />" class="row mb-0">
             <div class="col-auto">
                 <select class="form-select" autocomplete="off" required name="templateId" id="form-ride-template">
                     <option selected value="empty-1">Saisie libre</option>
@@ -41,8 +41,8 @@
                     <li class="d-none list-group-item list-group-item-ride justify-content-between align-items-center">
                         <div><span class="text-<#if ride.publishedStatus == 'PUBLISHED'>success<#else>danger</#if>"><i class="bi bi-calendar-<#if ride.publishedStatus == 'PUBLISHED'>check<#else>x</#if>"></i></span> ${ride.title} (${ride.date.format(_date_formatter)})<span class="text-muted"> - ${ride.publishedAt.format(_date_formatter)}</span></div>
                         <div class="btn-group" role="group">
-                            <a href="<@spring.url '/' + team.id + '/admin/rides/${ride.id}' />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-pencil"></i></a>
-                            <a href="<@spring.url '/' + team.id + '/admin/rides/delete/${ride.id}' />" class="btn btn-danger btn-sm" role="button"><i class="bi bi-trash"></i></a>
+                            <a href="<@common.teamUrl team.id '/admin/rides/${ride.id}' />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-pencil"></i></a>
+                            <a href="<@common.teamUrl team.id '/admin/rides/delete/${ride.id}' />" class="btn btn-danger btn-sm" role="button"><i class="bi bi-trash"></i></a>
                         </div>
                     </li>
                 </#list>

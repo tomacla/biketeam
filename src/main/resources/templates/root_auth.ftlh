@@ -10,8 +10,8 @@
 
            <div class="text-center my-4">
                <div class="btn-group mx-auto" role="group">
-                   <a class="btn btn-sm btn-outline-secondary" href="<@spring.url '/new' />">Créer un groupe</a>
-                   <a class="btn btn-sm btn-outline-secondary" href="<@spring.url '/teams' />">Explorer les groupes</a>
+                   <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/new' />">Créer un groupe</a>
+                   <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/teams' />">Explorer les groupes</a>
                </div>
            </div>
 
@@ -19,8 +19,8 @@
                 <div class="list-group">
                     <div class="list-group-item list-group-item-secondary">Mes groupes</div>
                     <#list userTeams as userTeam>
-                        <a href="<@spring.url '/${userTeam.id}' />" class="list-group-item list-group-item-action">
-                            <img src="<@spring.url '/api/' + userTeam.id + '/image' />" height="18" alt="Team image"> ${userTeam.name}
+                        <a href="<@common.teamUrl userTeam.id '' />" class="list-group-item list-group-item-action">
+                            <img src="<@common.teamUrl userTeam.id '/image' />" height="18" alt="Team image"> ${userTeam.name}
                         </a>
                     </#list>
                 </div>
@@ -35,8 +35,8 @@
 
             <div class="d-block d-md-none my-4 text-center">
                 <div class="btn-group mx-auto" role="group">
-                   <a class="btn btn-sm btn-outline-secondary" href="<@spring.url '/new' />">Créer un groupe</a>
-                   <a class="btn btn-sm btn-outline-secondary" href="<@spring.url '/teams' />">Explorer les groupes</a>
+                   <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/new' />">Créer un groupe</a>
+                   <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/teams' />">Explorer les groupes</a>
                </div>
             </div>
 

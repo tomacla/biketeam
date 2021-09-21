@@ -9,7 +9,7 @@
                 <h4>${map.name}<small class="text-muted"> - Ajoutée le ${map.postedAt.format(_date_formatter)}</small></h4>
                 <div>
                     <#if _team_admin>
-                        <a href="<@spring.url '/' + team.id + '/admin/maps/${map.id}' />" class="btn btn-sm btn-secondary"><i class="bi-pencil bi"></i> Editer</a>
+                        <a href="<@common.teamUrl team.id '/admin/maps/${map.id}' />" class="btn btn-sm btn-secondary"><i class="bi-pencil bi"></i> Editer</a>
                     </#if>
                 </div>
             </div>
@@ -24,8 +24,8 @@
             </#if>
 
             <div class="btn-group" role="group">
-                <a download="${map.name}.gpx" href="<@spring.url '/api/' + team.id + '/maps/${map.id}/gpx' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-download"></i> GPX</a>
-                <a download="${map.name}.fit" href="<@spring.url '/api/' + team.id + '/maps/${map.id}/fit' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-download"></i> FIT</a>
+                <a download="${map.name}.gpx" href="<@common.teamUrl team.id '/maps/${map.id}/gpx' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-download"></i> GPX</a>
+                <a download="${map.name}.fit" href="<@common.teamUrl team.id '/maps/${map.id}/fit' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-download"></i> FIT</a>
             </div>
         </div>
 
@@ -85,7 +85,7 @@
               controlElevation.load(gpxUrl);
         }
 
-        var gpxUrl = '<@spring.url '/api/' + team.id + '/maps/${map.id}/gpx' />';
+        var gpxUrl = '<@common.teamUrl team.id '/maps/${map.id}/gpx' />';
         var embedMap = initMap('map-container');
         displayElevation(embedMap, gpxUrl);
 

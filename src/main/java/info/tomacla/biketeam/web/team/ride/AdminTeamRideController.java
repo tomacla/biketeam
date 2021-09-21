@@ -2,6 +2,7 @@ package info.tomacla.biketeam.web.team.ride;
 
 import info.tomacla.biketeam.common.PublishedStatus;
 import info.tomacla.biketeam.domain.ride.Ride;
+import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.template.RideTemplate;
 import info.tomacla.biketeam.domain.user.User;
@@ -95,7 +96,7 @@ public class AdminTeamRideController extends AbstractController {
 
         Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
         if (optionalRide.isEmpty()) {
-            return redirectToAdminRides(team.getId());
+            return redirectToAdminRides(team);
         }
 
         Ride ride = optionalRide.get();
@@ -137,7 +138,7 @@ public class AdminTeamRideController extends AbstractController {
             if (!isNew) {
                 Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
                 if (optionalRide.isEmpty()) {
-                    return redirectToAdminRides(team.getId());
+                    return redirectToAdminRides(team);
                 }
                 target = optionalRide.get();
                 target.setDate(parser.getDate());
@@ -155,10 +156,7 @@ public class AdminTeamRideController extends AbstractController {
 
             // save participants
             final Map<String, Set<User>> participantsByName = target.getGroups().stream()
-                    .collect(Collectors.toMap(
-                            g -> g.getName(),
-                            g -> g.getParticipants()
-                    ));
+                    .collect(Collectors.toMap(RideGroup::getName, RideGroup::getParticipants));
 
             target.clearGroups();
             parser.getGroups(team.getId(), mapService).forEach(target::addGroup);
@@ -209,12 +207,12 @@ public class AdminTeamRideController extends AbstractController {
             model.addAttribute("errors", List.of(e.getMessage()));
         }
 
-        return redirectToAdminRides(team.getId());
+        return redirectToAdminRides(team);
 
     }
 
-    private String redirectToAdminRides(String teamId) {
-        return "redirect:/" + teamId + "/admin/rides";
+    private String redirectToAdminRides(Team team) {
+        return createRedirect(team, "/admin/rides");
     }
 
 }

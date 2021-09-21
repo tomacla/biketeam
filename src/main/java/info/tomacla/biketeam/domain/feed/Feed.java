@@ -89,23 +89,4 @@ public class Feed {
         this.imaged = imaged;
     }
 
-    // TODO should be url service
-    public String getDetailsUrl() {
-        if (type.equals(FeedType.RIDE)) {
-            return "/" + teamId + "/rides/" + getId();
-        }
-        return null;
-    }
-
-    // TODO should be url service
-    public String getImageUrl() {
-        if (imaged) {
-            if (type.equals(FeedType.RIDE)) {
-                return "/api/" + teamId + "/rides/" + getId() + "/image";
-            }
-            return "/api/" + teamId + "/publications/" + getId() + "/image";
-        }
-        return null;
-    }
-
 }

@@ -6,7 +6,7 @@
 
     <div class="col-12 col-md-8">
 
-        <a href="<@spring.url '/' + team.id + '/admin/publications/new' />" class="btn btn-secondary" role="button"><i class="bi bi-plus"></i> Nouvelle publication</a>
+        <a href="<@common.teamUrl team.id '/admin/publications/new' />" class="btn btn-secondary" role="button"><i class="bi bi-plus"></i> Nouvelle publication</a>
         <hr/>
         <#if publications?size gt 0>
             <ul class="list-group mt-4">
@@ -24,8 +24,8 @@
                     <li class="d-none list-group-item list-group-item-publication justify-content-between align-items-center">
                         <div><span class="text-<#if publication.publishedStatus == 'PUBLISHED'>success<#else>danger</#if>"><i class="bi bi-calendar-<#if publication.publishedStatus == 'PUBLISHED'>check<#else>x</#if>"></i></span> ${publication.title}<span class="text-muted"> - ${publication.publishedAt.format(_date_formatter)}</span></div>
                         <div class="btn-group" role="group">
-                            <a href="<@spring.url '/' + team.id + '/admin/publications/${publication.id}' />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-pencil"></i></a>
-                            <a href="<@spring.url '/' + team.id + '/admin/publications/delete/${publication.id}' />" class="btn btn-danger btn-sm" role="button"><i class="bi bi-trash"></i></a>
+                            <a href="<@common.teamUrl team.id '/admin/publications/${publication.id}' />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-pencil"></i></a>
+                            <a href="<@common.teamUrl team.id '/admin/publications/delete/${publication.id}' />" class="btn btn-danger btn-sm" role="button"><i class="bi bi-trash"></i></a>
                         </div>
                     </li>
                 </#list>

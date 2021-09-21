@@ -7,7 +7,7 @@
     <div class="col-12 col-md-8">
     
         <form enctype="multipart/form-data" name="form-publication"
-            action="<@spring.url '/' + team.id + '/admin/publications/' + formdata.id />"
+            action="<@common.teamUrl team.id '/admin/publications/' + formdata.id />"
             method="POST" class="border rounded p-4">
 
                 <div class="row mb-3 border rounded bg-light p-2">

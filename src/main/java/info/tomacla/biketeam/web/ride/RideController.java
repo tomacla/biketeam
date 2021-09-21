@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.web.ride;
 
+import info.tomacla.biketeam.common.ImageDescriptor;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.team.Team;
@@ -10,13 +11,17 @@ import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.server.ServerErrorException;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -38,7 +43,7 @@ public class RideController extends AbstractController {
 
         Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
         if (optionalRide.isEmpty()) {
-            return redirectToRides(team.getId());
+            return redirectToRides(team);
         }
 
         Ride ride = optionalRide.get();
@@ -94,7 +99,7 @@ public class RideController extends AbstractController {
 
         Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
         if (optionalRide.isEmpty()) {
-            return redirectToRides(team.getId());
+            return redirectToRides(team);
         }
 
         Ride ride = optionalRide.get();
@@ -120,7 +125,7 @@ public class RideController extends AbstractController {
 
         }
 
-        return redirectToRide(team.getId(), rideId);
+        return redirectToRide(team, rideId);
     }
 
     @GetMapping(value = "/{rideId}/remove-participant/{groupId}/{userId}")
@@ -134,7 +139,7 @@ public class RideController extends AbstractController {
 
         Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
         if (optionalRide.isEmpty()) {
-            return redirectToRides(team.getId());
+            return redirectToRides(team);
         }
 
         Ride ride = optionalRide.get();
@@ -154,7 +159,31 @@ public class RideController extends AbstractController {
 
         }
 
-        return redirectToRide(team.getId(), rideId);
+        return redirectToRide(team, rideId);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/{rideId}/image", method = RequestMethod.GET)
+    public ResponseEntity<byte[]> getRideImage(@PathVariable("teamId") String teamId, @PathVariable("rideId") String rideId) {
+        final Optional<ImageDescriptor> image = rideService.getImage(teamId, rideId);
+        if (image.isPresent()) {
+            try {
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.add("Content-Type", image.get().getExtension().getMediaType());
+
+                return new ResponseEntity<>(
+                        Files.readAllBytes(image.get().getPath()),
+                        headers,
+                        HttpStatus.OK
+                );
+            } catch (IOException e) {
+                throw new ServerErrorException("Error while reading ride image : " + rideId, e);
+            }
+        }
+
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to find ride image : " + rideId);
+
     }
 
 

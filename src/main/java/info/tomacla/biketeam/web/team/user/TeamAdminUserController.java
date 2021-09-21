@@ -42,7 +42,7 @@ public class TeamAdminUserController extends AbstractController {
 
         userService.save(user);
 
-        return "redirect:/" + team.getId() + "/admin/users";
+        return createRedirect(team, "/admin/users");
 
     }
 
@@ -63,7 +63,8 @@ public class TeamAdminUserController extends AbstractController {
             model.addAttribute("errors", List.of(e.getMessage()));
         }
 
-        return "redirect:/" + team.getId() + "/admin/users";
+        return createRedirect(team, "/admin/users");
+
     }
 
     @GetMapping(value = "/relegate/{userId}")
@@ -83,7 +84,7 @@ public class TeamAdminUserController extends AbstractController {
             model.addAttribute("errors", List.of(e.getMessage()));
         }
 
-        return "redirect:/" + team.getId() + "/admin/users";
+        return createRedirect(team, "/admin/users");
     }
 
 

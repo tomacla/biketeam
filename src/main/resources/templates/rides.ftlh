@@ -4,11 +4,11 @@
 
     <div class="col-12 col-md-4 mb-4">
 
-        <form id="rides-filter" action="<@spring.url '/' + team.id + '/rides' />" method="GET" class="border rounded p-2">
+        <form id="rides-filter" action="<@common.teamUrl team.id '/rides' />" method="GET" class="border rounded p-2">
 
             <#if _team_admin>
                 <div class="text-end">
-                    <a href="<@spring.url '/' + team.id + '/admin/rides' />" class="btn btn-outline-secondary btn-sm"><i class="bi bi-plus-circle"></i> Nouveau</a>
+                    <a href="<@common.teamUrl team.id '/admin/rides' />" class="btn btn-outline-secondary btn-sm"><i class="bi bi-plus-circle"></i> Nouveau</a>
                  </div>
              </#if>
 
@@ -59,11 +59,11 @@
                           <p>Groupes : <#list ride.groups as group><span class="badge bg-secondary">${group.name}</span><#if group_has_next> </#if></#list></p>
                           <p class="small wrap-content">${ride.description}</p>
                           <#if ride.imaged>
-                            <img src="<@spring.url '/api/' + team.id + '/rides/${ride.id}/image' />" class="d-block shadow rounded w-50 h-auto mx-auto" alt="${ride.id} image">
+                            <img src="<@common.teamUrl team.id '/rides/${ride.id}/image' />" class="d-block shadow rounded w-50 h-auto mx-auto" alt="${ride.id} image">
                           </#if>
                         </div>
                         <div class="card-footer text-center">
-                            <a href="<@spring.url '/' + team.id + '/rides/${ride.id}' />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye"></i> Voir plus</a>
+                            <a href="<@common.teamUrl team.id '/rides/${ride.id}' />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye"></i> Voir plus</a>
                         </div>
                     </div>
                   </div>

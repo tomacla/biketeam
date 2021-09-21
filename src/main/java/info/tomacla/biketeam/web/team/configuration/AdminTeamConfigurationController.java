@@ -173,7 +173,7 @@ public class AdminTeamConfigurationController extends AbstractController {
 
         teamService.save(team);
 
-        return "redirect:/" + team.getId() + "/admin/integration";
+        return createRedirect(team, "/admin/integration");
 
     }
 

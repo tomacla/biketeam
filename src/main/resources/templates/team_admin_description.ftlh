@@ -10,7 +10,7 @@
           Les informations de cette section seront affichées sur la page d'accueil.
         </div>
 
-        <form name="form-description" action="<@spring.url '/' + team.id + '/admin' />" method="POST" class="border rounded p-4">
+        <form name="form-description" action="<@common.teamUrl team.id '/admin' />" method="POST" class="border rounded p-4">
 
                 <h5>Obligatoires</h5>
                 <div class="mb-3">

@@ -1,10 +1,12 @@
 package info.tomacla.biketeam.web;
 
 import info.tomacla.biketeam.common.Country;
+import info.tomacla.biketeam.common.Strings;
 import info.tomacla.biketeam.domain.feed.Feed;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.Role;
 import info.tomacla.biketeam.domain.user.User;
+import info.tomacla.biketeam.domain.user.UserRole;
 import info.tomacla.biketeam.service.FacebookService;
 import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.web.team.NewTeamForm;
@@ -12,10 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
@@ -44,7 +43,7 @@ public class RootController extends AbstractController {
             addGlobalValues(principal, model, "Accueil", null);
             model.addAttribute("feed", feeds);
             model.addAttribute("user", user);
-            model.addAttribute("userTeams", user.getRoles().stream().map(ur -> ur.getTeam()).collect(Collectors.toList()));
+            model.addAttribute("userTeams", user.getRoles().stream().map(UserRole::getTeam).collect(Collectors.toList()));
             return "root_auth";
         } else {
             addGlobalValues(principal, model, "Accueil", null);
@@ -155,8 +154,25 @@ public class RootController extends AbstractController {
 
         teamService.save(team);
 
-        return "redirect:/" + team.getId() + "/admin/integration";
+        return createRedirect(team, "/admin/integration");
 
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/autocomplete/permatitle", method = RequestMethod.GET)
+    public String autocompleteMaps(@RequestParam("title") String title) {
+        String permatitle = Strings.permatitleFromString(title);
+        permatitle = permatitle.toLowerCase();
+        if (permatitle.length() > 20) {
+            permatitle = permatitle.substring(0, 20);
+        }
+        for (int i = 0; teamService.idExists(permatitle); i++) {
+            if (permatitle.length() == 20) {
+                permatitle = permatitle.substring(0, 18);
+            }
+            permatitle = permatitle + (i + 2);
+        }
+        return permatitle;
     }
 
 }

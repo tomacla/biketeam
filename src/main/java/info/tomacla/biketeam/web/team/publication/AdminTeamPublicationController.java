@@ -64,7 +64,7 @@ public class AdminTeamPublicationController extends AbstractController {
 
                 Optional<Publication> optionalPublication = publicationService.get(team.getId(), publicationId);
                 if (optionalPublication.isEmpty()) {
-                    return redirectToAdminPublications(team.getId());
+                    return redirectToAdminPublications(team);
                 }
 
                 publication = optionalPublication.get();
@@ -89,7 +89,7 @@ public class AdminTeamPublicationController extends AbstractController {
 
             publicationService.save(publication);
 
-            return redirectToAdminPublications(team.getId());
+            return redirectToAdminPublications(team);
 
         } catch (Exception e) {
             addGlobalValues(principal, model, "Administration - Modifier la publication", team);
@@ -116,7 +116,7 @@ public class AdminTeamPublicationController extends AbstractController {
 
             Optional<Publication> optionalPublication = publicationService.get(team.getId(), publicationId);
             if (optionalPublication.isEmpty()) {
-                return redirectToAdminPublications(team.getId());
+                return redirectToAdminPublications(team);
             }
 
             Publication publication = optionalPublication.get();
@@ -151,11 +151,11 @@ public class AdminTeamPublicationController extends AbstractController {
             model.addAttribute("errors", List.of(e.getMessage()));
         }
 
-        return redirectToAdminPublications(team.getId());
+        return redirectToAdminPublications(team);
     }
 
-    private String redirectToAdminPublications(String teamId) {
-        return "redirect:/" + teamId + "/admin/publications";
+    private String redirectToAdminPublications(Team team) {
+        return createRedirect(team, "/admin/publications");
     }
 
 }

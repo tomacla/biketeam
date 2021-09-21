@@ -46,7 +46,7 @@ public class AdminTeamMapController extends AbstractController {
 
         Optional<Map> optionalMap = mapService.get(team.getId(), mapId);
         if (optionalMap.isEmpty()) {
-            return redirectToAdminMaps(team.getId());
+            return redirectToAdminMaps(team);
         }
 
         Map map = optionalMap.get();
@@ -81,7 +81,7 @@ public class AdminTeamMapController extends AbstractController {
 
             Optional<Map> optionalMap = mapService.get(team.getId(), mapId);
             if (optionalMap.isEmpty()) {
-                return redirectToAdminMaps(team.getId());
+                return redirectToAdminMaps(team);
             }
 
             final NewMapForm.NewMapFormParser parser = form.parser();
@@ -94,7 +94,7 @@ public class AdminTeamMapController extends AbstractController {
 
             mapService.save(map);
 
-            return redirectToAdminMaps(team.getId());
+            return redirectToAdminMaps(team);
 
         } catch (Exception e) {
             addGlobalValues(principal, model, "Administration - Modifier la map", team);
@@ -124,7 +124,7 @@ public class AdminTeamMapController extends AbstractController {
                     FilenameUtils.removeExtension(file.getOriginalFilename()),
                     null
             );
-            return redirectToAdminMap(team.getId(), newMap.getId());
+            return redirectToAdminMap(team, newMap.getId());
 
         } catch (Exception e) {
 
@@ -152,15 +152,15 @@ public class AdminTeamMapController extends AbstractController {
             model.addAttribute("errors", List.of(e.getMessage()));
         }
 
-        return redirectToAdminMaps(team.getId());
+        return redirectToAdminMaps(team);
     }
 
-    private String redirectToAdminMaps(String teamId) {
-        return "redirect:/" + teamId + "/admin/maps";
+    private String redirectToAdminMaps(Team team) {
+        return createRedirect(team, "/admin/maps");
     }
 
-    private String redirectToAdminMap(String teamId, String mapId) {
-        return "redirect:/" + teamId + "/admin/maps/" + mapId;
+    private String redirectToAdminMap(Team team, String mapId) {
+        return createRedirect(team, "/admin/maps/" + mapId);
     }
 
 

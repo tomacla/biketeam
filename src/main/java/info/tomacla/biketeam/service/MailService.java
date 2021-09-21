@@ -50,7 +50,7 @@ public class MailService implements ExternalPublicationService {
             StringBuilder sb = new StringBuilder();
             sb.append("<html>").append("<head></head>").append("<body>");
             sb.append("<p>").append(ride.getTitle()).append(" - ").append(Dates.frenchDateFormat(ride.getDate())).append("</p>");
-            sb.append("<p>").append(getHtmlLink(urlService.getRideUrl(team.getId(), ride.getId()))).append("</p>");
+            sb.append("<p>").append(getHtmlLink(urlService.getRideUrl(team, ride.getId()))).append("</p>");
             sb.append("<p>").append(ride.getDescription()).append("</p>");
             sb.append("<br/>");
             ride.getGroups().forEach(group -> {
@@ -59,7 +59,7 @@ public class MailService implements ExternalPublicationService {
                 sb.append("Départ ").append(Dates.formatTime(group.getMeetingTime())).append(" - ");
                 sb.append(group.getMeetingLocation()).append("<br/>");
                 if (group.getMapId() != null) {
-                    sb.append("Map : ").append(getHtmlLink(urlService.getMapUrl(team.getId(), group.getMapId()))).append("<br/>");
+                    sb.append("Map : ").append(getHtmlLink(urlService.getMapUrl(team, group.getMapId()))).append("<br/>");
                 }
                 sb.append("</p>");
             });
@@ -89,7 +89,7 @@ public class MailService implements ExternalPublicationService {
         StringBuilder sb = new StringBuilder();
         sb.append("<html>").append("<head></head>").append("<body>");
         sb.append("<p>").append(publication.getTitle()).append("</p>");
-        sb.append("<p>").append(getHtmlLink(urlService.getTeamUrl(team.getId()))).append("</p>");
+        sb.append("<p>").append(getHtmlLink(urlService.getTeamUrl(team))).append("</p>");
         sb.append("<p>").append(publication.getContent()).append("</p>");
         if (publication.isImaged()) {
             sb.append("<p><img src=\"cid:Image\" /></p>");
@@ -115,7 +115,7 @@ public class MailService implements ExternalPublicationService {
 
         try {
 
-            final Set<String> tos = recipients.stream().map(u -> u.getEmail()).collect(Collectors.toSet());
+            final Set<String> tos = recipients.stream().map(User::getEmail).collect(Collectors.toSet());
 
             ImageDescriptor embedImage = null;
             if (image != null) {

@@ -46,7 +46,7 @@ public class FacebookService implements ExternalPublicationService {
 
         StringBuilder sb = new StringBuilder();
         sb.append(ride.getTitle()).append(" - ").append(Dates.frenchDateFormat(ride.getDate())).append("\n");
-        sb.append(urlService.getRideUrl(team.getId(), ride.getId())).append("\n\n");
+        sb.append(urlService.getRideUrl(team, ride.getId())).append("\n\n");
         sb.append(ride.getDescription()).append("\n\n");
         ride.getGroups().forEach(group -> {
             sb.append(group.getName()).append(" - ");
@@ -54,7 +54,7 @@ public class FacebookService implements ExternalPublicationService {
             sb.append("Départ ").append(Dates.formatTime(group.getMeetingTime())).append(" - ");
             sb.append(group.getMeetingLocation()).append("\n");
             if (group.getMapId() != null) {
-                sb.append("Map : ").append(urlService.getMapUrl(team.getId(), group.getMapId())).append("\n");
+                sb.append("Map : ").append(urlService.getMapUrl(team, group.getMapId())).append("\n");
             }
             sb.append("\n");
         });
@@ -74,7 +74,7 @@ public class FacebookService implements ExternalPublicationService {
 
         StringBuilder sb = new StringBuilder();
         sb.append(publication.getTitle()).append("\n");
-        sb.append(urlService.getTeamUrl(team.getId())).append("\n\n");
+        sb.append(urlService.getTeamUrl(team)).append("\n\n");
         sb.append(publication.getContent()).append("\n\n");
 
         final String content = sb.toString();

@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.service;
 
+import info.tomacla.biketeam.domain.team.Team;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -9,37 +10,44 @@ public class UrlService {
     @Value("${site.url}")
     private String siteUrl;
 
-    public String getRideUrl(String teamId, String mapId) {
-        return siteUrl + "/" + teamId + "/rides/" + mapId;
+    public String getRideUrl(Team team, String mapId) {
+        return getTeamUrl(team) + "/rides/" + mapId;
     }
 
-    public String getMapUrl(String teamId, String mapId) {
-        return siteUrl + "/" + teamId + "/maps/" + mapId;
+    public String getMapUrl(Team team, String mapId) {
+        return getTeamUrl(team) + "/maps/" + mapId;
     }
 
-    public String getMapFitUrl(String teamId, String mapId) {
-        return siteUrl + "/api/" + teamId + "/maps/" + mapId + "/fit";
+    public String getMapFitUrl(Team team, String mapId) {
+        return getTeamUrl(team) + "/maps/" + mapId + "/fit";
     }
 
-    public String getMapGpxUrl(String teamId, String mapId) {
-        return siteUrl + "/api/" + teamId + "/maps/" + mapId + "/gpx";
+    public String getMapGpxUrl(Team team, String mapId) {
+        return getTeamUrl(team) + "/maps/" + mapId + "/gpx";
     }
 
-    public String getMapImageUrl(String teamId, String mapId) {
-        return siteUrl + "/api/" + teamId + "/maps/" + mapId + "/image";
+    public String getMapImageUrl(Team team, String mapId) {
+        return getTeamUrl(team) + "/maps/" + mapId + "/image";
     }
 
     public String getUrlWithSuffix(String suffix) {
         return siteUrl + suffix;
     }
 
-    public String getTeamUrl(String teamId) {
-        return siteUrl + "/" + teamId;
+    public String getTeamUrl(Team team) {
+        if (team.getConfiguration().isDomainConfigured()) {
+            return team.getConfiguration().getDomain();
+        }
+        return siteUrl + "/" + team.getId();
     }
 
-    public String getUrl() {
+    public String getSiteUrl() {
         return siteUrl;
     }
 
-
+    public String getCookieDomain() {
+        String tmp = siteUrl.replace("https://", "");
+        tmp = tmp.replace("http://", "");
+        return tmp;
+    }
 }
