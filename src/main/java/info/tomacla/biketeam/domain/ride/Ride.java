@@ -7,10 +7,8 @@ import info.tomacla.biketeam.common.Strings;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "ride")
@@ -138,6 +136,26 @@ public class Ride {
 
     public Set<RideGroup> getGroups() {
         return groups;
+    }
+
+    public List<RideGroup> getSortedGroups() {
+        return groups.stream()
+                .sorted((r1, r2) -> {
+                    if((r1.getMapId() == null && r2.getMapId() == null)) {
+                        return r1.getName().compareTo(r2.getName());
+                    }
+                    if(r1.getMapId() == null && r2.getMapId() != null) {
+                        return 1;
+                    }
+                    if(r1.getMapId() != null && r2.getMapId() == null) {
+                        return -1;
+                    }
+                    if(r1.getMapId().equals(r2.getMapId())) {
+                        return r1.getName().compareTo(r2.getName());
+                    }
+                    return r1.getMapId().compareTo(r2.getMapId());
+                })
+                .collect(Collectors.toList());
     }
 
     public void addGroup(RideGroup group) {

@@ -24,7 +24,7 @@
 
     <div class="col-12 col-md-7">
 
-        <#list ride.groups as group>
+        <#list ride.sortedGroups as group>
             <div class="card mb-2">
                 <div class="card-body">
                     <h5 class="card-title">${group.name}</h5>

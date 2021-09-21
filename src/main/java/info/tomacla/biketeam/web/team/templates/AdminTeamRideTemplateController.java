@@ -72,7 +72,7 @@ public class AdminTeamRideTemplateController extends AbstractController {
                 .withDescription(rideTemplate.getDescription())
                 .withName(rideTemplate.getName())
                 .withType(rideTemplate.getType())
-                .withGroups(rideTemplate.getGroups())
+                .withGroups(rideTemplate.getSortedGroups())
                 .get();
 
 

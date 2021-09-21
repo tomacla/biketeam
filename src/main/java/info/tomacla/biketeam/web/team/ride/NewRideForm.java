@@ -265,7 +265,7 @@ public class NewRideForm {
             return this;
         }
 
-        public NewRideFormBuilder withGroups(Set<RideGroup> groups, String teamId, MapService mapService) {
+        public NewRideFormBuilder withGroups(List<RideGroup> groups, String teamId, MapService mapService) {
             if (groups != null) {
                 form.setGroups(groups.stream().map(g -> {
 

@@ -2,13 +2,12 @@ package info.tomacla.biketeam.domain.template;
 
 import info.tomacla.biketeam.common.Lists;
 import info.tomacla.biketeam.common.Strings;
+import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.ride.RideType;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "ride_template")
@@ -89,6 +88,12 @@ public class RideTemplate {
 
     public Set<RideGroupTemplate> getGroups() {
         return groups;
+    }
+
+    public List<RideGroupTemplate> getSortedGroups() {
+        return groups.stream()
+                .sorted(Comparator.comparing(RideGroupTemplate::getName))
+                .collect(Collectors.toList());
     }
 
     public void addGroup(RideGroupTemplate group) {

@@ -148,7 +148,7 @@ public class NewRideTemplateForm {
             return this;
         }
 
-        public NewRideTemplateFormBuilder withGroups(Set<RideGroupTemplate> groups) {
+        public NewRideTemplateFormBuilder withGroups(List<RideGroupTemplate> groups) {
             if (groups != null) {
                 form.setGroups(groups.stream().map(g -> NewRideGroupTemplateForm.builder()
                         .withId(g.getId())
