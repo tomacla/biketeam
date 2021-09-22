@@ -17,19 +17,19 @@
                   <div class="col-12">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h6 class="m-0 p-0 w-25">
+                            <h6 class="m-0 p-0">
                                 <#if withTeam>
                                     <a class="link-dark text-decoration-none" href="<@common.teamUrl feedItem.teamId '' />"><img src="<@common.teamUrl feedItem.teamId '/image' />" height="18" alt="Team image"> ${feedItem.teamName}</a>
                                 </#if>
                             </h6>
-                            <h6 class="m-0 p-0 text-center">
+                            <div class="text-end small text-muted">
                                 <#if feedItem.type == 'RIDE'>
-                                    <i class="bi bi-bicycle"></i> Ride
+                                    <span class="d-none d-md-inline">Ride </span><i class="bi bi-bicycle"></i>
                                 <#elseif feedItem.type == 'PUBLICATION'>
-                                    <i class="bi bi-newspaper"></i> Publication
+                                    <span class="d-none d-md-inline">Publication </span><i class="bi bi-newspaper"></i>
                                 </#if>
-                            </h6>
-                            <div class="w-25 text-end small text-muted">${feedItem.publishedAt.format(_date_formatter)}</div>
+                                ${feedItem.publishedAt.format(_date_formatter)}
+                            </div>
                         </div>
                         <div class="card-body">
                         <#if feedItem.type == 'RIDE'>

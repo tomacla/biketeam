@@ -2,7 +2,7 @@
 
 <div class="row pt-2 justify-content-center">
 
-    <aside class="col-12 col-md-4">
+    <aside class="col-12 col-md-4 order-2 order-md-1">
 
         <section class="border p-2 mb-4 rounded">
             <div class="d-flex flex-row justify-content-between">
@@ -22,9 +22,7 @@
                 </div>
             </div>
             <img src="<@common.teamUrl team.id '/image' />" class="d-block w-50 h-auto mx-auto my-4" alt="Team logo">
-            <p class="lead">
-              ${team.description.description}
-            </p>
+            <p><em>${team.description.description}</em></p>
             <p class="lead">
                 <#if (team.description.facebook)??>
                     <a target="_blank" href="https://www.facebook.com/${team.description.facebook}"><i class="bi bi-facebook"></i></a>
@@ -58,7 +56,7 @@
 
     </aside>
 
-    <div class="col-12 col-md-8 pb-4">
+    <div class="col-12 col-md-8 pb-4 order-1 order-md-2">
             <@common.displayFeed false />
     </div>
 

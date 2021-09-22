@@ -37,7 +37,7 @@
         </#if>
         <#if team?? && !_authenticated>
             <li class="nav-item border-end">
-                <a class="nav-link" href="<@common.teamUrl '' '/' />"><i class="bi bi-house"></i></a>
+                <a class="nav-link" href="<@common.teamUrl '' '/' />"><i class="bi bi-house"></i> <span class="d-md-none">Biketeam</span></a>
             </li>
         </#if>
         <#if _authenticated>
