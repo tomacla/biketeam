@@ -111,7 +111,7 @@ public class AdminTeamPublicationController extends AbstractController {
 
         boolean published = false;
 
-        NewPublicationForm.NewPublicationFormBuilder builder = NewPublicationForm.builder(ZonedDateTime.now(team.getZoneId()));
+        NewPublicationForm.NewPublicationFormBuilder builder = NewPublicationForm.builder(ZonedDateTime.now(), team.getZoneId());
         if (!publicationId.equals("new")) {
 
             Optional<Publication> optionalPublication = publicationService.get(team.getId(), publicationId);
@@ -123,7 +123,7 @@ public class AdminTeamPublicationController extends AbstractController {
             builder.withContent(publication.getContent())
                     .withId(publication.getId())
                     .withTitle(publication.getTitle())
-                    .withPublishedAt(publication.getPublishedAt());
+                    .withPublishedAt(publication.getPublishedAt(), team.getZoneId());
 
             published = publication.getPublishedStatus().equals(PublishedStatus.PUBLISHED);
         }

@@ -5,7 +5,6 @@ import info.tomacla.biketeam.common.Strings;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -84,8 +83,8 @@ public class NewPublicationForm {
         return new NewPublicationFormParser(this);
     }
 
-    public static NewPublicationFormBuilder builder(ZonedDateTime defaultPublishedAt) {
-        return new NewPublicationFormBuilder(defaultPublishedAt);
+    public static NewPublicationFormBuilder builder(ZonedDateTime defaultPublishedAt, ZoneId timezone) {
+        return new NewPublicationFormBuilder(defaultPublishedAt, timezone);
     }
 
     public static class NewPublicationFormParser {
@@ -109,7 +108,7 @@ public class NewPublicationForm {
         }
 
         public ZonedDateTime getPublishedAt(ZoneId timezone) {
-            return ZonedDateTime.of(LocalDateTime.parse(form.getPublishedAtDate() + "T" + form.getPublishedAtTime()), timezone);
+            return Dates.parseZonedDateTimeInUTC(form.getPublishedAtDate(), form.getPublishedAtTime(), timezone);
         }
 
         public Optional<MultipartFile> getFile() {
@@ -125,9 +124,9 @@ public class NewPublicationForm {
 
         private final NewPublicationForm form;
 
-        public NewPublicationFormBuilder(ZonedDateTime defaultPublishedAt) {
+        public NewPublicationFormBuilder(ZonedDateTime defaultPublishedAt, ZoneId timezone) {
             this.form = new NewPublicationForm();
-            withPublishedAt(defaultPublishedAt);
+            withPublishedAt(defaultPublishedAt, timezone);
         }
 
         public NewPublicationFormBuilder withId(String id) {
@@ -145,9 +144,9 @@ public class NewPublicationForm {
             return this;
         }
 
-        public NewPublicationFormBuilder withPublishedAt(ZonedDateTime publishedAt) {
-            form.setPublishedAtDate(Dates.formatZonedDate(publishedAt));
-            form.setPublishedAtTime(Dates.formatZonedTime(publishedAt));
+        public NewPublicationFormBuilder withPublishedAt(ZonedDateTime publishedAt, ZoneId timezone) {
+            form.setPublishedAtDate(Dates.formatZonedDateInTimezone(publishedAt, timezone));
+            form.setPublishedAtTime(Dates.formatZonedTimeInTimezone(publishedAt, timezone));
             return this;
         }
 

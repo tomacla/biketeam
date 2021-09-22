@@ -2,7 +2,6 @@ package info.tomacla.biketeam.domain.template;
 
 import info.tomacla.biketeam.common.Lists;
 import info.tomacla.biketeam.common.Strings;
-import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.ride.RideType;
 
 import javax.persistence.*;

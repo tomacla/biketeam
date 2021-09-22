@@ -17,4 +17,24 @@ public class DatesTest {
         assertEquals("12 mai 2021", Dates.frenchDateFormat(LocalDate.of(2021,05,12)));
     }
 
+    @Test
+    public void testCreation() {
+
+        ZoneId z = ZoneId.of("Europe/Paris");
+        ZoneId UTC = ZoneOffset.UTC;
+
+        String time = "12:00";
+        String date = "2021-09-25";
+
+        final ZonedDateTime dateinparis = ZonedDateTime.of(LocalDateTime.parse(date + "T" + time), z);
+        final ZonedDateTime dateinutc = dateinparis.withZoneSameLocal(UTC);
+
+        System.out.println(dateinparis);
+        System.out.println(dateinparis.withZoneSameLocal(UTC));
+        System.out.println(dateinparis.withZoneSameInstant(UTC));
+
+        System.out.println(dateinparis.withZoneSameInstant(UTC).withZoneSameInstant(z).toLocalTime());
+
+    }
+
 }

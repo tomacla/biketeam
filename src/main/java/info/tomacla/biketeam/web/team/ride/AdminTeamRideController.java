@@ -65,17 +65,17 @@ public class AdminTeamRideController extends AbstractController {
         if (templateId != null && !templateId.startsWith("empty-")) {
             Optional<RideTemplate> optionalTemplate = rideTemplateService.get(team.getId(), templateId);
             if (optionalTemplate.isPresent()) {
-                form = NewRideForm.builder(optionalTemplate.get(), ZonedDateTime.now(team.getZoneId())).get();
+                form = NewRideForm.builder(optionalTemplate.get(), ZonedDateTime.now(), team.getZoneId()).get();
             }
         }
 
         if (form == null && templateId.startsWith("empty-")) {
             int numberOfGroups = Integer.parseInt(templateId.replace("empty-", ""));
-            form = NewRideForm.builder(numberOfGroups, ZonedDateTime.now(team.getZoneId())).get();
+            form = NewRideForm.builder(numberOfGroups, ZonedDateTime.now(), team.getZoneId()).get();
         }
 
         if (form == null) {
-            form = NewRideForm.builder(1, ZonedDateTime.now(team.getZoneId())).get();
+            form = NewRideForm.builder(1, ZonedDateTime.now(), team.getZoneId()).get();
         }
 
         addGlobalValues(principal, model, "Administration - Nouveau ride", team);
@@ -101,12 +101,12 @@ public class AdminTeamRideController extends AbstractController {
 
         Ride ride = optionalRide.get();
 
-        NewRideForm form = NewRideForm.builder(ride.getGroups().size(), ZonedDateTime.now(team.getZoneId()))
+        NewRideForm form = NewRideForm.builder(ride.getGroups().size(), ZonedDateTime.now(), team.getZoneId())
                 .withId(ride.getId())
                 .withDate(ride.getDate())
                 .withDescription(ride.getDescription())
                 .withType(ride.getType())
-                .withPublishedAt(ride.getPublishedAt())
+                .withPublishedAt(ride.getPublishedAt(), team.getZoneId())
                 .withTitle(ride.getTitle())
                 .withGroups(ride.getSortedGroups(), team.getId(), mapService)
                 .get();

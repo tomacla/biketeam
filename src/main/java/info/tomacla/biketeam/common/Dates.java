@@ -1,8 +1,6 @@
 package info.tomacla.biketeam.common;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
@@ -21,6 +19,14 @@ public class Dates {
         return temporal.format(DateTimeFormatter.ISO_LOCAL_DATE);
     }
 
+    public static String formatZonedDateInTimezone(ZonedDateTime temporal, ZoneId timezone) {
+        return formatDate(temporal.withZoneSameInstant(timezone).toLocalDate());
+    }
+
+    public static String formatZonedTimeInTimezone(ZonedDateTime temporal, ZoneId timezone) {
+        return formatTime(temporal.withZoneSameInstant(timezone).toLocalTime());
+    }
+
     public static String formatZonedDate(ZonedDateTime temporal) {
         return formatDate(temporal.toLocalDate());
     }
@@ -31,6 +37,10 @@ public class Dates {
 
     public static String frenchDateFormat(LocalDate temporal) {
         return temporal.format(frenchFormatter);
+    }
+
+    public static ZonedDateTime parseZonedDateTimeInUTC(String date, String time, ZoneId timezone) {
+        return ZonedDateTime.of(LocalDateTime.parse(date + "T" + time), timezone).withZoneSameInstant(ZoneOffset.UTC);
     }
 
 }

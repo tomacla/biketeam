@@ -11,7 +11,6 @@ import info.tomacla.biketeam.service.MapService;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -146,12 +145,12 @@ public class NewRideForm {
         this.groups = Objects.requireNonNullElse(groups, new ArrayList<>());
     }
 
-    public static NewRideFormBuilder builder(int numberOfGroups, ZonedDateTime defaultDate) {
-        return new NewRideFormBuilder(numberOfGroups, defaultDate);
+    public static NewRideFormBuilder builder(int numberOfGroups, ZonedDateTime defaultDate, ZoneId timezone) {
+        return new NewRideFormBuilder(numberOfGroups, defaultDate, timezone);
     }
 
-    public static NewRideFormBuilder builder(RideTemplate template, ZonedDateTime defaultDate) {
-        return new NewRideFormBuilder(template, defaultDate);
+    public static NewRideFormBuilder builder(RideTemplate template, ZonedDateTime defaultDate, ZoneId timezone) {
+        return new NewRideFormBuilder(template, defaultDate, timezone);
     }
 
     public NewRideFormParser parser() {
@@ -179,7 +178,7 @@ public class NewRideForm {
         }
 
         public ZonedDateTime getPublishedAt(ZoneId timezone) {
-            return ZonedDateTime.of(LocalDateTime.parse(form.getPublishedAtDate() + "T" + form.getPublishedAtTime()), timezone);
+            return Dates.parseZonedDateTimeInUTC(form.getPublishedAtDate(), form.getPublishedAtTime(), timezone);
         }
 
         public RideType getType() {
@@ -222,15 +221,15 @@ public class NewRideForm {
 
         private final NewRideForm form;
 
-        public NewRideFormBuilder(int numberOfGroups, ZonedDateTime defaultDate) {
+        public NewRideFormBuilder(int numberOfGroups, ZonedDateTime defaultDate, ZoneId timezone) {
             this.form = new NewRideForm(numberOfGroups);
-            withPublishedAt(defaultDate);
+            withPublishedAt(defaultDate, timezone);
             withDate(defaultDate.toLocalDate());
         }
 
-        public NewRideFormBuilder(RideTemplate template, ZonedDateTime defaultDate) {
+        public NewRideFormBuilder(RideTemplate template, ZonedDateTime defaultDate, ZoneId timezone) {
             this.form = new NewRideForm(template);
-            withPublishedAt(defaultDate);
+            withPublishedAt(defaultDate, timezone);
             withDate(defaultDate.toLocalDate());
         }
 
@@ -259,9 +258,9 @@ public class NewRideForm {
             return this;
         }
 
-        public NewRideFormBuilder withPublishedAt(ZonedDateTime publishedAt) {
-            form.setPublishedAtDate(Dates.formatZonedDate(publishedAt));
-            form.setPublishedAtTime(Dates.formatZonedTime(publishedAt));
+        public NewRideFormBuilder withPublishedAt(ZonedDateTime publishedAt, ZoneId timezone) {
+            form.setPublishedAtDate(Dates.formatZonedDateInTimezone(publishedAt, timezone));
+            form.setPublishedAtTime(Dates.formatZonedTimeInTimezone(publishedAt, timezone));
             return this;
         }
 
