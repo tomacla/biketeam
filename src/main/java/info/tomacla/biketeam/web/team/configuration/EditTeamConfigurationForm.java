@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.web.team.configuration;
 
+import info.tomacla.biketeam.common.Strings;
 import info.tomacla.biketeam.common.Timezone;
 import info.tomacla.biketeam.domain.team.WebPage;
 
@@ -14,6 +15,7 @@ public class EditTeamConfigurationForm {
     private String defaultPage;
     private String feedVisible;
     private String ridesVisible;
+    private String markdownPage;
 
     public EditTeamConfigurationForm() {
         setTimezone(Timezone.DEFAULT_TIMEZONE);
@@ -21,6 +23,7 @@ public class EditTeamConfigurationForm {
         setDefaultPage("");
         setFeedVisible(null);
         setRidesVisible(null);
+        setMarkdownPage(null);
     }
 
     public String getTimezone() {
@@ -63,6 +66,14 @@ public class EditTeamConfigurationForm {
         this.ridesVisible = ridesVisible;
     }
 
+    public String getMarkdownPage() {
+        return markdownPage;
+    }
+
+    public void setMarkdownPage(String markdownPage) {
+        this.markdownPage = Strings.requireNonBlankOrDefault(markdownPage, "");
+    }
+
     public EditTeamConfigurationFormParser parser() {
         return new EditTeamConfigurationFormParser(this);
     }
@@ -99,6 +110,10 @@ public class EditTeamConfigurationForm {
             return form.getRidesVisible() != null && form.getRidesVisible().equals("on");
         }
 
+        public String getMarkdownPage() {
+            return form.getMarkdownPage();
+        }
+
     }
 
     public static class EditTeamConfigurationFormBuilder {
@@ -133,6 +148,11 @@ public class EditTeamConfigurationForm {
 
         public EditTeamConfigurationFormBuilder withDefaultPage(WebPage defaultPage) {
             form.setDefaultPage(defaultPage.name());
+            return this;
+        }
+
+        public EditTeamConfigurationFormBuilder withMarkdownPage(String markdownPage) {
+            form.setMarkdownPage(markdownPage);
             return this;
         }
 

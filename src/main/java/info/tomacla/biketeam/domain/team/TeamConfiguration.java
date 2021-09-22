@@ -2,6 +2,7 @@ package info.tomacla.biketeam.domain.team;
 
 import info.tomacla.biketeam.common.Strings;
 import info.tomacla.biketeam.common.Timezone;
+import org.springframework.util.ObjectUtils;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -37,6 +38,8 @@ public class TeamConfiguration {
     private boolean ridesVisible;
     @Column
     private String domain;
+    @Column(name = "markdown_page")
+    private String markdownPage;
 
     protected TeamConfiguration() {
 
@@ -118,6 +121,18 @@ public class TeamConfiguration {
 
     public boolean isDomainConfigured() {
         return this.domain != null;
+    }
+
+    public String getMarkdownPage() {
+        return markdownPage;
+    }
+
+    public void setMarkdownPage(String markdownPage) {
+        this.markdownPage = Strings.requireNonBlankOrNull(markdownPage);
+    }
+
+    public boolean isMarkdownPageWritten() {
+        return this.markdownPage != null && !this.markdownPage.trim().equals("");
     }
 
 }

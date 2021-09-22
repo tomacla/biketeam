@@ -22,7 +22,7 @@
                 </div>
             </div>
             <img src="<@common.teamUrl team.id '/image' />" class="d-block w-50 h-auto mx-auto my-4" alt="Team logo">
-            <p><em>${team.description.description}</em></p>
+            <p class="wrap-content"><em>${team.description.description}</em></p>
             <p class="lead">
                 <#if (team.description.facebook)??>
                     <a target="_blank" href="https://www.facebook.com/${team.description.facebook}"><i class="bi bi-facebook"></i></a>

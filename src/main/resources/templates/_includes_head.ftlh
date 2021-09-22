@@ -37,6 +37,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
     <script src="https://unpkg.com/@raruto/leaflet-elevation/dist/leaflet-elevation.js" type="text/javascript"></script>
+    <script src="https://unpkg.com/marked@3.0.4/lib/marked.js" type="text/javascript"></script>
+    <script src="https://unpkg.com/dompurify@2.3.3/dist/purify.js" type="text/javascript"></script>
 
     <script src="<@common.teamUrl '' '/js/tags.js' />"></script>
     <script src="<@common.teamUrl '' '/js/autocomplete.js' />"></script>

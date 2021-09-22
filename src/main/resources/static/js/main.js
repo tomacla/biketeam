@@ -3,12 +3,40 @@
 var maxFileSizeInMB = 1;
 var urlPattern = /(?:(?:https?|ftp):\/\/)?(?:\S+(?::\S*)?@)?(?:(?!10(?:\.\d{1,3}){3})(?!127(?:\.\d{1,3}){3})(?!169\.254(?:\.\d{1,3}){2})(?!192\.168(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\x{00a1}\-\x{ffff}0-9]+-?)*[a-z\x{00a1}\-\x{ffff}0-9]+)(?:\.(?:[a-z\x{00a1}\-\x{ffff}0-9]+-?)*[a-z\x{00a1}\-\x{ffff}0-9]+)*(?:\.(?:[a-z\x{00a1}\-\x{ffff}]{2,})))(?::\d{2,5})?(?:\/[^\s]*)?/ig;
 
+var markedToc = [];
+var markedRenderer = (function() {
+     var renderer = new marked.Renderer();
+     renderer.heading = function(text, level, raw) {
+         var anchor = this.options.headerPrefix + raw.toLowerCase().replace(/[^\w]+/g, '-');
+         if(level == 1) {
+             markedToc.push({
+                 anchor: anchor,
+                 level: level,
+                 text: text
+             });
+         }
+         return '<h' + level + ' id="' + anchor + '">'+ text+ '</h'+ level+ '>';
+     };
+     return renderer;
+ })();
+marked.setOptions({
+    renderer: markedRenderer,
+    gfm: true,
+    tables: true,
+    breaks: false,
+    pedantic: false,
+    sanitize: true,
+    smartLists: true,
+    smartypants: false
+  });
 
 document.addEventListener("DOMContentLoaded", function() {
     Array.from(document.getElementsByClassName('form-size-check')).forEach(initFormSizeCheck);
     Array.from(document.getElementsByClassName('form-input-geocode')).forEach(initGeoCode);
     Array.from(document.getElementsByClassName('form-map-control')).forEach(initMapAutoComplete);
     Array.from(document.getElementsByClassName('wrap-content')).forEach(wrapContent);
+    Array.from(document.getElementsByClassName('markdown-content')).forEach(markdownContent);
+    Array.from(document.getElementsByClassName('markdown-content-toc')).forEach(markdownContentToc);
     Array.from(document.getElementsByClassName('form-unique-id')).forEach(initUniqueIdField);
     Tags.init();
 
@@ -146,6 +174,20 @@ function wrapContent(contentContainer) {
 
       contentContainer.innerHTML = text;
 
+}
+
+function markdownContent(contentContainer) {
+      var text = contentContainer.innerHTML;
+      contentContainer.innerHTML = DOMPurify.sanitize( marked(text) , {USE_PROFILES: {html: true}} );
+}
+
+function markdownContentToc(contentContainer) {
+        var tocHTML = '<div class="list-group">';
+        markedToc.forEach(function (entry) {
+          tocHTML += '<a class="list-group-item list-group-item-action" href="#'+entry.anchor+'">'+entry.text+'</a>';
+        });
+        tocHTML += '</div>\n';
+        contentContainer.innerHTML = tocHTML;
 }
 
 /** FORMS **/

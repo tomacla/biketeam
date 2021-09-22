@@ -26,6 +26,11 @@
                   <a class="nav-link<#if springMacroRequestContext.requestUri == '/${team.id}' || springMacroRequestContext.requestUri == '/${team.id}/'> active</#if>" href="<@common.teamUrl team.id '' />">Actualités</a>
                 </li>
             </#if>
+            <#if team.configuration.markdownPageWritten>
+                <li class="nav-item">
+                  <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/' + team.id + '/faq')> active</#if>" href="<@common.teamUrl team.id '/page' />">FAQ</a>
+                </li>
+            </#if>
             <#if team.configuration.ridesVisible>
                 <li class="nav-item">
                   <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/' + team.id + '/rides')> active</#if>" href="<@common.teamUrl team.id '/rides' />">Rides</a>

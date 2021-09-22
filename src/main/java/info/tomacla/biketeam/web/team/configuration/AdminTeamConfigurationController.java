@@ -105,6 +105,7 @@ public class AdminTeamConfigurationController extends AbstractController {
                 .withTimezone(teamConfiguration.getTimezone())
                 .withDefaultSearchTags(teamConfiguration.getDefaultSearchTags())
                 .withDefaultPage(teamConfiguration.getDefaultPage())
+                .withMarkdownPage(teamConfiguration.getMarkdownPage())
                 .withFeedVisible(teamConfiguration.isFeedVisible())
                 .withRidesVisible(teamConfiguration.isRidesVisible())
                 .get();
@@ -135,6 +136,7 @@ public class AdminTeamConfigurationController extends AbstractController {
             teamConfiguration.setDefaultPage(parser.getDefaultPage());
             teamConfiguration.setFeedVisible(parser.isFeedVisible());
             teamConfiguration.setRidesVisible(parser.isRidesVisible());
+            teamConfiguration.setMarkdownPage(parser.getMarkdownPage());
             teamService.save(team);
 
             addGlobalValues(principal, model, "Administration - Configuration", team);
