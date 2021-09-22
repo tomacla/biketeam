@@ -54,16 +54,20 @@
                             <#else>
                                 <a href="<@common.teamUrl team.id '/rides/${ride.id}/add-participant/${group.id}/${_user_id}' />" class="btn btn-sm btn-outline-success"><i class="bi-bicycle bi"></i> J'y vais</a>
                              </#if>
-                            <div class="d-flex">
+                            <div class="p-0 m-0" style="height:30px;">
                                 <#list group.participants as participant>
-                                    <img data-bs-toggle="tooltip" data-bs-placement="top" title="${participant.identity}" src="${participant.profileImage}" alt="${participant.identity}" width="30" height="30" class="d-block rounded">
+                                    <#if participant.profileImage??>
+                                        <div style="width:30px; height:30px;" data-bs-toggle="tooltip" data-bs-placement="top" title="${participant.identity}" class="d-inline-block"><img class="w-100 h-100 d-block rounded" src="${participant.profileImage}" alt="${participant.identity}"></div>
+                                    <#else>
+                                        <div style="width:30px; height:30px; background:grey;" data-bs-toggle="tooltip" data-bs-placement="top" title="${participant.identity}" class="d-inline-block rounded"></div>
+                                    </#if>
                                 </#list>
                             </div>
                         </div>
                     </div>
                 <#else>
                     <div class="card-footer">
-                        ${group.participants?size} participant<#if group.participants?size gt 1>s</#if>
+                        ${group.participants?size} participant.e<#if group.participants?size gt 1>.s</#if>
                     </div>
                 </#if>
             </div>
