@@ -175,4 +175,11 @@ public class RootController extends AbstractController {
         return permatitle;
     }
 
+    @ResponseBody
+    @RequestMapping(value = "/robots.txt", method = RequestMethod.GET)
+    public String robotsTxt() {
+        return "User-agent: *\n" +
+                "Disallow: /";
+    }
+
 }
