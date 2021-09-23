@@ -221,7 +221,7 @@ public class SearchMapForm {
 
         public SearchMapFormBuilder withSort(MapSorterOption sort) {
             if (sort != null) {
-                form.setSort(sort.name().toLowerCase());
+                form.setSort(sort.name());
             }
             return this;
         }
