@@ -200,6 +200,7 @@ public class ArchiveService {
 
                 final Map newMap = mapService.save(team, fileInputStream, element.getName(), element.getPermatitle());
 
+                newMap.setName(element.getName());
                 newMap.setType(element.getType());
                 newMap.setTags(element.getTags());
                 newMap.setVisible(element.isVisible());
