@@ -23,6 +23,8 @@ public class RideTemplate {
     private String description;
     @OneToMany(mappedBy = "rideTemplate", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<RideGroupTemplate> groups;
+    @Column(nullable = true)
+    private Integer increment;
 
     @Transient
     private int nextGroupIndex = 0;
@@ -83,6 +85,14 @@ public class RideTemplate {
 
     public void setDescription(String description) {
         this.description = Strings.requireNonBlank(description, "description is null");
+    }
+
+    public Integer getIncrement() {
+        return increment;
+    }
+
+    public void setIncrement(Integer increment) {
+        this.increment = increment;
     }
 
     public Set<RideGroupTemplate> getGroups() {

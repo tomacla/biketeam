@@ -75,6 +75,13 @@
                     </div>
                 </div>
 
+                <div class="row">
+                    <div class="col-12 mb-3">
+                      <label for="form-ride-increment" class="form-label">Incrément (augmenté automatiquement à chaque ride associé)</label>
+                      <input autocomplete="off" value="${formdata.increment}" name="increment" type="number" min="1" step="1" class="form-control" id="form-ride-increment" placeholder="123">
+                    </div>
+                </div>
+
                 <div class="mb-3">
                   <label for="form-ride-description" class="form-label">Description</label>
                   <textarea required name="description" class="form-control" id="form-ride-description" rows="5">${formdata.description}</textarea>

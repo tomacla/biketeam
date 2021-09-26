@@ -71,6 +71,7 @@ public class AdminTeamRideTemplateController extends AbstractController {
                 .withId(rideTemplate.getId())
                 .withDescription(rideTemplate.getDescription())
                 .withName(rideTemplate.getName())
+                .withIncrement(rideTemplate.getIncrement())
                 .withType(rideTemplate.getType())
                 .withGroups(rideTemplate.getSortedGroups())
                 .get();
@@ -110,6 +111,8 @@ public class AdminTeamRideTemplateController extends AbstractController {
             } else {
                 target = new RideTemplate(team.getId(), parser.getName(), parser.getType(), parser.getDescription(), null);
             }
+
+            target.setIncrement(parser.getIncrement());
 
             target.clearGroups();
             parser.getGroups().forEach(target::addGroup);

@@ -531,6 +531,14 @@
 
     </changeSet>
 
+    <changeSet id="GITHUB-53-add-increment-template" author="tomacla">
+
+        <addColumn tableName="ride_template">
+            <column name="increment" type="INT"/>
+        </addColumn>
+
+    </changeSet>
+
 
 </databaseChangeLog>
 

@@ -39,4 +39,14 @@ public class RideTemplateService {
         log.info("Request ride template deletion {}", templateId);
         get(teamId, templateId).ifPresent(template -> rideTemplateRepository.delete(template));
     }
+
+    public void increment(String teamId, String templateId) {
+        log.info("Request ride template increment {}", templateId);
+        get(teamId, templateId).ifPresent(template -> {
+            if(template.getIncrement() != null) {
+                template.setIncrement(template.getIncrement() + 1);
+                save(template);
+            }
+        });
+    }
 }

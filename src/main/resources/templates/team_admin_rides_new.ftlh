@@ -66,6 +66,8 @@
             method="POST"
             class="border rounded p-4">
 
+                <input type="hidden" name="templateId" id="form-ride-templateId" value="${formdata.templateId}">
+
                 <div class="row mb-3 border rounded bg-light p-2">
                     <#if published>
                         <div class="alert alert-warning p-2" role="alert">

@@ -17,6 +17,7 @@ public class NewRideTemplateForm {
     private String type;
     private String description;
     private List<NewRideGroupTemplateForm> groups;
+    private String increment;
 
     public NewRideTemplateForm() {
         this(1);
@@ -27,6 +28,8 @@ public class NewRideTemplateForm {
         setName(null);
         setType(null);
         setDescription(null);
+        setIncrement(null);
+
         groups = new ArrayList<>();
         for (int i = 0; i < (Math.max(numberOfGroups, 1)); i++) {
             groups.add(NewRideGroupTemplateForm.builder().withName("G" + (i + 1)).get());
@@ -63,6 +66,14 @@ public class NewRideTemplateForm {
 
     public void setDescription(String description) {
         this.description = Strings.requireNonBlankOrDefault(description, "");
+    }
+
+    public String getIncrement() {
+        return increment;
+    }
+
+    public void setIncrement(String increment) {
+        this.increment = Strings.requireNonBlankOrDefault(increment, "");
     }
 
     public List<NewRideGroupTemplateForm> getGroups() {
@@ -105,6 +116,13 @@ public class NewRideTemplateForm {
             return form.getDescription();
         }
 
+        public Integer getIncrement() {
+            if(form.getIncrement() == null || form.getIncrement().isBlank()) {
+                return null;
+            }
+            return Integer.valueOf(form.getIncrement());
+        }
+
         public Set<RideGroupTemplate> getGroups() {
             return form.getGroups().stream().map(g -> {
                 NewRideGroupTemplateForm.NewRideGroupTemplateFormParser parser = g.parser();
@@ -145,6 +163,11 @@ public class NewRideTemplateForm {
 
         public NewRideTemplateFormBuilder withDescription(String description) {
             form.setDescription(description);
+            return this;
+        }
+
+        public NewRideTemplateFormBuilder withIncrement(Integer increment) {
+            form.setIncrement(increment != null ? increment.toString() : null);
             return this;
         }
 

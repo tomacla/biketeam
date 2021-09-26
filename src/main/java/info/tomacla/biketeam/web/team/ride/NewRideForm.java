@@ -25,6 +25,7 @@ public class NewRideForm {
     private String publishedAtTime;
     private String title;
     private String description;
+    private String templateId;
     private MultipartFile file;
     private List<NewRideGroupForm> groups;
 
@@ -41,6 +42,7 @@ public class NewRideForm {
         setTitle(null);
         setFile(null);
         setDescription(null);
+        setTemplateId(null);
         groups = new ArrayList<>();
         for (int i = 0; i < (Math.max(numberOfGroups, 1)); i++) {
             groups.add(NewRideGroupForm.builder().withName("G" + (i + 1)).get());
@@ -53,9 +55,14 @@ public class NewRideForm {
         setDate(null);
         setPublishedAtDate(null);
         setPublishedAtTime(null);
-        setTitle(rideTemplate.getName());
+        if(rideTemplate.getIncrement() != null) {
+            setTitle(rideTemplate.getName() + " #" + rideTemplate.getIncrement());
+        } else {
+            setTitle(rideTemplate.getName());
+        }
         setFile(null);
         setDescription(rideTemplate.getDescription());
+        setTemplateId(rideTemplate.getId());
         groups = new ArrayList<>();
         for (RideGroupTemplate g : rideTemplate.getGroups()) {
             groups.add(NewRideGroupForm.builder()
@@ -125,6 +132,14 @@ public class NewRideForm {
         this.description = Strings.requireNonBlankOrDefault(description, "");
     }
 
+    public String getTemplateId() {
+        return templateId;
+    }
+
+    public void setTemplateId(String templateId) {
+        this.templateId = Strings.requireNonBlankOrDefault(templateId, "");
+    }
+
     public MultipartFile getFile() {
         return file;
     }
@@ -187,6 +202,13 @@ public class NewRideForm {
 
         public String getDescription() {
             return form.getDescription();
+        }
+
+        public String getTemplateId() {
+            if (form.getTemplateId() == null || form.getTemplateId().isBlank()) {
+                return null;
+            }
+            return form.getTemplateId();
         }
 
         public Optional<MultipartFile> getFile() {
