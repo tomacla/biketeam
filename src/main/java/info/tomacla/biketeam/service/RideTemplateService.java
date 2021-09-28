@@ -43,7 +43,7 @@ public class RideTemplateService {
     public void increment(String teamId, String templateId) {
         log.info("Request ride template increment {}", templateId);
         get(teamId, templateId).ifPresent(template -> {
-            if(template.getIncrement() != null) {
+            if (template.getIncrement() != null) {
                 template.setIncrement(template.getIncrement() + 1);
                 save(template);
             }

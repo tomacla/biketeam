@@ -2,10 +2,12 @@ package info.tomacla.biketeam.web.team.map;
 
 import info.tomacla.biketeam.common.Strings;
 import info.tomacla.biketeam.domain.map.MapType;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class NewMapForm {
 
@@ -14,6 +16,7 @@ public class NewMapForm {
     private String type;
     private String visible;
     private List<String> tags;
+    private MultipartFile file;
 
     public NewMapForm() {
         setId(null);
@@ -21,6 +24,7 @@ public class NewMapForm {
         setType(null);
         setVisible(null);
         setTags(null);
+        setFile(null);
     }
 
     public String getId() {
@@ -63,6 +67,18 @@ public class NewMapForm {
         this.tags = Objects.requireNonNullElse(tags, new ArrayList<>());
     }
 
+    public MultipartFile getFile() {
+        return file;
+    }
+
+    public void setFile(MultipartFile file) {
+        this.file = file;
+    }
+
+    public boolean fileSet() {
+        return file != null && !file.isEmpty();
+    }
+
     public NewMapFormParser parser() {
         return new NewMapFormParser(this);
     }
@@ -97,6 +113,13 @@ public class NewMapForm {
 
         public MapType getType() {
             return MapType.valueOf(form.getType());
+        }
+
+        public Optional<MultipartFile> getFile() {
+            if (form.fileSet()) {
+                return Optional.of(form.getFile());
+            }
+            return Optional.empty();
         }
 
     }

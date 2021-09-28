@@ -92,6 +92,11 @@ public class AdminTeamMapController extends AbstractController {
             map.setTags(parser.getTags());
             map.setType(parser.getType());
 
+            if (parser.getFile().isPresent()) {
+                MultipartFile uploadedFile = parser.getFile().get();
+                mapService.replaceGpx(team, map, uploadedFile.getInputStream());
+            }
+
             mapService.save(map);
 
             return redirectToAdminMaps(team);

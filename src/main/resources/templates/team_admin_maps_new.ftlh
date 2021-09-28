@@ -53,6 +53,15 @@
 
                 <hr/>
 
+                <div class="alert alert-info" role="alert">Mettre un nouveau fichier GPX uniquement pour remplacer l'existant. Sinon laisser vide.</div>
+
+                <div class="mb-3">
+                  <label for="form-map-file" class="form-label">GPX</label>
+                  <input autocomplete="off" name="file" accept=".gpx" class="form-control form-size-check" type="file" id="form-map-file">
+                </div>
+
+                <hr/>
+
                 <button type="submit" class="btn btn-secondary">Enregistrer</button>
 
                 <hr/>

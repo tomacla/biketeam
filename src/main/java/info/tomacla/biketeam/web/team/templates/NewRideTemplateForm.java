@@ -117,7 +117,7 @@ public class NewRideTemplateForm {
         }
 
         public Integer getIncrement() {
-            if(form.getIncrement() == null || form.getIncrement().isBlank()) {
+            if (form.getIncrement() == null || form.getIncrement().isBlank()) {
                 return null;
             }
             return Integer.valueOf(form.getIncrement());

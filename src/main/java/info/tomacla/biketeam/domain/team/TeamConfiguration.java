@@ -2,7 +2,6 @@ package info.tomacla.biketeam.domain.team;
 
 import info.tomacla.biketeam.common.Strings;
 import info.tomacla.biketeam.common.Timezone;
-import org.springframework.util.ObjectUtils;
 
 import javax.persistence.*;
 import java.util.ArrayList;

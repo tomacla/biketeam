@@ -55,6 +55,13 @@ public class MapService {
         mapRepository.save(map);
     }
 
+    public void replaceGpx(Team team, Map map, InputStream is) {
+        log.info("Replacing GPX in map {}", map.getId());
+        Path gpx = fileService.getTempFileFromInputStream(is);
+        gpxService.parseAndReplace(team, map, gpx);
+        mapRepository.save(map);
+    }
+
     public Map save(Team team, InputStream is, String defaultName, String forceId) {
 
         log.info("Saving new map with default name {}", defaultName);
@@ -151,12 +158,6 @@ public class MapService {
             return Optional.of(fileService.get(FileRepositories.MAP_IMAGES, teamId, mapImage));
         }
         return Optional.empty();
-    }
-
-    public void generateImage(String teamId, String mapId) {
-        teamService.get(teamId).ifPresent(team ->
-                this.getGpxFile(teamId, mapId).ifPresent(gpxFile -> gpxService.generateImage(team, mapId, gpxFile))
-        );
     }
 
     private Sort getPageSort(MapSorterOption sortOption) {

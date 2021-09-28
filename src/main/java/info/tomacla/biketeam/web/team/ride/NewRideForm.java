@@ -55,7 +55,7 @@ public class NewRideForm {
         setDate(null);
         setPublishedAtDate(null);
         setPublishedAtTime(null);
-        if(rideTemplate.getIncrement() != null) {
+        if (rideTemplate.getIncrement() != null) {
             setTitle(rideTemplate.getName() + " #" + rideTemplate.getIncrement());
         } else {
             setTitle(rideTemplate.getName());

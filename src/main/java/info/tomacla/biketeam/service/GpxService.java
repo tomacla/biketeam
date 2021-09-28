@@ -64,6 +64,45 @@ public class GpxService {
     @Value("${mapbox.api-key}")
     private String mapBoxAPIKey;
 
+    public Map parseAndReplace(Team team, Map map, Path gpx) {
+
+        GPXPath gpxPath = getGPXPath(gpx, map.getName());
+
+        gpxPathEnhancer.virtualize(gpxPath);
+        GPXFilter.filterPointsDouglasPeucker(gpxPath);
+
+        io.github.glandais.util.Vector windRaw = gpxDataComputer.getWind(gpxPath);
+        Vector wind = new Vector(windRaw.getX(), windRaw.getY());
+        boolean crossing = gpxDataComputer.isCrossing(gpxPath);
+
+        Path staticMap = getStaticMap(team, gpxPath);
+
+        Path fit = getFit(gpxPath);
+
+        List<Point> points = gpxPath.getPoints();
+        io.github.glandais.gpx.Point startPoint = points.get(0);
+        io.github.glandais.gpx.Point endPoint = points.get(points.size() - 1);
+
+        info.tomacla.biketeam.common.Point start = new info.tomacla.biketeam.common.Point(startPoint.getLatDeg(), startPoint.getLonDeg());
+        info.tomacla.biketeam.common.Point end = new info.tomacla.biketeam.common.Point(endPoint.getLatDeg(), endPoint.getLonDeg());
+
+        map.setLength(Rounder.round2Decimals(Math.round(10.0 * gpxPath.getDist()) / 10000.0));
+        map.setPostedAt(LocalDate.now(team.getZoneId()));
+        map.setPositiveElevation(Rounder.round1Decimal(gpxPath.getTotalElevation()));
+        map.setNegativeElevation(Rounder.round1Decimal(gpxPath.getTotalElevationNegative()));
+        map.setStartPoint(start);
+        map.setEndPoint(end);
+        map.setWindDirection(WindDirection.findDirectionFromVector(wind));
+        map.setCrossing(crossing);
+
+        fileService.store(gpx, FileRepositories.GPX_FILES, team.getId(), map.getId() + ".gpx");
+        fileService.store(fit, FileRepositories.FIT_FILES, team.getId(), map.getId() + ".fit");
+        fileService.store(staticMap, FileRepositories.MAP_IMAGES, team.getId(), map.getId() + ".png");
+
+        return map;
+
+    }
+
     public Map parseAndStore(Team team, Path gpx, String defaultName, String forceId) {
 
         GPXPath gpxPath = getGPXPath(gpx, defaultName);
