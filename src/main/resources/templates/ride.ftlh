@@ -38,7 +38,7 @@
                     </ul>
                     <#if (group.mapId)??>
                         <div class="w-50 shadow rounded border d-flex flex-column justify-content-center">
-                            <img src="<@common.teamUrl team.id '/maps/${group.mapId}/image' />" class="d-block w-100 h-auto" alt="${group.mapId} image">
+                            <a href="<@common.teamUrl team.id '/maps/${group.mapId}' />"><img src="<@common.teamUrl team.id '/maps/${group.mapId}/image' />" class="d-block w-100 h-auto" alt="${group.mapId} image"></a>
                             <div class="btn-group" role="group">
                                 <a download="${ride.title}-${group.name}.gpx" href="<@common.teamUrl team.id '/maps/${group.mapId}/gpx' />" class="btn btn-light" role="button"><i class="bi bi-download"></i> GPX</a>
                                 <a download="${ride.title}-${group.name}.fit" href="<@common.teamUrl team.id '/maps/${group.mapId}/fit' />" class="btn btn-light" role="button"><i class="bi bi-download"></i> FIT</a>

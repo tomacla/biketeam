@@ -5,15 +5,15 @@
     <div class="col-12 mb-4">
 
         <div class="border rounded p-2">
-            <div class="justify-content-between">
+            <div class="d-flex flex-row justify-content-between">
                 <h4>${map.name}</h4>
-                <h6><small class="text-muted">Ajoutée le ${map.postedAt.format(_date_formatter)}</small></h6>
                 <div>
                     <#if _team_admin && !_embed>
                         <a href="<@common.teamUrl team.id '/admin/maps/${map.id}' />" class="btn btn-sm btn-secondary"><i class="bi-pencil bi"></i> Editer</a>
                     </#if>
                 </div>
             </div>
+            <h6><small class="text-muted">Ajoutée le ${map.postedAt.format(_date_formatter)}</small></h6>
             <ul class="list-inline">
                 <li class="list-inline-item"><i class="bi bi-arrow-left-right"></i> ${map.length}km</li>
                 <li class="list-inline-item"><i class="bi bi-arrow-up"></i> ${map.positiveElevation}m</li>
