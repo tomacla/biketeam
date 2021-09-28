@@ -163,6 +163,10 @@ public class Ride {
         groups.clear();
     }
 
+    public boolean hasParticipant(String id) {
+        return this.getGroups().stream().map(g -> g.hasParticipant(id)).filter(p -> p).count() != 0L;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -175,5 +179,6 @@ public class Ride {
     public int hashCode() {
         return Objects.hash(id);
     }
+
 
 }
