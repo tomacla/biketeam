@@ -141,19 +141,10 @@ public class Ride {
     public List<RideGroup> getSortedGroups() {
         return groups.stream()
                 .sorted((r1, r2) -> {
-                    if ((r1.getMapId() == null && r2.getMapId() == null)) {
-                        return r1.getName().compareTo(r2.getName());
+                    if(!r1.getMeetingTime().equals(r2.getMeetingTime())) {
+                        return r1.getMeetingTime().compareTo(r2.getMeetingTime());
                     }
-                    if (r1.getMapId() == null && r2.getMapId() != null) {
-                        return 1;
-                    }
-                    if (r1.getMapId() != null && r2.getMapId() == null) {
-                        return -1;
-                    }
-                    if (r1.getMapId().equals(r2.getMapId())) {
-                        return r1.getName().compareTo(r2.getName());
-                    }
-                    return r1.getMapId().compareTo(r2.getMapId());
+                    return r1.getName().compareTo(r2.getName());
                 })
                 .collect(Collectors.toList());
     }
