@@ -9,8 +9,7 @@ import info.tomacla.biketeam.web.ride.dto.AndroidMapDTO;
 import info.tomacla.biketeam.web.ride.dto.GarminMapDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -169,11 +168,23 @@ public class MapController extends AbstractController {
 
     @ResponseBody
     @RequestMapping(value = "/{mapId}/gpx", method = RequestMethod.GET, produces = "application/gpx+xml")
-    public byte[] getMapGpxFile(@PathVariable("teamId") String teamId, @PathVariable("mapId") String mapId) {
+    public ResponseEntity<byte[]> getMapGpxFile(@PathVariable("teamId") String teamId, @PathVariable("mapId") String mapId) {
         final Optional<Path> gpxFile = mapService.getGpxFile(teamId, mapId);
         if (gpxFile.isPresent()) {
             try {
-                return Files.readAllBytes(gpxFile.get());
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.add("Content-Type", "application/gpx+xml");
+                headers.setContentDisposition(ContentDisposition.builder("inline")
+                        .filename(mapId + ".gpx")
+                        .build());
+
+                return new ResponseEntity<>(
+                        Files.readAllBytes(gpxFile.get()),
+                        headers,
+                        HttpStatus.OK
+                );
+
             } catch (IOException e) {
                 throw new ServerErrorException("Error while reading gpx : " + mapId, e);
             }
@@ -183,11 +194,23 @@ public class MapController extends AbstractController {
 
     @ResponseBody
     @RequestMapping(value = "/{mapId}/fit", method = RequestMethod.GET, produces = "application/fit")
-    public byte[] getFitFile(@PathVariable("teamId") String teamId, @PathVariable("mapId") String mapId) {
+    public ResponseEntity<byte[]> getFitFile(@PathVariable("teamId") String teamId, @PathVariable("mapId") String mapId) {
         final Optional<Path> fitFile = mapService.getFitFile(teamId, mapId);
         if (fitFile.isPresent()) {
             try {
-                return Files.readAllBytes(fitFile.get());
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.add("Content-Type", "application/vnd.ant.fit");
+                headers.setContentDisposition(ContentDisposition.builder("inline")
+                        .filename(mapId + ".fit")
+                        .build());
+
+                return new ResponseEntity<>(
+                        Files.readAllBytes(fitFile.get()),
+                        headers,
+                        HttpStatus.OK
+                );
+
             } catch (IOException e) {
                 throw new ServerErrorException("Error while reading fit : " + mapId, e);
             }
@@ -197,11 +220,23 @@ public class MapController extends AbstractController {
 
     @ResponseBody
     @RequestMapping(value = "/{mapId}/image", method = RequestMethod.GET, produces = "image/png")
-    public byte[] getMapImage(@PathVariable("teamId") String teamId, @PathVariable("mapId") String mapId) {
+    public ResponseEntity<byte[]> getMapImage(@PathVariable("teamId") String teamId, @PathVariable("mapId") String mapId) {
         final Optional<Path> imageFile = mapService.getImageFile(teamId, mapId);
         if (imageFile.isPresent()) {
             try {
-                return Files.readAllBytes(imageFile.get());
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.add("Content-Type", "image/png");
+                headers.setContentDisposition(ContentDisposition.builder("inline")
+                        .filename(mapId + ".png")
+                        .build());
+
+                return new ResponseEntity<>(
+                        Files.readAllBytes(imageFile.get()),
+                        headers,
+                        HttpStatus.OK
+                );
+
             } catch (IOException e) {
                 throw new ServerErrorException("Error while reading image : " + mapId, e);
             }

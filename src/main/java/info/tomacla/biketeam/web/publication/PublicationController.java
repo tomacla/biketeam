@@ -3,6 +3,7 @@ package info.tomacla.biketeam.web.publication;
 import info.tomacla.biketeam.common.ImageDescriptor;
 import info.tomacla.biketeam.service.PublicationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,9 @@ public class PublicationController {
 
                 HttpHeaders headers = new HttpHeaders();
                 headers.add("Content-Type", image.get().getExtension().getMediaType());
+                headers.setContentDisposition(ContentDisposition.builder("inline")
+                        .filename(publicationId + image.get().getExtension().getExtension())
+                        .build());
 
                 return new ResponseEntity<>(
                         Files.readAllBytes(image.get().getPath()),

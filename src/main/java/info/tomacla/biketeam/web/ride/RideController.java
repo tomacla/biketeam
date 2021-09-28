@@ -11,6 +11,7 @@ import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -171,12 +172,16 @@ public class RideController extends AbstractController {
 
                 HttpHeaders headers = new HttpHeaders();
                 headers.add("Content-Type", image.get().getExtension().getMediaType());
+                headers.setContentDisposition(ContentDisposition.builder("inline")
+                        .filename(rideId + image.get().getExtension().getExtension())
+                        .build());
 
                 return new ResponseEntity<>(
                         Files.readAllBytes(image.get().getPath()),
                         headers,
                         HttpStatus.OK
                 );
+
             } catch (IOException e) {
                 throw new ServerErrorException("Error while reading ride image : " + rideId, e);
             }
