@@ -35,6 +35,7 @@
                     <li class="d-none list-group-item list-group-item-map justify-content-between align-items-center">
                         <div>${map.name}<span class="text-muted"> - ${map.postedAt.format(_date_formatter)}</span><#if !map.visible> - <i class="bi bi-eye-slash"></i></#if></div>
                         <div class="btn-group" role="group">
+                            <a href="<@common.teamUrl team.id '/maps/${map.id}' />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye"></i></a>
                             <a href="<@common.teamUrl team.id '/admin/maps/${map.id}' />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-pencil"></i></a>
                             <a href="<@common.teamUrl team.id '/admin/maps/delete/${map.id}' />" class="btn btn-danger btn-sm" role="button"><i class="bi bi-trash"></i></a>
                         </div>

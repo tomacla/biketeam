@@ -13,6 +13,9 @@
                     </#if>
                 </div>
             </div>
+            <#if ride.publishedStatus != 'PUBLISHED'>
+                <div class="p-1 alert alert-warning" role="alert">Ce ride n'est pas publié</div>
+            </#if>
             <h5 class="text-muted">${ride.date.format(_date_formatter)}</h5>
             <#if ride.imaged>
               <img src="<@common.teamUrl team.id '/rides/${ride.id}/image' />" class="d-block shadow rounded w-100 h-auto mx-auto" alt="${ride.id} image">
