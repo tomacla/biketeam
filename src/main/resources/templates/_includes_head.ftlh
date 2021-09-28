@@ -6,8 +6,6 @@
 <head>
 
     <meta charset="utf-8">
-    <meta name="application-name" content="Biketeam">
-    <meta name="description" content="Un site pour les groupes de vélo">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <#if og??>
@@ -22,8 +20,12 @@
 
     <#if team??>
         <link rel="shortcut icon" href="<@common.teamUrl team.id '/image' />">
+        <meta name="application-name" content="${team.name}">
+        <meta name="description" content="${team.description.description}">
     <#else>
         <link rel="shortcut icon" href="<@common.teamUrl '' '/css/biketeam-logo.png' />">
+        <meta name="application-name" content="Biketeam">
+        <meta name="description" content="Un site pour les groupes de vélo">
     </#if>
 
     <title>${_pagetitle} - Biketeam</title>
@@ -47,7 +49,9 @@
 </head>
 <body>
 
-    <#include "_includes_navbar.ftlh">
+    <#if !_embed>
+        <#include "_includes_navbar.ftlh">
+    </#if>
 
     <div class="modal fade" id="modal-filetoobig" tabindex="-1">
       <div class="modal-dialog">

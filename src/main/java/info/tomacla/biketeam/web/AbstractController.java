@@ -46,6 +46,7 @@ public abstract class AbstractController {
         model.addAttribute("_team_member", false);
         model.addAttribute("_domains", teamService.findAllTeamWithDomain());
         model.addAttribute("_siteUrl", urlService.getSiteUrl());
+        model.addAttribute("_embed", false);
 
         getUserFromPrincipal(principal).ifPresent(user -> {
             model.addAttribute("_authenticated", true);

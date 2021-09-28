@@ -5,10 +5,11 @@
     <div class="col-12 mb-4">
 
         <div class="border rounded p-2">
-            <div class="d-flex flex-row justify-content-between">
-                <h4>${map.name}<small class="text-muted"> - Ajoutée le ${map.postedAt.format(_date_formatter)}</small></h4>
+            <div class="justify-content-between">
+                <h4>${map.name}</h4>
+                <h6><small class="text-muted">Ajoutée le ${map.postedAt.format(_date_formatter)}</small></h6>
                 <div>
-                    <#if _team_admin>
+                    <#if _team_admin && !_embed>
                         <a href="<@common.teamUrl team.id '/admin/maps/${map.id}' />" class="btn btn-sm btn-secondary"><i class="bi-pencil bi"></i> Editer</a>
                     </#if>
                 </div>
@@ -23,17 +24,19 @@
                 <p><strong>Tags</strong> : <#list map.tags as tag><span class="badge bg-secondary">${tag}</span><#if tag_has_next> </#if></#list></p>
             </#if>
 
-            <div class="btn-group" role="group">
-                <a download="${map.name}.gpx" href="<@common.teamUrl team.id '/maps/${map.id}/gpx' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-download"></i> GPX</a>
-                <a download="${map.name}.fit" href="<@common.teamUrl team.id '/maps/${map.id}/fit' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-download"></i> FIT</a>
-            </div>
+             <#if !_embed>
+                <div class="btn-group" role="group">
+                    <a download="${map.name}.gpx" href="<@common.teamUrl team.id '/maps/${map.id}/gpx' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-download"></i> GPX</a>
+                    <a download="${map.name}.fit" href="<@common.teamUrl team.id '/maps/${map.id}/fit' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-download"></i> FIT</a>
+                </div>
+             </#if>
         </div>
 
     </div>
 
     <div class="col-12">
 
-        <div style="width:100%; height:500px;" id="map-container"></div>
+        <div style="width:100%; height:<#if !_embed>500px;<#else>40vh;</#if>" id="map-container"></div>
 
     </div>
 
@@ -85,9 +88,11 @@
               controlElevation.load(gpxUrl);
         }
 
-        var gpxUrl = '<@common.teamUrl team.id '/maps/${map.id}/gpx' />';
-        var embedMap = initMap('map-container');
-        displayElevation(embedMap, gpxUrl);
+        setTimeout(function() {
+            var gpxUrl = '<@common.teamUrl team.id '/maps/${map.id}/gpx' />';
+            var embedMap = initMap('map-container');
+            displayElevation(embedMap, gpxUrl);
+        }, 500);
 
 
     </script>

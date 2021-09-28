@@ -38,6 +38,7 @@ public class MapController extends AbstractController {
     @GetMapping(value = "/{mapId}")
     public String getMap(@PathVariable("teamId") String teamId,
                          @PathVariable("mapId") String mapId,
+                         @RequestParam(required = false, defaultValue = "false") boolean embed,
                          Principal principal,
                          Model model) {
 
@@ -59,6 +60,7 @@ public class MapController extends AbstractController {
 
         addGlobalValues(principal, model, "Map " + map.getName(), team);
         model.addAttribute("map", map);
+        model.addAttribute("_embed", embed);
         return "map";
 
     }
