@@ -10,6 +10,8 @@ import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.service.RideService;
 import info.tomacla.biketeam.service.RideTemplateService;
 import info.tomacla.biketeam.web.AbstractController;
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.collections4.SetUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -159,7 +161,8 @@ public class AdminTeamRideController extends AbstractController {
 
             // save participants
             final Map<String, Set<User>> participantsByName = target.getGroups().stream()
-                    .collect(Collectors.toMap(RideGroup::getName, RideGroup::getParticipants));
+                    .collect(Collectors.toMap(RideGroup::getName, RideGroup::getParticipants,
+                            (p1, p2) -> SetUtils.union(p1, p2)));
 
             target.clearGroups();
             parser.getGroups(team.getId(), mapService).forEach(target::addGroup);

@@ -150,8 +150,11 @@
                             </div>
                             <div class="mb-3 col-6">
                                 <label for="form-ride-group-map-${group?index}" class="form-label text-muted">&nbsp;</label>
-                                <input type="text" name="groups[${group?index}].mapName" readonly class="form-control-plaintext" id="form-ride-group-mapname-${group?index}" value="${group.mapName}">
-                                <input type="hidden" name="groups[${group?index}].mapId" id="form-ride-group-mapid-${group?index}" value="${group.mapId}">
+                                <div class="input-group mb-3">
+                                  <input placeholder="Aucune map sélectionnée" type="text" name="groups[${group?index}].mapName" readonly class="form-control" id="form-ride-group-mapname-${group?index}" value="${group.mapName}">
+                                  <button class="btn btn-outline-secondary" type="button" onclick="this.previousElementSibling.value=''; this.nextElementSibling.value='';"><i class="bi bi-x"></i></button>
+                                  <input type="hidden" name="groups[${group?index}].mapId" id="form-ride-group-mapid-${group?index}" value="${group.mapId}">
+                                </div>
                             </div>
                         </div>
                         <div class="row">
