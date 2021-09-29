@@ -65,7 +65,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         ReflectionUtils.makeAccessible(field);
 
         DefaultOAuth2AuthorizationRequestResolver defaultOAuth2AuthorizationRequestResolver = new DefaultOAuth2AuthorizationRequestResolver(clientRegistrationRepository, OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI);
-        ReflectionUtils.setField(field, defaultOAuth2AuthorizationRequestResolver, new OAuth2StateWriter());
+        ReflectionUtils.setField(field, defaultOAuth2AuthorizationRequestResolver, oAuth2StateWriter());
         return defaultOAuth2AuthorizationRequestResolver;
     }
 
@@ -77,6 +77,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public SSOTokenFilter ssoTokenFilter() {
         return new SSOTokenFilter();
+    }
+
+    @Bean
+    public OAuth2StateWriter oAuth2StateWriter() {
+        return new OAuth2StateWriter();
     }
 
 }

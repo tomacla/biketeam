@@ -64,7 +64,7 @@
             </li>
         <#else>
             <li class="nav-item">
-                <a href="<@common.teamUrl '' '/oauth2/authorization/strava' />"><img height="40" src="<@common.teamUrl '' '/css/btn_strava_connectwith_light.png' />" alt="connect with strava"></a>
+                <a href="<@common.teamUrl '' '/oauth2/authorization/strava?requestUri=${springMacroRequestContext.requestUri}' />"><img height="40" src="<@common.teamUrl '' '/css/btn_strava_connectwith_light.png' />" alt="connect with strava"></a>
             </li>
         </#if>
       </ul>
