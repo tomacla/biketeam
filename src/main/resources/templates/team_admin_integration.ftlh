@@ -53,6 +53,13 @@
 
             </#if>
 
+            <div class="mb-3">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" name="facebookGroupDetails" type="checkbox" id="form-configuration-fbgroupdetails"<#if formdata.facebookGroupDetails?? && formdata.facebookGroupDetails == 'on'> checked</#if>>
+                    <label class="form-check-label" for="form-configuration-fbgroupdetails">Détails des groupes dans les posts facebook</label>
+                  </div>
+             </div>
+
             <hr/>
 
             <button type="submit" class="btn btn-secondary">Enregistrer</button>

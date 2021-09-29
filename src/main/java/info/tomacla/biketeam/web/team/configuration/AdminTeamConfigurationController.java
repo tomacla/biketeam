@@ -190,6 +190,7 @@ public class AdminTeamConfigurationController extends AbstractController {
 
         EditTeamIntegrationForm form = EditTeamIntegrationForm.builder()
                 .withFacebookPageId(teamIntegration.getFacebookPageId())
+                .withFacebookGroupDetails(teamIntegration.isFacebookGroupDetails())
                 .get();
 
         addGlobalValues(principal, model, "Administration - Intégrations", team);
@@ -216,6 +217,7 @@ public class AdminTeamConfigurationController extends AbstractController {
             final EditTeamIntegrationForm.EditTeamIntegrationFormParser parser = form.parser();
 
             teamIntegration.setFacebookPageId(parser.getFacebookPageId());
+            teamIntegration.setFacebookGroupDetails(parser.isFacebookGroupDetails());
             teamService.save(team);
 
             addGlobalValues(principal, model, "Administration - Intégrations", team);

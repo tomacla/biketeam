@@ -45,19 +45,22 @@ public class FacebookService implements ExternalPublicationService {
         log.info("Publish ride {} to facebook", ride.getId());
 
         StringBuilder sb = new StringBuilder();
-        sb.append(ride.getTitle()).append(" - ").append(Dates.frenchDateFormat(ride.getDate())).append("\n");
-        sb.append(urlService.getRideUrl(team, ride.getId())).append("\n\n");
+        sb.append(ride.getTitle()).append("\n");
+        sb.append("RDV ").append(Dates.frenchDateFormat(ride.getDate())).append("\n");
+        sb.append("Toutes les infos : ").append(urlService.getRideUrl(team, ride.getId())).append("\n\n");
         sb.append(ride.getDescription()).append("\n\n");
-        ride.getSortedGroups().forEach(group -> {
-            sb.append(group.getName()).append(" - ");
-            sb.append(Math.round(group.getLowerSpeed())).append("/").append(Math.round(group.getUpperSpeed())).append(" km/h").append("\n");
-            sb.append("Départ ").append(Dates.formatTime(group.getMeetingTime())).append(" - ");
-            sb.append(group.getMeetingLocation()).append("\n");
-            if (group.getMapId() != null) {
-                sb.append("Map : ").append(urlService.getMapUrl(team, group.getMapId())).append("\n");
-            }
-            sb.append("\n");
-        });
+        if (team.getIntegration().isFacebookGroupDetails()) {
+            ride.getSortedGroups().forEach(group -> {
+                sb.append(group.getName()).append(" - ");
+                sb.append(Math.round(group.getLowerSpeed())).append("/").append(Math.round(group.getUpperSpeed())).append(" km/h").append("\n");
+                sb.append("Départ ").append(Dates.formatTime(group.getMeetingTime())).append(" - ");
+                sb.append(group.getMeetingLocation()).append("\n");
+                if (group.getMapId() != null) {
+                    sb.append("Map : ").append(urlService.getMapUrl(team, group.getMapId())).append("\n");
+                }
+                sb.append("\n");
+            });
+        }
 
         final String content = sb.toString();
         if (ride.isImaged()) {

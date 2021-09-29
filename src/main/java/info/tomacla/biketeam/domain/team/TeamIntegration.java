@@ -22,6 +22,8 @@ public class TeamIntegration {
     private String facebookAccessToken;
     @Column(name = "facebook_page_id")
     private String facebookPageId;
+    @Column(name = "facebook_group_details")
+    private boolean facebookGroupDetails;
 
     public TeamIntegration() {
 
@@ -64,6 +66,14 @@ public class TeamIntegration {
 
     public void setFacebookPageId(String facebookPageId) {
         this.facebookPageId = Strings.requireNonBlankOrNull(facebookPageId);
+    }
+
+    public boolean isFacebookGroupDetails() {
+        return facebookGroupDetails;
+    }
+
+    public void setFacebookGroupDetails(boolean facebookGroupDetails) {
+        this.facebookGroupDetails = facebookGroupDetails;
     }
 
     public boolean isFacebookConfigured() {

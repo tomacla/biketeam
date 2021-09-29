@@ -539,6 +539,16 @@
 
     </changeSet>
 
+    <changeSet id="facebook-group-details-control" author="tomacla">
+
+        <addColumn tableName="team_integration">
+            <column name="facebook_group_details" type="BOOLEAN"/>
+        </addColumn>
+
+        <sql>update team_integration set facebook_group_details = FALSE</sql>
+
+    </changeSet>
+
 
 </databaseChangeLog>
 

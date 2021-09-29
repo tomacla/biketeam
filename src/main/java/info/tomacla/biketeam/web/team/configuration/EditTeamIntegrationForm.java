@@ -5,6 +5,12 @@ import info.tomacla.biketeam.common.Strings;
 public class EditTeamIntegrationForm {
 
     private String facebookPageId;
+    private String facebookGroupDetails;
+
+    public EditTeamIntegrationForm() {
+        setFacebookPageId(null);
+        setFacebookGroupDetails(null);
+    }
 
     public String getFacebookPageId() {
         return facebookPageId;
@@ -12,6 +18,14 @@ public class EditTeamIntegrationForm {
 
     public void setFacebookPageId(String facebookPageId) {
         this.facebookPageId = Strings.requireNonBlankOrDefault(facebookPageId, "");
+    }
+
+    public String getFacebookGroupDetails() {
+        return facebookGroupDetails;
+    }
+
+    public void setFacebookGroupDetails(String facebookGroupDetails) {
+        this.facebookGroupDetails = facebookGroupDetails;
     }
 
     public EditTeamIntegrationFormParser parser() {
@@ -34,6 +48,10 @@ public class EditTeamIntegrationForm {
             return form.getFacebookPageId();
         }
 
+        public boolean isFacebookGroupDetails() {
+            return form.getFacebookGroupDetails() != null && form.getFacebookGroupDetails().equals("on");
+        }
+
     }
 
     public static class EditTeamIntegrationFormBuilder {
@@ -46,6 +64,11 @@ public class EditTeamIntegrationForm {
 
         public EditTeamIntegrationFormBuilder withFacebookPageId(String facebookPageId) {
             form.setFacebookPageId(facebookPageId);
+            return this;
+        }
+
+        public EditTeamIntegrationFormBuilder withFacebookGroupDetails(boolean facebookGroupDetails) {
+            form.setFacebookGroupDetails(facebookGroupDetails ? "on" : null);
             return this;
         }
 
