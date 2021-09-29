@@ -48,9 +48,9 @@ public class FacebookService implements ExternalPublicationService {
         sb.append(ride.getTitle()).append(" - ").append(Dates.frenchDateFormat(ride.getDate())).append("\n");
         sb.append(urlService.getRideUrl(team, ride.getId())).append("\n\n");
         sb.append(ride.getDescription()).append("\n\n");
-        ride.getGroups().forEach(group -> {
+        ride.getSortedGroups().forEach(group -> {
             sb.append(group.getName()).append(" - ");
-            sb.append(group.getLowerSpeed()).append("/").append(group.getUpperSpeed()).append(" km/h").append("\n");
+            sb.append(Math.round(group.getLowerSpeed())).append("/").append(Math.round(group.getUpperSpeed())).append(" km/h").append("\n");
             sb.append("Départ ").append(Dates.formatTime(group.getMeetingTime())).append(" - ");
             sb.append(group.getMeetingLocation()).append("\n");
             if (group.getMapId() != null) {

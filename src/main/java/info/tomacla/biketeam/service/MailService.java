@@ -53,9 +53,9 @@ public class MailService implements ExternalPublicationService {
             sb.append("<p>").append(getHtmlLink(urlService.getRideUrl(team, ride.getId()))).append("</p>");
             sb.append("<p>").append(ride.getDescription()).append("</p>");
             sb.append("<br/>");
-            ride.getGroups().forEach(group -> {
+            ride.getSortedGroups().forEach(group -> {
                 sb.append("<p>").append(group.getName()).append(" - ");
-                sb.append(group.getLowerSpeed()).append("/").append(group.getUpperSpeed()).append(" km/h").append("<br/>");
+                sb.append(Math.round(group.getLowerSpeed())).append("/").append(Math.round(group.getUpperSpeed())).append(" km/h").append("<br/>");
                 sb.append("Départ ").append(Dates.formatTime(group.getMeetingTime())).append(" - ");
                 sb.append(group.getMeetingLocation()).append("<br/>");
                 if (group.getMapId() != null) {
