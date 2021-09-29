@@ -154,7 +154,8 @@ public class RootController extends AbstractController {
 
         teamService.save(team);
 
-        return createRedirect(team, "/admin/integration");
+        // do not use super function createRedirect in this particular case
+        return "redirect:/" + team.getId() + "/admin/integration";
 
     }
 
