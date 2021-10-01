@@ -8,7 +8,7 @@
 
             <#if _team_admin>
                 <div class="text-end">
-                    <a href="<@common.teamUrl team.id '/admin/rides' />" class="btn btn-outline-secondary btn-sm"><i class="bi bi-plus-circle"></i> Nouveau</a>
+                    <a href="<@common.teamUrl team.id '/admin/rides' />" class="btn btn-secondary btn-sm"><i class="bi bi-plus-circle"></i> Nouveau</a>
                  </div>
              </#if>
 
@@ -54,16 +54,20 @@
                   <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                          <h4>${ride.title}</h4>
+                          <h4><a class="link-dark" href="<@common.teamUrl team.id '/rides/${ride.id}' />">${ride.title}</a></h4>
                           <h5 class="text-muted">${ride.date.format(_date_formatter)}</h5>
                           <p>Groupes : <#list ride.sortedGroups as group><span class="badge bg-secondary">${group.name}</span><#if group_has_next> </#if></#list></p>
                           <p class="small wrap-content">${ride.description}</p>
                           <#if ride.imaged>
-                            <img src="<@common.teamUrl team.id '/rides/${ride.id}/image' />" class="d-block shadow rounded w-50 h-auto mx-auto" alt="${ride.id} image">
+                            <div class="row justify-content-center">
+                                <div class="col-12 col-md-6">
+                                     <a href="<@common.teamUrl team.id '/rides/${ride.id}' />"><img src="<@common.teamUrl team.id '/rides/${ride.id}/image' />" class="d-block shadow rounded w-100 h-auto mx-auto" alt="${ride.id} image"></a>
+                                </div>
+                            </div>
                           </#if>
                         </div>
                         <div class="card-footer text-center">
-                            <a href="<@common.teamUrl team.id '/rides/${ride.id}' />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye"></i> Voir plus</a>
+                            <a href="<@common.teamUrl team.id '/rides/${ride.id}' />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye-fill"></i> Voir</a>
                         </div>
                     </div>
                   </div>

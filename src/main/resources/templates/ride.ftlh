@@ -2,7 +2,7 @@
 
 <div class="row pt-2 justify-content-center">
 
-    <div class="col-12 col-md-5 mb-4">
+    <div class="col-12 col-md-4 mb-4">
 
         <div class="border rounded p-2">
             <div class="d-flex flex-row justify-content-between">
@@ -25,7 +25,7 @@
 
     </div>
 
-    <div class="col-12 col-md-7">
+    <div class="col-12 col-md-8">
 
         <#list ride.sortedGroups as group>
             <div class="card mb-2">
@@ -37,13 +37,17 @@
                         <li>Lieu de rendez vous : <#if (group.meetingPoint)??><a class="link-dark" target="_blank" href="https://www.google.com/maps/search/?api=1&query=${group.meetingPoint.lat?c},${group.meetingPoint.lng?c}"></#if>${group.meetingLocation}<#if (group.meetingPoint)??></a></#if></li>
                     </ul>
                     <#if (group.mapId)??>
-                        <div class="w-50 shadow rounded border d-flex flex-column justify-content-center">
-                            <a href="<@common.teamUrl team.id '/maps/${group.mapId}' />"><img src="<@common.teamUrl team.id '/maps/${group.mapId}/image' />" class="d-block w-100 h-auto" alt="${group.mapId} image"></a>
-                            <div class="btn-group" role="group">
-                                <a download="${ride.title}-${group.name}.gpx" href="<@common.teamUrl team.id '/maps/${group.mapId}/gpx' />" class="btn btn-light" role="button"><i class="bi bi-download"></i> GPX</a>
-                                <a download="${ride.title}-${group.name}.fit" href="<@common.teamUrl team.id '/maps/${group.mapId}/fit' />" class="btn btn-light" role="button"><i class="bi bi-download"></i> FIT</a>
-                                <a href="<@common.teamUrl team.id '/maps/${group.mapId}' />" class="btn btn-light" role="button"><i class="bi bi-map"></i> Voir</a>
+                        <div class="row justify-content-center">
+                            <div class="col-12 col-md-6">
+                            <div class="w-100 shadow rounded border d-flex flex-column justify-content-center">
+                                <a href="<@common.teamUrl team.id '/maps/${group.mapId}' />"><img src="<@common.teamUrl team.id '/maps/${group.mapId}/image' />" class="d-block w-100 h-auto" alt="${group.mapId} image"></a>
+                                <div class="btn-group" role="group">
+                                    <a download="${ride.title}-${group.name}.gpx" href="<@common.teamUrl team.id '/maps/${group.mapId}/gpx' />" class="btn btn-light" role="button"><i class="bi bi-download"></i> GPX</a>
+                                    <a download="${ride.title}-${group.name}.fit" href="<@common.teamUrl team.id '/maps/${group.mapId}/fit' />" class="btn btn-light" role="button"><i class="bi bi-download"></i> FIT</a>
+                                    <a href="<@common.teamUrl team.id '/maps/${group.mapId}' />" class="btn btn-light" role="button"><i class="bi bi-map"></i> Voir</a>
+                                </div>
                             </div>
+                         </div>
                         </div>
                     <#else>
                         <p class="fst-italic">La map n'a pas été ajoutée.</p>

@@ -17,7 +17,7 @@
                             <a href="<@common.teamUrl team.id '/join/' + _user_id />" class="btn btn-sm btn-outline-success"><i class="bi-person-plus-fill bi"></i> Rejoindre</a>
                         </#if>
                     <#else>
-                        <a href="<@common.teamUrl '' '/oauth2/authorization/strava' />" class="btn btn-sm btn-outline-success"><i class="bi-person-plus-fill bi"></i> Rejoindre</a>
+                        <a href="<@common.teamUrl '' '/oauth2/authorization/strava?requestUri=${springMacroRequestContext.requestUri}' />" class="btn btn-sm btn-outline-success"><i class="bi-person-plus-fill bi"></i> Rejoindre</a>
                     </#if>
                 </div>
             </div>

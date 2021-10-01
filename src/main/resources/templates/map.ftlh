@@ -25,7 +25,7 @@
             </#if>
 
              <#if !_embed>
-                <div class="btn-group" role="group">
+                <div class="btn-group btn-group-sm" role="group">
                     <a download="${map.name}.gpx" href="<@common.teamUrl team.id '/maps/${map.id}/gpx' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-download"></i> GPX</a>
                     <a download="${map.name}.fit" href="<@common.teamUrl team.id '/maps/${map.id}/fit' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-download"></i> FIT</a>
                 </div>
@@ -34,10 +34,14 @@
 
     </div>
 
-    <div class="col-12">
+    <!-- mobile -->
+    <div class="col-12 d-block d-md-none">
+        <div style="width:100%; height:<#if !_embed>31vh;<#else>40vh</#if>;" id="map-container-sm"></div>
+    </div>
 
-        <div style="width:100%; height:<#if !_embed>500px;<#else>40vh;</#if>" id="map-container"></div>
-
+    <!-- desktop/tablet -->
+    <div class="col-12 d-none d-md-block">
+        <div style="width:100%; height:500px;" id="map-container-md"></div>
     </div>
 
     <script type="text/javascript">
@@ -90,8 +94,12 @@
 
         setTimeout(function() {
             var gpxUrl = '<@common.teamUrl team.id '/maps/${map.id}/gpx' />';
-            var embedMap = initMap('map-container');
-            displayElevation(embedMap, gpxUrl);
+
+            var embedMapSm = initMap('map-container-sm');
+            displayElevation(embedMapSm, gpxUrl);
+
+            var embedMapMd = initMap('map-container-md');
+            displayElevation(embedMapMd, gpxUrl);
         }, 500);
 
 

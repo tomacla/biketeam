@@ -38,15 +38,21 @@
                             <h5 class="card-title">${feedItem.title}</h5>
                         </#if>
                           <p class="card-text wrap-content">${feedItem.content}</p>
-                          <#if feedItem.imaged && feedItem.type == 'RIDE'>
-                            <img src="<@common.teamUrl feedItem.teamId '/rides/${feedItem.id}/image' />" class="d-block shadow rounded w-50 h-auto mx-auto" alt="${feedItem.title} image">
-                          <#elseif feedItem.imaged && feedItem.type == 'PUBLICATION'>
-                            <img src="<@common.teamUrl feedItem.teamId '/publications/${feedItem.id}/image' />" class="d-block shadow rounded w-50 h-auto mx-auto" alt="${feedItem.title} image">
+                          <#if feedItem.imaged>
+                              <div class="row justify-content-center">
+                                <div class="col-12 col-md-6">
+                                  <#if feedItem.type == 'RIDE'>
+                                    <a href="<@common.teamUrl feedItem.teamId '/rides/'+ feedItem.id />"><img src="<@common.teamUrl feedItem.teamId '/rides/${feedItem.id}/image' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${feedItem.title} image"></a>
+                                  <#elseif feedItem.type == 'PUBLICATION'>
+                                    <img src="<@common.teamUrl feedItem.teamId '/publications/${feedItem.id}/image' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${feedItem.title} image">
+                                  </#if>
+                                </div>
+                              </div>
                           </#if>
                         </div>
                         <#if feedItem.type == 'RIDE'>
                             <div class="card-footer text-center">
-                                <a href="<@common.teamUrl feedItem.teamId '/rides/'+ feedItem.id />" class="btn btn-secondary btn-sm" role="button">Voir</a>
+                                <a href="<@common.teamUrl feedItem.teamId '/rides/'+ feedItem.id />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye-fill"></i> Voir</a>
                             </div>
                         </#if>
                     </div>

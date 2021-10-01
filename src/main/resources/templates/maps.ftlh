@@ -3,10 +3,10 @@
 <div class="row pt-2 justify-content-center">
 
     <#if _team_admin>
-                  <div class="mb-2 text-end">
-                      <a href="<@common.teamUrl team.id '/admin/maps' />" class="btn btn-outline-secondary btn-sm"><i class="bi bi-plus-circle"></i> Nouveau</a>
-                   </div>
-               </#if>
+          <div class="mb-2 text-end">
+              <a href="<@common.teamUrl team.id '/admin/maps' />" class="btn btn-secondary btn-sm"><i class="bi bi-plus-circle"></i> Nouveau</a>
+           </div>
+       </#if>
 
     <div class="col-12 mb-4">
         <form id="maps-filter" action="<@common.teamUrl team.id '/maps' />" method="GET" class="border rounded p-2">
@@ -104,9 +104,9 @@
             <#list maps as map>
                   <div class="col-12 col-md-4">
                     <div class="card">
-                        <img src="<@common.teamUrl team.id '/maps/${map.id}/image' />" class="card-img-top" alt="${map.id} image">
+                        <a href="<@common.teamUrl team.id '/maps/${map.id}' />"><img src="<@common.teamUrl team.id '/maps/${map.id}/image' />" class="card-img-top" alt="${map.id} image"></a>
                         <div class="card-body">
-                          <h5 class="card-title">${map.name}</h5>
+                          <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl team.id '/maps/${map.id}' />">${map.name}</a></h5>
                           <p class="card-text">
                             <i class="bi bi-arrow-left-right"></i> ${map.length}km
                             <i class="bi bi-arrow-up"></i> ${map.positiveElevation}m
