@@ -159,8 +159,9 @@ public class Team {
         this.roles.add(new UserRole(this, user, role));
     }
 
-    public void removeRole(String userId) {
-        this.roles.removeIf(r -> r.getUser().getId().equals(userId));
+    public void removeRole(User user) {
+        this.roles.removeIf(r -> r.getUser().getId().equals(user.getId()));
+        user.removeRole(this.getId()); // needed for hibernate
     }
 
     public boolean isAdmin(String userId) {

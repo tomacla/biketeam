@@ -46,23 +46,20 @@ public class TeamController extends AbstractController {
         return "team_root";
     }
 
-    @GetMapping(value = "/join/{userId}")
+    @GetMapping(value = "/join")
     public String joinTeam(@PathVariable("teamId") String teamId,
-                           @PathVariable("userId") String userId,
                            Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
 
-        Optional<User> optionalUser = userService.get(userId);
         Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
 
-        if (optionalConnectedUser.isPresent() && optionalUser.isPresent()) {
+        if (optionalConnectedUser.isPresent()) {
 
-            User user = optionalUser.get();
             User connectedUser = optionalConnectedUser.get();
 
-            if (user.equals(connectedUser) || connectedUser.isAdmin()) {
-                team.addRole(user, Role.MEMBER);
+            if(!team.isAdminOrMember(connectedUser.getId())) {
+                team.addRole(connectedUser, Role.MEMBER);
                 teamService.save(team);
             }
 
@@ -71,27 +68,20 @@ public class TeamController extends AbstractController {
         return redirectToFeed(team);
     }
 
-    @GetMapping(value = "/leave/{userId}")
+    @GetMapping(value = "/leave")
     public String leaveTeam(@PathVariable("teamId") String teamId,
-                            @PathVariable("userId") String userId,
                             Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
 
-        Optional<User> optionalUser = userService.get(userId);
         Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
 
-        if (optionalConnectedUser.isPresent() && optionalUser.isPresent()) {
-
-            User user = optionalUser.get();
+        if (optionalConnectedUser.isPresent()) {
             User connectedUser = optionalConnectedUser.get();
-
-            if (user.equals(connectedUser) || connectedUser.isAdmin()) {
-                team.removeRole(userId);
-                user.removeRole(team.getId()); // needed for hibernate
+            if(team.isAdminOrMember(connectedUser.getId())) {
+                team.removeRole(connectedUser);
                 teamService.save(team);
             }
-
         }
 
         return redirectToFeed(team);

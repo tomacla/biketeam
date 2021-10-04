@@ -12,12 +12,12 @@
                         <#if _team_admin>
                             <button disabled class="btn btn-sm btn-success"><i class="bi-shield-fill bi"></i> Admin</button>
                         <#elseif _team_member>
-                            <a href="<@common.teamUrl team.id '/leave/' + _user_id />" class="btn btn-sm btn-success"><i class="bi-person-fill bi"></i> Membre</a>
+                            <a href="<@common.teamUrl team.id '/leave' />" class="btn btn-sm btn-success"><i class="bi-person-fill bi"></i> Membre</a>
                         <#else>
-                            <a href="<@common.teamUrl team.id '/join/' + _user_id />" class="btn btn-sm btn-outline-success"><i class="bi-person-plus-fill bi"></i> Rejoindre</a>
+                            <a href="<@common.teamUrl team.id '/join' />" class="btn btn-sm btn-outline-success"><i class="bi-person-plus-fill bi"></i> Rejoindre</a>
                         </#if>
                     <#else>
-                        <a href="<@common.teamUrl '' '/oauth2/authorization/strava?requestUri=${springMacroRequestContext.requestUri}' />" class="btn btn-sm btn-outline-success"><i class="bi-person-plus-fill bi"></i> Rejoindre</a>
+                        <a href="<@common.teamUrl '' '/oauth2/authorization/strava?requestUri=/${team.id}/join' />" class="btn btn-sm btn-outline-success"><i class="bi-person-plus-fill bi"></i> Rejoindre</a>
                     </#if>
                 </div>
             </div>

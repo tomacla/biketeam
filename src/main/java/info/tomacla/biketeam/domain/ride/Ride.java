@@ -163,8 +163,17 @@ public class Ride {
         groups.clear();
     }
 
-    public boolean hasParticipant(String id) {
-        return this.getGroups().stream().map(g -> g.hasParticipant(id)).filter(p -> p).count() != 0L;
+    public boolean hasParticipant(String userId) {
+        return this.getGroups().stream().map(g -> g.hasParticipant(userId)).filter(p -> p).count() != 0L;
+    }
+
+    public boolean isParticipantInAnotherGroup(String groupId, String userId) {
+        for (RideGroup group : this.getGroups()) {
+            if(!group.getId().equals(groupId) && group.hasParticipant(userId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

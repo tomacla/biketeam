@@ -89,11 +89,10 @@ public class RideController extends AbstractController {
 
     }
 
-    @GetMapping(value = "/{rideId}/add-participant/{groupId}/{userId}")
+    @GetMapping(value = "/{rideId}/add-participant/{groupId}")
     public String addParticipantToRide(@PathVariable("teamId") String teamId,
                                        @PathVariable("rideId") String rideId,
                                        @PathVariable("groupId") String groupId,
-                                       @PathVariable("userId") String userId,
                                        Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
@@ -105,26 +104,20 @@ public class RideController extends AbstractController {
 
         Ride ride = optionalRide.get();
         Optional<RideGroup> optionalGroup = ride.getGroups().stream().filter(rg -> rg.getId().equals(groupId)).findFirst();
-        Optional<User> optionalUser = userService.get(userId);
         Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
 
-        if (optionalConnectedUser.isPresent() && optionalGroup.isPresent() && optionalUser.isPresent()) {
+        if (optionalConnectedUser.isPresent() && optionalGroup.isPresent()) {
             RideGroup rideGroup = optionalGroup.get();
-            User user = optionalUser.get();
             User connectedUser = optionalConnectedUser.get();
 
-            if (user.equals(connectedUser) || connectedUser.isAdmin()) {
+            if (!team.isAdminOrMember(connectedUser.getId())) {
+                team.addRole(connectedUser, Role.MEMBER);
+                teamService.save(team);
+            }
 
-                if (!team.isAdminOrMember(user.getId())) {
-                    team.addRole(user, Role.MEMBER);
-                    teamService.save(team);
-                }
-
-                if(!ride.hasParticipant(user.getId())) {
-                    rideGroup.addParticipant(user);
-                    rideService.save(ride);
-                }
-
+            if(!ride.hasParticipant(connectedUser.getId())) {
+                rideGroup.addParticipant(connectedUser);
+                rideService.save(ride);
             }
 
         }
@@ -132,11 +125,10 @@ public class RideController extends AbstractController {
         return redirectToRide(team, rideId);
     }
 
-    @GetMapping(value = "/{rideId}/remove-participant/{groupId}/{userId}")
+    @GetMapping(value = "/{rideId}/remove-participant/{groupId}")
     public String removeParticipantToRide(@PathVariable("teamId") String teamId,
                                           @PathVariable("rideId") String rideId,
                                           @PathVariable("groupId") String groupId,
-                                          @PathVariable("userId") String userId,
                                           Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
@@ -148,18 +140,14 @@ public class RideController extends AbstractController {
 
         Ride ride = optionalRide.get();
         Optional<RideGroup> optionalGroup = ride.getGroups().stream().filter(rg -> rg.getId().equals(groupId)).findFirst();
-        Optional<User> optionalUser = userService.get(userId);
         Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
 
-        if (optionalConnectedUser.isPresent() && optionalGroup.isPresent() && optionalUser.isPresent()) {
+        if (optionalConnectedUser.isPresent() && optionalGroup.isPresent()) {
             RideGroup rideGroup = optionalGroup.get();
-            User user = optionalUser.get();
             User connectedUser = optionalConnectedUser.get();
 
-            if (user.equals(connectedUser) || connectedUser.isAdmin()) {
-                rideGroup.removeParticipant(user);
-                rideService.save(ride);
-            }
+            rideGroup.removeParticipant(connectedUser);
+            rideService.save(ride);
 
         }
 

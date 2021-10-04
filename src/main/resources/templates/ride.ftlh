@@ -53,15 +53,21 @@
                         <p class="fst-italic">La map n'a pas été ajoutée.</p>
                     </#if>
                 </div>
-                <#if _authenticated>
+
                     <div class="card-footer">
-                        <div class="d-flex justify-content-between">
-                            <#if group.hasParticipant(_user_id)>
-                                <a href="<@common.teamUrl team.id '/rides/${ride.id}/remove-participant/${group.id}/${_user_id}' />" class="btn btn-sm btn-success"><i class="bi-bicycle bi"></i> J'y vais</a>
-                            <#else>
-                                <a href="<@common.teamUrl team.id '/rides/${ride.id}/add-participant/${group.id}/${_user_id}' />" class="btn btn-sm btn-outline-success"><i class="bi-bicycle bi"></i> J'y vais</a>
-                             </#if>
-                            <div class="p-0 m-0" style="height:30px;">
+                        <div class="d-flex flex-row align-items-start justify-content-between">
+                            <div class="d-block pe-2">
+                                <#if _authenticated>
+                                    <#if group.hasParticipant(_user_id)>
+                                        <a href="<@common.teamUrl team.id '/rides/${ride.id}/remove-participant/${group.id}' />" class="text-nowrap d-block btn btn-sm btn-success"><i class="bi-bicycle bi"></i> J'y vais</a>
+                                    <#else>
+                                        <a tabindex="-1" href="<@common.teamUrl team.id '/rides/${ride.id}/add-participant/${group.id}' />" class="text-nowrap d-block btn btn-sm btn-outline-success <#if ride.isParticipantInAnotherGroup(group.id, _user_id)>disabled</#if>"><i class="bi-bicycle bi"></i> J'y vais</a>
+                                     </#if>
+                                <#else>
+                                        <a href="<@common.teamUrl '' '/oauth2/authorization/strava?requestUri=/${team.id}/rides/${ride.id}/add-participant/${group.id}' />" class="text-nowrap d-block btn btn-sm btn-outline-success"><i class="bi-bicycle bi"></i> J'y vais</a>
+                                </#if>
+                            </div>
+                            <div class="p-0 m-0 flex-wrap">
                                 <#list group.participants as participant>
                                     <#if participant.profileImage??>
                                         <div style="width:30px; height:30px;" data-bs-toggle="tooltip" data-bs-placement="top" title="${participant.identity}" class="d-inline-block"><img class="w-100 h-100 d-block rounded" src="${participant.profileImage}" alt="${participant.identity}"></div>
@@ -72,11 +78,6 @@
                             </div>
                         </div>
                     </div>
-                <#else>
-                    <div class="card-footer">
-                        ${group.participants?size} participant.e<#if group.participants?size gt 1>.s</#if>
-                    </div>
-                </#if>
             </div>
         </#list>
 
