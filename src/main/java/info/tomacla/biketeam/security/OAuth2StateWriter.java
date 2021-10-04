@@ -36,10 +36,10 @@ public class OAuth2StateWriter extends Base64StringKeyGenerator {
         if (currentHttpRequest != null) {
             final String customRequestUri = getCustomRequestUri(currentHttpRequest);
             String redirect = null;
-            if(customRequestUri != null) {
+            if (customRequestUri != null) {
                 String teamId = extractTeamId(customRequestUri);
                 String resultUri = extractResulting(customRequestUri);
-                if(!ObjectUtils.isEmpty(teamId)) {
+                if (!ObjectUtils.isEmpty(teamId)) {
                     final Optional<Team> team = teamService.get(teamId);
                     if (team.isPresent()) {
                         final String teamUrl = urlService.getTeamUrl(team.get());
@@ -82,7 +82,7 @@ public class OAuth2StateWriter extends Base64StringKeyGenerator {
     private String extractTeamId(String uri) {
         int startIndex = uri.startsWith("/") ? 1 : 0;
         final int nextSlash = uri.indexOf('/', startIndex);
-        if(nextSlash == -1) {
+        if (nextSlash == -1) {
             return uri.substring(startIndex);
         }
         return uri.substring(startIndex, nextSlash);
@@ -91,7 +91,7 @@ public class OAuth2StateWriter extends Base64StringKeyGenerator {
     private String extractResulting(String uri) {
         int firstIndex = uri.startsWith("/") ? 1 : 0;
         int startIndex = uri.indexOf('/', firstIndex);
-        if(startIndex == -1) {
+        if (startIndex == -1) {
             return "";
         }
         return uri.substring(startIndex);

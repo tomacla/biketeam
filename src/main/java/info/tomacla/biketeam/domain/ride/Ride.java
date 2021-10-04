@@ -141,7 +141,7 @@ public class Ride {
     public List<RideGroup> getSortedGroups() {
         return groups.stream()
                 .sorted((r1, r2) -> {
-                    if(!r1.getMeetingTime().equals(r2.getMeetingTime())) {
+                    if (!r1.getMeetingTime().equals(r2.getMeetingTime())) {
                         return r1.getMeetingTime().compareTo(r2.getMeetingTime());
                     }
                     return r1.getName().compareTo(r2.getName());
@@ -169,7 +169,7 @@ public class Ride {
 
     public boolean isParticipantInAnotherGroup(String groupId, String userId) {
         for (RideGroup group : this.getGroups()) {
-            if(!group.getId().equals(groupId) && group.hasParticipant(userId)) {
+            if (!group.getId().equals(groupId) && group.hasParticipant(userId)) {
                 return true;
             }
         }

@@ -115,7 +115,7 @@ public class RideController extends AbstractController {
                 teamService.save(team);
             }
 
-            if(!ride.hasParticipant(connectedUser.getId())) {
+            if (!ride.hasParticipant(connectedUser.getId())) {
                 rideGroup.addParticipant(connectedUser);
                 rideService.save(ride);
             }

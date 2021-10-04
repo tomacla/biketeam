@@ -58,7 +58,7 @@ public class TeamController extends AbstractController {
 
             User connectedUser = optionalConnectedUser.get();
 
-            if(!team.isAdminOrMember(connectedUser.getId())) {
+            if (!team.isAdminOrMember(connectedUser.getId())) {
                 team.addRole(connectedUser, Role.MEMBER);
                 teamService.save(team);
             }
@@ -78,7 +78,7 @@ public class TeamController extends AbstractController {
 
         if (optionalConnectedUser.isPresent()) {
             User connectedUser = optionalConnectedUser.get();
-            if(team.isAdminOrMember(connectedUser.getId())) {
+            if (team.isAdminOrMember(connectedUser.getId())) {
                 team.removeRole(connectedUser);
                 teamService.save(team);
             }
