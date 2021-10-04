@@ -1,14 +1,12 @@
 # Biketeam
 
-Easily create a website for bike groups.
+## Production
 
-## Demo
-
-See live demo [here](https://www.biketeam.info)
+See live [here](https://www.biketeam.info)
 
 ## Use sources
 
-Biketeam is a standard spring boot application so use spring boot maven plugin 
+Biketeam is a standard spring boot application so use spring boot maven plugin. You'll need a postgresql database.
 
 `mvn spring-boot:run`
 
@@ -52,12 +50,12 @@ spring.security.oauth2.client.registration.strava.client-id=xxx
 spring.security.oauth2.client.registration.strava.client-secret=xxx
 spring.security.oauth2.client.registration.strava.redirect-uri=http[s]://your-domain/login/oauth2/code/strava
 spring.security.oauth2.client.provider.strava.token-uri=https://www.strava.com/oauth/token?client_id=xxx&client_secret=xxx
-## User used at primary admin
+## User used as primary admin
 admin.strava-id=xxx
 admin.first-name=admin
 admin.last-name=admin
 ## Directories (archive to import, file to store)
-archive.directory=/home/thomas/Projects/biketeam/archives
+archive.directory=/path/to/archives
 file.repository=./data/repository
 ## Mapbox integration
 mapbox.api-key=xx
