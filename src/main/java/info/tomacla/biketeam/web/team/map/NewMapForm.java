@@ -2,6 +2,7 @@ package info.tomacla.biketeam.web.team.map;
 
 import info.tomacla.biketeam.common.Strings;
 import info.tomacla.biketeam.domain.map.MapType;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.Optional;
 public class NewMapForm {
 
     private String id;
+    private String newId;
     private String name;
     private String type;
     private String visible;
@@ -20,11 +22,16 @@ public class NewMapForm {
 
     public NewMapForm() {
         setId(null);
+        setNewId(null);
         setName(null);
         setType(null);
         setVisible(null);
         setTags(null);
         setFile(null);
+    }
+
+    public static NewMapFormBuilder builder() {
+        return new NewMapFormBuilder();
     }
 
     public String getId() {
@@ -33,6 +40,14 @@ public class NewMapForm {
 
     public void setId(String id) {
         this.id = Strings.requireNonBlankOrDefault(id, "new");
+    }
+
+    public String getNewId() {
+        return newId;
+    }
+
+    public void setNewId(String newId) {
+        this.newId = Strings.requireNonBlankOrDefault(newId, "");
     }
 
     public String getName() {
@@ -83,10 +98,6 @@ public class NewMapForm {
         return new NewMapFormParser(this);
     }
 
-    public static NewMapFormBuilder builder() {
-        return new NewMapFormBuilder();
-    }
-
     public static class NewMapFormParser {
 
         private final NewMapForm form;
@@ -97,6 +108,13 @@ public class NewMapForm {
 
         public String getId() {
             return form.getId();
+        }
+
+        public String getNewId() {
+            if (ObjectUtils.isEmpty(form.getNewId())) {
+                return null;
+            }
+            return form.getNewId();
         }
 
         public String getName() {
@@ -134,6 +152,7 @@ public class NewMapForm {
 
         public NewMapFormBuilder withId(String id) {
             form.setId(id);
+            form.setNewId(id);
             return this;
         }
 

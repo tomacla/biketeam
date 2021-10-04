@@ -10,6 +10,15 @@
             action="<@common.teamUrl team.id '/admin/maps/' + formdata.id />"
             method="POST" class="border rounded p-4">
 
+                <div class="mb-3">
+                    <div class="form-check form-switch mb-3">
+                      <input id="form-map-visible" name="visible" class="form-check-input" type="checkbox" id="flexCheckDefault"<#if formdata.visible?? && formdata.visible == 'on'> checked</#if>>
+                      <label class="form-check-label" for="form-map-visible">
+                        La map est visible
+                      </label>
+                    </div>
+                </div>
+
                 <div class="mb-3 row">
 
                      <div class="col-6">
@@ -28,26 +37,24 @@
 
                 </div>
 
-                 <div class="mb-3">
-                    <div class="form-check form-switch mb-3">
-                      <input id="form-map-visible" name="visible" class="form-check-input" type="checkbox" id="flexCheckDefault"<#if formdata.visible?? && formdata.visible == 'on'> checked</#if>>
-                      <label class="form-check-label" for="form-map-visible">
-                        La map est visible
-                      </label>
+                 <div class="mb-3 row">
+                    <div class="col-6">
+                        <label for="form-map-tags" class="form-label">Tags</label>
+                        <div class="input-group">
+                            <select multiple data-remove-first="true" data-allow-new="true" name="tags" class="form-select" id="form-map-tags">
+                                <option selected disabled hidden value="">Tag...</option>
+                                <#list tags as tag>
+                                    <option <#if formdata.tags?seq_contains(tag)>selected</#if> value="${tag}">${tag}</option>
+                                </#list>
+                            </select>
+                        </div>
                     </div>
-                </div>
 
-                <div class="mb-3">
-
-                    <label for="form-map-tags" class="form-label">Tags</label>
-                    <div class="input-group">
-                        <select multiple data-remove-first="true" data-allow-new="true" name="tags" class="form-select" id="form-map-tags">
-                            <option selected disabled hidden value="">Tag...</option>
-                            <#list tags as tag>
-                                <option <#if formdata.tags?seq_contains(tag)>selected</#if> value="${tag}">${tag}</option>
-                            </#list>
-                        </select>
+                    <div class="col-6">
+                        <label for="form-map-newId" class="form-label">URL unique</label>
+                        <input data-target-id-field="form-map-newId" minLength="2" maxLength="19" autocomplete="off" required value="${formdata.newId}" name="newId" type="text" class="form-control form-unique-id" id="form-map-newId">
                     </div>
+
 
                 </div>
 

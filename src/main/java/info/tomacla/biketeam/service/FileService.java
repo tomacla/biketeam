@@ -79,6 +79,15 @@ public class FileService {
         }
     }
 
+    public void move(String directory, String teamId, String oldFileName, String newFileName) {
+        try {
+            Files.move(Path.of(fileRepository, directory, teamId, oldFileName), Path.of(fileRepository, directory, teamId, newFileName));
+        } catch (IOException e) {
+            log.error("Unable to move file : " + oldFileName, e);
+            throw new RuntimeException("Unable to move file : " + oldFileName, e);
+        }
+    }
+
     public void store(Path file, String fileName) {
         try {
             Files.copy(file, Path.of(fileRepository, fileName), StandardCopyOption.REPLACE_EXISTING);

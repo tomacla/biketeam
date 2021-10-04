@@ -29,4 +29,9 @@ public interface RideRepository extends PagingAndSortingRepository<Ride, String>
     @Query(value = "update ride_group set map_id = NULL where map_id = :removedMapId", nativeQuery = true)
     void removeMapIdInGroups(@Param("removedMapId") String removedMapId);
 
+    @Transactional
+    @Modifying
+    @Query(value = "update ride_group set map_id = :newMapId where map_id = :removedMapId", nativeQuery = true)
+    void updateMapIdInGroups(@Param("removedMapId") String removedMapId, @Param("newMapId") String newMapId);
+
 }

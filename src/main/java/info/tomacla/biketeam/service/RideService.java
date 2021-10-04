@@ -103,6 +103,14 @@ public class RideService {
         }
     }
 
+    public void removeMapIdInGroups(String mapId) {
+        rideRepository.removeMapIdInGroups(mapId);
+    }
+
+    public void changeMapIdInGroups(String oldMapId, String newMapId) {
+        rideRepository.updateMapIdInGroups(oldMapId, newMapId);
+    }
+
     public Page<Ride> searchRides(String teamId, int page, int pageSize,
                                   LocalDate from, LocalDate to) {
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by("date").descending());

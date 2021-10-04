@@ -154,6 +154,18 @@ public class GpxService {
 
     }
 
+    public void deleteMap(String teamId, String mapId) {
+        fileService.delete(FileRepositories.GPX_FILES, teamId, mapId + ".gpx");
+        fileService.delete(FileRepositories.FIT_FILES, teamId, mapId + ".fit");
+        fileService.delete(FileRepositories.MAP_IMAGES, teamId, mapId + ".png");
+    }
+
+    public void changeMapId(String teamId, String oldId, String newId) {
+        fileService.move(FileRepositories.GPX_FILES, teamId, oldId + ".gpx", newId + ".gpx");
+        fileService.move(FileRepositories.FIT_FILES, teamId, oldId + ".fit", newId + ".fit");
+        fileService.move(FileRepositories.MAP_IMAGES, teamId, oldId + ".png", newId + ".png");
+    }
+
     public void generateImage(Team team, String mapId, Path gpxFile) {
         GPXPath gpxPath = getGPXPath(gpxFile, "");
         Path staticMapImage = getStaticMap(team, gpxPath);

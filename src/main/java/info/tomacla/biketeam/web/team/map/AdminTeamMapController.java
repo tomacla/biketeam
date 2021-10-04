@@ -99,6 +99,10 @@ public class AdminTeamMapController extends AbstractController {
 
             mapService.save(map);
 
+            if (parser.getNewId() != null && !parser.getNewId().equals(map.getId())) {
+                mapService.changeMapId(map, parser.getNewId());
+            }
+
             return redirectToAdminMaps(team);
 
         } catch (Exception e) {

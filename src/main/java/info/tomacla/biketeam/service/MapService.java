@@ -2,7 +2,6 @@ package info.tomacla.biketeam.service;
 
 import info.tomacla.biketeam.common.FileRepositories;
 import info.tomacla.biketeam.domain.map.*;
-import info.tomacla.biketeam.domain.ride.RideRepository;
 import info.tomacla.biketeam.domain.team.Team;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,17 +35,15 @@ public class MapService {
     private TeamService teamService;
 
     @Autowired
-    private RideRepository rideRepository;
+    private RideService rideService;
 
     public void delete(String teamId, String mapId) {
         log.info("Request map deletion {}", mapId);
         final Optional<Map> optionalMap = get(teamId, mapId);
         if (optionalMap.isPresent()) {
             final Map map = optionalMap.get();
-            rideRepository.removeMapIdInGroups(map.getId());
-            fileService.delete(FileRepositories.GPX_FILES, map.getTeamId(), map.getId() + ".gpx");
-            fileService.delete(FileRepositories.FIT_FILES, map.getTeamId(), map.getId() + ".fit");
-            fileService.delete(FileRepositories.MAP_IMAGES, map.getTeamId(), map.getId() + ".png");
+            rideService.removeMapIdInGroups(map.getId());
+            gpxService.deleteMap(map.getTeamId(), map.getId());
             mapRepository.delete(map);
         }
     }
@@ -177,4 +174,28 @@ public class MapService {
     }
 
 
+    public void changeMapId(Map map, String newId) {
+
+        save(new Map(
+                newId,
+                map.getTeamId(),
+                map.getName(),
+                map.getLength(),
+                map.getType(),
+                map.getPostedAt(),
+                map.getPositiveElevation(),
+                map.getNegativeElevation(),
+                map.getTags(),
+                map.getStartPoint(),
+                map.getEndPoint(),
+                map.getWindDirection(),
+                map.isCrossing(),
+                map.isVisible()));
+
+        gpxService.changeMapId(map.getTeamId(), map.getId(), newId);
+
+        delete(map.getTeamId(), map.getId());
+
+
+    }
 }
