@@ -126,7 +126,8 @@ public class MapService {
                 lowerPositiveElevation,
                 upperPositiveElevation,
                 tags,
-                windDirection
+                windDirection,
+                true
         );
 
         return mapRepository.findAll(spec, pageable);
