@@ -8,6 +8,9 @@
 
         <form name="form-integration" action="<@common.teamUrl team.id '/admin/integration' />" method="POST" class="border rounded p-4">
 
+            <h5>Domaine personnalisé</h5>
+            <p>Vous avez un nom de domaine que vous vous utilisez pour votre groupe. Envoyer un mail à contact@biketeam.info pour le configurer ensemble.</p>
+
             <h5>Facebook</h5>
             <div class="alert alert-info" role="alert">
                <p>L'intégration facebook permet de publier les rides et les publications sur une page Facebook.</p>
@@ -21,7 +24,7 @@
                        <li><i class="bi bi-check-circle"></i> Etape 2 : <span class="badge bg-primary">Page-ID : ${formdata.facebookPageId}</span></li>
                        <li><span class="badge bg-success"><i class="bi bi-check-circle"></i> Configuration terminée</span></li>
                    <#else>
-                       <li>Etape 2 : Page ID</li>
+                       <li>Etape 2 : ID de la page facebook</li>
                    </#if>
                </ul>
                <#if facebookConfigurationStep gt 1>
@@ -43,7 +46,8 @@
             <#elseif facebookConfigurationStep == 2>
 
                 <div class="mb-3">
-                  <label for="form-integration-facebookPageId" class="form-label">Page ID</label>
+                  <label for="form-integration-facebookPageId" class="form-label">ID de la page facebook (<a target="_blank" href="https://www.facebook.com/help/1503421039731588">Comment le trouver ?</a>)</label>
+                   <div id="facebook-help" class="form-text">Vous devez avoir les droits de publication sur la page.</div>
                   <input autocomplete="off" name="facebookPageId" value="${formdata.facebookPageId}" type="text" class="form-control" id="form-integration-facebookPageId">
                 </div>
 
