@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.security.Principal;
 import java.util.List;
@@ -141,10 +142,10 @@ public class RootController extends AbstractController {
     }
 
     @GetMapping(value = "/integration/facebook/login")
-    public String getSiteIntegration(@RequestParam("state") String teamId,
-                                     @RequestParam("code") String facebookCode,
-                                     Principal principal,
-                                     Model model) {
+    public RedirectView getSiteIntegration(@RequestParam("state") String teamId,
+                                           @RequestParam("code") String facebookCode,
+                                           Principal principal,
+                                           Model model) {
 
         checkAdmin(principal, teamId);
         final Team team = checkTeam(teamId);
@@ -155,7 +156,7 @@ public class RootController extends AbstractController {
         teamService.save(team);
 
         // do not use super function createRedirect in this particular case
-        return "redirect:/" + team.getId() + "/admin/integration";
+        return new RedirectView("/" + team.getId() + "/admin/integration");
 
     }
 

@@ -199,6 +199,12 @@ public class AdminTeamConfigurationController extends AbstractController {
         if (teamIntegration.getFacebookConfigurationStep() == 1) {
             model.addAttribute("facebookUrl", facebookService.getLoginUrl(team.getId()));
         }
+        if(teamIntegration.getFacebookConfigurationStep() == 2) {
+            model.addAttribute("authorizedPages", facebookService.getAuthorizedPages(team));
+        }
+        if(teamIntegration.getFacebookConfigurationStep() >= 2) {
+            model.addAttribute("facebookAccount", facebookService.getConnectedAccount(team).orElse("Inconnu"));
+        }
         return "team_admin_integration";
     }
 
@@ -226,6 +232,13 @@ public class AdminTeamConfigurationController extends AbstractController {
             if (teamIntegration.getFacebookConfigurationStep() == 1) {
                 model.addAttribute("facebookUrl", facebookService.getLoginUrl(team.getId()));
             }
+            if(teamIntegration.getFacebookConfigurationStep() == 2) {
+                model.addAttribute("authorizedPages", facebookService.getAuthorizedPages(team));
+            }
+            if(teamIntegration.getFacebookConfigurationStep() >= 2) {
+                model.addAttribute("facebookAccount", facebookService.getConnectedAccount(team).orElse("Inconnu"));
+            }
+
             return "team_admin_integration";
 
         } catch (Exception e) {
@@ -235,6 +248,12 @@ public class AdminTeamConfigurationController extends AbstractController {
             model.addAttribute("facebookConfigurationStep", teamIntegration.getFacebookConfigurationStep());
             if (teamIntegration.getFacebookConfigurationStep() == 1) {
                 model.addAttribute("facebookUrl", facebookService.getLoginUrl(team.getId()));
+            }
+            if(teamIntegration.getFacebookConfigurationStep() == 2) {
+                model.addAttribute("authorizedPages", facebookService.getAuthorizedPages(team));
+            }
+            if(teamIntegration.getFacebookConfigurationStep() >= 2) {
+                model.addAttribute("facebookAccount", facebookService.getConnectedAccount(team).orElse("Inconnu"));
             }
             return "team_admin_integration";
         }

@@ -5,6 +5,7 @@ import com.restfb.scope.FacebookPermissions;
 import com.restfb.scope.ScopeBuilder;
 import com.restfb.types.Account;
 import com.restfb.types.GraphResponse;
+import com.restfb.types.User;
 import info.tomacla.biketeam.common.Dates;
 import info.tomacla.biketeam.domain.publication.Publication;
 import info.tomacla.biketeam.domain.ride.Ride;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -143,6 +145,55 @@ public class FacebookService implements ExternalPublicationService {
         }
 
         return Optional.empty();
+    }
+
+    public Optional<String> getConnectedAccount(Team team) {
+
+        if(team.getIntegration().getFacebookAccessToken() == null) {
+            return Optional.empty();
+        }
+
+        try {
+
+            DefaultFacebookClient facebookClient = new DefaultFacebookClient(
+                    team.getIntegration().getFacebookAccessToken(),
+                    Version.LATEST
+            );
+
+            User user = facebookClient.fetchObject("me", User.class);
+
+            return Optional.of(user.getName());
+
+        } catch (Exception e) {
+            log.error("Error while fetching active profile", e);
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public List<FacebookPage> getAuthorizedPages(Team team) {
+        try {
+
+            DefaultFacebookClient facebookClient = new DefaultFacebookClient(
+                    team.getIntegration().getFacebookAccessToken(),
+                    Version.LATEST
+            );
+
+            List<FacebookPage> pages = new ArrayList<>();
+            Connection<Account> connection = facebookClient.fetchConnection("/me/accounts", Account.class);
+
+            for (List<Account> accounts : connection) {
+                for (Account account : accounts) {
+                    pages.add(new FacebookPage(account.getId(), account.getName()));
+                }
+            }
+
+            return pages;
+
+        } catch (Exception e) {
+            log.error("Error while fetching pages", e);
+            throw new RuntimeException(e);
+        }
     }
 
     public String getLoginUrl(String teamId) {
