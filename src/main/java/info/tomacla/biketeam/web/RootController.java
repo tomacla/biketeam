@@ -183,4 +183,10 @@ public class RootController extends AbstractController {
                 "Disallow: /";
     }
 
+    @RequestMapping(value = "/legal-mentions", method = RequestMethod.GET)
+    public String termsOfService(Principal principal, Model model) {
+        addGlobalValues(principal, model, "Mentions légales", null);
+        return "legal_mentions";
+    }
+
 }
