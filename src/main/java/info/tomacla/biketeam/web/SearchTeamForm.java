@@ -21,6 +21,10 @@ public class SearchTeamForm {
         setCity(null);
     }
 
+    public static SearchTeamFormBuilder builder() {
+        return new SearchTeamFormBuilder();
+    }
+
     public int getPage() {
         return page;
     }
@@ -63,10 +67,6 @@ public class SearchTeamForm {
 
     public SearchTeamFormParser parser() {
         return new SearchTeamFormParser(this);
-    }
-
-    public static SearchTeamFormBuilder builder() {
-        return new SearchTeamFormBuilder();
     }
 
     public static class SearchTeamFormParser {

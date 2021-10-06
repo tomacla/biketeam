@@ -7,6 +7,7 @@ import info.tomacla.biketeam.common.PublishedStatus;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideIdTitleDateProjection;
 import info.tomacla.biketeam.domain.ride.RideRepository;
+import info.tomacla.biketeam.service.externalpublication.ExternalPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,13 +36,10 @@ public class RideService {
     private RideRepository rideRepository;
 
     @Autowired
-    private FacebookService facebookService;
-
-    @Autowired
-    private MailService mailService;
-
-    @Autowired
     private TeamService teamService;
+
+    @Autowired
+    private ExternalPublisher externalPublisher;
 
     public Optional<ImageDescriptor> getImage(String teamId, String rideId) {
 
@@ -70,8 +68,7 @@ public class RideService {
                     log.info("Publishing ride {} for team {}", ride.getId(), team.getId());
                     ride.setPublishedStatus(PublishedStatus.PUBLISHED);
                     save(ride);
-                    facebookService.publish(team, ride);
-                    mailService.publish(team, ride);
+                    externalPublisher.publish(team, ride);
                 })
         );
 

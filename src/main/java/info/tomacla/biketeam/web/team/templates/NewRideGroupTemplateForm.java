@@ -27,6 +27,10 @@ public class NewRideGroupTemplateForm {
         setMeetingLocation(null);
     }
 
+    public static NewRideGroupTemplateFormBuilder builder() {
+        return new NewRideGroupTemplateFormBuilder();
+    }
+
     public String getId() {
         return id;
     }
@@ -89,10 +93,6 @@ public class NewRideGroupTemplateForm {
 
     public void setMeetingTime(String meetingTime) {
         this.meetingTime = Strings.requireNonBlankOrDefault(meetingTime, "12:00");
-    }
-
-    public static NewRideGroupTemplateFormBuilder builder() {
-        return new NewRideGroupTemplateFormBuilder();
     }
 
     public NewRideGroupTemplateFormParser parser() {

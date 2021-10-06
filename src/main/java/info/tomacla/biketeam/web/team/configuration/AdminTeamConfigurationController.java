@@ -4,11 +4,12 @@ import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.TeamConfiguration;
 import info.tomacla.biketeam.domain.team.TeamDescription;
 import info.tomacla.biketeam.domain.team.TeamIntegration;
-import info.tomacla.biketeam.service.FacebookService;
 import info.tomacla.biketeam.service.FileService;
 import info.tomacla.biketeam.service.MapService;
+import info.tomacla.biketeam.service.externalpublication.FacebookService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +30,9 @@ public class AdminTeamConfigurationController extends AbstractController {
 
     @Autowired
     private FacebookService facebookService;
+
+    @Value("${smtp.from}")
+    private String smtpFrom;
 
     @GetMapping
     public String getSiteDescription(@PathVariable("teamId") String teamId,
@@ -191,6 +195,9 @@ public class AdminTeamConfigurationController extends AbstractController {
         EditTeamIntegrationForm form = EditTeamIntegrationForm.builder()
                 .withFacebookPageId(teamIntegration.getFacebookPageId())
                 .withFacebookGroupDetails(teamIntegration.isFacebookGroupDetails())
+                .withMattermostApiEndpoint(teamIntegration.getMattermostApiEndpoint())
+                .withMattermostApiToken(teamIntegration.getMattermostApiToken())
+                .withMattermostChannelID(teamIntegration.getMattermostChannelID())
                 .get();
 
         addGlobalValues(principal, model, "Administration - Intégrations", team);
@@ -199,12 +206,13 @@ public class AdminTeamConfigurationController extends AbstractController {
         if (teamIntegration.getFacebookConfigurationStep() == 1) {
             model.addAttribute("facebookUrl", facebookService.getLoginUrl(team.getId()));
         }
-        if(teamIntegration.getFacebookConfigurationStep() == 2) {
+        if (teamIntegration.getFacebookConfigurationStep() == 2) {
             model.addAttribute("authorizedPages", facebookService.getAuthorizedPages(team));
         }
-        if(teamIntegration.getFacebookConfigurationStep() >= 2) {
+        if (teamIntegration.getFacebookConfigurationStep() >= 2) {
             model.addAttribute("facebookAccount", facebookService.getConnectedAccount(team).orElse("Inconnu"));
         }
+        model.addAttribute("adminContact", smtpFrom);
         return "team_admin_integration";
     }
 
@@ -224,6 +232,9 @@ public class AdminTeamConfigurationController extends AbstractController {
 
             teamIntegration.setFacebookPageId(parser.getFacebookPageId());
             teamIntegration.setFacebookGroupDetails(parser.isFacebookGroupDetails());
+            teamIntegration.setMattermostApiToken(parser.getMattermostApiToken());
+            teamIntegration.setMattermostChannelID(parser.getMattermostChannelID());
+            teamIntegration.setMattermostApiEndpoint(parser.getMattermostApiEndpoint());
             teamService.save(team);
 
             addGlobalValues(principal, model, "Administration - Intégrations", team);
@@ -232,13 +243,13 @@ public class AdminTeamConfigurationController extends AbstractController {
             if (teamIntegration.getFacebookConfigurationStep() == 1) {
                 model.addAttribute("facebookUrl", facebookService.getLoginUrl(team.getId()));
             }
-            if(teamIntegration.getFacebookConfigurationStep() == 2) {
+            if (teamIntegration.getFacebookConfigurationStep() == 2) {
                 model.addAttribute("authorizedPages", facebookService.getAuthorizedPages(team));
             }
-            if(teamIntegration.getFacebookConfigurationStep() >= 2) {
+            if (teamIntegration.getFacebookConfigurationStep() >= 2) {
                 model.addAttribute("facebookAccount", facebookService.getConnectedAccount(team).orElse("Inconnu"));
             }
-
+            model.addAttribute("adminContact", smtpFrom);
             return "team_admin_integration";
 
         } catch (Exception e) {
@@ -249,12 +260,13 @@ public class AdminTeamConfigurationController extends AbstractController {
             if (teamIntegration.getFacebookConfigurationStep() == 1) {
                 model.addAttribute("facebookUrl", facebookService.getLoginUrl(team.getId()));
             }
-            if(teamIntegration.getFacebookConfigurationStep() == 2) {
+            if (teamIntegration.getFacebookConfigurationStep() == 2) {
                 model.addAttribute("authorizedPages", facebookService.getAuthorizedPages(team));
             }
-            if(teamIntegration.getFacebookConfigurationStep() >= 2) {
+            if (teamIntegration.getFacebookConfigurationStep() >= 2) {
                 model.addAttribute("facebookAccount", facebookService.getConnectedAccount(team).orElse("Inconnu"));
             }
+            model.addAttribute("adminContact", smtpFrom);
             return "team_admin_integration";
         }
 

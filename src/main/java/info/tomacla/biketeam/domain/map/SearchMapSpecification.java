@@ -53,7 +53,7 @@ public class SearchMapSpecification implements Specification<Map> {
         if (windDirection != null) {
             predicates.add(criteriaBuilder.equal(root.get("windDirection"), windDirection));
         }
-        if(visible != null) {
+        if (visible != null) {
             predicates.add(criteriaBuilder.equal(root.get("visible"), visible));
         }
         criteriaQuery.distinct(true);

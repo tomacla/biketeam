@@ -32,17 +32,13 @@ import java.util.stream.Stream;
 public class ArchiveService {
 
     private static final Logger log = LoggerFactory.getLogger(ArchiveService.class);
-
+    private final ExecutorService executor = Executors.newFixedThreadPool(4);
     @Value("${archive.directory}")
     private String archiveDirectory;
-
     @Autowired
     private MapService mapService;
-
     @Autowired
     private TeamService teamService;
-
-    private final ExecutorService executor = Executors.newFixedThreadPool(4);
 
     public List<String> listArchives() {
         return Stream.of(new File(archiveDirectory).listFiles())

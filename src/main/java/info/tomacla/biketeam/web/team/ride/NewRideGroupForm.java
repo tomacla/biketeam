@@ -29,6 +29,10 @@ public class NewRideGroupForm {
         setUpperSpeed(30);
     }
 
+    public static NewRideGroupFormBuilder builder() {
+        return new NewRideGroupFormBuilder();
+    }
+
     public String getName() {
         return name;
     }
@@ -99,10 +103,6 @@ public class NewRideGroupForm {
 
     public void setMeetingTime(String meetingTime) {
         this.meetingTime = Strings.requireNonBlankOrDefault(meetingTime, "12:00");
-    }
-
-    public static NewRideGroupFormBuilder builder() {
-        return new NewRideGroupFormBuilder();
     }
 
     public NewRideGroupFormParser parser() {

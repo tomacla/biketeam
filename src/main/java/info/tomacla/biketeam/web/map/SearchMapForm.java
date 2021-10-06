@@ -34,6 +34,10 @@ public class SearchMapForm {
         setSort("");
     }
 
+    public static SearchMapFormBuilder builder() {
+        return new SearchMapFormBuilder();
+    }
+
     public int getPage() {
         return page;
     }
@@ -116,10 +120,6 @@ public class SearchMapForm {
 
     public SearchMapFormParser parser() {
         return new SearchMapFormParser(this);
-    }
-
-    public static SearchMapFormBuilder builder() {
-        return new SearchMapFormBuilder();
     }
 
     public static class SearchMapFormParser {

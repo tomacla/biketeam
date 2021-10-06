@@ -23,7 +23,7 @@ public class RideTemplate {
     private String description;
     @OneToMany(mappedBy = "rideTemplate", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<RideGroupTemplate> groups;
-    @Column(nullable = true)
+    @Column
     private Integer increment;
 
     @Transient
@@ -99,6 +99,11 @@ public class RideTemplate {
         return groups;
     }
 
+    public void setGroups(Set<RideGroupTemplate> groups) {
+        Lists.requireNonEmpty(groups, "groups is null");
+        groups.forEach(this::addGroup);
+    }
+
     public List<RideGroupTemplate> getSortedGroups() {
         return groups.stream()
                 .sorted(Comparator.comparing(RideGroupTemplate::getName))
@@ -108,11 +113,6 @@ public class RideTemplate {
     public void addGroup(RideGroupTemplate group) {
         group.setRideTemplate(this, nextGroupIndex++);
         groups.add(group);
-    }
-
-    public void setGroups(Set<RideGroupTemplate> groups) {
-        Lists.requireNonEmpty(groups, "groups is null");
-        groups.forEach(this::addGroup);
     }
 
     public void clearGroups() {

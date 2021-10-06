@@ -26,6 +26,10 @@ public class EditTeamConfigurationForm {
         setMarkdownPage(null);
     }
 
+    public static EditTeamConfigurationFormBuilder builder() {
+        return new EditTeamConfigurationFormBuilder();
+    }
+
     public String getTimezone() {
         return timezone;
     }
@@ -76,10 +80,6 @@ public class EditTeamConfigurationForm {
 
     public EditTeamConfigurationFormParser parser() {
         return new EditTeamConfigurationFormParser(this);
-    }
-
-    public static EditTeamConfigurationFormBuilder builder() {
-        return new EditTeamConfigurationFormBuilder();
     }
 
     public static class EditTeamConfigurationFormParser {

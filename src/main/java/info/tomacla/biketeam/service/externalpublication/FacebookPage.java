@@ -1,4 +1,4 @@
-package info.tomacla.biketeam.service;
+package info.tomacla.biketeam.service.externalpublication;
 
 public class FacebookPage {
 

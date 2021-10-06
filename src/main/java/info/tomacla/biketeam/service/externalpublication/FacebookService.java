@@ -1,4 +1,4 @@
-package info.tomacla.biketeam.service;
+package info.tomacla.biketeam.service.externalpublication;
 
 import com.restfb.*;
 import com.restfb.scope.FacebookPermissions;
@@ -10,6 +10,10 @@ import info.tomacla.biketeam.common.Dates;
 import info.tomacla.biketeam.domain.publication.Publication;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.service.PublicationService;
+import info.tomacla.biketeam.service.RideService;
+import info.tomacla.biketeam.service.TeamService;
+import info.tomacla.biketeam.service.UrlService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +45,11 @@ public class FacebookService implements ExternalPublicationService {
 
     @Autowired
     private Environment env;
+
+    @Override
+    public boolean isApplicable(Team team) {
+        return team.getIntegration().isFacebookConfigured();
+    }
 
     public void publish(Team team, Ride ride) {
 
@@ -93,7 +102,7 @@ public class FacebookService implements ExternalPublicationService {
 
     private void publish(Team team, String content, Path image) {
 
-        if (!team.getIntegration().isFacebookConfigured()) {
+        if (!isApplicable(team)) {
             return;
         }
 
@@ -149,7 +158,7 @@ public class FacebookService implements ExternalPublicationService {
 
     public Optional<String> getConnectedAccount(Team team) {
 
-        if(team.getIntegration().getFacebookAccessToken() == null) {
+        if (team.getIntegration().getFacebookAccessToken() == null) {
             return Optional.empty();
         }
 

@@ -36,6 +36,10 @@ public class NewRideTemplateForm {
         }
     }
 
+    public static NewRideTemplateFormBuilder builder(int numberOfGroups) {
+        return new NewRideTemplateFormBuilder(numberOfGroups);
+    }
+
     public String getId() {
         return id;
     }
@@ -84,10 +88,6 @@ public class NewRideTemplateForm {
         this.groups = Objects.requireNonNullElse(groups, new ArrayList<>());
     }
 
-    public static NewRideTemplateFormBuilder builder(int numberOfGroups) {
-        return new NewRideTemplateFormBuilder(numberOfGroups);
-    }
-
     public NewRideTemplateFormParser parser() {
         return new NewRideTemplateFormParser(this);
     }
@@ -126,13 +126,12 @@ public class NewRideTemplateForm {
         public Set<RideGroupTemplate> getGroups() {
             return form.getGroups().stream().map(g -> {
                 NewRideGroupTemplateForm.NewRideGroupTemplateFormParser parser = g.parser();
-                RideGroupTemplate gg = new RideGroupTemplate(parser.getName(),
+                return new RideGroupTemplate(parser.getName(),
                         parser.getLowerSpeed(),
                         parser.getUpperSpeed(),
                         parser.getMeetingLocation(),
                         parser.getMeetingTime(),
                         parser.getMeetingPoint().orElse(null));
-                return gg;
             }).collect(Collectors.toSet());
         }
 

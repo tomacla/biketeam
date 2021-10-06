@@ -5,7 +5,6 @@ import info.tomacla.biketeam.common.Dates;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.security.LocalDefaultOAuth2User;
-import info.tomacla.biketeam.service.ArchiveService;
 import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.service.UrlService;
 import info.tomacla.biketeam.service.UserService;
@@ -28,9 +27,6 @@ public abstract class AbstractController {
 
     @Autowired
     protected UserService userService;
-
-    @Autowired
-    private ArchiveService archiveService;
 
     @Autowired
     private UrlService urlService;

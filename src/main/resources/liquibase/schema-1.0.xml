@@ -549,6 +549,16 @@
 
     </changeSet>
 
+    <changeSet id="GITHUB-68-ADD-MATTERMOST" author="tomacla">
+
+        <addColumn tableName="team_integration">
+            <column name="mattermost_api_token" type="VARCHAR(100)"/>
+            <column name="mattermost_channel_id" type="VARCHAR(100)"/>
+            <column name="mattermost_api_endpoint" type="VARCHAR(100)"/>
+        </addColumn>
+
+    </changeSet>
+
 
 </databaseChangeLog>
 

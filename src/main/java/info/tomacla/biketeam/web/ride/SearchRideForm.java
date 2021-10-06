@@ -20,6 +20,10 @@ public class SearchRideForm {
         setFrom(null);
     }
 
+    public static SearchRideFormBuilder builder() {
+        return new SearchRideFormBuilder();
+    }
+
     public int getPage() {
         return page;
     }
@@ -54,10 +58,6 @@ public class SearchRideForm {
 
     public SearchRideFormParser parser() {
         return new SearchRideFormParser(this);
-    }
-
-    public static SearchRideFormBuilder builder() {
-        return new SearchRideFormBuilder();
     }
 
     public static class SearchRideFormParser {

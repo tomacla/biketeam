@@ -22,6 +22,10 @@ public class NewTeamForm {
         setDescription(null);
     }
 
+    public static NewTeamFormBuilder builder() {
+        return new NewTeamFormBuilder();
+    }
+
     public String getId() {
         return id;
     }
@@ -68,10 +72,6 @@ public class NewTeamForm {
 
     public void setTimezone(String timezone) {
         this.timezone = Objects.requireNonNullElse(timezone, Timezone.DEFAULT_TIMEZONE);
-    }
-
-    public static NewTeamFormBuilder builder() {
-        return new NewTeamFormBuilder();
     }
 
     public NewTeamFormParser parser() {

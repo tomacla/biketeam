@@ -19,13 +19,11 @@ import java.util.*;
 @Service
 public class SMTPService {
 
+    protected static final Logger log = LoggerFactory.getLogger(SMTPService.class);
     @Autowired
     private TeamService teamService;
-
     @Autowired
     private Environment env;
-
-    protected static final Logger log = LoggerFactory.getLogger(SMTPService.class);
 
     public void sendDirectly(Team team, Set<String> tos, String subject, String message, ImageDescriptor embedImage) {
         tos.forEach(to -> this.send(team, Set.of(to), null, null, subject, message, embedImage, null));
@@ -119,6 +117,9 @@ public class SMTPService {
 
     }
 
+    public boolean isSmtpConfigured() {
+        return getSmtpProperties() != null;
+    }
 
     private Properties getSmtpProperties() {
 

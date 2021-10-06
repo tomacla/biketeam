@@ -24,6 +24,12 @@ public class TeamIntegration {
     private String facebookPageId;
     @Column(name = "facebook_group_details")
     private boolean facebookGroupDetails;
+    @Column(name = "mattermost_api_token")
+    private String mattermostApiToken;
+    @Column(name = "mattermost_channel_id")
+    private String mattermostChannelID;
+    @Column(name = "mattermost_api_endpoint")
+    private String mattermostApiEndpoint;
 
     public TeamIntegration() {
 
@@ -90,4 +96,31 @@ public class TeamIntegration {
         return 1;
     }
 
+    public boolean isMattermostConfigured() {
+        return this.mattermostApiEndpoint != null && this.mattermostChannelID != null && this.mattermostApiToken != null;
+    }
+
+    public String getMattermostApiToken() {
+        return mattermostApiToken;
+    }
+
+    public void setMattermostApiToken(String mattermostApiToken) {
+        this.mattermostApiToken = Strings.requireNonBlankOrNull(mattermostApiToken);
+    }
+
+    public String getMattermostChannelID() {
+        return mattermostChannelID;
+    }
+
+    public void setMattermostChannelID(String mattermostChannelID) {
+        this.mattermostChannelID = Strings.requireNonBlankOrNull(mattermostChannelID);
+    }
+
+    public String getMattermostApiEndpoint() {
+        return mattermostApiEndpoint;
+    }
+
+    public void setMattermostApiEndpoint(String mattermostApiEndpoint) {
+        this.mattermostApiEndpoint = Strings.requireNonBlankOrNull(mattermostApiEndpoint);
+    }
 }

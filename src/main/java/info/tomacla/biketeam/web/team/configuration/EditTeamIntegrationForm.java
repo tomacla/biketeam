@@ -6,10 +6,20 @@ public class EditTeamIntegrationForm {
 
     private String facebookPageId;
     private String facebookGroupDetails;
+    private String mattermostApiToken;
+    private String mattermostChannelID;
+    private String mattermostApiEndpoint;
 
     public EditTeamIntegrationForm() {
         setFacebookPageId(null);
         setFacebookGroupDetails(null);
+        setMattermostApiEndpoint(null);
+        setMattermostApiToken(null);
+        setMattermostChannelID(null);
+    }
+
+    public static EditTeamIntegrationFormBuilder builder() {
+        return new EditTeamIntegrationFormBuilder();
     }
 
     public String getFacebookPageId() {
@@ -28,12 +38,32 @@ public class EditTeamIntegrationForm {
         this.facebookGroupDetails = facebookGroupDetails;
     }
 
-    public EditTeamIntegrationFormParser parser() {
-        return new EditTeamIntegrationFormParser(this);
+    public String getMattermostApiToken() {
+        return mattermostApiToken;
     }
 
-    public static EditTeamIntegrationFormBuilder builder() {
-        return new EditTeamIntegrationFormBuilder();
+    public void setMattermostApiToken(String mattermostApiToken) {
+        this.mattermostApiToken = Strings.requireNonBlankOrDefault(mattermostApiToken, "");
+    }
+
+    public String getMattermostChannelID() {
+        return mattermostChannelID;
+    }
+
+    public void setMattermostChannelID(String mattermostChannelID) {
+        this.mattermostChannelID = Strings.requireNonBlankOrDefault(mattermostChannelID, "");
+    }
+
+    public String getMattermostApiEndpoint() {
+        return mattermostApiEndpoint;
+    }
+
+    public void setMattermostApiEndpoint(String mattermostApiEndpoint) {
+        this.mattermostApiEndpoint = Strings.requireNonBlankOrDefault(mattermostApiEndpoint, "");
+    }
+
+    public EditTeamIntegrationFormParser parser() {
+        return new EditTeamIntegrationFormParser(this);
     }
 
     public static class EditTeamIntegrationFormParser {
@@ -50,6 +80,18 @@ public class EditTeamIntegrationForm {
 
         public boolean isFacebookGroupDetails() {
             return form.getFacebookGroupDetails() != null && form.getFacebookGroupDetails().equals("on");
+        }
+
+        public String getMattermostApiToken() {
+            return form.getMattermostApiToken();
+        }
+
+        public String getMattermostChannelID() {
+            return form.getMattermostChannelID();
+        }
+
+        public String getMattermostApiEndpoint() {
+            return form.getMattermostApiEndpoint();
         }
 
     }
@@ -69,6 +111,21 @@ public class EditTeamIntegrationForm {
 
         public EditTeamIntegrationFormBuilder withFacebookGroupDetails(boolean facebookGroupDetails) {
             form.setFacebookGroupDetails(facebookGroupDetails ? "on" : null);
+            return this;
+        }
+
+        public EditTeamIntegrationFormBuilder withMattermostApiToken(String mattermostApiToken) {
+            form.setMattermostApiToken(mattermostApiToken);
+            return this;
+        }
+
+        public EditTeamIntegrationFormBuilder withMattermostChannelID(String mattermostChannelID) {
+            form.setMattermostChannelID(mattermostChannelID);
+            return this;
+        }
+
+        public EditTeamIntegrationFormBuilder withMattermostApiEndpoint(String mattermostApiEndpoint) {
+            form.setMattermostApiEndpoint(mattermostApiEndpoint);
             return this;
         }
 

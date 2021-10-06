@@ -8,8 +8,13 @@
 
         <form name="form-integration" action="<@common.teamUrl team.id '/admin/integration' />" method="POST" class="border rounded p-4">
 
-            <h5>Domaine personnalisé</h5>
-            <p>Vous avez un nom de domaine que vous vous utilisez pour votre groupe. Envoyer un mail à contact@biketeam.info pour le configurer ensemble.</p>
+            <#if adminContact??>
+                <div class="mb-3">
+                    <h5>Domaine personnalisé</h5>
+                    <p>Vous avez un nom de domaine que vous vous utilisez pour votre groupe. Envoyer un mail à ${adminContact} pour le configurer ensemble.</p>
+                </div>
+                <hr/>
+            </#if>
 
             <h5>Facebook</h5>
             <div class="mb-3">
@@ -71,7 +76,23 @@
 
             </#if>
 
+            <hr/>
 
+            <div class="mb-3">
+                <h5>Mattermost</h5>
+                <div class="mb-3">
+                  <label for="form-integration-mattermostendpoint" class="form-label">API Endpoint</label>
+                  <input autocomplete="off" name="mattermostApiEndpoint" value="${formdata.mattermostApiEndpoint}" type="text" class="form-control" id="form-integration-mattermostendpoint">
+                </div>
+                <div class="mb-3">
+                  <label for="form-integration-mattermosttoken" class="form-label">Token API</label>
+                  <input autocomplete="off" name="mattermostApiToken" value="${formdata.mattermostApiToken}" type="text" class="form-control" id="form-integration-mattermosttoken">
+                </div>
+                <div class="mb-3">
+                  <label for="form-integration-mattermostchannelid" class="form-label">ID du channel</label>
+                  <input autocomplete="off" name="mattermostChannelID" value="${formdata.mattermostChannelID}" type="text" class="form-control" id="form-integration-mattermostchannelid">
+                </div>
+            </div>
 
             <hr/>
 

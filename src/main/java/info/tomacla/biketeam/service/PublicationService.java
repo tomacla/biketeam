@@ -7,6 +7,7 @@ import info.tomacla.biketeam.common.PublishedStatus;
 import info.tomacla.biketeam.domain.publication.Publication;
 import info.tomacla.biketeam.domain.publication.PublicationIdTitlePublishedAtProjection;
 import info.tomacla.biketeam.domain.publication.PublicationRepository;
+import info.tomacla.biketeam.service.externalpublication.ExternalPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,13 +31,10 @@ public class PublicationService {
     private TeamService teamService;
 
     @Autowired
-    private FacebookService facebookService;
-
-    @Autowired
     private FileService fileService;
 
     @Autowired
-    private MailService mailService;
+    private ExternalPublisher externalPublisher;
 
     public void publishPublications() {
         teamService.list().forEach(team ->
@@ -48,8 +46,7 @@ public class PublicationService {
                     log.info("Publishing publication {}", pub.getId());
                     pub.setPublishedStatus(PublishedStatus.PUBLISHED);
                     publicationRepository.save(pub);
-                    facebookService.publish(team, pub);
-                    mailService.publish(team, pub);
+                    externalPublisher.publish(team, pub);
                 })
         );
     }

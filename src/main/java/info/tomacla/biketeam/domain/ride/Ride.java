@@ -138,6 +138,11 @@ public class Ride {
         return groups;
     }
 
+    public void setGroups(Set<RideGroup> groups) {
+        Lists.requireNonEmpty(groups, "groups is null");
+        groups.forEach(this::addGroup);
+    }
+
     public List<RideGroup> getSortedGroups() {
         return groups.stream()
                 .sorted((r1, r2) -> {
@@ -152,11 +157,6 @@ public class Ride {
     public void addGroup(RideGroup group) {
         group.setRide(this, nextGroupIndex++);
         groups.add(group);
-    }
-
-    public void setGroups(Set<RideGroup> groups) {
-        Lists.requireNonEmpty(groups, "groups is null");
-        groups.forEach(this::addGroup);
     }
 
     public void clearGroups() {

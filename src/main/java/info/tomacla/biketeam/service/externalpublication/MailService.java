@@ -1,4 +1,4 @@
-package info.tomacla.biketeam.service;
+package info.tomacla.biketeam.service.externalpublication;
 
 import info.tomacla.biketeam.common.Dates;
 import info.tomacla.biketeam.common.FileExtension;
@@ -7,6 +7,7 @@ import info.tomacla.biketeam.domain.publication.Publication;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
+import info.tomacla.biketeam.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,11 @@ public class MailService implements ExternalPublicationService {
 
     @Autowired
     private SMTPService smtpService;
+
+    @Override
+    public boolean isApplicable(Team team) {
+        return smtpService.isSmtpConfigured();
+    }
 
     public void publish(Team team, Ride ride) {
 
@@ -112,6 +118,10 @@ public class MailService implements ExternalPublicationService {
     }
 
     private void publish(Team team, List<User> recipients, String subject, String content, Path image) {
+
+        if (!isApplicable(team)) {
+            return;
+        }
 
         try {
 

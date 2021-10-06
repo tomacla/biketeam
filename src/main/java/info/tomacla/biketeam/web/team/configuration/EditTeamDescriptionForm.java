@@ -26,6 +26,9 @@ public class EditTeamDescriptionForm {
         setOther("");
     }
 
+    public static EditTeamDescriptionFormBuilder builder() {
+        return new EditTeamDescriptionFormBuilder();
+    }
 
     public String getDescription() {
         return description;
@@ -101,10 +104,6 @@ public class EditTeamDescriptionForm {
 
     public EditTeamDescriptionFormParser parser() {
         return new EditTeamDescriptionFormParser(this);
-    }
-
-    public static EditTeamDescriptionFormBuilder builder() {
-        return new EditTeamDescriptionFormBuilder();
     }
 
     public static class EditTeamDescriptionFormParser {

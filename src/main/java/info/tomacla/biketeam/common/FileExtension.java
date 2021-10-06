@@ -22,18 +22,6 @@ public enum FileExtension {
         this.mediaType = mediaType;
     }
 
-    public String getExtension() {
-        return extension;
-    }
-
-    public String getMediaType() {
-        return mediaType;
-    }
-
-    public List<String> getOtherExtensions() {
-        return otherExtensions;
-    }
-
     public static List<FileExtension> byPriority() {
         return List.of(PNG, JPEG);
     }
@@ -51,6 +39,18 @@ public enum FileExtension {
             }
         }
         return Optional.empty();
+    }
+
+    public String getExtension() {
+        return extension;
+    }
+
+    public String getMediaType() {
+        return mediaType;
+    }
+
+    public List<String> getOtherExtensions() {
+        return otherExtensions;
     }
 
 }

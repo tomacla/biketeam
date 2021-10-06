@@ -27,6 +27,10 @@ public class NewPublicationForm {
         setFile(null);
     }
 
+    public static NewPublicationFormBuilder builder(ZonedDateTime defaultPublishedAt, ZoneId timezone) {
+        return new NewPublicationFormBuilder(defaultPublishedAt, timezone);
+    }
+
     public String getId() {
         return id;
     }
@@ -81,10 +85,6 @@ public class NewPublicationForm {
 
     public NewPublicationFormParser parser() {
         return new NewPublicationFormParser(this);
-    }
-
-    public static NewPublicationFormBuilder builder(ZonedDateTime defaultPublishedAt, ZoneId timezone) {
-        return new NewPublicationFormBuilder(defaultPublishedAt, timezone);
     }
 
     public static class NewPublicationFormParser {

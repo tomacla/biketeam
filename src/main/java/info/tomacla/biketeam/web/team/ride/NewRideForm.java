@@ -76,6 +76,14 @@ public class NewRideForm {
         }
     }
 
+    public static NewRideFormBuilder builder(int numberOfGroups, ZonedDateTime defaultDate, ZoneId timezone) {
+        return new NewRideFormBuilder(numberOfGroups, defaultDate, timezone);
+    }
+
+    public static NewRideFormBuilder builder(RideTemplate template, ZonedDateTime defaultDate, ZoneId timezone) {
+        return new NewRideFormBuilder(template, defaultDate, timezone);
+    }
+
     public String getId() {
         return id;
     }
@@ -160,14 +168,6 @@ public class NewRideForm {
         this.groups = Objects.requireNonNullElse(groups, new ArrayList<>());
     }
 
-    public static NewRideFormBuilder builder(int numberOfGroups, ZonedDateTime defaultDate, ZoneId timezone) {
-        return new NewRideFormBuilder(numberOfGroups, defaultDate, timezone);
-    }
-
-    public static NewRideFormBuilder builder(RideTemplate template, ZonedDateTime defaultDate, ZoneId timezone) {
-        return new NewRideFormBuilder(template, defaultDate, timezone);
-    }
-
     public NewRideFormParser parser() {
         return new NewRideFormParser(this);
     }
@@ -225,7 +225,7 @@ public class NewRideForm {
                 if (parser.getMapId().isPresent()) {
                     mapId = mapService.get(teamId, parser.getMapId().get()).isPresent() ? parser.getMapId().get() : null;
                 }
-                RideGroup gg = new RideGroup(parser.getName(),
+                return new RideGroup(parser.getName(),
                         parser.getLowerSpeed(),
                         parser.getUpperSpeed(),
                         mapId,
@@ -233,7 +233,6 @@ public class NewRideForm {
                         parser.getMeetingTime(),
                         parser.getMeetingPoint().orElse(null),
                         new HashSet<>());
-                return gg;
             }).collect(Collectors.toSet());
         }
 
