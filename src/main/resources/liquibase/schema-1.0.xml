@@ -559,6 +559,21 @@
 
     </changeSet>
 
+    <changeSet id="GITHUB-70-FACEBOOK-INTEGRATION" author="tomacla">
+
+        <dropColumn tableName="team_integration" columnName="facebook_access_token" />
+
+        <createTable tableName="admin_parameters">
+            <column name="name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="VARCHAR(500)" />
+        </createTable>
+
+        <addPrimaryKey tableName="admin_parameters" columnNames="name"/>
+
+    </changeSet>
+
 
 </databaseChangeLog>
 

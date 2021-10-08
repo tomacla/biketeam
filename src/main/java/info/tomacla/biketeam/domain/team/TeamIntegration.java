@@ -18,8 +18,6 @@ public class TeamIntegration {
     @JoinColumn(name = "team_id")
     private Team team;
 
-    @Column(name = "facebook_access_token")
-    private String facebookAccessToken;
     @Column(name = "facebook_page_id")
     private String facebookPageId;
     @Column(name = "facebook_group_details")
@@ -33,12 +31,6 @@ public class TeamIntegration {
 
     public TeamIntegration() {
 
-    }
-
-    public TeamIntegration(String facebookAccessToken,
-                           String facebookPageId) {
-        setFacebookAccessToken(facebookAccessToken);
-        setFacebookPageId(facebookPageId);
     }
 
     public String getTeamId() {
@@ -58,14 +50,6 @@ public class TeamIntegration {
         this.teamId = team.getId();
     }
 
-    public String getFacebookAccessToken() {
-        return facebookAccessToken;
-    }
-
-    public void setFacebookAccessToken(String facebookAccessToken) {
-        this.facebookAccessToken = Strings.requireNonBlankOrNull(facebookAccessToken);
-    }
-
     public String getFacebookPageId() {
         return facebookPageId;
     }
@@ -83,17 +67,7 @@ public class TeamIntegration {
     }
 
     public boolean isFacebookConfigured() {
-        return getFacebookConfigurationStep() == 3;
-    }
-
-    public int getFacebookConfigurationStep() {
-        if (facebookAccessToken != null && facebookPageId != null) {
-            return 3;
-        }
-        if (facebookAccessToken != null) {
-            return 2;
-        }
-        return 1;
+        return facebookPageId != null;
     }
 
     public boolean isMattermostConfigured() {

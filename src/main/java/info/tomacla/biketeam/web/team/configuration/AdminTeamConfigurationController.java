@@ -6,7 +6,6 @@ import info.tomacla.biketeam.domain.team.TeamDescription;
 import info.tomacla.biketeam.domain.team.TeamIntegration;
 import info.tomacla.biketeam.service.FileService;
 import info.tomacla.biketeam.service.MapService;
-import info.tomacla.biketeam.service.externalpublication.FacebookService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,9 +26,6 @@ public class AdminTeamConfigurationController extends AbstractController {
 
     @Autowired
     private MapService mapService;
-
-    @Autowired
-    private FacebookService facebookService;
 
     @Value("${smtp.from}")
     private String smtpFrom;
@@ -160,29 +156,6 @@ public class AdminTeamConfigurationController extends AbstractController {
 
     }
 
-    @GetMapping(value = "/integration/facebook/backward")
-    public String facebookConfBackward(@PathVariable("teamId") String teamId,
-                                       Principal principal,
-                                       Model model) {
-
-        final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
-
-        final TeamIntegration teamIntegration = team.getIntegration();
-
-        final int facebookConfigurationStep = teamIntegration.getFacebookConfigurationStep();
-        if (facebookConfigurationStep == 3) {
-            teamIntegration.setFacebookPageId(null);
-        } else if (facebookConfigurationStep == 2) {
-            teamIntegration.setFacebookAccessToken(null);
-        }
-
-        teamService.save(team);
-
-        return createRedirect(team, "/admin/integration");
-
-    }
-
     @GetMapping(value = "/integration")
     public String getSiteIntegration(@PathVariable("teamId") String teamId,
                                      Principal principal, Model model) {
@@ -193,7 +166,6 @@ public class AdminTeamConfigurationController extends AbstractController {
         final TeamIntegration teamIntegration = team.getIntegration();
 
         EditTeamIntegrationForm form = EditTeamIntegrationForm.builder()
-                .withFacebookPageId(teamIntegration.getFacebookPageId())
                 .withFacebookGroupDetails(teamIntegration.isFacebookGroupDetails())
                 .withMattermostApiEndpoint(teamIntegration.getMattermostApiEndpoint())
                 .withMattermostApiToken(teamIntegration.getMattermostApiToken())
@@ -202,16 +174,6 @@ public class AdminTeamConfigurationController extends AbstractController {
 
         addGlobalValues(principal, model, "Administration - Intégrations", team);
         model.addAttribute("formdata", form);
-        model.addAttribute("facebookConfigurationStep", teamIntegration.getFacebookConfigurationStep());
-        if (teamIntegration.getFacebookConfigurationStep() == 1) {
-            model.addAttribute("facebookUrl", facebookService.getLoginUrl(team.getId()));
-        }
-        if (teamIntegration.getFacebookConfigurationStep() == 2) {
-            model.addAttribute("authorizedPages", facebookService.getAuthorizedPages(team));
-        }
-        if (teamIntegration.getFacebookConfigurationStep() >= 2) {
-            model.addAttribute("facebookAccount", facebookService.getConnectedAccount(team).orElse("Inconnu"));
-        }
         model.addAttribute("adminContact", smtpFrom);
         return "team_admin_integration";
     }
@@ -230,7 +192,6 @@ public class AdminTeamConfigurationController extends AbstractController {
 
             final EditTeamIntegrationForm.EditTeamIntegrationFormParser parser = form.parser();
 
-            teamIntegration.setFacebookPageId(parser.getFacebookPageId());
             teamIntegration.setFacebookGroupDetails(parser.isFacebookGroupDetails());
             teamIntegration.setMattermostApiToken(parser.getMattermostApiToken());
             teamIntegration.setMattermostChannelID(parser.getMattermostChannelID());
@@ -239,16 +200,6 @@ public class AdminTeamConfigurationController extends AbstractController {
 
             addGlobalValues(principal, model, "Administration - Intégrations", team);
             model.addAttribute("formdata", form);
-            model.addAttribute("facebookConfigurationStep", teamIntegration.getFacebookConfigurationStep());
-            if (teamIntegration.getFacebookConfigurationStep() == 1) {
-                model.addAttribute("facebookUrl", facebookService.getLoginUrl(team.getId()));
-            }
-            if (teamIntegration.getFacebookConfigurationStep() == 2) {
-                model.addAttribute("authorizedPages", facebookService.getAuthorizedPages(team));
-            }
-            if (teamIntegration.getFacebookConfigurationStep() >= 2) {
-                model.addAttribute("facebookAccount", facebookService.getConnectedAccount(team).orElse("Inconnu"));
-            }
             model.addAttribute("adminContact", smtpFrom);
             return "team_admin_integration";
 
@@ -256,16 +207,6 @@ public class AdminTeamConfigurationController extends AbstractController {
             model.addAttribute("errors", List.of(e.getMessage()));
             addGlobalValues(principal, model, "Administration - Intégrations", team);
             model.addAttribute("formdata", form);
-            model.addAttribute("facebookConfigurationStep", teamIntegration.getFacebookConfigurationStep());
-            if (teamIntegration.getFacebookConfigurationStep() == 1) {
-                model.addAttribute("facebookUrl", facebookService.getLoginUrl(team.getId()));
-            }
-            if (teamIntegration.getFacebookConfigurationStep() == 2) {
-                model.addAttribute("authorizedPages", facebookService.getAuthorizedPages(team));
-            }
-            if (teamIntegration.getFacebookConfigurationStep() >= 2) {
-                model.addAttribute("facebookAccount", facebookService.getConnectedAccount(team).orElse("Inconnu"));
-            }
             model.addAttribute("adminContact", smtpFrom);
             return "team_admin_integration";
         }

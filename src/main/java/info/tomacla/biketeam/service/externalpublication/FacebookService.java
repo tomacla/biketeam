@@ -7,12 +7,13 @@ import com.restfb.types.Account;
 import com.restfb.types.GraphResponse;
 import com.restfb.types.User;
 import info.tomacla.biketeam.common.Dates;
+import info.tomacla.biketeam.domain.parameter.Parameter;
+import info.tomacla.biketeam.domain.parameter.ParameterRepository;
 import info.tomacla.biketeam.domain.publication.Publication;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.service.PublicationService;
 import info.tomacla.biketeam.service.RideService;
-import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.service.UrlService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +31,7 @@ import java.util.Optional;
 public class FacebookService implements ExternalPublicationService {
 
     private static final Logger log = LoggerFactory.getLogger(FacebookService.class);
-
-    @Autowired
-    private TeamService teamService;
-
+    private static String FACEBOOK_TOKEN_PARAMETER_KEY = "FACEBOOK_TOKEN";
     @Autowired
     private RideService rideService;
 
@@ -45,6 +43,9 @@ public class FacebookService implements ExternalPublicationService {
 
     @Autowired
     private Environment env;
+
+    @Autowired
+    private ParameterRepository parameterRepository;
 
     @Override
     public boolean isApplicable(Team team) {
@@ -106,10 +107,15 @@ public class FacebookService implements ExternalPublicationService {
             return;
         }
 
+        final Optional<Parameter> facebookAccessToken = getFacebookAccessToken();
+        if (facebookAccessToken.isEmpty()) {
+            return;
+        }
+
         try {
 
             final DefaultFacebookClient facebookClient = new DefaultFacebookClient(
-                    team.getIntegration().getFacebookAccessToken(),
+                    facebookAccessToken.get().getValue(),
                     Version.LATEST
             );
 
@@ -125,11 +131,11 @@ public class FacebookService implements ExternalPublicationService {
                     publishClient.publish(team.getIntegration().getFacebookPageId() + "/photos",
                             GraphResponse.class,
                             attachment,
-                            Parameter.with("message", content));
+                            com.restfb.Parameter.with("message", content));
                 } else {
                     publishClient.publish(team.getIntegration().getFacebookPageId() + "/feed",
                             GraphResponse.class,
-                            Parameter.with("message", content));
+                            com.restfb.Parameter.with("message", content));
                 }
 
             }
@@ -156,16 +162,17 @@ public class FacebookService implements ExternalPublicationService {
         return Optional.empty();
     }
 
-    public Optional<String> getConnectedAccount(Team team) {
+    public Optional<String> getConnectedAccount() {
 
-        if (team.getIntegration().getFacebookAccessToken() == null) {
+        final Optional<Parameter> facebookAccessToken = getFacebookAccessToken();
+        if (facebookAccessToken.isEmpty()) {
             return Optional.empty();
         }
 
         try {
 
             DefaultFacebookClient facebookClient = new DefaultFacebookClient(
-                    team.getIntegration().getFacebookAccessToken(),
+                    facebookAccessToken.get().getValue(),
                     Version.LATEST
             );
 
@@ -180,11 +187,17 @@ public class FacebookService implements ExternalPublicationService {
 
     }
 
-    public List<FacebookPage> getAuthorizedPages(Team team) {
+    public List<FacebookPage> getAuthorizedPages() {
+
+        final Optional<Parameter> facebookAccessToken = getFacebookAccessToken();
+        if (facebookAccessToken.isEmpty()) {
+            return new ArrayList<>();
+        }
+
         try {
 
             DefaultFacebookClient facebookClient = new DefaultFacebookClient(
-                    team.getIntegration().getFacebookAccessToken(),
+                    facebookAccessToken.get().getValue(),
                     Version.LATEST
             );
 
@@ -205,7 +218,7 @@ public class FacebookService implements ExternalPublicationService {
         }
     }
 
-    public String getLoginUrl(String teamId) {
+    public String getLoginUrl() {
 
         try {
 
@@ -213,12 +226,13 @@ public class FacebookService implements ExternalPublicationService {
 
             ScopeBuilder scopeBuilder = new ScopeBuilder();
             scopeBuilder.addPermission(FacebookPermissions.PAGES_MANAGE_POSTS);
+            scopeBuilder.addPermission(FacebookPermissions.PAGES_READ_ENGAGEMENT);
+            scopeBuilder.addPermission(FacebookPermissions.PAGES_SHOW_LIST);
 
             return facebookClient.getLoginDialogUrl(
                     env.getProperty("facebook.app-id"),
                     getRedirectUri(),
-                    scopeBuilder,
-                    Parameter.with("state", teamId));
+                    scopeBuilder);
         } catch (Exception e) {
             log.error("Error while builing facebook login URL", e);
             throw new RuntimeException(e);
@@ -248,6 +262,21 @@ public class FacebookService implements ExternalPublicationService {
 
     private String getRedirectUri() {
         return urlService.getUrlWithSuffix("/integration/facebook/login/");
+    }
+
+    public Optional<Parameter> getFacebookAccessToken() {
+        return parameterRepository.findById(FACEBOOK_TOKEN_PARAMETER_KEY);
+    }
+
+    public void storeToken(String userAccessToken) {
+        Parameter p = new Parameter();
+        p.setName(FACEBOOK_TOKEN_PARAMETER_KEY);
+        p.setValue(userAccessToken);
+        parameterRepository.save(p);
+    }
+
+    public void deleteToken() {
+        parameterRepository.findById(FACEBOOK_TOKEN_PARAMETER_KEY).ifPresent(p -> parameterRepository.delete(p));
     }
 
 }

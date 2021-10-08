@@ -142,21 +142,15 @@ public class RootController extends AbstractController {
     }
 
     @GetMapping(value = "/integration/facebook/login")
-    public RedirectView getSiteIntegration(@RequestParam("state") String teamId,
-                                           @RequestParam("code") String facebookCode,
+    public RedirectView getSiteIntegration(@RequestParam("code") String facebookCode,
                                            Principal principal,
                                            Model model) {
 
-        checkAdmin(principal, teamId);
-        final Team team = checkTeam(teamId);
-
         final String userAccessToken = facebookService.getUserAccessToken(facebookCode);
-        team.getIntegration().setFacebookAccessToken(userAccessToken);
-
-        teamService.save(team);
+        facebookService.storeToken(userAccessToken);
 
         // do not use super function createRedirect in this particular case
-        return new RedirectView("/" + team.getId() + "/admin/integration");
+        return new RedirectView("/admin/facebook");
 
     }
 
