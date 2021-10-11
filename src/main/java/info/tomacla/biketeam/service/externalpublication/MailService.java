@@ -70,7 +70,7 @@ public class MailService implements ExternalPublicationService {
                 sb.append("</p>");
             });
             if (ride.isImaged()) {
-                sb.append("<p><img src=\"cid:Image\" /></p>");
+                sb.append("<p><img width=\"400\" src=\"cid:Image\" /></p>");
             }
             sb.append("<br/>").append("<p>").append(team.getName()).append("</p>");
             sb.append("</body>").append("</html>");
@@ -98,7 +98,7 @@ public class MailService implements ExternalPublicationService {
         sb.append("<p>").append(getHtmlLink(urlService.getTeamUrl(team))).append("</p>");
         sb.append("<p>").append(publication.getContent()).append("</p>");
         if (publication.isImaged()) {
-            sb.append("<p><img src=\"cid:Image\" /></p>");
+            sb.append("<p><img width=\"400\" src=\"cid:Image\" /></p>");
         }
         sb.append("<br/>").append("<p>").append(team.getName()).append("</p>");
         sb.append("</body>").append("</html>");
