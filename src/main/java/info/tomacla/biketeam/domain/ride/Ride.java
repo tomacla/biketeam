@@ -3,6 +3,7 @@ package info.tomacla.biketeam.domain.ride;
 import info.tomacla.biketeam.common.Lists;
 import info.tomacla.biketeam.common.PublishedStatus;
 import info.tomacla.biketeam.common.Strings;
+import org.springframework.util.ObjectUtils;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -33,9 +34,6 @@ public class Ride {
     @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @OrderBy("id ASC")
     private Set<RideGroup> groups;
-
-    @Transient
-    private int nextGroupIndex = 0;
 
     protected Ride() {
 
@@ -154,9 +152,48 @@ public class Ride {
                 .collect(Collectors.toList());
     }
 
+    public void addOrReplaceGroups(List<RideGroup> updatedGroups) {
+
+        // remove deleted groups
+        final Set<String> updatedGroupsId = updatedGroups.stream().map(RideGroup::getId).filter(id -> !ObjectUtils.isEmpty(id)).collect(Collectors.toSet());
+        this.groups.forEach(group -> {
+            if (!updatedGroupsId.contains(group.getId())) {
+                group.removeRide(); // needed for hibernate
+            }
+        });
+        groups.removeIf(g -> !updatedGroupsId.contains(g.getId()));
+
+        // add new groups
+        final List<RideGroup> newGroups = updatedGroups.stream().filter(g -> g.getId() == null).collect(Collectors.toList());
+        newGroups.forEach(this::addGroup);
+
+        // update existing groups
+        final List<RideGroup> existingGroups = updatedGroups.stream().filter(g -> g.getId() != null).collect(Collectors.toList());
+        existingGroups.forEach(g ->
+                this.groups.stream().filter(gg -> g.getId().equals(gg.getId())).findFirst().ifPresent(target -> {
+                    target.setMeetingLocation(g.getMeetingLocation());
+                    target.setMeetingTime(g.getMeetingTime());
+                    target.setName(g.getName());
+                    target.setUpperSpeed(g.getUpperSpeed());
+                    target.setLowerSpeed(g.getLowerSpeed());
+                    target.setMapId(g.getMapId());
+                })
+        );
+
+
+    }
+
     public void addGroup(RideGroup group) {
-        group.setRide(this, nextGroupIndex++);
+        group.setRide(this, getNextGroupIndex());
         groups.add(group);
+    }
+
+    private int getNextGroupIndex() {
+        final Optional<Integer> nextIndex = this.groups.stream().map(RideGroup::getGroupIndex).max(Comparator.naturalOrder());
+        if (nextIndex.isEmpty()) {
+            return 0;
+        }
+        return nextIndex.get() + 1;
     }
 
     public void clearGroups() {

@@ -3,12 +3,14 @@ package info.tomacla.biketeam.web.team.ride;
 import info.tomacla.biketeam.common.Dates;
 import info.tomacla.biketeam.common.Point;
 import info.tomacla.biketeam.common.Strings;
+import org.springframework.util.ObjectUtils;
 
 import java.time.LocalTime;
 import java.util.Optional;
 
 public class NewRideGroupForm {
 
+    private String id;
     private String name;
     private double lowerSpeed;
     private double upperSpeed;
@@ -20,6 +22,7 @@ public class NewRideGroupForm {
     private String meetingTime;
 
     public NewRideGroupForm() {
+        setId(null);
         setName(null);
         setMapId(null);
         setMapName(null);
@@ -31,6 +34,14 @@ public class NewRideGroupForm {
 
     public static NewRideGroupFormBuilder builder() {
         return new NewRideGroupFormBuilder();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = Strings.requireNonBlankOrDefault(id, "");
     }
 
     public String getName() {
@@ -117,6 +128,13 @@ public class NewRideGroupForm {
             this.form = form;
         }
 
+        public String getId() {
+            if (ObjectUtils.isEmpty(form.getId())) {
+                return null;
+            }
+            return form.getId();
+        }
+
         public String getName() {
             return form.getName();
         }
@@ -159,6 +177,11 @@ public class NewRideGroupForm {
 
         public NewRideGroupFormBuilder() {
             this.form = new NewRideGroupForm();
+        }
+
+        public NewRideGroupFormBuilder withId(String id) {
+            form.setId(id);
+            return this;
         }
 
         public NewRideGroupFormBuilder withName(String name) {

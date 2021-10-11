@@ -2,15 +2,12 @@ package info.tomacla.biketeam.web.team.ride;
 
 import info.tomacla.biketeam.common.PublishedStatus;
 import info.tomacla.biketeam.domain.ride.Ride;
-import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.template.RideTemplate;
-import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.service.RideService;
 import info.tomacla.biketeam.service.RideTemplateService;
 import info.tomacla.biketeam.web.AbstractController;
-import org.apache.commons.collections4.SetUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,10 +18,7 @@ import java.security.Principal;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = "/{teamId}/admin/rides")
@@ -150,28 +144,18 @@ public class AdminTeamRideController extends AbstractController {
                 target.setTitle(parser.getTitle());
                 target.setDescription(parser.getDescription());
                 target.setType(parser.getType());
+
+                target.addOrReplaceGroups(parser.getGroups(teamId, mapService));
+
             } else {
                 target = new Ride(team.getId(), parser.getType(), parser.getDate(), parser.getPublishedAt(timezone),
                         parser.getTitle(), parser.getDescription(), parser.getFile().isPresent(), null);
                 if (parser.getTemplateId() != null) {
                     rideTemplateService.increment(team.getId(), parser.getTemplateId());
                 }
+                // new group so just add all groups
+                parser.getGroups(team.getId(), mapService).forEach(target::addGroup);
             }
-
-            // save participants
-            final Map<String, Set<User>> participantsByName = target.getGroups().stream()
-                    .collect(Collectors.toMap(RideGroup::getName, RideGroup::getParticipants,
-                            (p1, p2) -> SetUtils.union(p1, p2)));
-
-            target.clearGroups();
-            parser.getGroups(team.getId(), mapService).forEach(target::addGroup);
-
-            // restore participants
-            target.getGroups().forEach(group -> {
-                if (participantsByName.containsKey(group.getName())) {
-                    participantsByName.get(group.getName()).forEach(group::addParticipant);
-                }
-            });
 
             if (parser.getFile().isPresent()) {
                 target.setImaged(true);

@@ -48,6 +48,11 @@
         var groupContainer = document.getElementById('form-ride-groups');
         var groupCopy = groupContainer.firstElementChild.cloneNode(true);
         groupContainer.appendChild(groupCopy);
+        [...groupCopy.getElementsByTagName("input")].forEach(function(input) {
+            if(input.hasAttribute('data-empty-on-copy')) {
+                input.value='';
+            }
+        });
         resetGroupIndexes();
     }
 
@@ -119,6 +124,7 @@
                 <div id="form-ride-groups">
                 <#list formdata.groups as group>
                     <div class="form-ride-group border border-dark rounded p-2 m-2">
+                        <input type="hidden" data-empty-on-copy="true" name="groups[${group?index}].id" id="form-ride-group-id-${group?index}" value="${group.id}">
                         <div class="row">
                             <div class="mb-3 col-6">
                                 <label for="form-ride-group-name-${group?index}" class="form-label">Nom</label>

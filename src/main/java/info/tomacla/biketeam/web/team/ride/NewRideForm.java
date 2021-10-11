@@ -64,7 +64,7 @@ public class NewRideForm {
         setDescription(rideTemplate.getDescription());
         setTemplateId(rideTemplate.getId());
         groups = new ArrayList<>();
-        for (RideGroupTemplate g : rideTemplate.getGroups()) {
+        for (RideGroupTemplate g : rideTemplate.getSortedGroups()) {
             groups.add(NewRideGroupForm.builder()
                     .withName(g.getName())
                     .withLowerSpeed(g.getLowerSpeed())
@@ -218,14 +218,14 @@ public class NewRideForm {
             return Optional.empty();
         }
 
-        public Set<RideGroup> getGroups(String teamId, MapService mapService) {
+        public List<RideGroup> getGroups(String teamId, MapService mapService) {
             return form.getGroups().stream().map(g -> {
                 NewRideGroupForm.NewRideGroupFormParser parser = g.parser();
                 String mapId = null;
                 if (parser.getMapId().isPresent()) {
                     mapId = mapService.get(teamId, parser.getMapId().get()).isPresent() ? parser.getMapId().get() : null;
                 }
-                return new RideGroup(parser.getName(),
+                final RideGroup gg = new RideGroup(parser.getName(),
                         parser.getLowerSpeed(),
                         parser.getUpperSpeed(),
                         mapId,
@@ -233,7 +233,14 @@ public class NewRideForm {
                         parser.getMeetingTime(),
                         parser.getMeetingPoint().orElse(null),
                         new HashSet<>());
-            }).collect(Collectors.toSet());
+
+                if (parser.getId() != null) {
+                    gg.setId(parser.getId());
+                }
+
+                return gg;
+
+            }).collect(Collectors.toList());
         }
 
     }
@@ -299,6 +306,7 @@ public class NewRideForm {
                     }
 
                     return NewRideGroupForm.builder()
+                            .withId(g.getId())
                             .withName(g.getName())
                             .withMapId(mapId)
                             .withMapName(mapName)

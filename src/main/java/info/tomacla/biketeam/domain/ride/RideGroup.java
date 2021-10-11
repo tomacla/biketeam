@@ -9,7 +9,6 @@ import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Entity
@@ -56,7 +55,6 @@ public class RideGroup {
                      LocalTime meetingTime,
                      Point meetingPoint,
                      Set<User> participants) {
-        this.id = UUID.randomUUID().toString(); // tmp id
         setName(name);
         setLowerSpeed(lowerSpeed);
         setUpperSpeed(upperSpeed);
@@ -160,6 +158,11 @@ public class RideGroup {
         this.id = ride.getId() + "-" + index;
     }
 
+    public int getGroupIndex() {
+        final String[] parts = this.id.split("-");
+        return Integer.valueOf(parts[parts.length - 1]);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -171,5 +174,9 @@ public class RideGroup {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public void removeRide() {
+        this.ride = null;
     }
 }
