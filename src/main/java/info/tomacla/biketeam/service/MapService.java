@@ -174,6 +174,9 @@ public class MapService {
         return sort;
     }
 
+    public void renameMap(Map map) {
+        gpxService.renameMap(map.getTeamId(), map.getId(), map.getName());
+    }
 
     public void changeMapId(Map map, String newId) {
 
@@ -198,5 +201,9 @@ public class MapService {
         delete(map.getTeamId(), map.getId());
 
 
+    }
+
+    public void refreshFiles(String teamId, String mapId) {
+        get(teamId, mapId).ifPresent(map -> this.renameMap(map));
     }
 }

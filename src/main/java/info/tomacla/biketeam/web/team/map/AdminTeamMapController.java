@@ -87,6 +87,7 @@ public class AdminTeamMapController extends AbstractController {
             final NewMapForm.NewMapFormParser parser = form.parser();
 
             Map map = optionalMap.get();
+            String previousName = map.getName();
             map.setName(parser.getName());
             map.setVisible(parser.isVisible());
             map.setTags(parser.getTags());
@@ -98,6 +99,10 @@ public class AdminTeamMapController extends AbstractController {
             }
 
             mapService.save(map);
+
+            if(!map.getName().equals(previousName)) {
+                mapService.renameMap(map);
+            }
 
             if (parser.getNewId() != null && !parser.getNewId().equals(map.getId())) {
                 mapService.changeMapId(map, parser.getNewId());
@@ -130,7 +135,7 @@ public class AdminTeamMapController extends AbstractController {
             final Map newMap = mapService.save(
                     team,
                     file.getInputStream(),
-                    FilenameUtils.removeExtension(file.getOriginalFilename()),
+                    null,
                     null
             );
             return redirectToAdminMap(team, newMap.getId());

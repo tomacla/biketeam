@@ -67,7 +67,6 @@ public class GpxService {
     public Map parseAndReplace(Team team, Map map, Path gpx) {
 
         GPXPath gpxPath = getGPXPath(gpx, map.getName());
-
         gpxPathEnhancer.virtualize(gpxPath);
         GPXFilter.filterPointsDouglasPeucker(gpxPath);
 
@@ -75,9 +74,9 @@ public class GpxService {
         Vector wind = new Vector(windRaw.getX(), windRaw.getY());
         boolean crossing = gpxDataComputer.isCrossing(gpxPath);
 
-        Path staticMap = getStaticMap(team, gpxPath);
-
-        Path fit = getFit(gpxPath);
+        Path storedStaticMap = getStaticMap(gpxPath);
+        Path storedFit = getFit(gpxPath);
+        Path storedGpx = getGpx(gpxPath);
 
         List<Point> points = gpxPath.getPoints();
         io.github.glandais.gpx.Point startPoint = points.get(0);
@@ -95,9 +94,9 @@ public class GpxService {
         map.setWindDirection(WindDirection.findDirectionFromVector(wind));
         map.setCrossing(crossing);
 
-        fileService.store(gpx, FileRepositories.GPX_FILES, team.getId(), map.getId() + ".gpx");
-        fileService.store(fit, FileRepositories.FIT_FILES, team.getId(), map.getId() + ".fit");
-        fileService.store(staticMap, FileRepositories.MAP_IMAGES, team.getId(), map.getId() + ".png");
+        fileService.store(storedGpx, FileRepositories.GPX_FILES, team.getId(), map.getId() + ".gpx");
+        fileService.store(storedFit, FileRepositories.FIT_FILES, team.getId(), map.getId() + ".fit");
+        fileService.store(storedStaticMap, FileRepositories.MAP_IMAGES, team.getId(), map.getId() + ".png");
 
         return map;
 
@@ -106,7 +105,6 @@ public class GpxService {
     public Map parseAndStore(Team team, Path gpx, String defaultName, String forceId) {
 
         GPXPath gpxPath = getGPXPath(gpx, defaultName);
-
         gpxPathEnhancer.virtualize(gpxPath);
         GPXFilter.filterPointsDouglasPeucker(gpxPath);
 
@@ -114,9 +112,9 @@ public class GpxService {
         Vector wind = new Vector(windRaw.getX(), windRaw.getY());
         boolean crossing = gpxDataComputer.isCrossing(gpxPath);
 
-        Path staticMap = getStaticMap(team, gpxPath);
-
-        Path fit = getFit(gpxPath);
+        Path storedStaticMap = getStaticMap(gpxPath);
+        Path storedFit = getFit(gpxPath);
+        Path storedGpx = getGpx(gpxPath);
 
         List<Point> points = gpxPath.getPoints();
         io.github.glandais.gpx.Point startPoint = points.get(0);
@@ -126,7 +124,7 @@ public class GpxService {
         info.tomacla.biketeam.common.Point end = new info.tomacla.biketeam.common.Point(endPoint.getLatDeg(), endPoint.getLonDeg());
 
         Map newMap = new Map(
-                Strings.permatitleFromString(gpxPath.getName()),
+                forceId != null ? forceId : Strings.permatitleFromString(gpxPath.getName()),
                 team.getId(),
                 gpxPath.getName(),
                 Rounder.round2Decimals(Math.round(10.0 * gpxPath.getDist()) / 10000.0),
@@ -142,13 +140,9 @@ public class GpxService {
                 false
         );
 
-        if (forceId != null) {
-            newMap.setId(forceId);
-        }
-
-        fileService.store(gpx, FileRepositories.GPX_FILES, team.getId(), newMap.getId() + ".gpx");
-        fileService.store(fit, FileRepositories.FIT_FILES, team.getId(), newMap.getId() + ".fit");
-        fileService.store(staticMap, FileRepositories.MAP_IMAGES, team.getId(), newMap.getId() + ".png");
+        fileService.store(storedGpx, FileRepositories.GPX_FILES, team.getId(), newMap.getId() + ".gpx");
+        fileService.store(storedFit, FileRepositories.FIT_FILES, team.getId(), newMap.getId() + ".fit");
+        fileService.store(storedStaticMap, FileRepositories.MAP_IMAGES, team.getId(), newMap.getId() + ".png");
 
         return newMap;
 
@@ -166,10 +160,16 @@ public class GpxService {
         fileService.move(FileRepositories.MAP_IMAGES, teamId, oldId + ".png", newId + ".png");
     }
 
-    public void generateImage(Team team, String mapId, Path gpxFile) {
-        GPXPath gpxPath = getGPXPath(gpxFile, "");
-        Path staticMapImage = getStaticMap(team, gpxPath);
-        fileService.store(staticMapImage, FileRepositories.MAP_IMAGES, team.getId(), mapId + ".png");
+    public void renameMap(String teamId, String mapId, String newName) {
+
+        GPXPath gpxPath = getGPXPath(fileService.get(FileRepositories.GPX_FILES, teamId, mapId + ".gpx"), newName);
+        Path storedStaticMap = getStaticMap(gpxPath);
+        Path storedFit = getFit(gpxPath);
+        Path storedGpx = getGpx(gpxPath);
+
+        fileService.store(storedGpx, FileRepositories.GPX_FILES, teamId, mapId + ".gpx");
+        fileService.store(storedFit, FileRepositories.FIT_FILES, teamId, mapId + ".fit");
+        fileService.store(storedStaticMap, FileRepositories.MAP_IMAGES, teamId, mapId + ".png");
     }
 
     private GPXPath getGPXPath(Path path, String defaultName) {
@@ -188,6 +188,9 @@ public class GpxService {
             log.error("Error while parsing GPX", e);
             throw new RuntimeException(e);
         }
+        if(defaultName != null) {
+            gpxPath.setName(defaultName);
+        }
         return gpxPath;
     }
 
@@ -202,7 +205,18 @@ public class GpxService {
         }
     }
 
-    private Path getStaticMap(Team team, GPXPath path) {
+    private Path getGpx(GPXPath gpxPath) {
+        try {
+            Path gpx = fileService.getTempFile("gpxsimplified", ".gpx");
+            gpxFileWriter.writeGpxFile(List.of(gpxPath), gpx.toFile());
+            return gpx;
+        } catch (Exception e) {
+            log.error("Error while creating FIT", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Path getStaticMap(GPXPath path) {
         try {
             String tileUrl = "https://api.mapbox.com/styles/v1/mapbox/outdoors-v11/tiles/256/{z}/{x}/{y}?access_token=" + mapBoxAPIKey;
 
