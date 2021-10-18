@@ -18,6 +18,9 @@
                 <li class="list-inline-item"><i class="bi bi-arrow-left-right"></i> ${map.length}km</li>
                 <li class="list-inline-item"><i class="bi bi-arrow-up"></i> ${map.positiveElevation}m</li>
                 <li class="list-inline-item"><i class="bi bi-arrow-down"></i> ${map.negativeElevation}m</li>
+                <#if map.crossing>
+                    <li class="list-inline-item"><i class="bi bi-x"></i> Ca croise !</li>
+                </#if>
             </ul>
 
             <#if map.tags?size gt 0>
