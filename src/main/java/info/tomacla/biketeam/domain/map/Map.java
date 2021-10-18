@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "map")
@@ -79,7 +80,7 @@ public class Map {
         setLength(length);
         setPositiveElevation(positiveElevation);
         setNegativeElevation(negativeElevation);
-        setTags(tags);
+        setTags(new ArrayList<>(tags));
         setStartPoint(startPoint);
         setEndPoint(endPoint);
         setWindDirection(windDirection);

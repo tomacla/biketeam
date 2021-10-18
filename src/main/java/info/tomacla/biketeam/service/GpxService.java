@@ -132,12 +132,12 @@ public class GpxService {
                 LocalDate.now(team.getZoneId()),
                 Rounder.round1Decimal(gpxPath.getTotalElevation()),
                 Rounder.round1Decimal(gpxPath.getTotalElevationNegative()),
-                new ArrayList<>(),
+                team.getConfiguration().getDefaultSearchTags(),
                 start,
                 end,
                 WindDirection.findDirectionFromVector(wind),
                 crossing,
-                false
+                true
         );
 
         fileService.store(storedGpx, FileRepositories.GPX_FILES, team.getId(), newMap.getId() + ".gpx");

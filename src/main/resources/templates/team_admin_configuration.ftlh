@@ -42,7 +42,7 @@
                 <hr/>
 
                 <div class="mb-3">
-                    <label class="form-label" for="maps-filter-tags" class="form-label">Tags par défaut pour la recherche</label>
+                    <label class="form-label" for="maps-filter-tags" class="form-label">Tags par défaut (recherche et création de maps)</label>
                     <div class="input-group">
                           <label class="input-group-text" for="maps-filter-tags" class="form-label">Tags</label>
                           <select multiple data-remove-first="true" name="defaultSearchTags" class="form-select" id="maps-filter-tags">

@@ -25,7 +25,7 @@ public class NewMapForm {
         setNewId(null);
         setName(null);
         setType(null);
-        setVisible(null);
+        setVisible("on");
         setTags(null);
         setFile(null);
     }
