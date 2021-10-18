@@ -1,4 +1,4 @@
-package info.tomacla.biketeam;
+package info.tomacla.biketeam.startup;
 
 import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.service.TeamService;
