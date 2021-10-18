@@ -1,11 +1,13 @@
 package info.tomacla.biketeam.web.ride;
 
 import info.tomacla.biketeam.common.ImageDescriptor;
+import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.Role;
 import info.tomacla.biketeam.domain.user.User;
+import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.service.RideService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,7 @@ import java.nio.file.Files;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = "/{teamId}/rides")
@@ -33,6 +36,9 @@ public class RideController extends AbstractController {
 
     @Autowired
     private RideService rideService;
+
+    @Autowired
+    private MapService mapService;
 
     @GetMapping(value = "/{rideId}")
     public String getRide(@PathVariable("teamId") String teamId,
@@ -48,8 +54,19 @@ public class RideController extends AbstractController {
         }
 
         Ride ride = optionalRide.get();
+        final java.util.Map<String, Map> maps = ride.getGroups().stream()
+                .map(RideGroup::getMapId)
+                .filter(mapId -> mapId != null)
+                .distinct()
+                .map(mapId -> mapService.get(teamId, mapId))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toMap(Map::getId, m -> m));
+
+
         addGlobalValues(principal, model, "Ride " + ride.getTitle(), team);
         model.addAttribute("ride", ride);
+        model.addAttribute("maps", maps);
         return "ride";
     }
 

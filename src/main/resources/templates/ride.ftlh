@@ -40,6 +40,13 @@
                         <div class="row justify-content-center">
                             <div class="col-12 col-md-6">
                             <div class="w-100 shadow rounded border d-flex flex-column justify-content-center">
+                                <#if maps[group.mapId]??>
+                                    <ul class="list-inline mx-auto my-1">
+                                        <li class="list-inline-item"><i class="bi bi-arrow-left-right"></i> ${maps[group.mapId].length}km</li>
+                                        <li class="list-inline-item"><i class="bi bi-arrow-up"></i> ${maps[group.mapId].positiveElevation}m</li>
+                                        <li class="list-inline-item"><i class="bi bi-arrow-down"></i> ${maps[group.mapId].negativeElevation}m</li>
+                                    </ul>
+                                </#if>
                                 <a href="<@common.teamUrl team.id '/maps/${group.mapId}' />"><img src="<@common.teamUrl team.id '/maps/${group.mapId}/image' />" class="d-block w-100 h-auto" alt="${group.mapId} image"></a>
                                 <div class="btn-group" role="group">
                                     <a download="${ride.title}-${group.name}.gpx" href="<@common.teamUrl team.id '/maps/${group.mapId}/gpx' />" class="btn btn-light" role="button"><i class="bi bi-download"></i> GPX</a>
