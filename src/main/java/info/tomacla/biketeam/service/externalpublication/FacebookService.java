@@ -11,6 +11,7 @@ import info.tomacla.biketeam.domain.parameter.Parameter;
 import info.tomacla.biketeam.domain.parameter.ParameterRepository;
 import info.tomacla.biketeam.domain.publication.Publication;
 import info.tomacla.biketeam.domain.ride.Ride;
+import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.service.PublicationService;
 import info.tomacla.biketeam.service.RideService;
@@ -26,6 +27,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class FacebookService implements ExternalPublicationService {
@@ -59,6 +61,9 @@ public class FacebookService implements ExternalPublicationService {
         StringBuilder sb = new StringBuilder();
         sb.append(ride.getTitle()).append("\n");
         sb.append("RDV ").append(Dates.frenchDateFormat(ride.getDate())).append("\n");
+        if (!team.getIntegration().isFacebookGroupDetails()) {
+            sb.append(ride.getSortedGroups().stream().map(RideGroup::getName).collect(Collectors.joining(", "))).append("\n");
+        }
         sb.append("Toutes les infos : ").append(urlService.getRideUrl(team, ride.getId())).append("\n\n");
         sb.append(ride.getDescription()).append("\n\n");
         if (team.getIntegration().isFacebookGroupDetails()) {
