@@ -60,6 +60,10 @@ public class FileService {
         return Path.of(fileRepository, fileName);
     }
 
+    public Path get(String directory, String teamId) {
+        return Path.of(fileRepository, directory, teamId);
+    }
+
     public Path get(String directory, String teamId, String fileName) {
         try {
             Files.createDirectories(Path.of(fileRepository, directory, teamId));

@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.domain.team;
 
+import info.tomacla.biketeam.common.Point;
 import info.tomacla.biketeam.common.Strings;
 
 import javax.persistence.*;
@@ -28,6 +29,12 @@ public class TeamIntegration {
     private String mattermostChannelID;
     @Column(name = "mattermost_api_endpoint")
     private String mattermostApiEndpoint;
+    @AttributeOverrides({
+            @AttributeOverride(name = "lat", column = @Column(name = "heatmap_center_lat")),
+            @AttributeOverride(name = "lng", column = @Column(name = "heatmap_center_lng"))
+    })
+    @Embedded
+    private Point heatmapCenter;
 
     public TeamIntegration() {
 
@@ -97,4 +104,17 @@ public class TeamIntegration {
     public void setMattermostApiEndpoint(String mattermostApiEndpoint) {
         this.mattermostApiEndpoint = Strings.requireNonBlankOrNull(mattermostApiEndpoint);
     }
+
+    public Point getHeatmapCenter() {
+        return heatmapCenter;
+    }
+
+    public void setHeatmapCenter(Point heatmapCenter) {
+        this.heatmapCenter = heatmapCenter;
+    }
+
+    public boolean isHeatmapConfigured() {
+        return this.heatmapCenter != null;
+    }
+
 }

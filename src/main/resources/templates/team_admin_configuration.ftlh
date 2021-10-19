@@ -54,16 +54,6 @@
                       </div>
                 </div>
 
-                <hr/>
-
-                <h5>FAQ</h5>
-
-                 <div class="alert alert-info" role="alert">La syntaxe demandée est du markdown. Pour plus de simplicité, utilisez un éditeur de markdown en ligne puis copier le résultat ici.</div>
-
-                <div class="mb-3">
-                  <textarea name="markdownPage" class="form-control" id="form-configuration-mdpage" rows="15">${formdata.markdownPage}</textarea>
-                </div>
-
                 <button type="submit" class="btn btn-secondary">Enregistrer</button>
         </form>
 

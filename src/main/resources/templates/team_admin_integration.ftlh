@@ -51,6 +51,21 @@
                 </div>
             </div>
 
+            <div class="mb-3">
+                <h5>Heatmap</h5>
+                <div class="alert alert-info" role="alert">Pour activer la heatmap, renseignez les coordonnées du centre à utiliser pour la générer.</div>
+                <div class="row mb-3">
+                    <div class="col-6">
+                      <label for="form-integration-heatmaplat" class="form-label">Latitude</label>
+                      <input autocomplete="off" name="heatmapCenterLat" value="${formdata.heatmapCenterLat}" type="number" min="-90" max="90" step="0.0000000000000001" class="form-control" id="form-integration-heatmapcenterlat">
+                    </div>
+                    <div class="col-6">
+                      <label for="form-integration-heatmaplng" class="form-label">Longitude</label>
+                      <input autocomplete="off" name="heatmapCenterLng" value="${formdata.heatmapCenterLng}" type="number" min="-180" max="180" step="0.0000000000000001" class="form-control" id="form-integration-heatmapcenterlng">
+                    </div>
+                </div>
+            </div>
+
             <button type="submit" class="btn btn-secondary">Enregistrer</button>
         </form>
 

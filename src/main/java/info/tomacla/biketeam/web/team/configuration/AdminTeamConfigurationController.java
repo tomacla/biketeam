@@ -1,10 +1,12 @@
 package info.tomacla.biketeam.web.team.configuration;
 
+import info.tomacla.biketeam.common.Point;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.TeamConfiguration;
 import info.tomacla.biketeam.domain.team.TeamDescription;
 import info.tomacla.biketeam.domain.team.TeamIntegration;
 import info.tomacla.biketeam.service.FileService;
+import info.tomacla.biketeam.service.HeatmapService;
 import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,9 @@ public class AdminTeamConfigurationController extends AbstractController {
 
     @Value("${smtp.from}")
     private String smtpFrom;
+
+    @Autowired
+    private HeatmapService heatmapService;
 
     @GetMapping
     public String getSiteDescription(@PathVariable("teamId") String teamId,
@@ -105,7 +110,6 @@ public class AdminTeamConfigurationController extends AbstractController {
                 .withTimezone(teamConfiguration.getTimezone())
                 .withDefaultSearchTags(teamConfiguration.getDefaultSearchTags())
                 .withDefaultPage(teamConfiguration.getDefaultPage())
-                .withMarkdownPage(teamConfiguration.getMarkdownPage())
                 .withFeedVisible(teamConfiguration.isFeedVisible())
                 .withRidesVisible(teamConfiguration.isRidesVisible())
                 .get();
@@ -136,7 +140,6 @@ public class AdminTeamConfigurationController extends AbstractController {
             teamConfiguration.setDefaultPage(parser.getDefaultPage());
             teamConfiguration.setFeedVisible(parser.isFeedVisible());
             teamConfiguration.setRidesVisible(parser.isRidesVisible());
-            teamConfiguration.setMarkdownPage(parser.getMarkdownPage());
             teamService.save(team);
 
             addGlobalValues(principal, model, "Administration - Configuration", team);
@@ -156,6 +159,54 @@ public class AdminTeamConfigurationController extends AbstractController {
 
     }
 
+    @GetMapping(value = "/page")
+    public String getSitePage(@PathVariable("teamId") String teamId,
+                                       Principal principal, Model model) {
+
+        final Team team = checkTeam(teamId);
+        checkAdmin(principal, team.getId());
+
+        final TeamConfiguration teamConfiguration = team.getConfiguration();
+
+        EditTeamPageForm form = EditTeamPageForm.builder()
+                .withMarkdownPage(teamConfiguration.getMarkdownPage())
+                .get();
+
+        addGlobalValues(principal, model, "Administration - Configuration", team);
+        model.addAttribute("formdata", form);
+        return "team_admin_page_configuration";
+    }
+
+    @PostMapping(value = "/page")
+    public String updateSitePage(@PathVariable("teamId") String teamId,
+                                          Principal principal,
+                                          Model model,
+                                 EditTeamPageForm form) {
+
+        final Team team = checkTeam(teamId);
+        checkAdmin(principal, team.getId());
+
+        final TeamConfiguration teamConfiguration = team.getConfiguration();
+
+        try {
+            final EditTeamPageForm.EditTeamPageFormParser parser = form.parser();
+
+            teamConfiguration.setMarkdownPage(parser.getMarkdownPage());
+            teamService.save(team);
+
+            addGlobalValues(principal, model, "Administration - Configuration", team);
+            model.addAttribute("formdata", form);
+            return "team_admin_page_configuration";
+
+        } catch (Exception e) {
+            addGlobalValues(principal, model, "Administration - Configuration", team);
+            model.addAttribute("formdata", form);
+            return "team_admin_page_configuration";
+
+        }
+
+    }
+
     @GetMapping(value = "/integration")
     public String getSiteIntegration(@PathVariable("teamId") String teamId,
                                      Principal principal, Model model) {
@@ -170,6 +221,7 @@ public class AdminTeamConfigurationController extends AbstractController {
                 .withMattermostApiEndpoint(teamIntegration.getMattermostApiEndpoint())
                 .withMattermostApiToken(teamIntegration.getMattermostApiToken())
                 .withMattermostChannelID(teamIntegration.getMattermostChannelID())
+                .withHeatmapCenter(teamIntegration.getHeatmapCenter())
                 .get();
 
         addGlobalValues(principal, model, "Administration - Intégrations", team);
@@ -190,13 +242,20 @@ public class AdminTeamConfigurationController extends AbstractController {
 
         try {
 
+            Point beforeEdit = team.getIntegration().getHeatmapCenter();
+
             final EditTeamIntegrationForm.EditTeamIntegrationFormParser parser = form.parser();
 
             teamIntegration.setFacebookGroupDetails(parser.isFacebookGroupDetails());
             teamIntegration.setMattermostApiToken(parser.getMattermostApiToken());
             teamIntegration.setMattermostChannelID(parser.getMattermostChannelID());
             teamIntegration.setMattermostApiEndpoint(parser.getMattermostApiEndpoint());
+            teamIntegration.setHeatmapCenter(parser.getHeatmapCenter());
             teamService.save(team);
+
+            if(team.getIntegration().isHeatmapConfigured() && !team.getIntegration().getHeatmapCenter().equals(beforeEdit)) {
+                heatmapService.generateHeatmap(team);
+            }
 
             addGlobalValues(principal, model, "Administration - Intégrations", team);
             model.addAttribute("formdata", form);

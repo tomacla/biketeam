@@ -1,6 +1,8 @@
 package info.tomacla.biketeam.web.team.configuration;
 
+import info.tomacla.biketeam.common.Point;
 import info.tomacla.biketeam.common.Strings;
+import org.springframework.util.ObjectUtils;
 
 public class EditTeamIntegrationForm {
 
@@ -8,12 +10,16 @@ public class EditTeamIntegrationForm {
     private String mattermostApiToken;
     private String mattermostChannelID;
     private String mattermostApiEndpoint;
+    private String heatmapCenterLat;
+    private String heatmapCenterLng;
 
     public EditTeamIntegrationForm() {
         setFacebookGroupDetails(null);
         setMattermostApiEndpoint(null);
         setMattermostApiToken(null);
         setMattermostChannelID(null);
+        setHeatmapCenterLat(null);
+        setHeatmapCenterLng(null);
     }
 
     public static EditTeamIntegrationFormBuilder builder() {
@@ -52,6 +58,22 @@ public class EditTeamIntegrationForm {
         this.mattermostApiEndpoint = Strings.requireNonBlankOrDefault(mattermostApiEndpoint, "");
     }
 
+    public String getHeatmapCenterLat() {
+        return heatmapCenterLat;
+    }
+
+    public void setHeatmapCenterLat(String heatmapCenterLat) {
+        this.heatmapCenterLat = Strings.requireNonBlankOrDefault(heatmapCenterLat, "");
+    }
+
+    public String getHeatmapCenterLng() {
+        return heatmapCenterLng;
+    }
+
+    public void setHeatmapCenterLng(String heatmapCenterLng) {
+        this.heatmapCenterLng = Strings.requireNonBlankOrDefault(heatmapCenterLng, "");
+    }
+
     public EditTeamIntegrationFormParser parser() {
         return new EditTeamIntegrationFormParser(this);
     }
@@ -78,6 +100,13 @@ public class EditTeamIntegrationForm {
 
         public String getMattermostApiEndpoint() {
             return form.getMattermostApiEndpoint();
+        }
+
+        public Point getHeatmapCenter() {
+            if(!ObjectUtils.isEmpty(form.getHeatmapCenterLat()) && !ObjectUtils.isEmpty(form.getHeatmapCenterLng())) {
+                return new Point(Double.parseDouble(form.getHeatmapCenterLat()), Double.parseDouble(form.getHeatmapCenterLng()));
+            }
+            return null;
         }
 
     }
@@ -107,6 +136,14 @@ public class EditTeamIntegrationForm {
 
         public EditTeamIntegrationFormBuilder withMattermostApiEndpoint(String mattermostApiEndpoint) {
             form.setMattermostApiEndpoint(mattermostApiEndpoint);
+            return this;
+        }
+
+        public EditTeamIntegrationFormBuilder withHeatmapCenter(Point heatmapCenter) {
+            if(heatmapCenter != null) {
+                form.setHeatmapCenterLat(String.valueOf(heatmapCenter.getLat()));
+                form.setHeatmapCenterLng(String.valueOf(heatmapCenter.getLng()));
+            }
             return this;
         }
 

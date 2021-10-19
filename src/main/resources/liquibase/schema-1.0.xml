@@ -574,6 +574,13 @@
 
     </changeSet>
 
+    <changeSet id="ADD-HEATMAP" author="tomacla">
+        <addColumn tableName="team_integration">
+            <column name="heatmap_center_lat" type="DOUBLE"/>
+            <column name="heatmap_center_lng" type="DOUBLE"/>
+        </addColumn>
+    </changeSet>
+
 
 </databaseChangeLog>
 
