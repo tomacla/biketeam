@@ -29,7 +29,6 @@ import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -188,7 +187,7 @@ public class GpxService {
             log.error("Error while parsing GPX", e);
             throw new RuntimeException(e);
         }
-        if(defaultName != null) {
+        if (defaultName != null) {
             gpxPath.setName(defaultName);
         }
         return gpxPath;

@@ -1,6 +1,5 @@
 package info.tomacla.biketeam.web.team.configuration;
 
-import info.tomacla.biketeam.common.Strings;
 import info.tomacla.biketeam.common.Timezone;
 import info.tomacla.biketeam.domain.team.WebPage;
 

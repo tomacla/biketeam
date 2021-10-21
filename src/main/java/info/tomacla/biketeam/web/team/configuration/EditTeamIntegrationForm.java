@@ -103,7 +103,7 @@ public class EditTeamIntegrationForm {
         }
 
         public Point getHeatmapCenter() {
-            if(!ObjectUtils.isEmpty(form.getHeatmapCenterLat()) && !ObjectUtils.isEmpty(form.getHeatmapCenterLng())) {
+            if (!ObjectUtils.isEmpty(form.getHeatmapCenterLat()) && !ObjectUtils.isEmpty(form.getHeatmapCenterLng())) {
                 return new Point(Double.parseDouble(form.getHeatmapCenterLat()), Double.parseDouble(form.getHeatmapCenterLng()));
             }
             return null;
@@ -140,7 +140,7 @@ public class EditTeamIntegrationForm {
         }
 
         public EditTeamIntegrationFormBuilder withHeatmapCenter(Point heatmapCenter) {
-            if(heatmapCenter != null) {
+            if (heatmapCenter != null) {
                 form.setHeatmapCenterLat(String.valueOf(heatmapCenter.getLat()));
                 form.setHeatmapCenterLng(String.valueOf(heatmapCenter.getLng()));
             }

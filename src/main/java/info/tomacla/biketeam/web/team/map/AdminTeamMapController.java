@@ -4,7 +4,6 @@ import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.web.AbstractController;
-import liquibase.util.file.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -100,7 +99,7 @@ public class AdminTeamMapController extends AbstractController {
 
             mapService.save(map);
 
-            if(!map.getName().equals(previousName)) {
+            if (!map.getName().equals(previousName)) {
                 mapService.renameMap(map);
             }
 

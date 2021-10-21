@@ -29,7 +29,7 @@ public class AdminTeamConfigurationController extends AbstractController {
     @Autowired
     private MapService mapService;
 
-    @Value("${smtp.from}")
+    @Value("${contact.email}")
     private String smtpFrom;
 
     @Autowired
@@ -161,7 +161,7 @@ public class AdminTeamConfigurationController extends AbstractController {
 
     @GetMapping(value = "/page")
     public String getSitePage(@PathVariable("teamId") String teamId,
-                                       Principal principal, Model model) {
+                              Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
         checkAdmin(principal, team.getId());
@@ -179,8 +179,8 @@ public class AdminTeamConfigurationController extends AbstractController {
 
     @PostMapping(value = "/page")
     public String updateSitePage(@PathVariable("teamId") String teamId,
-                                          Principal principal,
-                                          Model model,
+                                 Principal principal,
+                                 Model model,
                                  EditTeamPageForm form) {
 
         final Team team = checkTeam(teamId);
@@ -253,7 +253,7 @@ public class AdminTeamConfigurationController extends AbstractController {
             teamIntegration.setHeatmapCenter(parser.getHeatmapCenter());
             teamService.save(team);
 
-            if(team.getIntegration().isHeatmapConfigured() && !team.getIntegration().getHeatmapCenter().equals(beforeEdit)) {
+            if (team.getIntegration().isHeatmapConfigured() && !team.getIntegration().getHeatmapCenter().equals(beforeEdit)) {
                 heatmapService.generateHeatmap(team);
             }
 

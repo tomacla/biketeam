@@ -59,7 +59,6 @@ public class HeatmapService {
     }
 
 
-
     public static class GenerateHeatmap implements Runnable {
 
         private final String heatmapPath;

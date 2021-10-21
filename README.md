@@ -62,12 +62,10 @@ mapbox.api-key=xx
 ## Facebook integration (optional)
 facebook.app-id=xx
 facebook.app-secret=xx
+## Contact email
+contact.email=foo@bar.com
 ## SMTP integration (optional)
-smtp.username=xx
-smtp.password=xx
-smtp.from=xx
-smtp.host=xx
-smtp.port=xx
+## See Spring Mail configuration
 ```
 
 ### With docker

@@ -39,11 +39,11 @@ public class MailService implements ExternalPublicationService {
     private UserService userService;
 
     @Autowired
-    private SMTPService smtpService;
+    private MailSenderService mailSenderService;
 
     @Override
     public boolean isApplicable(Team team) {
-        return smtpService.isSmtpConfigured();
+        return mailSenderService.isSmtpConfigured();
     }
 
     public void publish(Team team, Ride ride) {
@@ -132,7 +132,7 @@ public class MailService implements ExternalPublicationService {
                 final FileExtension fileExtension = FileExtension.findByFileName(image.getFileName().toString()).get();
                 embedImage = ImageDescriptor.of(fileExtension, image);
             }
-            smtpService.sendHiddenly(team, tos, subject, content, embedImage);
+            mailSenderService.sendHiddenly(team, tos, subject, content, embedImage);
 
         } catch (Exception e) {
             log.error("Error while publishing by email : " + content, e);
