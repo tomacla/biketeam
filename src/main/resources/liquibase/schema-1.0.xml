@@ -581,6 +581,13 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="ADD-HEATMAP-PARAMETER" author="tomacla">
+        <addColumn tableName="team_integration">
+            <column name="heatmap_display" type="BOOLEAN"/>
+        </addColumn>
+        <sql>update team_integration set heatmap_display = false</sql>
+    </changeSet>
+
 
 </databaseChangeLog>
 

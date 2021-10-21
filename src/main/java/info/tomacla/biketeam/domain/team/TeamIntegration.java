@@ -35,6 +35,8 @@ public class TeamIntegration {
     })
     @Embedded
     private Point heatmapCenter;
+    @Column(name = "heatmap_display")
+    private boolean heatmapDisplay;
 
     public TeamIntegration() {
 
@@ -111,6 +113,14 @@ public class TeamIntegration {
 
     public void setHeatmapCenter(Point heatmapCenter) {
         this.heatmapCenter = heatmapCenter;
+    }
+
+    public boolean isHeatmapDisplay() {
+        return heatmapDisplay;
+    }
+
+    public void setHeatmapDisplay(boolean heatmapDisplay) {
+        this.heatmapDisplay = heatmapDisplay;
     }
 
     public boolean isHeatmapConfigured() {

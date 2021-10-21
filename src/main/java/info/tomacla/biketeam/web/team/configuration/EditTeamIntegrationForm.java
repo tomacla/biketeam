@@ -12,6 +12,7 @@ public class EditTeamIntegrationForm {
     private String mattermostApiEndpoint;
     private String heatmapCenterLat;
     private String heatmapCenterLng;
+    private String heatmapDisplay;
 
     public EditTeamIntegrationForm() {
         setFacebookGroupDetails(null);
@@ -20,6 +21,7 @@ public class EditTeamIntegrationForm {
         setMattermostChannelID(null);
         setHeatmapCenterLat(null);
         setHeatmapCenterLng(null);
+        setHeatmapDisplay(null);
     }
 
     public static EditTeamIntegrationFormBuilder builder() {
@@ -74,6 +76,15 @@ public class EditTeamIntegrationForm {
         this.heatmapCenterLng = Strings.requireNonBlankOrDefault(heatmapCenterLng, "");
     }
 
+    public String getHeatmapDisplay() {
+        return heatmapDisplay;
+    }
+
+    public void setHeatmapDisplay(String heatmapDisplay) {
+        this.heatmapDisplay = heatmapDisplay;
+    }
+
+
     public EditTeamIntegrationFormParser parser() {
         return new EditTeamIntegrationFormParser(this);
     }
@@ -107,6 +118,10 @@ public class EditTeamIntegrationForm {
                 return new Point(Double.parseDouble(form.getHeatmapCenterLat()), Double.parseDouble(form.getHeatmapCenterLng()));
             }
             return null;
+        }
+
+        public boolean isHeatmapDisplay() {
+            return form.getHeatmapDisplay() != null && form.getHeatmapDisplay().equals("on");
         }
 
     }
@@ -144,6 +159,11 @@ public class EditTeamIntegrationForm {
                 form.setHeatmapCenterLat(String.valueOf(heatmapCenter.getLat()));
                 form.setHeatmapCenterLng(String.valueOf(heatmapCenter.getLng()));
             }
+            return this;
+        }
+
+        public EditTeamIntegrationFormBuilder withHeatmapDisplay(boolean heatmapDisplay) {
+            form.setHeatmapDisplay(heatmapDisplay ? "on" : null);
             return this;
         }
 

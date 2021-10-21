@@ -48,7 +48,7 @@ public class TeamController extends AbstractController {
 
         addGlobalValues(principal, model, team.getName(), team);
         model.addAttribute("feed", teamService.listFeed(team.getId()));
-        model.addAttribute("hasHeatmap", heatmapService.get(team.getId()).isPresent());
+        model.addAttribute("hasHeatmap", team.getIntegration().isHeatmapDisplay() && heatmapService.get(team.getId()).isPresent());
         return "team_root";
     }
 

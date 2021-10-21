@@ -222,6 +222,7 @@ public class AdminTeamConfigurationController extends AbstractController {
                 .withMattermostApiToken(teamIntegration.getMattermostApiToken())
                 .withMattermostChannelID(teamIntegration.getMattermostChannelID())
                 .withHeatmapCenter(teamIntegration.getHeatmapCenter())
+                .withHeatmapDisplay(teamIntegration.isHeatmapDisplay())
                 .get();
 
         addGlobalValues(principal, model, "Administration - Intégrations", team);
@@ -251,6 +252,7 @@ public class AdminTeamConfigurationController extends AbstractController {
             teamIntegration.setMattermostChannelID(parser.getMattermostChannelID());
             teamIntegration.setMattermostApiEndpoint(parser.getMattermostApiEndpoint());
             teamIntegration.setHeatmapCenter(parser.getHeatmapCenter());
+            teamIntegration.setHeatmapDisplay(parser.isHeatmapDisplay());
             teamService.save(team);
 
             if (team.getIntegration().isHeatmapConfigured() && !team.getIntegration().getHeatmapCenter().equals(beforeEdit)) {
