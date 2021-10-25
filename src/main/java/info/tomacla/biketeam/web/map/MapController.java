@@ -11,6 +11,7 @@ import info.tomacla.biketeam.web.AbstractController;
 import info.tomacla.biketeam.web.ride.dto.AndroidMapDTO;
 import info.tomacla.biketeam.web.ride.dto.GarminMapDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
@@ -40,6 +41,9 @@ public class MapController extends AbstractController {
     @Autowired
     private ThumbnailService thumbnailService;
 
+    @Value("${mapbox.api-key}")
+    private String mapBoxAPIKey;
+
     @GetMapping(value = "/{mapId}")
     public String getMap(@PathVariable("teamId") String teamId,
                          @PathVariable("mapId") String mapId,
@@ -65,6 +69,7 @@ public class MapController extends AbstractController {
 
         addGlobalValues(principal, model, "Map " + map.getName(), team);
         model.addAttribute("map", map);
+        model.addAttribute("mapBoxAPIKey", mapBoxAPIKey);
         model.addAttribute("_embed", embed);
         return "map";
 

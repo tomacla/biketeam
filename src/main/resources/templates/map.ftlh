@@ -53,18 +53,11 @@
 
             var target = L.map(mapContainerId).setView([51.505, -0.09], 13);
 
-            <#if (_integ.mapBoxAPIKey)??>
-                L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/outdoors-v11/tiles/256/{z}/{x}/{y}?access_token=${_integ.mapBoxAPIKey}', {
-                    attribution: '&copy; <a target="_blank" href="https://openstreetmap.org/copyright">Carte de base et données de OpenStreetMap</a>',
-                    minZoom: 1,
-                    maxZoom: 17
-                }).addTo(target);
-            <#else>
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '&copy; <a target="_blank" href="https://openstreetmap.org/copyright">Carte de base et données de OpenStreetMap</a>'
-                }).addTo(target);
-            </#if>
+            L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/outdoors-v11/tiles/256/{z}/{x}/{y}?access_token=${mapBoxAPIKey}', {
+                attribution: '&copy; <a target="_blank" href="https://openstreetmap.org/copyright">Carte de base et données de OpenStreetMap</a>',
+                minZoom: 1,
+                maxZoom: 17
+            }).addTo(target);
 
             // show the scale bar on the lower left corner
             L.control.scale().addTo(target);
