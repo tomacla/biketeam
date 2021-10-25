@@ -69,13 +69,13 @@ public class GpxService {
         gpxPathEnhancer.virtualize(gpxPath);
         GPXFilter.filterPointsDouglasPeucker(gpxPath);
 
-        io.github.glandais.util.Vector windRaw = gpxDataComputer.getWind(gpxPath);
-        Vector wind = new Vector(windRaw.getX(), windRaw.getY());
-        boolean crossing = gpxDataComputer.isCrossing(gpxPath);
-
         Path storedStaticMap = getStaticMap(gpxPath);
         Path storedFit = getFit(gpxPath);
         Path storedGpx = getGpx(gpxPath);
+
+        io.github.glandais.util.Vector windRaw = gpxDataComputer.getWind(gpxPath);
+        Vector wind = new Vector(windRaw.getX(), windRaw.getY());
+        boolean crossing = gpxDataComputer.isCrossing(gpxPath);
 
         List<Point> points = gpxPath.getPoints();
         io.github.glandais.gpx.Point startPoint = points.get(0);
@@ -107,13 +107,13 @@ public class GpxService {
         gpxPathEnhancer.virtualize(gpxPath);
         GPXFilter.filterPointsDouglasPeucker(gpxPath);
 
-        io.github.glandais.util.Vector windRaw = gpxDataComputer.getWind(gpxPath);
-        Vector wind = new Vector(windRaw.getX(), windRaw.getY());
-        boolean crossing = gpxDataComputer.isCrossing(gpxPath);
-
         Path storedStaticMap = getStaticMap(gpxPath);
         Path storedFit = getFit(gpxPath);
         Path storedGpx = getGpx(gpxPath);
+
+        io.github.glandais.util.Vector windRaw = gpxDataComputer.getWind(gpxPath);
+        Vector wind = new Vector(windRaw.getX(), windRaw.getY());
+        boolean crossing = gpxDataComputer.isCrossing(gpxPath);
 
         List<Point> points = gpxPath.getPoints();
         io.github.glandais.gpx.Point startPoint = points.get(0);
