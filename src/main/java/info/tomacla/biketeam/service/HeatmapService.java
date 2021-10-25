@@ -80,7 +80,7 @@ public class HeatmapService {
 
             try {
 
-                ProcessBuilder pb = new ProcessBuilder("python3", "heatmap.py", "--dir", gpxPath, "--output", outputPath,
+                ProcessBuilder pb = new ProcessBuilder("python3.9", "heatmap.py", "--dir", gpxPath, "--output", outputPath,
                         "--bounds", String.valueOf(center.getLat() - 0.2), String.valueOf(center.getLat() + 0.2),
                         String.valueOf(center.getLng() - 0.5), String.valueOf(center.getLng() + 0.5));
                 pb.directory(new File(heatmapPath));
