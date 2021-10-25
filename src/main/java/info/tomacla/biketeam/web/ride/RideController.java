@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.web.ride;
 
+import info.tomacla.biketeam.common.FileExtension;
 import info.tomacla.biketeam.common.ImageDescriptor;
 import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.ride.Ride;
@@ -9,6 +10,7 @@ import info.tomacla.biketeam.domain.user.Role;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.service.RideService;
+import info.tomacla.biketeam.service.ThumbnailService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -27,6 +29,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.security.Principal;
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -39,6 +42,9 @@ public class RideController extends AbstractController {
 
     @Autowired
     private MapService mapService;
+
+    @Autowired
+    private ThumbnailService thumbnailService;
 
     @GetMapping(value = "/{rideId}")
     public String getRide(@PathVariable("teamId") String teamId,
@@ -56,7 +62,7 @@ public class RideController extends AbstractController {
         Ride ride = optionalRide.get();
         final java.util.Map<String, Map> maps = ride.getGroups().stream()
                 .map(RideGroup::getMapId)
-                .filter(mapId -> mapId != null)
+                .filter(Objects::nonNull)
                 .distinct()
                 .map(mapId -> mapService.get(teamId, mapId))
                 .filter(Optional::isPresent)
@@ -173,19 +179,29 @@ public class RideController extends AbstractController {
 
     @ResponseBody
     @RequestMapping(value = "/{rideId}/image", method = RequestMethod.GET)
-    public ResponseEntity<byte[]> getRideImage(@PathVariable("teamId") String teamId, @PathVariable("rideId") String rideId) {
+    public ResponseEntity<byte[]> getRideImage(@PathVariable("teamId") String teamId,
+                                               @PathVariable("rideId") String rideId,
+                                               @RequestParam(name="width",  defaultValue = "-1", required = false) int targetWidth) {
         final Optional<ImageDescriptor> image = rideService.getImage(teamId, rideId);
         if (image.isPresent()) {
             try {
 
+                final ImageDescriptor targetImage = image.get();
+                final FileExtension targetImageExtension = targetImage.getExtension();
+
                 HttpHeaders headers = new HttpHeaders();
-                headers.add("Content-Type", image.get().getExtension().getMediaType());
+                headers.add("Content-Type", targetImageExtension.getMediaType());
                 headers.setContentDisposition(ContentDisposition.builder("inline")
-                        .filename(rideId + image.get().getExtension().getExtension())
+                        .filename(rideId + targetImageExtension.getExtension())
                         .build());
 
+                byte[] bytes = Files.readAllBytes(targetImage.getPath());
+                if(targetWidth != -1) {
+                    bytes = thumbnailService.resizeImage(bytes, targetWidth, targetImageExtension);
+                }
+
                 return new ResponseEntity<>(
-                        Files.readAllBytes(image.get().getPath()),
+                        bytes,
                         headers,
                         HttpStatus.OK
                 );

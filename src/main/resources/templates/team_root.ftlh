@@ -53,7 +53,7 @@
         <#if hasHeatmap>
             <section class="border p-2 mb-3 rounded">
                 <h5>Heatmap</h5>
-                <a href="<@common.teamUrl team.id '/heatmap' />" target="_blank"><img src="<@common.teamUrl team.id '/heatmap' />" class="d-block w-100 my-auto" alt="Heatmap"></a>
+                <a href="<@common.teamUrl team.id '/heatmap' />" target="_blank"><img src="<@common.teamUrl team.id '/heatmap?width=500' />" class="d-block w-100 my-auto" alt="Heatmap"></a>
             </section>
         </#if>
 

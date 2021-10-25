@@ -1,8 +1,11 @@
 package info.tomacla.biketeam.web.map;
 
+import info.tomacla.biketeam.common.FileExtension;
+import info.tomacla.biketeam.common.ImageDescriptor;
 import info.tomacla.biketeam.domain.map.*;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.service.MapService;
+import info.tomacla.biketeam.service.ThumbnailService;
 import info.tomacla.biketeam.service.UrlService;
 import info.tomacla.biketeam.web.AbstractController;
 import info.tomacla.biketeam.web.ride.dto.AndroidMapDTO;
@@ -33,6 +36,9 @@ public class MapController extends AbstractController {
 
     @Autowired
     private UrlService urlService;
+
+    @Autowired
+    private ThumbnailService thumbnailService;
 
     @GetMapping(value = "/{mapId}")
     public String getMap(@PathVariable("teamId") String teamId,
@@ -220,7 +226,9 @@ public class MapController extends AbstractController {
 
     @ResponseBody
     @RequestMapping(value = "/{mapId}/image", method = RequestMethod.GET, produces = "image/png")
-    public ResponseEntity<byte[]> getMapImage(@PathVariable("teamId") String teamId, @PathVariable("mapId") String mapId) {
+    public ResponseEntity<byte[]> getMapImage(@PathVariable("teamId") String teamId,
+                                              @PathVariable("mapId") String mapId,
+                                              @RequestParam(name="width",  defaultValue = "-1", required = false) int targetWidth) {
         final Optional<Path> imageFile = mapService.getImageFile(teamId, mapId);
         if (imageFile.isPresent()) {
             try {
@@ -231,8 +239,13 @@ public class MapController extends AbstractController {
                         .filename(mapId + ".png")
                         .build());
 
+                byte[] bytes = Files.readAllBytes(imageFile.get());
+                if(targetWidth != -1) {
+                    bytes = thumbnailService.resizeImage(bytes, targetWidth, FileExtension.PNG);
+                }
+
                 return new ResponseEntity<>(
-                        Files.readAllBytes(imageFile.get()),
+                        bytes,
                         headers,
                         HttpStatus.OK
                 );

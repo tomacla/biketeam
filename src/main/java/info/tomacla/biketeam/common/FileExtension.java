@@ -9,17 +9,19 @@ import java.util.Optional;
 
 public enum FileExtension {
 
-    PNG(".png", new ArrayList<>(), MediaType.IMAGE_PNG_VALUE),
-    JPEG(".jpg", List.of(".jpeg"), MediaType.IMAGE_JPEG_VALUE);
+    PNG(".png", new ArrayList<>(), MediaType.IMAGE_PNG_VALUE, "PNG"),
+    JPEG(".jpg", List.of(".jpeg"), MediaType.IMAGE_JPEG_VALUE, "JPEG");
 
     private final String extension;
     private final List<String> otherExtensions;
     private final String mediaType;
+    private final String imageIOType;
 
-    FileExtension(String extension, List<String> otherExtensions, String mediaType) {
+    FileExtension(String extension, List<String> otherExtensions, String mediaType, String imageIOType) {
         this.extension = extension;
         this.otherExtensions = otherExtensions;
         this.mediaType = mediaType;
+        this.imageIOType = imageIOType;
     }
 
     public static List<FileExtension> byPriority() {
@@ -53,4 +55,7 @@ public enum FileExtension {
         return otherExtensions;
     }
 
+    public String getImageIOType() {
+        return imageIOType;
+    }
 }

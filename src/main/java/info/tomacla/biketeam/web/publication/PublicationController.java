@@ -1,17 +1,16 @@
 package info.tomacla.biketeam.web.publication;
 
+import info.tomacla.biketeam.common.FileExtension;
 import info.tomacla.biketeam.common.ImageDescriptor;
 import info.tomacla.biketeam.service.PublicationService;
+import info.tomacla.biketeam.service.ThumbnailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerErrorException;
 
@@ -26,21 +25,34 @@ public class PublicationController {
     @Autowired
     private PublicationService publicationService;
 
+    @Autowired
+    private ThumbnailService thumbnailService;
+
     @ResponseBody
     @RequestMapping(value = "/{publicationId}/image", method = RequestMethod.GET)
-    public ResponseEntity<byte[]> getPublicationImage(@PathVariable("teamId") String teamId, @PathVariable("publicationId") String publicationId) {
+    public ResponseEntity<byte[]> getPublicationImage(@PathVariable("teamId") String teamId,
+                                                      @PathVariable("publicationId") String publicationId,
+                                                      @RequestParam(name = "width", defaultValue = "-1", required = false) int targetWidth) {
         final Optional<ImageDescriptor> image = publicationService.getImage(teamId, publicationId);
         if (image.isPresent()) {
             try {
 
+                final ImageDescriptor targetImage = image.get();
+                final FileExtension targetImageExtension = targetImage.getExtension();
+
                 HttpHeaders headers = new HttpHeaders();
-                headers.add("Content-Type", image.get().getExtension().getMediaType());
+                headers.add("Content-Type", targetImageExtension.getMediaType());
                 headers.setContentDisposition(ContentDisposition.builder("inline")
-                        .filename(publicationId + image.get().getExtension().getExtension())
+                        .filename(publicationId + targetImageExtension.getExtension())
                         .build());
 
+                byte[] bytes = Files.readAllBytes(targetImage.getPath());
+                if (targetWidth != -1) {
+                    bytes = thumbnailService.resizeImage(bytes, targetWidth, targetImageExtension);
+                }
+
                 return new ResponseEntity<>(
-                        Files.readAllBytes(image.get().getPath()),
+                        bytes,
                         headers,
                         HttpStatus.OK
                 );

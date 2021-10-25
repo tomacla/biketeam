@@ -42,9 +42,9 @@
                               <div class="row justify-content-center">
                                 <div class="col-12 col-md-6">
                                   <#if feedItem.type == 'RIDE'>
-                                    <a href="<@common.teamUrl feedItem.teamId '/rides/'+ feedItem.id />"><img src="<@common.teamUrl feedItem.teamId '/rides/${feedItem.id}/image' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${feedItem.title} image"></a>
+                                    <a href="<@common.teamUrl feedItem.teamId '/rides/'+ feedItem.id />"><img src="<@common.teamUrl feedItem.teamId '/rides/${feedItem.id}/image?width=500' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${feedItem.title} image"></a>
                                   <#elseif feedItem.type == 'PUBLICATION'>
-                                    <img src="<@common.teamUrl feedItem.teamId '/publications/${feedItem.id}/image' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${feedItem.title} image">
+                                    <img src="<@common.teamUrl feedItem.teamId '/publications/${feedItem.id}/image?width=500' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${feedItem.title} image">
                                   </#if>
                                 </div>
                               </div>

@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.web.team;
 
+import info.tomacla.biketeam.common.FileExtension;
 import info.tomacla.biketeam.common.ImageDescriptor;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.TeamConfiguration;
@@ -7,6 +8,7 @@ import info.tomacla.biketeam.domain.team.WebPage;
 import info.tomacla.biketeam.domain.user.Role;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.service.HeatmapService;
+import info.tomacla.biketeam.service.ThumbnailService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ContentDisposition;
@@ -30,6 +32,9 @@ public class TeamController extends AbstractController {
 
     @Autowired
     private HeatmapService heatmapService;
+
+    @Autowired
+    private ThumbnailService thumbnailService;
 
     @GetMapping
     public String getFeed(@PathVariable("teamId") String teamId,
@@ -122,19 +127,28 @@ public class TeamController extends AbstractController {
 
     @ResponseBody
     @RequestMapping(value = "/heatmap", method = RequestMethod.GET)
-    public ResponseEntity<byte[]> getHeatmap(@PathVariable("teamId") String teamId) {
+    public ResponseEntity<byte[]> getHeatmap(@PathVariable("teamId") String teamId,
+                                             @RequestParam(name="width",  defaultValue = "-1", required = false) int targetWidth) {
         final Optional<ImageDescriptor> image = heatmapService.get(teamId);
         if (image.isPresent()) {
             try {
 
+                final ImageDescriptor targetImage = image.get();
+                final FileExtension targetImageExtension = targetImage.getExtension();
+
                 HttpHeaders headers = new HttpHeaders();
-                headers.add("Content-Type", image.get().getExtension().getMediaType());
+                headers.add("Content-Type", targetImageExtension.getMediaType());
                 headers.setContentDisposition(ContentDisposition.builder("inline")
-                        .filename(teamId + image.get().getExtension().getExtension())
+                        .filename(teamId + targetImageExtension.getExtension())
                         .build());
 
+                byte[] bytes = Files.readAllBytes(targetImage.getPath());
+                if(targetWidth != -1) {
+                    bytes = thumbnailService.resizeImage(bytes, targetWidth, targetImageExtension);
+                }
+
                 return new ResponseEntity<>(
-                        Files.readAllBytes(image.get().getPath()),
+                        bytes,
                         headers,
                         HttpStatus.OK
                 );

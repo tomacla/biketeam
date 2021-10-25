@@ -104,7 +104,7 @@
             <#list maps as map>
                   <div class="col-12 col-md-4">
                     <div class="card">
-                        <a href="<@common.teamUrl team.id '/maps/${map.id}' />"><img src="<@common.teamUrl team.id '/maps/${map.id}/image' />" class="card-img-top" alt="${map.id} image"></a>
+                        <a href="<@common.teamUrl team.id '/maps/${map.id}' />"><img src="<@common.teamUrl team.id '/maps/${map.id}/image?width=450' />" class="card-img-top" alt="${map.id} image"></a>
                         <div class="card-body">
                           <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl team.id '/maps/${map.id}' />">${map.name}</a></h5>
                           <p class="card-text">
