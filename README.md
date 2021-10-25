@@ -66,6 +66,8 @@ facebook.app-secret=xx
 contact.email=foo@bar.com
 ## SMTP integration (optional)
 ## See Spring Mail configuration
+## LOGS
+logging.file.name=/path/to/logs/biketeam.log
 ```
 
 ### With docker
