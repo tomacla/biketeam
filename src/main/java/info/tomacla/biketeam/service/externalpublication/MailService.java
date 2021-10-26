@@ -41,6 +41,9 @@ public class MailService implements ExternalPublicationService {
     @Autowired
     private MailSenderService mailSenderService;
 
+    @Autowired
+    private ThumbnailService thumbnailService;
+
     @Override
     public boolean isApplicable(Team team) {
         return mailSenderService.isSmtpConfigured();
@@ -130,7 +133,8 @@ public class MailService implements ExternalPublicationService {
             ImageDescriptor embedImage = null;
             if (image != null) {
                 final FileExtension fileExtension = FileExtension.findByFileName(image.getFileName().toString()).get();
-                embedImage = ImageDescriptor.of(fileExtension, image);
+                final Path thumbnail = thumbnailService.resizeImage(image, 400, fileExtension);
+                embedImage = ImageDescriptor.of(fileExtension, thumbnail);
             }
             mailSenderService.sendHiddenly(team, tos, subject, content, embedImage);
 

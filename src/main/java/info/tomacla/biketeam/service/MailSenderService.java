@@ -23,8 +23,10 @@ public class MailSenderService {
 
     @Autowired
     private TeamService teamService;
+
     @Autowired
     private Environment env;
+
     @Autowired
     private JavaMailSender emailSender;
 
