@@ -154,15 +154,10 @@ public class User implements Serializable {
         this.roles = roles;
     }
 
-    public void clearRoles() {
-        this.roles.clear();
-    }
-
-    public void addRole(UserRole role) {
-        this.roles.add(role);
-    }
-
     public void addRole(Team team, Role role) {
+        if(hasRole(team, role)) {
+            this.removeRole(team.getId());
+        }
         this.roles.add(new UserRole(team, this, role));
     }
 

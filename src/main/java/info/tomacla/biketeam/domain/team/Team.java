@@ -148,11 +148,8 @@ public class Team {
     }
 
     public void clearRoles() {
+        this.roles.forEach(role -> role.getUser().removeRole(role.getId())); // needed for hibernate
         this.roles.clear();
-    }
-
-    public void addRole(UserRole role) {
-        this.roles.add(role);
     }
 
     public void addRole(User user, Role role) {

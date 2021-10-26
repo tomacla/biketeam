@@ -56,7 +56,6 @@ public class TeamAdminUserController extends AbstractController {
 
         try {
             final User user = userService.get(userId).orElseThrow(() -> new IllegalArgumentException("User unknown"));
-            user.removeRole(team.getId());
             user.addRole(team, Role.ADMIN);
             userService.save(user);
         } catch (Exception e) {
@@ -77,7 +76,6 @@ public class TeamAdminUserController extends AbstractController {
 
         try {
             final User user = userService.get(userId).orElseThrow(() -> new IllegalArgumentException("User unknown"));
-            user.removeRole(team.getId());
             user.addRole(team, Role.MEMBER);
             userService.save(user);
         } catch (Exception e) {

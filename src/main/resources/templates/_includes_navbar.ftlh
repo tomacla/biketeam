@@ -51,7 +51,7 @@
             </li>
             <#if _admin>
                 <li class="nav-item">
-                  <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/admin')> active</#if>" href="<@common.teamUrl '' '/admin/users' />"><i class="bi bi-gear"></i> <span class="d-md-none">Administration</span></a>
+                  <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/admin')> active</#if>" href="<@common.teamUrl '' '/admin/teams' />"><i class="bi bi-gear"></i> <span class="d-md-none">Administration</span></a>
                 </li>
             </#if>
             <#if team??>

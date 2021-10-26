@@ -1,6 +1,8 @@
 package info.tomacla.biketeam.service;
 
 import info.tomacla.biketeam.common.FileExtension;
+import info.tomacla.biketeam.common.FileRepositories;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -185,4 +187,15 @@ public class FileService {
             log.error("Unable to clean tmp directory", e);
         }
     }
+
+    public void deleteByTeam(String teamId) {
+        FileRepositories.list().forEach(directory -> {
+            try {
+                FileUtils.deleteDirectory(get(directory, teamId).toFile());
+            } catch (IOException e) {
+                log.error("Unable to delete directory {}/{}", directory, teamId);
+            }
+        });
+    }
+
 }
