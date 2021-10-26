@@ -73,7 +73,8 @@ public class AuthUserService extends DefaultOAuth2UserService {
             }
 
         }
-        return new LocalDefaultOAuth2User(authorities, attributes, userNameAttributeName, u.getId());
+
+        return OAuth2UserDetails.create(u);
 
     }
 

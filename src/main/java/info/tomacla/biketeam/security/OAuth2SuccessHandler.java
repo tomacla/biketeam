@@ -6,11 +6,14 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
@@ -40,12 +43,26 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             if (session == null) {
                 return referer;
             }
+
+            final String sessionId = session.getId();
+            final String rememberMe = getRememberMe(request);
+
             if (referer.indexOf('?') != -1) {
-                return referer + "&sso=" + ssoService.getSSOToken(session.getId());
+                return referer + "&sso=" + ssoService.getSSOToken(sessionId, rememberMe);
             }
-            return referer + "?sso=" + ssoService.getSSOToken(session.getId());
+            return referer + "?sso=" + ssoService.getSSOToken(sessionId, rememberMe);
         }
         return super.determineTargetUrl(request, response);
+    }
+
+    private String getRememberMe(HttpServletRequest request) {
+        final Cookie[] cookies = request.getCookies();
+        for (Cookie cookie : cookies) {
+            if(cookie.getName().equalsIgnoreCase("remember-me")) {
+                return cookie.getValue();
+            }
+        }
+        return null;
     }
 
 }

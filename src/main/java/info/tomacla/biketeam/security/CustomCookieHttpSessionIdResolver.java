@@ -47,7 +47,7 @@ public class CustomCookieHttpSessionIdResolver implements HttpSessionIdResolver 
         String sso = queryParams.getFirst("sso");
         if (sso != null) {
             String ssoToken = URLDecoder.decode(sso, StandardCharsets.UTF_8);
-            final Optional<String> authTokenFromSSOToken = ssoService.getAuthTokenFromSSOToken(ssoToken);
+            final Optional<String> authTokenFromSSOToken = ssoService.getSessionIdFromSSOToken(ssoToken);
             if (authTokenFromSSOToken.isPresent()) {
                 return List.of(authTokenFromSSOToken.get());
             }

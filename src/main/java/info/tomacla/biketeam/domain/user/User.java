@@ -3,17 +3,19 @@ package info.tomacla.biketeam.domain.user;
 import info.tomacla.biketeam.common.Strings;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.security.AdminAuthority;
+import info.tomacla.biketeam.security.UserAuthority;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "user_account")
-public class User implements Serializable {
+public class User {
 
     @Id
     private String id;
@@ -204,5 +206,6 @@ public class User implements Serializable {
     public boolean isAdminOrMember(String teamId) {
         return isAdmin(teamId) || isMember(teamId);
     }
+
 
 }

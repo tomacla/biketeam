@@ -1,9 +1,6 @@
 package info.tomacla.biketeam;
 
-import info.tomacla.biketeam.security.CustomCookieHttpSessionIdResolver;
-import info.tomacla.biketeam.security.OAuth2StateWriter;
-import info.tomacla.biketeam.security.OAuth2SuccessHandler;
-import info.tomacla.biketeam.security.SSOTokenFilter;
+import info.tomacla.biketeam.security.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +8,7 @@ import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.client.JdbcOAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -26,6 +24,9 @@ import java.lang.reflect.Field;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Autowired
     private ClientRegistrationRepository clientRegistrationRepository;
 
     @Override
@@ -37,6 +38,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/management/**").hasRole("ADMIN")
                 .anyRequest().permitAll()
+                .and()
+                .rememberMe().alwaysRemember(true).userDetailsService(userDetailsService)
                 .and()
                 .oauth2Login(oauth2 -> {
                     oauth2.failureUrl("/login-error");

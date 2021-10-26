@@ -9,18 +9,21 @@ public class SSOToken {
 
     private String token;
     private ZonedDateTime generatedAt;
-    private String originToken;
+    private String sessionId;
+    private String rememberMe;
 
-    private SSOToken(String token, ZonedDateTime generatedAt, String originToken) {
+    private SSOToken(String token, ZonedDateTime generatedAt, String sessionId, String rememberMe) {
         this.token = token;
         this.generatedAt = generatedAt;
-        this.originToken = originToken;
+        this.sessionId = sessionId;
+        this.rememberMe = rememberMe;
     }
 
-    public static SSOToken create(String originToken) {
+    public static SSOToken create(String sessionId, String rememberMe) {
         return new SSOToken(UUID.randomUUID().toString(),
                 ZonedDateTime.now(ZoneOffset.UTC),
-                originToken == null ? "none" : originToken);
+                sessionId,
+                rememberMe);
     }
 
     public boolean isValid() {
@@ -31,8 +34,11 @@ public class SSOToken {
         return token;
     }
 
-    public String getOriginToken() {
-        return originToken;
+    public String getSessionId() {
+        return sessionId;
     }
 
+    public String getRememberMe() {
+        return rememberMe;
+    }
 }
