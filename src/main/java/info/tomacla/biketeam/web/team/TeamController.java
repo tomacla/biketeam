@@ -128,7 +128,7 @@ public class TeamController extends AbstractController {
     @ResponseBody
     @RequestMapping(value = "/heatmap", method = RequestMethod.GET)
     public ResponseEntity<byte[]> getHeatmap(@PathVariable("teamId") String teamId,
-                                             @RequestParam(name="width",  defaultValue = "-1", required = false) int targetWidth) {
+                                             @RequestParam(name = "width", defaultValue = "-1", required = false) int targetWidth) {
         final Optional<ImageDescriptor> image = heatmapService.get(teamId);
         if (image.isPresent()) {
             try {
@@ -143,7 +143,7 @@ public class TeamController extends AbstractController {
                         .build());
 
                 byte[] bytes = Files.readAllBytes(targetImage.getPath());
-                if(targetWidth != -1) {
+                if (targetWidth != -1) {
                     bytes = thumbnailService.resizeImage(bytes, targetWidth, targetImageExtension);
                 }
 

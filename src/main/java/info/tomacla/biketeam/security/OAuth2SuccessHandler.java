@@ -12,8 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
@@ -58,7 +56,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private String getRememberMe(HttpServletRequest request) {
         final Cookie[] cookies = request.getCookies();
         for (Cookie cookie : cookies) {
-            if(cookie.getName().equalsIgnoreCase("remember-me")) {
+            if (cookie.getName().equalsIgnoreCase("remember-me")) {
                 return cookie.getValue();
             }
         }

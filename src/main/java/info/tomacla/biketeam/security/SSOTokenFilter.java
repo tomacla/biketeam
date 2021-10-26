@@ -3,7 +3,6 @@ package info.tomacla.biketeam.security;
 import info.tomacla.biketeam.service.UrlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.session.web.http.CookieSerializer;
 import org.springframework.session.web.http.DefaultCookieSerializer;
 import org.springframework.session.web.http.SessionRepositoryFilter;
@@ -50,22 +49,15 @@ public class SSOTokenFilter extends OncePerRequestFilter {
         String sso = queryParams.getFirst("sso");
         if (sso != null) {
             String ssoToken = URLDecoder.decode(sso, StandardCharsets.UTF_8);
-            final Optional<String> sessionId = ssoService.getSessionIdFromSSOToken(ssoToken);
-            if (sessionId.isPresent()) {
-                cookieSerializer.writeCookieValue(new CookieSerializer.CookieValue(request, response, sessionId.get()));
-            }
-            final Optional<String> rememberMe = ssoService.getRememberMeFromSSOToken(ssoToken);
-            if (rememberMe.isPresent()) {
-                setRememberMeCookie(rememberMe.get(), response);
-            }
+            ssoService.getSessionIdFromSSOToken(ssoToken).ifPresent(s -> cookieSerializer.writeCookieValue(new CookieSerializer.CookieValue(request, response, s)));
+            ssoService.getRememberMeFromSSOToken(ssoToken).ifPresent(s -> setRememberMeCookie(s, response));
         }
 
         filterChain.doFilter(request, response);
 
     }
 
-    protected void setRememberMeCookie(String value, HttpServletResponse response) {
-        String cookieValue = value;
+    protected void setRememberMeCookie(String cookieValue, HttpServletResponse response) {
         Cookie cookie = new Cookie("remember-me", cookieValue);
         cookie.setMaxAge(1209600);
         cookie.setPath("/");

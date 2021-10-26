@@ -1,7 +1,6 @@
 package info.tomacla.biketeam.web.map;
 
 import info.tomacla.biketeam.common.FileExtension;
-import info.tomacla.biketeam.common.ImageDescriptor;
 import info.tomacla.biketeam.domain.map.*;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.service.MapService;
@@ -233,7 +232,7 @@ public class MapController extends AbstractController {
     @RequestMapping(value = "/{mapId}/image", method = RequestMethod.GET, produces = "image/png")
     public ResponseEntity<byte[]> getMapImage(@PathVariable("teamId") String teamId,
                                               @PathVariable("mapId") String mapId,
-                                              @RequestParam(name="width",  defaultValue = "-1", required = false) int targetWidth) {
+                                              @RequestParam(name = "width", defaultValue = "-1", required = false) int targetWidth) {
         final Optional<Path> imageFile = mapService.getImageFile(teamId, mapId);
         if (imageFile.isPresent()) {
             try {
@@ -245,7 +244,7 @@ public class MapController extends AbstractController {
                         .build());
 
                 byte[] bytes = Files.readAllBytes(imageFile.get());
-                if(targetWidth != -1) {
+                if (targetWidth != -1) {
                     bytes = thumbnailService.resizeImage(bytes, targetWidth, FileExtension.PNG);
                 }
 

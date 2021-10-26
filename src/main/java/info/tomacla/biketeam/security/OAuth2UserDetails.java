@@ -1,8 +1,6 @@
 package info.tomacla.biketeam.security;
 
 import info.tomacla.biketeam.domain.user.User;
-import liquibase.util.StringUtil;
-import org.apache.tomcat.util.buf.StringUtils;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;

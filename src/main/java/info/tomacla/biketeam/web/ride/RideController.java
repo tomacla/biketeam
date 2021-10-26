@@ -181,7 +181,7 @@ public class RideController extends AbstractController {
     @RequestMapping(value = "/{rideId}/image", method = RequestMethod.GET)
     public ResponseEntity<byte[]> getRideImage(@PathVariable("teamId") String teamId,
                                                @PathVariable("rideId") String rideId,
-                                               @RequestParam(name="width",  defaultValue = "-1", required = false) int targetWidth) {
+                                               @RequestParam(name = "width", defaultValue = "-1", required = false) int targetWidth) {
         final Optional<ImageDescriptor> image = rideService.getImage(teamId, rideId);
         if (image.isPresent()) {
             try {
@@ -196,7 +196,7 @@ public class RideController extends AbstractController {
                         .build());
 
                 byte[] bytes = Files.readAllBytes(targetImage.getPath());
-                if(targetWidth != -1) {
+                if (targetWidth != -1) {
                     bytes = thumbnailService.resizeImage(bytes, targetWidth, targetImageExtension);
                 }
 

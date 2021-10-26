@@ -3,15 +3,12 @@ package info.tomacla.biketeam.domain.user;
 import info.tomacla.biketeam.common.Strings;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.team.Team;
-import info.tomacla.biketeam.security.AdminAuthority;
-import info.tomacla.biketeam.security.UserAuthority;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import javax.persistence.*;
-import java.io.Serializable;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "user_account")
@@ -157,7 +154,7 @@ public class User {
     }
 
     public void addRole(Team team, Role role) {
-        if(hasRole(team, role)) {
+        if (hasRole(team, role)) {
             this.removeRole(team.getId());
         }
         this.roles.add(new UserRole(team, this, role));

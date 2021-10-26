@@ -1,6 +1,9 @@
 package info.tomacla.biketeam;
 
-import info.tomacla.biketeam.security.*;
+import info.tomacla.biketeam.security.CustomCookieHttpSessionIdResolver;
+import info.tomacla.biketeam.security.OAuth2StateWriter;
+import info.tomacla.biketeam.security.OAuth2SuccessHandler;
+import info.tomacla.biketeam.security.SSOTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

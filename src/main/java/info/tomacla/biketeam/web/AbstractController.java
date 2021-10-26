@@ -101,7 +101,7 @@ public abstract class AbstractController {
             return userService.get(oauthprincipal.getUsername());
         }
         if (principal instanceof RememberMeAuthenticationToken) {
-            RememberMeAuthenticationToken wrapperPrincipal = (RememberMeAuthenticationToken)principal;
+            RememberMeAuthenticationToken wrapperPrincipal = (RememberMeAuthenticationToken) principal;
             OAuth2UserDetails oauthprincipal = (OAuth2UserDetails) wrapperPrincipal.getPrincipal();
             return userService.get(oauthprincipal.getUsername());
         }
