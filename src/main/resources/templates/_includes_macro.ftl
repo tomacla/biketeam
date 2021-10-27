@@ -25,6 +25,8 @@
                             <div class="text-end small text-muted">
                                 <#if feedItem.type == 'RIDE'>
                                     <span class="d-none d-md-inline">Ride </span><i class="bi bi-bicycle"></i>
+                                <#elseif feedItem.type == 'TRIP'>
+                                    <span class="d-none d-md-inline">Trip </span><i class="bi bi-signpost-2"></i>
                                 <#elseif feedItem.type == 'PUBLICATION'>
                                     <span class="d-none d-md-inline">Publication </span><i class="bi bi-newspaper"></i>
                                 </#if>
@@ -34,6 +36,8 @@
                         <div class="card-body">
                         <#if feedItem.type == 'RIDE'>
                             <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl feedItem.teamId '/rides/'+ feedItem.id />">${feedItem.title}</a></h5>
+                        <#elseif feedItem.type == 'TRIP'>
+                            <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl feedItem.teamId '/trips/'+ feedItem.id />">${feedItem.title}</a></h5>
                         <#else>
                             <h5 class="card-title">${feedItem.title}</h5>
                         </#if>
@@ -43,6 +47,8 @@
                                 <div class="col-12 col-md-6">
                                   <#if feedItem.type == 'RIDE'>
                                     <a href="<@common.teamUrl feedItem.teamId '/rides/'+ feedItem.id />"><img src="<@common.teamUrl feedItem.teamId '/rides/${feedItem.id}/image?width=500' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${feedItem.title} image"></a>
+                                  <#elseif feedItem.type == 'TRIP'>
+                                    <a href="<@common.teamUrl feedItem.teamId '/trips/'+ feedItem.id />"><img src="<@common.teamUrl feedItem.teamId '/trips/${feedItem.id}/image?width=500' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${feedItem.title} image"></a>
                                   <#elseif feedItem.type == 'PUBLICATION'>
                                     <img src="<@common.teamUrl feedItem.teamId '/publications/${feedItem.id}/image?width=500' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${feedItem.title} image">
                                   </#if>
@@ -53,6 +59,10 @@
                         <#if feedItem.type == 'RIDE'>
                             <div class="card-footer text-center">
                                 <a href="<@common.teamUrl feedItem.teamId '/rides/'+ feedItem.id />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye-fill"></i> Voir</a>
+                            </div>
+                        <#elseif feedItem.type == 'TRIP'>
+                            <div class="card-footer text-center">
+                                <a href="<@common.teamUrl feedItem.teamId '/trips/'+ feedItem.id />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye-fill"></i> Voir</a>
                             </div>
                         </#if>
                     </div>

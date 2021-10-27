@@ -50,6 +50,9 @@ public class TeamController extends AbstractController {
         if (teamConfiguration.getDefaultPage().equals(WebPage.RIDES)) {
             return redirectToRides(team);
         }
+        if (teamConfiguration.getDefaultPage().equals(WebPage.TRIPS)) {
+            return redirectToTrips(team);
+        }
 
         addGlobalValues(principal, model, team.getName(), team);
         model.addAttribute("feed", teamService.listFeed(team.getId()));

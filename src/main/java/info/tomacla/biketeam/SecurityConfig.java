@@ -35,6 +35,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
+        // TODO use roles to control access to team admin
+
         http
                 .cors().and().csrf().disable()
                 .authorizeRequests()

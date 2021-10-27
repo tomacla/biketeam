@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 
 @Order(SessionRepositoryFilter.DEFAULT_ORDER - 1)
 public class SSOTokenFilter extends OncePerRequestFilter {

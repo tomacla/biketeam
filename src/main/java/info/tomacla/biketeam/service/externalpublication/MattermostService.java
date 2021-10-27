@@ -5,6 +5,7 @@ import info.tomacla.biketeam.domain.publication.Publication;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.domain.trip.Trip;
 import info.tomacla.biketeam.service.UrlService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,8 +50,32 @@ public class MattermostService implements ExternalPublicationService {
     }
 
     @Override
+    public void publish(Team team, Trip trip) {
+
+        log.info("Publish trip {} to mattermost", trip.getId());
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(trip.getTitle()).append("\n");
+        sb.append("Du ").append(Dates.frenchDateFormat(trip.getStartDate())).append(" au ").append(Dates.frenchDateFormat(trip.getEndDate())).append("\n");
+        sb.append("Toutes les infos : ").append(urlService.getTripUrl(team, trip.getId()));
+
+        final String content = sb.toString();
+        this.publish(team, content);
+
+    }
+
+    @Override
     public void publish(Team team, Publication publication) {
-        // NOT SUPPORTED
+
+        log.info("Publish publication {} to mattermost", publication.getId());
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(publication.getTitle()).append("\n");
+        sb.append("Toutes les infos : ").append(urlService.getTeamUrl(team));
+
+        final String content = sb.toString();
+        this.publish(team, content);
+
     }
 
     private void publish(Team team, String content) {

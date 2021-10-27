@@ -14,6 +14,10 @@ public class UrlService {
         return getTeamUrl(team) + "/rides/" + mapId;
     }
 
+    public String getTripUrl(Team team, String tripId) {
+        return getTeamUrl(team) + "/trips/" + tripId;
+    }
+
     public String getMapUrl(Team team, String mapId) {
         return getTeamUrl(team) + "/maps/" + mapId;
     }

@@ -13,8 +13,10 @@ import info.tomacla.biketeam.domain.publication.Publication;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.domain.trip.Trip;
 import info.tomacla.biketeam.service.PublicationService;
 import info.tomacla.biketeam.service.RideService;
+import info.tomacla.biketeam.service.TripService;
 import info.tomacla.biketeam.service.UrlService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +41,9 @@ public class FacebookService implements ExternalPublicationService {
 
     @Autowired
     private PublicationService publicationService;
+
+    @Autowired
+    private TripService tripService;
 
     @Autowired
     private UrlService urlService;
@@ -82,6 +87,25 @@ public class FacebookService implements ExternalPublicationService {
         final String content = sb.toString();
         if (ride.isImaged()) {
             rideService.getImage(team.getId(), ride.getId()).ifPresent(rideImage -> this.publish(team, content, rideImage.getPath()));
+        } else {
+            this.publish(team, content, null);
+        }
+
+    }
+
+    public void publish(Team team, Trip trip) {
+
+        log.info("Publish trip {} to facebook", trip.getId());
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(trip.getTitle()).append("\n");
+        sb.append("Du ").append(Dates.frenchDateFormat(trip.getStartDate())).append(" au ").append(Dates.frenchDateFormat(trip.getEndDate())).append("\n");
+        sb.append("Toutes les infos : ").append(urlService.getTripUrl(team, trip.getId())).append("\n\n");
+        sb.append(trip.getDescription()).append("\n\n");
+
+        final String content = sb.toString();
+        if (trip.isImaged()) {
+            tripService.getImage(team.getId(), trip.getId()).ifPresent(tripImage -> this.publish(team, content, tripImage.getPath()));
         } else {
             this.publish(team, content, null);
         }

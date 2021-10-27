@@ -58,12 +58,14 @@ public class FileService {
         return Files.exists(Path.of(fileRepository, directory, teamId, fileName));
     }
 
-    public Path get(String fileName) {
-        return Path.of(fileRepository, fileName);
-    }
-
     public Path get(String directory, String teamId) {
-        return Path.of(fileRepository, directory, teamId);
+        try {
+            Files.createDirectories(Path.of(fileRepository, directory, teamId));
+            return Path.of(fileRepository, directory, teamId);
+        } catch (IOException e) {
+            log.error("Unable to get directory : " + teamId, e);
+            throw new RuntimeException("Unable to get directory : " + teamId, e);
+        }
     }
 
     public Path get(String directory, String teamId, String fileName) {
@@ -157,6 +159,9 @@ public class FileService {
         log.info("Initializing appliation directories");
 
         Files.createDirectories(Path.of(fileRepository));
+        for (String subRepo : FileRepositories.list()) {
+            Files.createDirectories(Path.of(fileRepository, subRepo));
+        }
         Files.createDirectories(getTmpDirectory());
 
     }

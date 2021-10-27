@@ -3,6 +3,7 @@ package info.tomacla.biketeam.service.externalpublication;
 import info.tomacla.biketeam.domain.publication.Publication;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.domain.trip.Trip;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -30,8 +31,13 @@ public class ExternalPublisher implements ApplicationContextAware {
         getPublishers(team).forEach(s -> s.publish(team, publication));
     }
 
+    public void publish(Team team, Trip trip) {
+        getPublishers(team).forEach(s -> s.publish(team, trip));
+    }
+
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
+
 }

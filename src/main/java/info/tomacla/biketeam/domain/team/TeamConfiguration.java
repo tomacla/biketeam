@@ -35,6 +35,8 @@ public class TeamConfiguration {
     private boolean feedVisible;
     @Column(name = "rides_visible")
     private boolean ridesVisible;
+    @Column(name = "trips_visible")
+    private boolean tripsVisible;
     @Column
     private String domain;
     @Column(name = "markdown_page")
@@ -45,12 +47,13 @@ public class TeamConfiguration {
     }
 
     public TeamConfiguration(String timezone, List<String> defaultSearchTags,
-                             WebPage defaultPage, boolean feedVisible, boolean ridesVisible) {
+                             WebPage defaultPage, boolean feedVisible, boolean ridesVisible, boolean tripsVisible) {
         setTimezone(timezone);
         setDefaultSearchTags(defaultSearchTags);
         setDefaultPage(defaultPage);
         setFeedVisible(feedVisible);
         setRidesVisible(ridesVisible);
+        setTripsVisible(tripsVisible);
     }
 
     public String getTeamId() {
@@ -108,6 +111,14 @@ public class TeamConfiguration {
 
     public void setRidesVisible(boolean ridesVisible) {
         this.ridesVisible = ridesVisible;
+    }
+
+    public boolean isTripsVisible() {
+        return tripsVisible;
+    }
+
+    public void setTripsVisible(boolean tripsVisible) {
+        this.tripsVisible = tripsVisible;
     }
 
     public String getDomain() {

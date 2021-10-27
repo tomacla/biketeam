@@ -14,6 +14,7 @@ public class EditTeamConfigurationForm {
     private String defaultPage;
     private String feedVisible;
     private String ridesVisible;
+    private String tripsVisible;
 
     public EditTeamConfigurationForm() {
         setTimezone(Timezone.DEFAULT_TIMEZONE);
@@ -21,6 +22,7 @@ public class EditTeamConfigurationForm {
         setDefaultPage("");
         setFeedVisible(null);
         setRidesVisible(null);
+        setTripsVisible(null);
     }
 
     public static EditTeamConfigurationFormBuilder builder() {
@@ -67,6 +69,14 @@ public class EditTeamConfigurationForm {
         this.ridesVisible = ridesVisible;
     }
 
+    public String getTripsVisible() {
+        return tripsVisible;
+    }
+
+    public void setTripsVisible(String tripsVisible) {
+        this.tripsVisible = tripsVisible;
+    }
+
     public EditTeamConfigurationFormParser parser() {
         return new EditTeamConfigurationFormParser(this);
     }
@@ -99,6 +109,10 @@ public class EditTeamConfigurationForm {
             return form.getRidesVisible() != null && form.getRidesVisible().equals("on");
         }
 
+        public boolean isTripsVisible() {
+            return form.getTripsVisible() != null && form.getTripsVisible().equals("on");
+        }
+
     }
 
     public static class EditTeamConfigurationFormBuilder {
@@ -128,6 +142,11 @@ public class EditTeamConfigurationForm {
 
         public EditTeamConfigurationFormBuilder withRidesVisible(boolean ridesVisible) {
             form.setRidesVisible(ridesVisible ? "on" : null);
+            return this;
+        }
+
+        public EditTeamConfigurationFormBuilder withTripsVisible(boolean tripsVisible) {
+            form.setTripsVisible(tripsVisible ? "on" : null);
             return this;
         }
 

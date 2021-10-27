@@ -587,6 +587,121 @@
         </addColumn>
         <sql>update team_integration set heatmap_display = false</sql>
     </changeSet>
+    
+    <changeSet id="GITHUB-77-TRIPS" author="tomacla">
+
+        <createTable tableName="trip">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="team_id" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="lower_speed" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="upper_speed" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="meeting_location" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="meeting_point_lat" type="DOUBLE"/>
+            <column name="meeting_point_lng" type="DOUBLE"/>
+            <column name="meeting_time" type="TIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(8000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="imaged" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(25)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="published_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+            <column name="published_status" type="VARCHAR(25)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="trip" columnNames="id"/>
+
+        <createIndex tableName="trip" indexName="trip_team_id">
+            <column name="team_id"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="trip"
+                                 baseColumnNames="team_id"
+                                 constraintName="fk_trip_team"
+                                 referencedTableName="team"
+                                 referencedColumnNames="id"/>
+
+        <createTable tableName="trip_stage">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="map_id" type="VARCHAR(255)"/>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="trip_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="trip_stage" columnNames="id"/>
+
+        <createIndex tableName="trip_stage" indexName="trip_stage_trip_id">
+            <column name="trip_id"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="trip_stage"
+                                 baseColumnNames="trip_id"
+                                 constraintName="fk_trip_stage_trip_id"
+                                 referencedTableName="trip"
+                                 referencedColumnNames="id"/>
+
+        <createTable tableName="trip_participant">
+            <column name="trip_id" type="VARCHAR(255)"/>
+            <column name="user_id" type="VARCHAR(255)"/>
+        </createTable>
+
+        <addColumn tableName="team_configuration">
+            <column name="trips_visible" type="BOOLEAN"/>
+        </addColumn>
+
+        <sql>update team_configuration set trips_visible = false</sql>
+
+        <dropView viewName="feed" />
+
+        <createView viewName="feed" replaceIfExists="true">
+            select r.id as id, r.team_id as team_id, t.name as team_name, 'RIDE' as type, r.published_at as published_at, r.title as title,
+            r.description as content, r.imaged as imaged FROM ride r, team t where t.id = r.team_id and r.published_status = 'PUBLISHED'
+            UNION
+            select p.id as id, p.team_id as team_id, t.name as team_name, 'PUBLICATION' as type, p.published_at as published_at, p.title as title,
+            p.content as content, p.imaged as imaged FROM publication p, team t where t.id = p.team_id and p.published_status = 'PUBLISHED'
+            UNION
+            select tr.id as id, tr.team_id as team_id, t.name as team_name, 'TRIP' as type, tr.published_at as published_at, tr.title as title,
+            tr.description as content, tr.imaged as imaged FROM trip tr, team t where t.id = tr.team_id and tr.published_status = 'PUBLISHED'
+        </createView>
+
+    </changeSet>
 
 
 </databaseChangeLog>

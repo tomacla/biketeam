@@ -20,6 +20,9 @@ public class TaskService {
     private PublicationService publicationService;
 
     @Autowired
+    private TripService tripService;
+
+    @Autowired
     private FileService fileService;
 
     @Autowired
@@ -30,6 +33,7 @@ public class TaskService {
         log.info("Executing scheduled publicationTask");
         rideService.publishRides();
         publicationService.publishPublications();
+        tripService.publishTrips();
     }
 
     @Scheduled(fixedRate = 300000, initialDelay = 15000)

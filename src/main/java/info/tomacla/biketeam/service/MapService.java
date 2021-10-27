@@ -37,12 +37,16 @@ public class MapService {
     @Autowired
     private RideService rideService;
 
+    @Autowired
+    private TripService tripService;
+
     public void delete(String teamId, String mapId) {
         log.info("Request map deletion {}", mapId);
         final Optional<Map> optionalMap = get(teamId, mapId);
         if (optionalMap.isPresent()) {
             final Map map = optionalMap.get();
             rideService.removeMapIdInGroups(map.getId());
+            tripService.removeMapIdInStages(map.getId());
             gpxService.deleteMap(map.getTeamId(), map.getId());
             mapRepository.delete(map);
         }
@@ -196,6 +200,8 @@ public class MapService {
                 map.isCrossing(),
                 map.isVisible()));
 
+        rideService.changeMapIdInGroups(map.getId(), newId);
+        tripService.changeMapIdInStages(map.getId(), newId);
         gpxService.changeMapId(map.getTeamId(), map.getId(), newId);
 
         delete(map.getTeamId(), map.getId());
@@ -204,6 +210,6 @@ public class MapService {
     }
 
     public void refreshFiles(String teamId, String mapId) {
-        get(teamId, mapId).ifPresent(map -> this.renameMap(map));
+        get(teamId, mapId).ifPresent(this::renameMap);
     }
 }

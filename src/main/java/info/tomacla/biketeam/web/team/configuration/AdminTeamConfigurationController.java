@@ -112,6 +112,7 @@ public class AdminTeamConfigurationController extends AbstractController {
                 .withDefaultPage(teamConfiguration.getDefaultPage())
                 .withFeedVisible(teamConfiguration.isFeedVisible())
                 .withRidesVisible(teamConfiguration.isRidesVisible())
+                .withTripsVisible(teamConfiguration.isTripsVisible())
                 .get();
 
         addGlobalValues(principal, model, "Administration - Configuration", team);
@@ -140,6 +141,7 @@ public class AdminTeamConfigurationController extends AbstractController {
             teamConfiguration.setDefaultPage(parser.getDefaultPage());
             teamConfiguration.setFeedVisible(parser.isFeedVisible());
             teamConfiguration.setRidesVisible(parser.isRidesVisible());
+            teamConfiguration.setTripsVisible(parser.isTripsVisible());
             teamService.save(team);
 
             addGlobalValues(principal, model, "Administration - Configuration", team);

@@ -132,8 +132,16 @@ public abstract class AbstractController {
         return createRedirect(team, "/rides");
     }
 
+    protected String redirectToTrips(Team team) {
+        return createRedirect(team, "/trips");
+    }
+
     protected String redirectToRide(Team team, String rideId) {
         return createRedirect(team, "/rides/" + rideId);
+    }
+
+    protected String redirectToTrip(Team team, String tripId) {
+        return createRedirect(team, "/trips/" + tripId);
     }
 
     protected String redirectToMaps(Team team) {

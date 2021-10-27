@@ -76,7 +76,8 @@ public class TeamService {
         TeamConfiguration teamConfiguration = team.getConfiguration();
 
         if ((teamConfiguration.getDefaultPage().equals(WebPage.FEED) && !teamConfiguration.isFeedVisible())
-                || (teamConfiguration.getDefaultPage().equals(WebPage.RIDES) && !teamConfiguration.isRidesVisible())) {
+                || (teamConfiguration.getDefaultPage().equals(WebPage.RIDES) && !teamConfiguration.isRidesVisible())
+                || (teamConfiguration.getDefaultPage().equals(WebPage.TRIPS) && !teamConfiguration.isTripsVisible())) {
             teamConfiguration.setDefaultPage(WebPage.MAPS);
         }
 

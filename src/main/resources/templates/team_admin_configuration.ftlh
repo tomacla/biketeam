@@ -13,6 +13,7 @@
                          <select name="defaultPage" class="form-select" id="form-configuration-defaultpage">
                              <option<#if formdata.defaultPage == 'FEED'> selected</#if> value="FEED">Accueil</option>
                              <option<#if formdata.defaultPage == 'RIDES'> selected</#if> value="RIDES">Rides</option>
+                             <option<#if formdata.defaultPage == 'TRIPS'> selected</#if> value="TRIPS">Trips</option>
                              <option<#if formdata.defaultPage == 'MAPS'> selected</#if> value="MAPS">Maps</option>
                          </select>
                 </div>
@@ -26,6 +27,10 @@
                         <input class="form-check-input" name="ridesVisible" type="checkbox" id="form-configuration-ridesvisible"<#if formdata.ridesVisible?? && formdata.ridesVisible == 'on'> checked</#if>>
                         <label class="form-check-label" for="form-configuration-ridesvisible">Activer la page "Rides"</label>
                       </div>
+                      <div class="form-check form-switch">
+                          <input class="form-check-input" name="tripsVisible" type="checkbox" id="form-configuration-tripsvisible"<#if formdata.tripsVisible?? && formdata.tripsVisible == 'on'> checked</#if>>
+                          <label class="form-check-label" for="form-configuration-tripsVisible">Activer la page "Trips"</label>
+                        </div>
                 </div>
 
                 <hr/>
