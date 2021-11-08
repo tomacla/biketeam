@@ -1,8 +1,6 @@
 package info.tomacla.biketeam.web.user;
 
-import info.tomacla.biketeam.common.Point;
 import info.tomacla.biketeam.common.Strings;
-import org.springframework.util.ObjectUtils;
 
 public class EditUserForm {
 

@@ -37,6 +37,7 @@ public abstract class AbstractController {
 
         model.addAttribute("_pagetitle", pageTitle);
         model.addAttribute("_date_formatter", Dates.frenchFormatter);
+        model.addAttribute("_time_formatter", Dates.timeFormatter);
         model.addAttribute("_authenticated", false);
         model.addAttribute("_admin", false);
         model.addAttribute("_team_admin", false);
@@ -108,13 +109,19 @@ public abstract class AbstractController {
         return Optional.empty();
     }
 
-    protected void checkAdmin(Principal principal, String teamId) {
+    protected boolean isAdmin(Principal principal, String teamId) {
         boolean admin = false;
         final Optional<User> optionalUser = getUserFromPrincipal(principal);
         if (optionalUser.isPresent()) {
             final User user = optionalUser.get();
             admin = user.isAdmin() || user.isAdmin(teamId);
         }
+        return admin;
+
+    }
+
+    protected void checkAdmin(Principal principal, String teamId) {
+        boolean admin = isAdmin(principal, teamId);
         if (!admin) {
             throw new IllegalStateException("User is not admin");
         }

@@ -14,7 +14,7 @@
                 </div>
             </div>
             <#if ride.publishedStatus != 'PUBLISHED'>
-                <div class="p-1 alert alert-warning" role="alert">Ce ride n'est pas publié</div>
+                <div class="p-1 alert alert-warning" role="alert">Ce ride n'est pas publié.<br/> <span class="small text-muted">Publication le ${ride.publishedAt.format(_date_formatter)} à ${ride.publishedAt.format(_time_formatter)} (UTC)</span></div>
             </#if>
             <h5 class="text-muted">${ride.date.format(_date_formatter)}</h5>
             <#if ride.imaged>

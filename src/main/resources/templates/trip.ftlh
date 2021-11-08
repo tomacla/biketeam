@@ -14,7 +14,7 @@
                 </div>
             </div>
             <#if trip.publishedStatus != 'PUBLISHED'>
-                <div class="p-1 alert alert-warning" role="alert">Ce trip n'est pas publié</div>
+                <div class="p-1 alert alert-warning" role="alert">Ce trip n'est pas publié.<br/> <span class="small text-muted">Publication le ${trip.publishedAt.format(_date_formatter)} à ${trip.publishedAt.format(_time_formatter)} (UTC)</span></div>
             </#if>
             <h5 class="text-muted">Du ${trip.startDate.format(_date_formatter)} au ${trip.endDate.format(_date_formatter)}</h5>
             <ul class="list-unstyled">

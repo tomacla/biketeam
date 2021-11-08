@@ -36,7 +36,7 @@ public class MattermostService implements ExternalPublicationService {
     @Override
     public void publish(Team team, Ride ride) {
 
-        if(!team.getIntegration().isMattermostPublishRides()) {
+        if (!team.getIntegration().isMattermostPublishRides()) {
             return;
         }
 
@@ -56,7 +56,7 @@ public class MattermostService implements ExternalPublicationService {
     @Override
     public void publish(Team team, Trip trip) {
 
-        if(!team.getIntegration().isMattermostPublishTrips()) {
+        if (!team.getIntegration().isMattermostPublishTrips()) {
             return;
         }
 
@@ -75,7 +75,7 @@ public class MattermostService implements ExternalPublicationService {
     @Override
     public void publish(Team team, Publication publication) {
 
-        if(!team.getIntegration().isMattermostPublishPublications()) {
+        if (!team.getIntegration().isMattermostPublishPublications()) {
             return;
         }
 

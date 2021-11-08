@@ -2,6 +2,7 @@ package info.tomacla.biketeam.web.trip;
 
 import info.tomacla.biketeam.common.FileExtension;
 import info.tomacla.biketeam.common.ImageDescriptor;
+import info.tomacla.biketeam.common.PublishedStatus;
 import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.trip.Trip;
@@ -60,6 +61,11 @@ public class TripController extends AbstractController {
         }
 
         Trip trip = optionalTrip.get();
+
+        if (!trip.getPublishedStatus().equals(PublishedStatus.PUBLISHED) && !isAdmin(principal, teamId)) {
+            return redirectToTrips(team);
+        }
+
         final java.util.Map<String, Map> maps = trip.getStages().stream()
                 .map(TripStage::getMapId)
                 .filter(Objects::nonNull)

@@ -4,8 +4,6 @@ import info.tomacla.biketeam.common.Point;
 import info.tomacla.biketeam.common.Strings;
 import org.springframework.util.ObjectUtils;
 
-import javax.persistence.Column;
-
 public class EditTeamIntegrationForm {
 
     private String facebookGroupDetails;

@@ -61,7 +61,7 @@ public class FacebookService implements ExternalPublicationService {
 
     public void publish(Team team, Ride ride) {
 
-        if(!team.getIntegration().isFacebookPublishRides()) {
+        if (!team.getIntegration().isFacebookPublishRides()) {
             return;
         }
 
@@ -99,7 +99,7 @@ public class FacebookService implements ExternalPublicationService {
 
     public void publish(Team team, Trip trip) {
 
-        if(!team.getIntegration().isFacebookPublishTrips()) {
+        if (!team.getIntegration().isFacebookPublishTrips()) {
             return;
         }
 
@@ -122,7 +122,7 @@ public class FacebookService implements ExternalPublicationService {
 
     public void publish(Team team, Publication publication) {
 
-        if(!team.getIntegration().isFacebookPublishPublications()) {
+        if (!team.getIntegration().isFacebookPublishPublications()) {
             return;
         }
 
