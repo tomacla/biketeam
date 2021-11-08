@@ -734,6 +734,29 @@
 
     </changeSet>
 
+    <changeSet id="GITHUB-79-FEED-DETAILS" author="tomacla">
+
+        <dropView viewName="feed" />
+
+        <createView viewName="feed" replaceIfExists="true">
+            select r.id as id, r.team_id as team_id, t.name as team_name, 'RIDE' as type, r.published_at as published_at, r.date as date, r.title as title,
+            r.description as content, r.imaged as imaged FROM ride r, team t where t.id = r.team_id and r.published_status = 'PUBLISHED'
+            UNION
+            select p.id as id, p.team_id as team_id, t.name as team_name, 'PUBLICATION' as type, p.published_at as published_at, NULL as date, p.title as title,
+            p.content as content, p.imaged as imaged FROM publication p, team t where t.id = p.team_id and p.published_status = 'PUBLISHED'
+            UNION
+            select tr.id as id, tr.team_id as team_id, t.name as team_name, 'TRIP' as type, tr.published_at as published_at, tr.start_date as date, tr.title as title,
+            tr.description as content, tr.imaged as imaged FROM trip tr, team t where t.id = tr.team_id and tr.published_status = 'PUBLISHED'
+        </createView>
+
+        <createView viewName="feed_badges" replaceIfExists="true">
+            select * from (select rg.ride_id as feed_id, ROW_NUMBER() over (ORDER BY rg.ride_id, rg.meeting_time, rg.name) || '-' || rg.name as badges FROM ride_group rg, ride r where r.id = rg.ride_id and r.published_status = 'PUBLISHED') as data1
+            UNION
+            select * from (select ts.trip_id as feed_id, ROW_NUMBER() over (ORDER BY ts.trip_id, ts.date, ts.name) || '-' || ts.name as badges FROM trip_stage ts, trip t where t.id = ts.trip_id and t.published_status = 'PUBLISHED') as data2
+        </createView>
+
+    </changeSet>
+
 
 </databaseChangeLog>
 

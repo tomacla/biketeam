@@ -35,11 +35,14 @@
                         </div>
                         <div class="card-body">
                         <#if feedItem.type == 'RIDE'>
-                            <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl feedItem.teamId '/rides/'+ feedItem.id />">${feedItem.title}</a></h5>
+                            <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl feedItem.teamId '/rides/'+ feedItem.id />">${feedItem.title}</a> - ${feedItem.date.format(_date_formatter)}</h5>
                         <#elseif feedItem.type == 'TRIP'>
-                            <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl feedItem.teamId '/trips/'+ feedItem.id />">${feedItem.title}</a></h5>
+                            <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl feedItem.teamId '/trips/'+ feedItem.id />">${feedItem.title}</a> - ${feedItem.date.format(_date_formatter)}</h5>
                         <#else>
                             <h5 class="card-title">${feedItem.title}</h5>
+                        </#if>
+                        <#if feedItem.badges?? && feedItem.badges?size gt 0>
+                            <p><#list feedItem.badges as badge><span class="badge bg-secondary">${badge}</span><#if badge_has_next> </#if></#list></p>
                         </#if>
                           <p class="card-text wrap-content">${feedItem.content}</p>
                           <#if feedItem.imaged>
