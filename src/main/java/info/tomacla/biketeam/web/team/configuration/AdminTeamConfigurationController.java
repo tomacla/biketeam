@@ -119,6 +119,8 @@ public class AdminTeamConfigurationController extends AbstractController {
         model.addAttribute("formdata", form);
         model.addAttribute("timezones", getAllAvailableTimeZones());
         model.addAttribute("tags", mapService.listTags(team.getId()));
+        model.addAttribute("adminContact", smtpFrom);
+        model.addAttribute("domain", teamConfiguration.getDomain());
         return "team_admin_configuration";
     }
 
@@ -148,6 +150,8 @@ public class AdminTeamConfigurationController extends AbstractController {
             model.addAttribute("formdata", form);
             model.addAttribute("timezones", getAllAvailableTimeZones());
             model.addAttribute("tags", mapService.listTags(team.getId()));
+            model.addAttribute("adminContact", smtpFrom);
+            model.addAttribute("domain", teamConfiguration.getDomain());
             return "team_admin_configuration";
 
         } catch (Exception e) {
@@ -155,6 +159,8 @@ public class AdminTeamConfigurationController extends AbstractController {
             model.addAttribute("formdata", form);
             model.addAttribute("timezones", getAllAvailableTimeZones());
             model.addAttribute("tags", mapService.listTags(team.getId()));
+            model.addAttribute("adminContact", smtpFrom);
+            model.addAttribute("domain", teamConfiguration.getDomain());
             return "team_admin_configuration";
 
         }
@@ -220,9 +226,15 @@ public class AdminTeamConfigurationController extends AbstractController {
 
         EditTeamIntegrationForm form = EditTeamIntegrationForm.builder()
                 .withFacebookGroupDetails(teamIntegration.isFacebookGroupDetails())
+                .withFacebookPublishPublications(teamIntegration.isFacebookPublishPublications())
+                .withFacebookPublishRides(teamIntegration.isFacebookPublishRides())
+                .withFacebookPublishTrips(teamIntegration.isFacebookPublishTrips())
                 .withMattermostApiEndpoint(teamIntegration.getMattermostApiEndpoint())
                 .withMattermostApiToken(teamIntegration.getMattermostApiToken())
                 .withMattermostChannelID(teamIntegration.getMattermostChannelID())
+                .withMattermostPublishPublications(teamIntegration.isMattermostPublishPublications())
+                .withMattermostPublishRides(teamIntegration.isMattermostPublishRides())
+                .withMattermostPublishTrips(teamIntegration.isMattermostPublishTrips())
                 .withHeatmapCenter(teamIntegration.getHeatmapCenter())
                 .withHeatmapDisplay(teamIntegration.isHeatmapDisplay())
                 .get();
@@ -250,9 +262,15 @@ public class AdminTeamConfigurationController extends AbstractController {
             final EditTeamIntegrationForm.EditTeamIntegrationFormParser parser = form.parser();
 
             teamIntegration.setFacebookGroupDetails(parser.isFacebookGroupDetails());
+            teamIntegration.setFacebookPublishRides(parser.isFacebookPublishRides());
+            teamIntegration.setFacebookPublishPublications(parser.isFacebookPublishPublications());
+            teamIntegration.setFacebookPublishTrips(parser.isFacebookPublishTrips());
             teamIntegration.setMattermostApiToken(parser.getMattermostApiToken());
             teamIntegration.setMattermostChannelID(parser.getMattermostChannelID());
             teamIntegration.setMattermostApiEndpoint(parser.getMattermostApiEndpoint());
+            teamIntegration.setMattermostPublishPublications(parser.isMattermostPublishPublications());
+            teamIntegration.setMattermostPublishRides(parser.isMattermostPublishRides());
+            teamIntegration.setMattermostPublishTrips(parser.isMattermostPublishTrips());
             teamIntegration.setHeatmapCenter(parser.getHeatmapCenter());
             teamIntegration.setHeatmapDisplay(parser.isHeatmapDisplay());
             teamService.save(team);

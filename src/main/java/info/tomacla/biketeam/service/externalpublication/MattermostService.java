@@ -29,12 +29,16 @@ public class MattermostService implements ExternalPublicationService {
     private UrlService urlService;
 
     @Override
-    public boolean isApplicable(Team team) {
+    public boolean isConfigured(Team team) {
         return team.getIntegration().isMattermostConfigured();
     }
 
     @Override
     public void publish(Team team, Ride ride) {
+
+        if(!team.getIntegration().isMattermostPublishRides()) {
+            return;
+        }
 
         log.info("Publish ride {} to mattermost", ride.getId());
 
@@ -52,6 +56,10 @@ public class MattermostService implements ExternalPublicationService {
     @Override
     public void publish(Team team, Trip trip) {
 
+        if(!team.getIntegration().isMattermostPublishTrips()) {
+            return;
+        }
+
         log.info("Publish trip {} to mattermost", trip.getId());
 
         StringBuilder sb = new StringBuilder();
@@ -67,6 +75,10 @@ public class MattermostService implements ExternalPublicationService {
     @Override
     public void publish(Team team, Publication publication) {
 
+        if(!team.getIntegration().isMattermostPublishPublications()) {
+            return;
+        }
+
         log.info("Publish publication {} to mattermost", publication.getId());
 
         StringBuilder sb = new StringBuilder();
@@ -80,7 +92,7 @@ public class MattermostService implements ExternalPublicationService {
 
     private void publish(Team team, String content) {
 
-        if (!isApplicable(team)) {
+        if (!isConfigured(team)) {
             return;
         }
 

@@ -49,6 +49,7 @@ public class AdminFacebookController extends AbstractController {
         addGlobalValues(principal, model, "Administration - Facebook", null);
         model.addAttribute("accessToken", facebookAccessToken == null ? null : facebookAccessToken.getValue());
         model.addAttribute("teams", teams);
+        model.addAttribute("connectedAccount", facebookService.getConnectedAccount().orElse(null));
         model.addAttribute("authorizedPages", authorizedPages);
         model.addAttribute("facebookUrl", facebookService.getLoginUrl());
 

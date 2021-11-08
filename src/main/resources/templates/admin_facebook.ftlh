@@ -15,7 +15,8 @@
             </div>
         <#else>
             <div class="mb-3">
-                <a href="<@common.teamUrl '' '/admin/facebook/disconnect' />" class="btn btn-danger" type="button">Détruire le lien Facebook</a>
+                <p>Connecté en tant que ${connectedAccount} - <a href="<@common.teamUrl '' '/admin/facebook/disconnect' />" class="btn btn-danger" type="button">Détruire le lien Facebook</a></p>
+
             </div>
             <#if teams?size gt 0>
                 <form name="form-integration" action="<@common.teamUrl '' '/admin/facebook' />" method="POST" class="border rounded p-4">

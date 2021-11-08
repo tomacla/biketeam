@@ -33,6 +33,12 @@ public class User {
     private Set<RideGroup> rideGroups;
     @Column(name = "email")
     private String email;
+    @Column(name = "email_publish_trips")
+    private boolean emailPublishTrips;
+    @Column(name = "email_publish_rides")
+    private boolean emailPublishRides;
+    @Column(name = "email_publish_publications")
+    private boolean emailPublishPublications;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<UserRole> roles;
 
@@ -143,6 +149,30 @@ public class User {
 
     public void setEmail(String email) {
         this.email = Strings.requireEmailOrNull(email);
+    }
+
+    public boolean isEmailPublishTrips() {
+        return emailPublishTrips;
+    }
+
+    public void setEmailPublishTrips(boolean emailPublishTrips) {
+        this.emailPublishTrips = emailPublishTrips;
+    }
+
+    public boolean isEmailPublishRides() {
+        return emailPublishRides;
+    }
+
+    public void setEmailPublishRides(boolean emailPublishRides) {
+        this.emailPublishRides = emailPublishRides;
+    }
+
+    public boolean isEmailPublishPublications() {
+        return emailPublishPublications;
+    }
+
+    public void setEmailPublishPublications(boolean emailPublishPublications) {
+        this.emailPublishPublications = emailPublishPublications;
     }
 
     public Set<UserRole> getRoles() {

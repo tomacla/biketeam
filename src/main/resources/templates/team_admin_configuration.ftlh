@@ -8,7 +8,26 @@
 
         <form name="form-configuration" action="<@common.teamUrl team.id '/admin/configuration' />" method="POST" class="border rounded p-4">
 
+                <#if adminContact?? && !domain??>
+                    <div class="mb-3">
+                        <h5>Domaine personnalisé</h5>
+                        <p>Vous avez un nom de domaine que vous vous utilisez pour votre groupe. Envoyer un mail à ${adminContact} pour le configurer ensemble.</p>
+                    </div>
+                    <hr/>
+                </#if>
+
+                <#if domain??>
+                    <div class="mb-3">
+                        <h5>Domaine personnalisé</h5>
+                        <p>Ce groupe est accessible sur le domaine ${domain}</p>
+                    </div>
+                    <hr/>
+                </#if>
+
+                <h5>Navigation</h5>
+
                 <div class="mb-3">
+
                        <label for="form-configuration-defaultpage" class="form-label">Page par défaut</label>
                          <select name="defaultPage" class="form-select" id="form-configuration-defaultpage">
                              <option<#if formdata.defaultPage == 'FEED'> selected</#if> value="FEED">Accueil</option>
@@ -35,6 +54,8 @@
 
                 <hr/>
 
+                <h5>Localisation</h5>
+
                 <div class="mb-3">
                   <label for="form-configuration-timezone" class="form-label">Timezone</label>
                     <select required name="timezone" class="form-select" id="form-configuration-timezone">
@@ -45,6 +66,8 @@
                 </div>
 
                 <hr/>
+
+                <h5>Préférences</h5>
 
                 <div class="mb-3">
                     <label class="form-label" for="maps-filter-tags" class="form-label">Tags par défaut (recherche et création de maps)</label>

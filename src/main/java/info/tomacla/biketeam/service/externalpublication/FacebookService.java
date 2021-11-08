@@ -55,11 +55,15 @@ public class FacebookService implements ExternalPublicationService {
     private ParameterRepository parameterRepository;
 
     @Override
-    public boolean isApplicable(Team team) {
+    public boolean isConfigured(Team team) {
         return team.getIntegration().isFacebookConfigured();
     }
 
     public void publish(Team team, Ride ride) {
+
+        if(!team.getIntegration().isFacebookPublishRides()) {
+            return;
+        }
 
         log.info("Publish ride {} to facebook", ride.getId());
 
@@ -95,6 +99,10 @@ public class FacebookService implements ExternalPublicationService {
 
     public void publish(Team team, Trip trip) {
 
+        if(!team.getIntegration().isFacebookPublishTrips()) {
+            return;
+        }
+
         log.info("Publish trip {} to facebook", trip.getId());
 
         StringBuilder sb = new StringBuilder();
@@ -114,6 +122,10 @@ public class FacebookService implements ExternalPublicationService {
 
     public void publish(Team team, Publication publication) {
 
+        if(!team.getIntegration().isFacebookPublishPublications()) {
+            return;
+        }
+
         log.info("Publish publication {} to facebook", publication.getId());
 
         StringBuilder sb = new StringBuilder();
@@ -132,7 +144,7 @@ public class FacebookService implements ExternalPublicationService {
 
     private void publish(Team team, String content, Path image) {
 
-        if (!isApplicable(team)) {
+        if (!isConfigured(team)) {
             return;
         }
 

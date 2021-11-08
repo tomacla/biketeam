@@ -703,6 +703,37 @@
 
     </changeSet>
 
+    <changeSet id="GITHUB-85-BROADCAST-TUNING" author="tomacla">
+
+        <addColumn tableName="team_integration">
+            <column name="facebook_publish_trips" type="BOOLEAN"/>
+            <column name="facebook_publish_rides" type="BOOLEAN"/>
+            <column name="facebook_publish_publications" type="BOOLEAN"/>
+            <column name="mattermost_publish_trips" type="BOOLEAN"/>
+            <column name="mattermost_publish_rides" type="BOOLEAN"/>
+            <column name="mattermost_publish_publications" type="BOOLEAN"/>
+        </addColumn>
+
+        <sql>update team_integration set facebook_publish_publications = false, facebook_publish_trips = false, facebook_publish_rides = false</sql>
+        <sql>update team_integration set facebook_publish_trips = true where facebook_page_id is not null</sql>
+        <sql>update team_integration set facebook_publish_rides = true where facebook_page_id is not null</sql>
+
+        <sql>update team_integration set mattermost_publish_publications = false, mattermost_publish_trips = false, mattermost_publish_rides = false</sql>
+        <sql>update team_integration set mattermost_publish_trips = true where mattermost_api_token is not null</sql>
+        <sql>update team_integration set mattermost_publish_rides = true where mattermost_api_token is not null</sql>
+
+        <addColumn tableName="user_account">
+            <column name="email_publish_trips" type="BOOLEAN"/>
+            <column name="email_publish_rides" type="BOOLEAN"/>
+            <column name="email_publish_publications" type="BOOLEAN"/>
+        </addColumn>
+
+        <sql>update user_account set email_publish_publications = false, email_publish_trips = false, email_publish_rides = false</sql>
+        <sql>update user_account set email_publish_rides = true where email is not null</sql>
+        <sql>update user_account set email_publish_trips = true where email is not null</sql>
+
+    </changeSet>
+
 
 </databaseChangeLog>
 

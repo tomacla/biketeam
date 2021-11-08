@@ -20,7 +20,7 @@ public class ExternalPublisher implements ApplicationContextAware {
 
     private List<ExternalPublicationService> getPublishers(Team team) {
         final Map<String, ExternalPublicationService> publishers = applicationContext.getBeansOfType(ExternalPublicationService.class);
-        return publishers.values().stream().filter(e -> e.isApplicable(team)).collect(Collectors.toList());
+        return publishers.values().stream().filter(e -> e.isConfigured(team)).collect(Collectors.toList());
     }
 
     public void publish(Team team, Ride ride) {

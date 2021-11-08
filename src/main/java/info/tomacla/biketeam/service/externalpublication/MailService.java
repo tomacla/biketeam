@@ -49,13 +49,17 @@ public class MailService implements ExternalPublicationService {
     private TripService tripService;
 
     @Override
-    public boolean isApplicable(Team team) {
+    public boolean isConfigured(Team team) {
         return mailSenderService.isSmtpConfigured();
     }
 
     public void publish(Team team, Ride ride) {
 
-        final List<User> recipients = userService.listUsersWithMailActivated(team);
+        final List<User> recipients = userService.listUsersWithMailActivated(team)
+                .stream()
+                .filter(User::isEmailPublishRides)
+                .collect(Collectors.toList());
+
         if (recipients.size() > 0) {
 
             log.info("Publish ride {} to {} recipients", ride.getId(), recipients.size());
@@ -95,7 +99,11 @@ public class MailService implements ExternalPublicationService {
 
     public void publish(Team team, Trip trip) {
 
-        final List<User> recipients = userService.listUsersWithMailActivated(team);
+        final List<User> recipients = userService.listUsersWithMailActivated(team)
+                .stream()
+                .filter(User::isEmailPublishTrips)
+                .collect(Collectors.toList());
+
         if (recipients.size() > 0) {
 
             log.info("Publish trip {} to {} recipients", trip.getId(), recipients.size());
@@ -136,27 +144,34 @@ public class MailService implements ExternalPublicationService {
 
     public void publish(Team team, Publication publication) {
 
-        final List<User> recipients = userService.listUsersWithMailActivated(team);
+        final List<User> recipients = userService.listUsersWithMailActivated(team)
+                .stream()
+                .filter(User::isEmailPublishPublications)
+                .collect(Collectors.toList());
 
-        log.info("Publish publication {} to {} recipients", publication.getId(), recipients.size());
+        if (recipients.size() > 0) {
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("<html>").append("<head></head>").append("<body>");
-        sb.append("<p>").append(publication.getTitle()).append("</p>");
-        sb.append("<p>").append(getHtmlLink(urlService.getTeamUrl(team))).append("</p>");
-        sb.append("<p>").append(publication.getContent()).append("</p>");
-        if (publication.isImaged()) {
-            sb.append("<p><img width=\"400\" src=\"cid:Image\" /></p>");
-        }
-        sb.append("<br/>").append("<p>").append(team.getName()).append("</p>");
-        sb.append("</body>").append("</html>");
+            log.info("Publish publication {} to {} recipients", publication.getId(), recipients.size());
 
-        final String content = sb.toString();
+            StringBuilder sb = new StringBuilder();
+            sb.append("<html>").append("<head></head>").append("<body>");
+            sb.append("<p>").append(publication.getTitle()).append("</p>");
+            sb.append("<p>").append(getHtmlLink(urlService.getTeamUrl(team))).append("</p>");
+            sb.append("<p>").append(publication.getContent()).append("</p>");
+            if (publication.isImaged()) {
+                sb.append("<p><img width=\"400\" src=\"cid:Image\" /></p>");
+            }
+            sb.append("<br/>").append("<p>").append(team.getName()).append("</p>");
+            sb.append("</body>").append("</html>");
 
-        if (publication.isImaged()) {
-            publicationService.getImage(team.getId(), publication.getId()).ifPresent(pubImage -> this.publish(team, recipients, publication.getTitle(), content, pubImage.getPath()));
-        } else {
-            this.publish(team, recipients, publication.getTitle(), content, null);
+            final String content = sb.toString();
+
+            if (publication.isImaged()) {
+                publicationService.getImage(team.getId(), publication.getId()).ifPresent(pubImage -> this.publish(team, recipients, publication.getTitle(), content, pubImage.getPath()));
+            } else {
+                this.publish(team, recipients, publication.getTitle(), content, null);
+            }
+
         }
 
     }
@@ -167,7 +182,7 @@ public class MailService implements ExternalPublicationService {
 
     private void publish(Team team, List<User> recipients, String subject, String content, Path image) {
 
-        if (!isApplicable(team)) {
+        if (!isConfigured(team)) {
             return;
         }
 

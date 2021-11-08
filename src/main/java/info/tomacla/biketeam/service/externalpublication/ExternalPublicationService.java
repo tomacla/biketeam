@@ -7,7 +7,7 @@ import info.tomacla.biketeam.domain.trip.Trip;
 
 public interface ExternalPublicationService {
 
-    boolean isApplicable(Team team);
+    boolean isConfigured(Team team);
 
     void publish(Team team, Ride ride);
 

@@ -23,12 +23,24 @@ public class TeamIntegration {
     private String facebookPageId;
     @Column(name = "facebook_group_details")
     private boolean facebookGroupDetails;
+    @Column(name = "facebook_publish_trips")
+    private boolean facebookPublishTrips;
+    @Column(name = "facebook_publish_rides")
+    private boolean facebookPublishRides;
+    @Column(name = "facebook_publish_publications")
+    private boolean facebookPublishPublications;
     @Column(name = "mattermost_api_token")
     private String mattermostApiToken;
     @Column(name = "mattermost_channel_id")
     private String mattermostChannelID;
     @Column(name = "mattermost_api_endpoint")
     private String mattermostApiEndpoint;
+    @Column(name = "mattermost_publish_trips")
+    private boolean mattermostPublishTrips;
+    @Column(name = "mattermost_publish_rides")
+    private boolean mattermostPublishRides;
+    @Column(name = "mattermost_publish_publications")
+    private boolean mattermostPublishPublications;
     @AttributeOverrides({
             @AttributeOverride(name = "lat", column = @Column(name = "heatmap_center_lat")),
             @AttributeOverride(name = "lng", column = @Column(name = "heatmap_center_lng"))
@@ -75,6 +87,30 @@ public class TeamIntegration {
         this.facebookGroupDetails = facebookGroupDetails;
     }
 
+    public boolean isFacebookPublishTrips() {
+        return facebookPublishTrips;
+    }
+
+    public void setFacebookPublishTrips(boolean facebookPublishTrips) {
+        this.facebookPublishTrips = facebookPublishTrips;
+    }
+
+    public boolean isFacebookPublishRides() {
+        return facebookPublishRides;
+    }
+
+    public void setFacebookPublishRides(boolean facebookPublishRides) {
+        this.facebookPublishRides = facebookPublishRides;
+    }
+
+    public boolean isFacebookPublishPublications() {
+        return facebookPublishPublications;
+    }
+
+    public void setFacebookPublishPublications(boolean facebookPublishPublications) {
+        this.facebookPublishPublications = facebookPublishPublications;
+    }
+
     public boolean isFacebookConfigured() {
         return facebookPageId != null;
     }
@@ -105,6 +141,30 @@ public class TeamIntegration {
 
     public void setMattermostApiEndpoint(String mattermostApiEndpoint) {
         this.mattermostApiEndpoint = Strings.requireNonBlankOrNull(mattermostApiEndpoint);
+    }
+
+    public boolean isMattermostPublishTrips() {
+        return mattermostPublishTrips;
+    }
+
+    public void setMattermostPublishTrips(boolean mattermostPublishTrips) {
+        this.mattermostPublishTrips = mattermostPublishTrips;
+    }
+
+    public boolean isMattermostPublishRides() {
+        return mattermostPublishRides;
+    }
+
+    public void setMattermostPublishRides(boolean mattermostPublishRides) {
+        this.mattermostPublishRides = mattermostPublishRides;
+    }
+
+    public boolean isMattermostPublishPublications() {
+        return mattermostPublishPublications;
+    }
+
+    public void setMattermostPublishPublications(boolean mattermostPublishPublications) {
+        this.mattermostPublishPublications = mattermostPublishPublications;
     }
 
     public Point getHeatmapCenter() {
