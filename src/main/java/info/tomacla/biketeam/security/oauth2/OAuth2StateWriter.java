@@ -1,4 +1,4 @@
-package info.tomacla.biketeam.security;
+package info.tomacla.biketeam.security.oauth2;
 
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.service.TeamService;

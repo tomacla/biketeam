@@ -29,7 +29,6 @@ public class AdminTeamRideTemplateController extends AbstractController {
                                Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         addGlobalValues(principal, model, "Administration - Templates", team);
         model.addAttribute("templates", rideTemplateService.listTemplates(team.getId()));
@@ -42,7 +41,6 @@ public class AdminTeamRideTemplateController extends AbstractController {
                               Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         NewRideTemplateForm form = NewRideTemplateForm.builder(1).get();
 
@@ -59,7 +57,6 @@ public class AdminTeamRideTemplateController extends AbstractController {
                                Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         Optional<RideTemplate> optionalTemplate = rideTemplateService.get(team.getId(), templateId);
         if (optionalTemplate.isEmpty()) {
@@ -91,7 +88,6 @@ public class AdminTeamRideTemplateController extends AbstractController {
                                NewRideTemplateForm form) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         try {
 
@@ -140,7 +136,6 @@ public class AdminTeamRideTemplateController extends AbstractController {
                                  Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         try {
             rideTemplateService.delete(team.getId(), templateId);

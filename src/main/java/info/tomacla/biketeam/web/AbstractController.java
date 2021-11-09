@@ -120,13 +120,6 @@ public abstract class AbstractController {
 
     }
 
-    protected void checkAdmin(Principal principal, String teamId) {
-        boolean admin = isAdmin(principal, teamId);
-        if (!admin) {
-            throw new IllegalStateException("User is not admin");
-        }
-    }
-
     protected List<String> getAllAvailableTimeZones() {
         return ZoneId.getAvailableZoneIds().stream().map(ZoneId::of).map(ZoneId::toString).sorted().collect(Collectors.toList());
     }

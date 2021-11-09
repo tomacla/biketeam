@@ -36,7 +36,6 @@ public class AdminTeamPublicationController extends AbstractController {
                                   Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         addGlobalValues(principal, model, "Administration - Publications", team);
         model.addAttribute("publications", publicationService.listPublications(team.getId()));
@@ -51,7 +50,6 @@ public class AdminTeamPublicationController extends AbstractController {
                                   NewPublicationForm form) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         final ZoneId timezone = team.getZoneId();
 
@@ -107,7 +105,6 @@ public class AdminTeamPublicationController extends AbstractController {
                                   Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         boolean published = false;
 
@@ -143,7 +140,6 @@ public class AdminTeamPublicationController extends AbstractController {
                                     Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         try {
             publicationService.delete(team.getId(), publicationId);

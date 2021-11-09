@@ -1,6 +1,7 @@
-package info.tomacla.biketeam.security;
+package info.tomacla.biketeam.security.oauth2;
 
 import info.tomacla.biketeam.domain.user.User;
+import info.tomacla.biketeam.security.OAuth2UserDetails;
 import info.tomacla.biketeam.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +20,9 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
-public class AuthUserService extends DefaultOAuth2UserService {
+public class Oauth2AuthUserService extends DefaultOAuth2UserService {
 
-    private static final Logger log = LoggerFactory.getLogger(AuthUserService.class);
+    private static final Logger log = LoggerFactory.getLogger(Oauth2AuthUserService.class);
 
     @Autowired
     private UserService userService;
@@ -29,7 +30,6 @@ public class AuthUserService extends DefaultOAuth2UserService {
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
-        String userNameAttributeName = userRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
         DefaultOAuth2User user = (DefaultOAuth2User) super.loadUser(userRequest);
 
         List<GrantedAuthority> authorities = new ArrayList<>(user.getAuthorities());
@@ -67,10 +67,6 @@ public class AuthUserService extends DefaultOAuth2UserService {
             u.setCity((String) attributes.get("city"));
             u.setProfileImage((String) attributes.get("profile_medium"));
             userService.save(u);
-
-            if (u.isAdmin()) {
-                authorities.add(AdminAuthority.get());
-            }
 
         }
 

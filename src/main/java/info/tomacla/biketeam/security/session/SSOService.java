@@ -1,4 +1,4 @@
-package info.tomacla.biketeam.security;
+package info.tomacla.biketeam.security.session;
 
 import org.springframework.stereotype.Service;
 

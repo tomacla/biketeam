@@ -1,5 +1,6 @@
-package info.tomacla.biketeam.security;
+package info.tomacla.biketeam.security.session;
 
+import info.tomacla.biketeam.security.OAuth2UserDetails;
 import info.tomacla.biketeam.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -34,7 +34,7 @@ public class RootController extends AbstractController {
     private FacebookService facebookService;
 
     @GetMapping
-    public String getRoot(Principal principal, Model model) {
+    public String getRoot(@RequestParam(required = false, name = "error") String error, Principal principal, Model model) {
 
         final Optional<User> userFromPrincipal = getUserFromPrincipal(principal);
         if (userFromPrincipal.isPresent()) {
@@ -42,12 +42,18 @@ public class RootController extends AbstractController {
             final Set<String> teamIds = user.getRoles().stream().map(ur -> ur.getTeam().getId()).collect(Collectors.toSet());
             final List<Feed> feeds = teamService.listFeed(teamIds);
             addGlobalValues(principal, model, "Accueil", null);
+            if (error != null) {
+                model.addAttribute("errors", List.of(error));
+            }
             model.addAttribute("feed", feeds);
             model.addAttribute("user", user);
             model.addAttribute("userTeams", user.getRoles().stream().map(UserRole::getTeam).collect(Collectors.toList()));
             return "root_auth";
         } else {
             addGlobalValues(principal, model, "Accueil", null);
+            if (error != null) {
+                model.addAttribute("errors", List.of(error));
+            }
             model.addAttribute("teams", teamService.getLast4());
             return "root";
         }
@@ -135,14 +141,6 @@ public class RootController extends AbstractController {
 
         return "teams";
 
-    }
-
-    @GetMapping(value = "/login-error")
-    public String loginError(Principal principal, Model model) {
-        addGlobalValues(principal, model, "Accueil", null);
-        model.addAttribute("errors", List.of("Erreur de connexion"));
-        model.addAttribute("teams", teamService.getLast4());
-        return "root";
     }
 
     @GetMapping(value = "/integration/facebook/login")

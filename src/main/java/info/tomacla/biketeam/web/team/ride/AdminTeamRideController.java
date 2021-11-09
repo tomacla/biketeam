@@ -38,7 +38,6 @@ public class AdminTeamRideController extends AbstractController {
     public String getRides(@PathVariable("teamId") String teamId, Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         addGlobalValues(principal, model, "Administration - Rides", team);
         model.addAttribute("rides", rideService.listRides(team.getId()));
@@ -53,7 +52,6 @@ public class AdminTeamRideController extends AbstractController {
                           Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         NewRideForm form = null;
 
@@ -87,7 +85,6 @@ public class AdminTeamRideController extends AbstractController {
                            Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
         if (optionalRide.isEmpty()) {
@@ -121,7 +118,6 @@ public class AdminTeamRideController extends AbstractController {
                            NewRideForm form) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         try {
 
@@ -188,7 +184,6 @@ public class AdminTeamRideController extends AbstractController {
                              Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         try {
             rideService.delete(team.getId(), rideId);

@@ -1,4 +1,4 @@
-package info.tomacla.biketeam.security;
+package info.tomacla.biketeam.security.session;
 
 import info.tomacla.biketeam.service.UrlService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
-public class CustomCookieHttpSessionIdResolver implements HttpSessionIdResolver {
+public class CookieHttpSessionIdResolverWithSSO implements HttpSessionIdResolver {
 
     private static final String WRITTEN_SESSION_ID_ATTR = CookieHttpSessionIdResolver.class.getName()
             .concat(".WRITTEN_SESSION_ID_ATTR");
@@ -52,7 +52,6 @@ public class CustomCookieHttpSessionIdResolver implements HttpSessionIdResolver 
                 return List.of(authTokenFromSSOToken.get());
             }
         }
-
 
         return this.cookieSerializer.readCookieValues(request);
     }

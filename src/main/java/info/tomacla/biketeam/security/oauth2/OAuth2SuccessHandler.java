@@ -1,5 +1,6 @@
-package info.tomacla.biketeam.security;
+package info.tomacla.biketeam.security.oauth2;
 
+import info.tomacla.biketeam.security.session.SSOService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.util.MultiValueMap;

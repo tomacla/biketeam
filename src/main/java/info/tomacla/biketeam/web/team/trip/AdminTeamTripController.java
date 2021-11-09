@@ -36,7 +36,6 @@ public class AdminTeamTripController extends AbstractController {
     public String getTrips(@PathVariable("teamId") String teamId, Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         addGlobalValues(principal, model, "Administration - Trips", team);
         model.addAttribute("trips", tripService.listTrips(team.getId()));
@@ -50,7 +49,6 @@ public class AdminTeamTripController extends AbstractController {
                           Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         NewTripForm form = NewTripForm.builder(ZonedDateTime.now(), team.getZoneId()).get();
 
@@ -68,7 +66,6 @@ public class AdminTeamTripController extends AbstractController {
                            Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         Optional<Trip> optionalTrip = tripService.get(team.getId(), tripId);
         if (optionalTrip.isEmpty()) {
@@ -108,7 +105,6 @@ public class AdminTeamTripController extends AbstractController {
                            NewTripForm form) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         try {
 
@@ -179,7 +175,6 @@ public class AdminTeamTripController extends AbstractController {
                              Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         try {
             tripService.delete(team.getId(), tripId);

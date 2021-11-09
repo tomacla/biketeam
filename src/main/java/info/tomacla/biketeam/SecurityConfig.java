@@ -1,9 +1,9 @@
 package info.tomacla.biketeam;
 
-import info.tomacla.biketeam.security.CustomCookieHttpSessionIdResolver;
-import info.tomacla.biketeam.security.OAuth2StateWriter;
-import info.tomacla.biketeam.security.OAuth2SuccessHandler;
-import info.tomacla.biketeam.security.SSOTokenFilter;
+import info.tomacla.biketeam.security.oauth2.OAuth2StateWriter;
+import info.tomacla.biketeam.security.oauth2.OAuth2SuccessHandler;
+import info.tomacla.biketeam.security.session.CookieHttpSessionIdResolverWithSSO;
+import info.tomacla.biketeam.security.session.SSOTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +18,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
@@ -35,25 +36,38 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
-        // TODO use roles to control access to team admin
+        // global conf
+        http.cors()
+                .and()
+                .csrf().disable();
 
-        http
-                .cors().and().csrf().disable()
-                .authorizeRequests()
-                .antMatchers("/admin/**").hasRole("ADMIN")
-                .antMatchers("/management/**").hasRole("ADMIN")
-                .anyRequest().permitAll()
-                .and()
-                .rememberMe().alwaysRemember(true).userDetailsService(userDetailsService)
-                .and()
-                .oauth2Login(oauth2 -> {
-                    oauth2.failureUrl("/login-error");
-                    oauth2.loginPage("/");
-                    oauth2.authorizationEndpoint(config ->
-                            config.authorizationRequestResolver(oAuth2AuthorizationRequestResolver())
-                    );
-                    oauth2.successHandler(oAuth2SuccessHandler());
-                });
+        // requests conf
+        http.authorizeRequests(auth -> {
+            auth.antMatchers("/admin/**").hasRole("ADMIN");
+            auth.antMatchers("/management/**").hasRole("ADMIN");
+            auth.antMatchers("/{teamId}/admin/**").access("@checkTeamAdminService.authorize(authentication, #teamId)");
+            auth.anyRequest().permitAll();
+        });
+
+        http.exceptionHandling(e -> {
+            e.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/"));
+            e.accessDeniedPage("/?error=Acc%C3%A8s%20interdit");
+        });
+
+        // remember me conf
+        http.rememberMe(rm -> {
+            rm.alwaysRemember(true);
+            rm.userDetailsService(userDetailsService);
+        });
+
+        // oauth2 cong
+        http.oauth2Login(oauth2 -> {
+            oauth2.failureUrl("/?error=Erreur%20de%20connexion");
+            oauth2.loginPage("/");
+            oauth2.authorizationEndpoint(config -> config.authorizationRequestResolver(oAuth2AuthorizationRequestResolver()));
+            oauth2.successHandler(oAuth2SuccessHandler());
+        });
+
 
     }
 
@@ -79,8 +93,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public CustomCookieHttpSessionIdResolver customCookieHttpSessionIdResolver() {
-        return new CustomCookieHttpSessionIdResolver();
+    public CookieHttpSessionIdResolverWithSSO customCookieHttpSessionIdResolver() {
+        return new CookieHttpSessionIdResolverWithSSO();
     }
 
     @Bean

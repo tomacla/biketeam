@@ -40,7 +40,7 @@ public class AdminTeamConfigurationController extends AbstractController {
                                      Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
+
 
         final TeamDescription teamDescription = team.getDescription();
 
@@ -67,7 +67,7 @@ public class AdminTeamConfigurationController extends AbstractController {
                                         EditTeamDescriptionForm form) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
+
 
         final TeamDescription teamDescription = team.getDescription();
 
@@ -102,7 +102,7 @@ public class AdminTeamConfigurationController extends AbstractController {
                                        Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
+
 
         final TeamConfiguration teamConfiguration = team.getConfiguration();
 
@@ -131,7 +131,7 @@ public class AdminTeamConfigurationController extends AbstractController {
                                           EditTeamConfigurationForm form) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
+
 
         final TeamConfiguration teamConfiguration = team.getConfiguration();
 
@@ -172,7 +172,7 @@ public class AdminTeamConfigurationController extends AbstractController {
                               Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
+
 
         final TeamConfiguration teamConfiguration = team.getConfiguration();
 
@@ -192,7 +192,7 @@ public class AdminTeamConfigurationController extends AbstractController {
                                  EditTeamPageForm form) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
+
 
         final TeamConfiguration teamConfiguration = team.getConfiguration();
 
@@ -220,7 +220,7 @@ public class AdminTeamConfigurationController extends AbstractController {
                                      Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
+
 
         final TeamIntegration teamIntegration = team.getIntegration();
 
@@ -251,7 +251,7 @@ public class AdminTeamConfigurationController extends AbstractController {
                                         EditTeamIntegrationForm form) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
+
 
         final TeamIntegration teamIntegration = team.getIntegration();
 
@@ -300,7 +300,7 @@ public class AdminTeamConfigurationController extends AbstractController {
                           Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
+
 
         addGlobalValues(principal, model, "Administration - Logo", team);
         return "team_admin_logo";
@@ -312,7 +312,7 @@ public class AdminTeamConfigurationController extends AbstractController {
                              @RequestParam("file") MultipartFile file) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
+
 
         try {
             teamService.saveImage(team.getId(), file.getInputStream(), file.getOriginalFilename());

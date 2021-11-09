@@ -19,7 +19,6 @@ public class TeamAdminUserController extends AbstractController {
     public String getUsers(@PathVariable("teamId") String teamId, Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         addGlobalValues(principal, model, "Administration - Utilisateurs", team);
         model.addAttribute("users", userService.listUsers(team));
@@ -31,7 +30,6 @@ public class TeamAdminUserController extends AbstractController {
                           @RequestParam("stravaId") Long stravaId) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         User user = userService.getByStravaId(stravaId).orElse(new User(false, "Inconnu", "Inconnu", stravaId,
                 null, null, null, null, null));
@@ -52,7 +50,6 @@ public class TeamAdminUserController extends AbstractController {
                               Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         try {
             final User user = userService.get(userId).orElseThrow(() -> new IllegalArgumentException("User unknown"));
@@ -72,7 +69,6 @@ public class TeamAdminUserController extends AbstractController {
                                Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         try {
             final User user = userService.get(userId).orElseThrow(() -> new IllegalArgumentException("User unknown"));

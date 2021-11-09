@@ -27,7 +27,6 @@ public class AdminTeamMapController extends AbstractController {
                           Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         addGlobalValues(principal, model, "Administration - Maps", team);
         model.addAttribute("maps", mapService.listMaps(team.getId()));
@@ -41,7 +40,6 @@ public class AdminTeamMapController extends AbstractController {
                           Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         Optional<Map> optionalMap = mapService.get(team.getId(), mapId);
         if (optionalMap.isEmpty()) {
@@ -74,7 +72,6 @@ public class AdminTeamMapController extends AbstractController {
                           NewMapForm form) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         try {
 
@@ -127,7 +124,6 @@ public class AdminTeamMapController extends AbstractController {
                             @RequestParam("file") MultipartFile file) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         try {
 
@@ -157,7 +153,6 @@ public class AdminTeamMapController extends AbstractController {
                             Model model) {
 
         final Team team = checkTeam(teamId);
-        checkAdmin(principal, team.getId());
 
         try {
             mapService.delete(team.getId(), mapId);
