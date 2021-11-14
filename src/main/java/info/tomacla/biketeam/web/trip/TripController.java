@@ -62,7 +62,7 @@ public class TripController extends AbstractController {
 
         Trip trip = optionalTrip.get();
 
-        if (!trip.getPublishedStatus().equals(PublishedStatus.PUBLISHED) && !isAdmin(principal, teamId)) {
+        if (!trip.getPublishedStatus().equals(PublishedStatus.PUBLISHED) && !isAdmin(principal, team)) {
             return redirectToTrips(team);
         }
 
@@ -136,7 +136,7 @@ public class TripController extends AbstractController {
         if (optionalConnectedUser.isPresent()) {
             User connectedUser = optionalConnectedUser.get();
 
-            if (!team.isAdminOrMember(connectedUser.getId())) {
+            if (!team.isMember(connectedUser.getId())) {
                 team.addRole(connectedUser, Role.MEMBER);
                 teamService.save(team);
             }

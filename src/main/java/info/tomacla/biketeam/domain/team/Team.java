@@ -1,5 +1,7 @@
 package info.tomacla.biketeam.domain.team;
 
+import info.tomacla.biketeam.common.Country;
+import info.tomacla.biketeam.common.Strings;
 import info.tomacla.biketeam.domain.user.Role;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.user.UserRole;
@@ -8,10 +10,8 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "team")
@@ -21,7 +21,8 @@ public class Team {
     private String id;
     private String name;
     private String city;
-    private String country;
+    @Enumerated(EnumType.STRING)
+    private Country country;
     @Column(name = "created_at")
     private LocalDate createdAt;
     @OneToOne(mappedBy = "team", cascade = CascadeType.ALL)
@@ -35,42 +36,36 @@ public class Team {
     private TeamIntegration integration;
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<UserRole> roles;
+    @Enumerated(EnumType.STRING)
+    private Visibility visibility;
 
-    protected Team() {
-
+    public Team() {
     }
 
     public Team(String id,
                 String name,
                 String city,
-                String country,
+                Country country,
                 String timezone,
-                String defaultDescription,
-                Set<UserRole> roles) {
+                String defaultDescription) {
 
         setId(id.toLowerCase());
         setName(name);
         setCity(city);
         setCountry(country);
-        this.roles = Objects.requireNonNullElse(roles, new HashSet<>());
+        this.roles = new HashSet<>();
         this.createdAt = LocalDate.now(ZoneOffset.UTC);
+        this.visibility = Visibility.PUBLIC;
 
-        TeamDescription description = new TeamDescription();
-        description.setTeam(this);
+        TeamDescription description = new TeamDescription(this);
         description.setDescription(defaultDescription);
         setDescription(description);
 
-        TeamConfiguration configuration = new TeamConfiguration();
-        configuration.setTeam(this);
+        TeamConfiguration configuration = new TeamConfiguration(this);
         configuration.setTimezone(timezone);
-        configuration.setDefaultSearchTags(new ArrayList<>());
-        configuration.setFeedVisible(true);
-        configuration.setRidesVisible(true);
-        configuration.setDefaultPage(WebPage.FEED);
         setConfiguration(configuration);
 
-        TeamIntegration teamIntegration = new TeamIntegration();
-        teamIntegration.setTeam(this);
+        TeamIntegration teamIntegration = new TeamIntegration(this);
         setIntegration(teamIntegration);
 
     }
@@ -96,15 +91,15 @@ public class Team {
     }
 
     public void setCity(String city) {
-        this.city = city;
+        this.city = Strings.requireNonBlank(city, "city is null");
     }
 
-    public String getCountry() {
+    public Country getCountry() {
         return country;
     }
 
-    public void setCountry(String country) {
-        this.country = country;
+    public void setCountry(Country country) {
+        this.country = Objects.requireNonNull(country, "country is null");
     }
 
     public LocalDate getCreatedAt() {
@@ -120,7 +115,7 @@ public class Team {
     }
 
     public void setDescription(TeamDescription description) {
-        this.description = description;
+        this.description = Objects.requireNonNull(description);
     }
 
     public TeamConfiguration getConfiguration() {
@@ -128,7 +123,7 @@ public class Team {
     }
 
     public void setConfiguration(TeamConfiguration configuration) {
-        this.configuration = configuration;
+        this.configuration = Objects.requireNonNull(configuration);
     }
 
     public TeamIntegration getIntegration() {
@@ -136,7 +131,15 @@ public class Team {
     }
 
     public void setIntegration(TeamIntegration integration) {
-        this.integration = integration;
+        this.integration = Objects.requireNonNull(integration);
+    }
+
+    public Visibility getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(Visibility visibility) {
+        this.visibility = Objects.requireNonNull(visibility);
     }
 
     public Set<UserRole> getRoles() {
@@ -144,26 +147,36 @@ public class Team {
     }
 
     public void setRoles(Set<UserRole> roles) {
-        this.roles = roles;
+        this.roles = Objects.requireNonNullElse(roles, new HashSet<>());
+    }
+
+    public List<UserRole> getSortedRoles() {
+        return roles.stream()
+                .sorted(Comparator.comparing(UserRole::getUserId))
+                .collect(Collectors.toList());
     }
 
     public void clearRoles() {
-        this.roles.forEach(role -> role.getUser().removeRole(role.getId())); // needed for hibernate
+        this.roles.forEach(UserRole::removeTeam); // needed for hibernate
         this.roles.clear();
     }
 
     public void addRole(User user, Role role) {
-        this.roles.add(new UserRole(this, user, role));
+        if (isMember(user.getId())) {
+            this.roles.stream().filter(r -> r.getUserId().equals(user.getId())).findFirst().ifPresent(r -> r.setRole(role));
+        } else {
+            this.roles.add(new UserRole(this, user.getId(), role));
+        }
     }
 
     public void removeRole(User user) {
-        this.roles.removeIf(r -> r.getUser().getId().equals(user.getId()));
-        user.removeRole(this.getId()); // needed for hibernate
+        this.roles.stream().filter(role -> role.getUserId().equals(user.getId())).forEach(UserRole::removeTeam);
+        this.roles.removeIf(role -> role.getUserId().equals(user.getId()));
     }
 
     public boolean isAdmin(String userId) {
         for (UserRole role : this.roles) {
-            if (role.getUser().getId().equals(userId) && role.getRole().equals(Role.ADMIN)) {
+            if (role.getUserId().equals(userId) && role.getRole().equals(Role.ADMIN)) {
                 return true;
             }
         }
@@ -172,19 +185,28 @@ public class Team {
 
     public boolean isMember(String userId) {
         for (UserRole role : this.roles) {
-            if (role.getUser().getId().equals(userId) && role.getRole().equals(Role.MEMBER)) {
+            if (role.getUserId().equals(userId)) {
                 return true;
             }
         }
         return false;
     }
 
-    public boolean isAdminOrMember(String userId) {
-        return isAdmin(userId) || isMember(userId);
-    }
-
     public ZoneId getZoneId() {
         return ZoneId.of(getConfiguration().getTimezone());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Team team = (Team) o;
+        return id.equals(team.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
 }

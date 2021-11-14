@@ -7,6 +7,7 @@ import info.tomacla.biketeam.common.ImageDescriptor;
 import info.tomacla.biketeam.domain.feed.Feed;
 import info.tomacla.biketeam.domain.feed.FeedRepository;
 import info.tomacla.biketeam.domain.team.*;
+import info.tomacla.biketeam.domain.user.Role;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,9 +57,21 @@ public class TeamService {
         return get(teamId).orElseThrow(() -> new IllegalArgumentException("Unknown team ID")).getDescription();
     }
 
+    public List<Team> getUserTeams(String userId) {
+        return teamRepository.findByRoles_UserIdAndRoles_RoleIn(userId, Set.of(Role.ADMIN, Role.MEMBER));
+    }
+
+    public List<Team> getUserTeamsAdmin(String userId) {
+        return teamRepository.findByRoles_UserIdAndRoles_RoleIn(userId, Set.of(Role.ADMIN));
+    }
+
+    public List<Team> getUserTeamsMember(String userId) {
+        return teamRepository.findByRoles_UserIdAndRoles_RoleIn(userId, Set.of(Role.MEMBER));
+    }
+
     public List<Feed> listFeed(String teamId) {
-        return feedRepository.findAllByTeamIdAndPublishedAtLessThan(
-                teamId,
+        return feedRepository.findAllByTeamIdInAndPublishedAtLessThan(
+                Set.of(teamId),
                 ZonedDateTime.now(ZoneOffset.UTC), // TODO should be user timezone and not UTC
                 PageRequest.of(0, 15, Sort.by("publishedAt").descending())).getContent();
     }
@@ -89,7 +102,8 @@ public class TeamService {
     }
 
     public List<Team> getLast4() {
-        return teamRepository.findAll(PageRequest.of(0, 4, Sort.by("createdAt").descending())).getContent();
+        return teamRepository.findByVisibilityIn(List.of(Visibility.PUBLIC, Visibility.PRIVATE),
+                PageRequest.of(0, 4, Sort.by("createdAt").descending())).getContent();
     }
 
     public void initTeamImage(Team newTeam) {
@@ -138,14 +152,14 @@ public class TeamService {
 
     public Page<Team> searchTeams(int page, int pageSize, String name, String city, Country country) {
 
-        Sort sort = Sort.by("name").ascending();
+        Sort sort = Sort.by(Sort.Order.asc("name").ignoreCase());
         Pageable pageable = PageRequest.of(page, pageSize, sort);
 
         SearchTeamSpecification spec = new SearchTeamSpecification(
                 name,
                 city,
-                country
-        );
+                country,
+                List.of(Visibility.PUBLIC, Visibility.PRIVATE));
 
         return teamRepository.findAll(spec, pageable);
 

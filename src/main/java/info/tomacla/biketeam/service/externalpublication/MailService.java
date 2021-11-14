@@ -55,8 +55,9 @@ public class MailService implements ExternalPublicationService {
 
     public void publish(Team team, Ride ride) {
 
-        final List<User> recipients = userService.listUsersWithMailActivated(team)
+        final List<User> recipients = userService.listUsers(team)
                 .stream()
+                .filter(u -> u.getEmail() != null)
                 .filter(User::isEmailPublishRides)
                 .collect(Collectors.toList());
 
@@ -99,8 +100,9 @@ public class MailService implements ExternalPublicationService {
 
     public void publish(Team team, Trip trip) {
 
-        final List<User> recipients = userService.listUsersWithMailActivated(team)
+        final List<User> recipients = userService.listUsers(team)
                 .stream()
+                .filter(u -> u.getEmail() != null)
                 .filter(User::isEmailPublishTrips)
                 .collect(Collectors.toList());
 
@@ -144,8 +146,9 @@ public class MailService implements ExternalPublicationService {
 
     public void publish(Team team, Publication publication) {
 
-        final List<User> recipients = userService.listUsersWithMailActivated(team)
+        final List<User> recipients = userService.listUsers(team)
                 .stream()
+                .filter(u -> u.getEmail() != null)
                 .filter(User::isEmailPublishPublications)
                 .collect(Collectors.toList());
 

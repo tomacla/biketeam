@@ -17,4 +17,8 @@ public abstract class Authorities {
         return new SimpleGrantedAuthority("ROLE_ADMIN_" + teamId);
     }
 
+    public static GrantedAuthority teamUser(String teamId) {
+        return new SimpleGrantedAuthority("ROLE_USER_" + teamId);
+    }
+
 }

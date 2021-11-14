@@ -4,7 +4,6 @@ import java.util.Objects;
 
 public class EditTeamDescriptionForm {
 
-    private String description;
     private String facebook;
     private String twitter;
     private String email;
@@ -15,7 +14,6 @@ public class EditTeamDescriptionForm {
     private String other;
 
     public EditTeamDescriptionForm() {
-        setDescription("");
         setFacebook("");
         setTwitter("");
         setEmail("");
@@ -28,14 +26,6 @@ public class EditTeamDescriptionForm {
 
     public static EditTeamDescriptionFormBuilder builder() {
         return new EditTeamDescriptionFormBuilder();
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = Objects.requireNonNullElse(description, "");
     }
 
     public String getFacebook() {
@@ -114,10 +104,6 @@ public class EditTeamDescriptionForm {
             this.form = form;
         }
 
-        public String getDescription() {
-            return form.getDescription();
-        }
-
         public String getFacebook() {
             return form.getFacebook();
         }
@@ -157,15 +143,8 @@ public class EditTeamDescriptionForm {
 
         private final EditTeamDescriptionForm form;
 
-
         protected EditTeamDescriptionFormBuilder() {
             this.form = new EditTeamDescriptionForm();
-        }
-
-
-        public EditTeamDescriptionFormBuilder withDescription(String description) {
-            form.setDescription(description);
-            return this;
         }
 
         public EditTeamDescriptionFormBuilder withFacebook(String facebook) {

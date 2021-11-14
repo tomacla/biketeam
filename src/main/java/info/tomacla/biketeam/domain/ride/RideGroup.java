@@ -6,9 +6,7 @@ import info.tomacla.biketeam.domain.user.User;
 
 import javax.persistence.*;
 import java.time.LocalTime;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -43,8 +41,7 @@ public class RideGroup {
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> participants;
 
-    protected RideGroup() {
-
+    public RideGroup() {
     }
 
     public RideGroup(String name,
@@ -75,6 +72,15 @@ public class RideGroup {
 
     public Ride getRide() {
         return ride;
+    }
+
+    public void setRide(Ride ride, int index) {
+        this.ride = Objects.requireNonNull(ride);
+        this.id = ride.getId() + "-" + index;
+    }
+
+    public void removeRide() {
+        this.ride = null;
     }
 
     public String getName() {
@@ -134,7 +140,7 @@ public class RideGroup {
     }
 
     public boolean hasParticipant(String userId) {
-        return this.getParticipants().stream().map(User::getId).collect(Collectors.toSet()).contains(userId);
+        return this.getParticipants().stream().map(User::getId).anyMatch(uid -> uid.equals(userId));
     }
 
     public void addParticipant(User participant) {
@@ -142,7 +148,7 @@ public class RideGroup {
     }
 
     public void removeParticipant(User participant) {
-        this.getParticipants().removeIf(u -> u.getId().equals(participant.getId()));
+        this.getParticipants().removeIf(u -> u.equals(participant));
     }
 
     public Set<User> getParticipants() {
@@ -153,14 +159,15 @@ public class RideGroup {
         this.participants = Objects.requireNonNullElse(participants, new HashSet<>());
     }
 
-    public void setRide(Ride ride, int index) {
-        this.ride = Objects.requireNonNull(ride);
-        this.id = ride.getId() + "-" + index;
+    public List<User> getSortedParticipants() {
+        return participants.stream()
+                .sorted(Comparator.comparing(User::getId))
+                .collect(Collectors.toList());
     }
 
     public int getGroupIndex() {
         final String[] parts = this.id.split("-");
-        return Integer.valueOf(parts[parts.length - 1]);
+        return Integer.parseInt(parts[parts.length - 1]);
     }
 
     @Override
@@ -176,7 +183,5 @@ public class RideGroup {
         return Objects.hash(id);
     }
 
-    public void removeRide() {
-        this.ride = null;
-    }
+
 }

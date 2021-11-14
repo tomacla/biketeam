@@ -2,6 +2,7 @@ package info.tomacla.biketeam.security.oauth2;
 
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.security.OAuth2UserDetails;
+import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,9 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TeamService teamService;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -70,7 +74,7 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
 
         }
 
-        return OAuth2UserDetails.create(u);
+        return OAuth2UserDetails.create(u, teamService.getUserTeamsMember(u.getId()), teamService.getUserTeamsAdmin(u.getId()));
 
     }
 

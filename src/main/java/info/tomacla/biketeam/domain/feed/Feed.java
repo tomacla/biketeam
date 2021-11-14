@@ -4,6 +4,7 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Entity
@@ -26,10 +27,6 @@ public class Feed {
     @ElementCollection
     private List<String> badges;
     private boolean imaged;
-
-    protected Feed() {
-
-    }
 
     public String getId() {
         return id;
@@ -113,4 +110,18 @@ public class Feed {
     public void setBadges(List<String> badges) {
         this.badges = badges;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Feed feed = (Feed) o;
+        return id.equals(feed.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
 }

@@ -10,15 +10,8 @@
           Les informations de cette section seront affichées sur la page d'accueil.
         </div>
 
-        <form name="form-description" action="<@common.teamUrl team.id '/admin' />" method="POST" class="border rounded p-4">
+        <form name="form-description" action="<@common.teamUrl team.id '/admin/description' />" method="POST" class="border rounded p-4">
 
-                <h5>Obligatoires</h5>
-                <div class="mb-3">
-                  <label for="form-description-description" class="form-label">Description</label>
-                  <textarea required name="description" class="form-control" id="form-description-description" rows="3">${formdata.description}</textarea>
-                </div>
-                <hr/>
-                <h5>Complémentaires</h5>
                 <div class="alert alert-info" role="alert">
                    Les informations ci dessous seront affichées sur la page d'accueil.
                  </div>

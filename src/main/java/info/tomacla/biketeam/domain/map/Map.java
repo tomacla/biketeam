@@ -53,8 +53,7 @@ public class Map {
     private boolean crossing;
     private boolean visible;
 
-    protected Map() {
-
+    public Map() {
     }
 
     public Map(String id,
@@ -197,21 +196,6 @@ public class Map {
 
     public void setVisible(boolean visible) {
         this.visible = visible;
-    }
-
-    public String getDescription() {
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("Distance ").append(length).append("km").append(" - ");
-        sb.append(positiveElevation).append("m D+").append(" - ");
-        sb.append(type.getLabel());
-        if (!tags.isEmpty()) {
-            sb.append(" - ");
-            tags.forEach(t -> sb.append(t).append(", "));
-        }
-
-        return sb.toString();
-
     }
 
     @Override

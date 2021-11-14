@@ -62,7 +62,7 @@ public class RideController extends AbstractController {
 
         Ride ride = optionalRide.get();
 
-        if (!ride.getPublishedStatus().equals(PublishedStatus.PUBLISHED) && !isAdmin(principal, teamId)) {
+        if (!ride.getPublishedStatus().equals(PublishedStatus.PUBLISHED) && !isAdmin(principal, team)) {
             return redirectToRides(team);
         }
 
@@ -139,7 +139,7 @@ public class RideController extends AbstractController {
             RideGroup rideGroup = optionalGroup.get();
             User connectedUser = optionalConnectedUser.get();
 
-            if (!team.isAdminOrMember(connectedUser.getId())) {
+            if (!team.isMember(connectedUser.getId())) {
                 team.addRole(connectedUser, Role.MEMBER);
                 teamService.save(team);
             }

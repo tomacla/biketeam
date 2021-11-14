@@ -40,12 +40,12 @@
         </section>
 
         <section class="border p-2 mb-3 rounded">
-            <h5>Membres (${team.roles?size})</h5>
-            <#list team.roles as role>
-                <#if role.user.profileImage??>
-                    <div style="width:30px; height:30px;" data-bs-toggle="tooltip" data-bs-placement="top" title="${role.user.identity}" class="d-inline-block"><img class="w-100 h-100 d-block rounded" src="${role.user.profileImage}" alt="${role.user.identity}"></div>
+            <h5>Membres (${users?size})</h5>
+            <#list users as user>
+                <#if user.profileImage??>
+                    <div style="width:30px; height:30px;" data-bs-toggle="tooltip" data-bs-placement="top" title="${user.identity}" class="d-inline-block"><img class="w-100 h-100 d-block rounded" src="${user.profileImage}" alt="${user.identity}"></div>
                 <#else>
-                    <div style="width:30px; height:30px; background:grey;" data-bs-toggle="tooltip" data-bs-placement="top" title="${role.user.identity}" class="d-inline-block rounded"></div>
+                    <div style="width:30px; height:30px; background:grey;" data-bs-toggle="tooltip" data-bs-placement="top" title="${user.identity}" class="d-inline-block rounded"></div>
                 </#if>
             </#list>
         </section>

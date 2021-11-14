@@ -2,7 +2,6 @@ package info.tomacla.biketeam.domain.user;
 
 import info.tomacla.biketeam.common.Strings;
 import info.tomacla.biketeam.domain.ride.RideGroup;
-import info.tomacla.biketeam.domain.team.Team;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -39,10 +38,8 @@ public class User {
     private boolean emailPublishRides;
     @Column(name = "email_publish_publications")
     private boolean emailPublishPublications;
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private Set<UserRole> roles;
 
-    protected User() {
+    public User() {
 
     }
 
@@ -64,7 +61,6 @@ public class User {
         setCity(city);
         setProfileImage(profileImage);
         setRideGroups(rideGroups);
-        this.roles = Objects.requireNonNullElse(roles, new HashSet<>());
     }
 
     public String getId() {
@@ -175,64 +171,16 @@ public class User {
         this.emailPublishPublications = emailPublishPublications;
     }
 
-    public Set<UserRole> getRoles() {
-        return roles;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return id.equals(user.id);
     }
 
-    public void setRoles(Set<UserRole> roles) {
-        this.roles = roles;
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
-
-    public void addRole(Team team, Role role) {
-        if (hasRole(team, role)) {
-            this.removeRole(team.getId());
-        }
-        this.roles.add(new UserRole(team, this, role));
-    }
-
-    public boolean hasTeam(Team team) {
-        for (UserRole userRole : this.roles) {
-            if (userRole.getTeam().getId().equals(team.getId())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean hasRole(Team team, Role role) {
-        for (UserRole userRole : this.roles) {
-            if (userRole.getRole().equals(role) && userRole.getTeam().getId().equals(team.getId())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public void removeRole(String teamId) {
-        this.roles.removeIf(r -> r.getTeam().getId().equals(teamId));
-    }
-
-    public boolean isAdmin(String teamId) {
-        for (UserRole role : this.roles) {
-            if (role.getTeam().getId().equals(teamId) && role.getRole().equals(Role.ADMIN)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean isMember(String teamId) {
-        for (UserRole role : this.roles) {
-            if (role.getTeam().getId().equals(teamId) && role.getRole().equals(Role.MEMBER)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean isAdminOrMember(String teamId) {
-        return isAdmin(teamId) || isMember(teamId);
-    }
-
-
 }

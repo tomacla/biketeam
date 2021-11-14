@@ -41,7 +41,7 @@
 
         <#if teams?size == 0>
              <div class="alert alert-warning" role="alert">
-               Aucune map à afficher.
+               Aucune team à afficher.
              </div>
         <#else>
              <div class="row row-cols-1 row-cols-md-4 g-4">
@@ -52,8 +52,7 @@
                              <div style="height:180px; width:100%;  background-image: url('<@common.teamUrl team.id '/image' />');background-repeat: no-repeat;background-position: 50% 50%; background-size: contain;"></div>
                              </div>
                            <div class="card-body">
-
-                             <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl team.id '' />">${team.name}</a></h5>
+                             <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl team.id '' />"><#if team.visibility == 'PRIVATE'><i class="bi bi-lock-fill"></i> </#if>${team.name}</a></h5>
                              <h6 class="text-muted">${team.city}, ${team.country}</h6>
                            </div>
                          </div>

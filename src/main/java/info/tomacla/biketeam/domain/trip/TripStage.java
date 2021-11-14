@@ -20,8 +20,7 @@ public class TripStage {
     @Column(name = "map_id")
     private String mapId;
 
-    protected TripStage() {
-
+    public TripStage() {
     }
 
     public TripStage(String name,
@@ -42,6 +41,15 @@ public class TripStage {
 
     public Trip getTrip() {
         return trip;
+    }
+
+    public void setTrip(Trip trip, int index) {
+        this.trip = Objects.requireNonNull(trip);
+        this.id = trip.getId() + "-" + index;
+    }
+
+    public void removeTrip() {
+        this.trip = null;
     }
 
     public String getName() {
@@ -68,14 +76,9 @@ public class TripStage {
         this.mapId = Strings.requireNonBlankOrNull(mapId);
     }
 
-    public void setTrip(Trip trip, int index) {
-        this.trip = Objects.requireNonNull(trip);
-        this.id = trip.getId() + "-" + index;
-    }
-
     public int getStageIndex() {
         final String[] parts = this.id.split("-");
-        return Integer.valueOf(parts[parts.length - 1]);
+        return Integer.parseInt(parts[parts.length - 1]);
     }
 
     @Override
@@ -89,10 +92,6 @@ public class TripStage {
     @Override
     public int hashCode() {
         return Objects.hash(id);
-    }
-
-    public void removeTrip() {
-        this.trip = null;
     }
 
 }

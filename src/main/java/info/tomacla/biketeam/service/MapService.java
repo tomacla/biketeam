@@ -91,7 +91,7 @@ public class MapService {
         if (q == null || q.isBlank()) {
             return mapRepository.findAllDistinctTags(teamId);
         }
-        return mapRepository.findDistinctTagsContainer(teamId, q.toLowerCase());
+        return mapRepository.findDistinctTagsContaining(teamId, q.toLowerCase());
     }
 
     public List<MapIdNamePostedAtVisibleProjection> searchMaps(String teamId, String q) {

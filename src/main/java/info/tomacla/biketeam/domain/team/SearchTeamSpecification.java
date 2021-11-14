@@ -15,11 +15,13 @@ public class SearchTeamSpecification implements Specification<Team> {
     private final String name;
     private final String city;
     private final Country country;
+    private final List<Visibility> visibilities;
 
-    public SearchTeamSpecification(String name, String city, Country country) {
+    public SearchTeamSpecification(String name, String city, Country country, List<Visibility> visibilities) {
         this.name = name;
         this.city = city;
         this.country = country;
+        this.visibilities = visibilities;
     }
 
     @Override
@@ -34,7 +36,11 @@ public class SearchTeamSpecification implements Specification<Team> {
         if (country != null) {
             predicates.add(criteriaBuilder.like(root.get("country"), country.name()));
         }
-        criteriaQuery.distinct(true);
+        if (!visibilities.isEmpty()) {
+            final CriteriaBuilder.In<Object> visibility = criteriaBuilder.in(root.get("visibility"));
+            visibilities.forEach(visibility::value);
+            predicates.add(visibility);
+        }
         return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
     }
 

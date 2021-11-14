@@ -62,8 +62,7 @@ public class Trip {
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> participants;
 
-    protected Trip() {
-
+    public Trip() {
     }
 
     public Trip(String teamId,
@@ -78,9 +77,7 @@ public class Trip {
                 boolean imaged,
                 String meetingLocation,
                 LocalTime meetingTime,
-                Point meetingPoint,
-                Set<User> participants,
-                Set<TripStage> stages) {
+                Point meetingPoint) {
 
         this.id = UUID.randomUUID().toString();
         setTeamId(teamId);
@@ -95,10 +92,11 @@ public class Trip {
         setMeetingLocation(meetingLocation);
         setMeetingTime(meetingTime);
         setMeetingPoint(meetingPoint);
-        setParticipants(participants);
         setLowerSpeed(lowerSpeed);
         setUpperSpeed(upperSpeed);
-        this.stages = Objects.requireNonNullElse(stages, new HashSet<>());
+
+        this.participants = new HashSet<>();
+        this.stages = new HashSet<>();
     }
 
     public String getId() {
@@ -274,6 +272,10 @@ public class Trip {
         stages.add(stage);
     }
 
+    public void clearStages() {
+        stages.clear();
+    }
+
     private int getNextStageIndex() {
         final Optional<Integer> nextIndex = this.stages.stream().map(TripStage::getStageIndex).max(Comparator.naturalOrder());
         if (nextIndex.isEmpty()) {
@@ -282,12 +284,8 @@ public class Trip {
         return nextIndex.get() + 1;
     }
 
-    public void clearStages() {
-        stages.clear();
-    }
-
     public boolean hasParticipant(String userId) {
-        return this.getParticipants().stream().map(User::getId).collect(Collectors.toSet()).contains(userId);
+        return this.getParticipants().stream().map(User::getId).anyMatch(uid -> uid.equals(userId));
     }
 
     public void addParticipant(User participant) {
@@ -295,7 +293,7 @@ public class Trip {
     }
 
     public void removeParticipant(User participant) {
-        this.getParticipants().removeIf(u -> u.getId().equals(participant.getId()));
+        this.getParticipants().removeIf(u -> u.equals(participant));
     }
 
     public Set<User> getParticipants() {
@@ -304,6 +302,12 @@ public class Trip {
 
     public void setParticipants(Set<User> participants) {
         this.participants = Objects.requireNonNullElse(participants, new HashSet<>());
+    }
+
+    public List<User> getSortedParticipants() {
+        return participants.stream()
+                .sorted(Comparator.comparing(User::getId))
+                .collect(Collectors.toList());
     }
 
     @Override

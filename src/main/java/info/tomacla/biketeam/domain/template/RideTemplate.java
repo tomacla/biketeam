@@ -29,22 +29,21 @@ public class RideTemplate {
     @Transient
     private int nextGroupIndex = 0;
 
-    protected RideTemplate() {
-
+    public RideTemplate() {
     }
 
     public RideTemplate(String teamId,
                         String name,
                         RideType type,
-                        String description,
-                        Set<RideGroupTemplate> groups) {
+                        String description) {
 
         this.id = UUID.randomUUID().toString();
         setTeamId(teamId);
         setName(name);
         setType(type);
         setDescription(description);
-        this.groups = Objects.requireNonNullElse(groups, new HashSet<>());
+        this.groups = new HashSet<>();
+
     }
 
     public String getId() {

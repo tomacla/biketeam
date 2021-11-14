@@ -27,8 +27,8 @@ public class AdminTeamController extends AbstractController {
     }
 
     @GetMapping(value = "/delete/{teamId}")
-    public String relegateTeam(@PathVariable("teamId") String teamId,
-                               Model model) {
+    public String deleteTeam(@PathVariable("teamId") String teamId,
+                             Model model) {
 
         try {
             deletionService.deleteTeam(teamId);

@@ -1,17 +1,22 @@
 package info.tomacla.biketeam.service;
 
 import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.domain.team.Visibility;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.user.UserRepository;
+import info.tomacla.biketeam.domain.user.UserRole;
+import info.tomacla.biketeam.security.Authorities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -30,6 +35,9 @@ public class UserService {
     @Value("${admin.last-name}")
     private String adminLastName;
 
+    @Autowired
+    private TeamService teamService;
+
     public Optional<User> getByStravaId(Long stravaId) {
         return userRepository.findByStravaId(stravaId);
     }
@@ -47,7 +55,11 @@ public class UserService {
     }
 
     public List<User> listUsers(Team team) {
-        return userRepository.findByRoles_Team(team);
+        return team.getRoles().stream().map(UserRole::getUserId)
+                .map(this::get)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
     }
 
     public void promote(String userId) {
@@ -66,10 +78,6 @@ public class UserService {
         });
     }
 
-    public List<User> listUsersWithMailActivated(Team team) {
-        return userRepository.findByEmailNotNullAndRoles_Team(team);
-    }
-
     @PostConstruct
     public void init() {
 
@@ -86,6 +94,28 @@ public class UserService {
                     null,
                     null));
         }
+
+    }
+
+    public boolean authorizeAdminAccess(Authentication authentication, String teamId) {
+        return authentication.getAuthorities().contains(Authorities.admin())
+                || authentication.getAuthorities().contains(Authorities.teamAdmin(teamId));
+
+    }
+
+    public boolean authorizePublicAccess(Authentication authentication, String teamId) {
+
+        if (authentication.getAuthorities().contains(Authorities.admin())
+                || authentication.getAuthorities().contains(Authorities.teamAdmin(teamId))) {
+            return true;
+        }
+
+        final Team team = teamService.get(teamId).orElseThrow(() -> new IllegalArgumentException("Unknown team"));
+        if (team.getVisibility().equals(Visibility.PUBLIC) || team.getVisibility().equals(Visibility.PUBLIC_UNLISTED)) {
+            return true;
+        }
+
+        return authentication.getAuthorities().contains(Authorities.teamUser(teamId));
 
     }
 

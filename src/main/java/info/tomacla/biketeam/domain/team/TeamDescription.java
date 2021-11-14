@@ -33,32 +33,12 @@ public class TeamDescription {
     @Column(length = 2000)
     private String other;
 
-    protected TeamDescription() {
-
+    public TeamDescription() {
     }
 
-    public TeamDescription(String description) {
-        setDescription(description);
-    }
-
-    public TeamDescription(String description,
-                           String facebook,
-                           String twitter,
-                           String email,
-                           String phoneNumber,
-                           String addressStreetLine,
-                           String addressPostalCode,
-                           String addressCity,
-                           String other) {
-        setDescription(description);
-        setFacebook(facebook);
-        setTwitter(twitter);
-        setEmail(email);
-        setPhoneNumber(phoneNumber);
-        setAddressStreetLine(addressStreetLine);
-        setAddressPostalCode(addressPostalCode);
-        setAddressCity(addressCity);
-        setOther(other);
+    public TeamDescription(Team team) {
+        this.team = team;
+        this.teamId = team.getId();
     }
 
     public String getTeamId() {

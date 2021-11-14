@@ -6,7 +6,6 @@ import info.tomacla.biketeam.domain.feed.Feed;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.Role;
 import info.tomacla.biketeam.domain.user.User;
-import info.tomacla.biketeam.domain.user.UserRole;
 import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.service.externalpublication.FacebookService;
 import info.tomacla.biketeam.web.team.NewTeamForm;
@@ -20,7 +19,6 @@ import org.springframework.web.servlet.view.RedirectView;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
@@ -39,15 +37,17 @@ public class RootController extends AbstractController {
         final Optional<User> userFromPrincipal = getUserFromPrincipal(principal);
         if (userFromPrincipal.isPresent()) {
             final User user = userFromPrincipal.get();
-            final Set<String> teamIds = user.getRoles().stream().map(ur -> ur.getTeam().getId()).collect(Collectors.toSet());
-            final List<Feed> feeds = teamService.listFeed(teamIds);
+
+            final List<Team> teams = teamService.getUserTeams(user.getId());
+
+            final List<Feed> feeds = teamService.listFeed(teams.stream().map(Team::getId).collect(Collectors.toSet()));
             addGlobalValues(principal, model, "Accueil", null);
             if (error != null) {
                 model.addAttribute("errors", List.of(error));
             }
             model.addAttribute("feed", feeds);
             model.addAttribute("user", user);
-            model.addAttribute("userTeams", user.getRoles().stream().map(UserRole::getTeam).collect(Collectors.toList()));
+            model.addAttribute("userTeams", teams);
             return "root_auth";
         } else {
             addGlobalValues(principal, model, "Accueil", null);
@@ -86,8 +86,7 @@ public class RootController extends AbstractController {
                     parser.getCity(),
                     parser.getCountry(),
                     parser.getTimezone(),
-                    parser.getDescription(),
-                    null);
+                    parser.getDescription());
 
             newTeam.addRole(targetAdmin, Role.ADMIN);
 
@@ -144,9 +143,9 @@ public class RootController extends AbstractController {
     }
 
     @GetMapping(value = "/integration/facebook/login")
-    public RedirectView getSiteIntegration(@RequestParam("code") String facebookCode,
-                                           Principal principal,
-                                           Model model) {
+    public RedirectView facebookCallbackEndpoint(@RequestParam("code") String facebookCode,
+                                                 Principal principal,
+                                                 Model model) {
 
         final String userAccessToken = facebookService.getUserAccessToken(facebookCode);
         facebookService.storeToken(userAccessToken);
@@ -158,15 +157,16 @@ public class RootController extends AbstractController {
 
     @ResponseBody
     @RequestMapping(value = "/autocomplete/permatitle", method = RequestMethod.GET)
-    public String autocompleteMaps(@RequestParam("title") String title) {
+    public String autocompleteMaps(@RequestParam("title") String title,
+                                   @RequestParam(required = false, defaultValue = "20") int maxSize) {
         String permatitle = Strings.permatitleFromString(title);
         permatitle = permatitle.toLowerCase();
-        if (permatitle.length() > 20) {
-            permatitle = permatitle.substring(0, 20);
+        if (permatitle.length() > maxSize) {
+            permatitle = permatitle.substring(0, maxSize);
         }
         for (int i = 0; teamService.idExists(permatitle); i++) {
-            if (permatitle.length() == 20) {
-                permatitle = permatitle.substring(0, 18);
+            if (permatitle.length() == maxSize) {
+                permatitle = permatitle.substring(0, maxSize - 2);
             }
             permatitle = permatitle + (i + 2);
         }

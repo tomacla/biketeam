@@ -757,6 +757,16 @@
 
     </changeSet>
 
+    <changeSet id="GITHUB-80-team-visibility" author="tomacla">
+
+        <addColumn tableName="team">
+            <column name="visibility" type="VARCHAR(50)" />
+        </addColumn>
+
+        <sql>update team set visibility = 'PUBLIC'</sql>
+
+    </changeSet>
+
 
 </databaseChangeLog>
 

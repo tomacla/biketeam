@@ -75,7 +75,7 @@
                                 </#if>
                             </div>
                             <div class="p-0 m-0 flex-wrap">
-                                <#list group.participants as participant>
+                                <#list group.sortedParticipants as participant>
                                     <#if participant.profileImage??>
                                         <div style="width:30px; height:30px;" data-bs-toggle="tooltip" data-bs-placement="top" title="${participant.identity}" class="d-inline-block"><img class="w-100 h-100 d-block rounded" src="${participant.profileImage}" alt="${participant.identity}"></div>
                                     <#else>

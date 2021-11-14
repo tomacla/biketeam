@@ -13,8 +13,6 @@ import java.util.List;
 @Repository
 public interface MapRepository extends PagingAndSortingRepository<Map, String>, JpaSpecificationExecutor<Map> {
 
-    List<Map> findAllByTeamId(String teamId);
-
     List<MapIdNamePostedAtVisibleProjection> findAllByTeamIdOrderByPostedAtDesc(String teamId);
 
     List<MapIdNamePostedAtVisibleProjection> findAllByTeamIdAndNameContainingIgnoreCaseOrderByPostedAtDesc(String teamId, String namePart);
@@ -25,7 +23,6 @@ public interface MapRepository extends PagingAndSortingRepository<Map, String>, 
     List<String> findAllDistinctTags(@Param("teamId") String teamId);
 
     @Query(value = "select distinct mt.tags from map_tags mt, map m where m.team_id = :teamId and m.id = mt.map_id and LOWER(mt.tags) LIKE %:tagPart% order by mt.tags", nativeQuery = true)
-    List<String> findDistinctTagsContainer(@Param("teamId") String teamId, @Param("tagPart") String tagPart);
-
+    List<String> findDistinctTagsContaining(@Param("teamId") String teamId, @Param("tagPart") String tagPart);
 
 }

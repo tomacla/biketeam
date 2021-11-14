@@ -3,6 +3,7 @@ package info.tomacla.biketeam.domain.user;
 import info.tomacla.biketeam.domain.team.Team;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table(name = "user_role")
@@ -10,22 +11,22 @@ public class UserRole {
 
     @Id
     private String id;
-    @ManyToOne(fetch = FetchType.EAGER)
-    private User user;
+    @Column(name = "user_id")
+    private String userId;
     @ManyToOne(fetch = FetchType.EAGER)
     private Team team;
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    protected UserRole() {
+    public UserRole() {
 
     }
 
-    public UserRole(Team team, User user, Role role) {
-        this.id = team.getId() + "-" + user.getId();
+    public UserRole(Team team, String userId, Role role) {
+        this.id = team.getId() + "-" + userId;
         this.setTeam(team);
-        this.setUser(user);
-        this.role = role;
+        this.setUserId(userId);
+        this.setRole(role);
     }
 
     public String getId() {
@@ -44,12 +45,12 @@ public class UserRole {
         this.role = role;
     }
 
-    public User getUser() {
-        return user;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public Team getTeam() {
@@ -58,6 +59,23 @@ public class UserRole {
 
     public void setTeam(Team team) {
         this.team = team;
+    }
+
+    public void removeTeam() {
+        this.team = null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserRole userRole = (UserRole) o;
+        return id.equals(userRole.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
 }

@@ -36,6 +36,56 @@ public class AdminTeamConfigurationController extends AbstractController {
     private HeatmapService heatmapService;
 
     @GetMapping
+    public String getSiteGeneral(@PathVariable("teamId") String teamId,
+                                 Principal principal, Model model) {
+
+        final Team team = checkTeam(teamId);
+
+        final TeamDescription teamDescription = team.getDescription();
+
+        EditTeamGeneralForm form = EditTeamGeneralForm.builder()
+                .withDescription(teamDescription.getDescription())
+                .withName(team.getName())
+                .withVisibility(team.getVisibility())
+                .get();
+
+        addGlobalValues(principal, model, "Administration - Général", team);
+        model.addAttribute("formdata", form);
+        return "team_admin_general";
+    }
+
+    @PostMapping
+    public String updateSiteGeneral(@PathVariable("teamId") String teamId,
+                                    Principal principal, Model model,
+                                    EditTeamGeneralForm form) {
+
+        final Team team = checkTeam(teamId);
+
+        final TeamDescription teamDescription = team.getDescription();
+
+        final EditTeamGeneralForm.EditTeamGeneralFormParser parser = form.parser();
+
+        try {
+
+            teamDescription.setDescription(parser.getDescription());
+            team.setName(parser.getName());
+            team.setVisibility(parser.getVisibility());
+            teamService.save(team);
+
+            addGlobalValues(principal, model, "Administration - Général", team);
+            model.addAttribute("formdata", form);
+            return "team_admin_general";
+
+        } catch (Exception e) {
+            addGlobalValues(principal, model, "Administration - Général", team);
+            model.addAttribute("errors", List.of(e.getMessage()));
+            model.addAttribute("formdata", form);
+            return "team_admin_general";
+        }
+
+    }
+
+    @GetMapping(value = "/description")
     public String getSiteDescription(@PathVariable("teamId") String teamId,
                                      Principal principal, Model model) {
 
@@ -45,7 +95,6 @@ public class AdminTeamConfigurationController extends AbstractController {
         final TeamDescription teamDescription = team.getDescription();
 
         EditTeamDescriptionForm form = EditTeamDescriptionForm.builder()
-                .withDescription(teamDescription.getDescription())
                 .withFacebook(teamDescription.getFacebook())
                 .withTwitter(teamDescription.getTwitter())
                 .withEmail(teamDescription.getEmail())
@@ -61,7 +110,7 @@ public class AdminTeamConfigurationController extends AbstractController {
         return "team_admin_description";
     }
 
-    @PostMapping
+    @PostMapping(value = "/description")
     public String updateSiteDescription(@PathVariable("teamId") String teamId,
                                         Principal principal, Model model,
                                         EditTeamDescriptionForm form) {
@@ -71,17 +120,18 @@ public class AdminTeamConfigurationController extends AbstractController {
 
         final TeamDescription teamDescription = team.getDescription();
 
+        final EditTeamDescriptionForm.EditTeamDescriptionFormParser parser = form.parser();
+
         try {
 
-            teamDescription.setDescription(form.getDescription());
-            teamDescription.setFacebook(form.getFacebook());
-            teamDescription.setTwitter(form.getTwitter());
-            teamDescription.setEmail(form.getEmail());
-            teamDescription.setPhoneNumber(form.getPhoneNumber());
-            teamDescription.setAddressStreetLine(form.getAddressStreetLine());
-            teamDescription.setAddressPostalCode(form.getAddressPostalCode());
-            teamDescription.setAddressCity(form.getAddressCity());
-            teamDescription.setOther(form.getOther());
+            teamDescription.setFacebook(parser.getFacebook());
+            teamDescription.setTwitter(parser.getTwitter());
+            teamDescription.setEmail(parser.getEmail());
+            teamDescription.setPhoneNumber(parser.getPhoneNumber());
+            teamDescription.setAddressStreetLine(parser.getAddressStreetLine());
+            teamDescription.setAddressPostalCode(parser.getAddressPostalCode());
+            teamDescription.setAddressCity(parser.getAddressCity());
+            teamDescription.setOther(parser.getOther());
             teamService.save(team);
 
             addGlobalValues(principal, model, "Administration - Description", team);

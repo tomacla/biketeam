@@ -56,6 +56,7 @@ public class TeamController extends AbstractController {
 
         addGlobalValues(principal, model, team.getName(), team);
         model.addAttribute("feed", teamService.listFeed(team.getId()));
+        model.addAttribute("users", userService.listUsers(team));
         model.addAttribute("hasHeatmap", team.getIntegration().isHeatmapDisplay() && heatmapService.get(team.getId()).isPresent());
         return "team_root";
     }
@@ -72,7 +73,7 @@ public class TeamController extends AbstractController {
 
             User connectedUser = optionalConnectedUser.get();
 
-            if (!team.isAdminOrMember(connectedUser.getId())) {
+            if (!team.isMember(connectedUser.getId())) {
                 team.addRole(connectedUser, Role.MEMBER);
                 teamService.save(team);
             }
@@ -92,7 +93,7 @@ public class TeamController extends AbstractController {
 
         if (optionalConnectedUser.isPresent()) {
             User connectedUser = optionalConnectedUser.get();
-            if (team.isAdminOrMember(connectedUser.getId())) {
+            if (team.isMember(connectedUser.getId())) {
                 team.removeRole(connectedUser);
                 teamService.save(team);
             }

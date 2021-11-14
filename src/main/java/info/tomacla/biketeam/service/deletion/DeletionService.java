@@ -47,11 +47,6 @@ public class DeletionService {
             tripRepository.findAllByTeamIdOrderByStartDateDesc(teamId).stream().map(TripIdTitleDateProjection::getId).forEach(tripRepository::deleteById);
             mapRepository.findAllByTeamIdOrderByPostedAtDesc(teamId).stream().map(MapIdNamePostedAtVisibleProjection::getId).forEach(mapRepository::deleteById);
             fileService.deleteByTeam(teamId);
-            // remove all access
-            userRepository.findByRoles_Team(team).forEach(user -> {
-                user.removeRole(team.getId());
-                userRepository.save(user);
-            });
             // remove all access to this team
             team.clearRoles();
             teamRepository.save(team);

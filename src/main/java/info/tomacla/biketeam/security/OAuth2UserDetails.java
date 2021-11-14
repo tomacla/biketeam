@@ -1,6 +1,6 @@
 package info.tomacla.biketeam.security;
 
-import info.tomacla.biketeam.domain.user.Role;
+import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,6 +10,8 @@ import java.io.Serializable;
 import java.util.*;
 
 public class OAuth2UserDetails implements Serializable, UserDetails, OAuth2User {
+
+    private static final long serialVersionUID = 6064613477799000059L;
 
     private List<GrantedAuthority> authorities;
     private Map<String, Object> attributes;
@@ -72,7 +74,7 @@ public class OAuth2UserDetails implements Serializable, UserDetails, OAuth2User 
         this.attributes = attributes;
     }
 
-    public static OAuth2UserDetails create(User u) {
+    public static OAuth2UserDetails create(User u, List<Team> member, List<Team> admin) {
 
         OAuth2UserDetails ud = new OAuth2UserDetails();
 
@@ -93,9 +95,9 @@ public class OAuth2UserDetails implements Serializable, UserDetails, OAuth2User 
         if (u.isAdmin()) {
             authorities.add(Authorities.admin());
         }
-        u.getRoles().stream()
-                .filter(r -> r.getRole().equals(Role.ADMIN))
-                .forEach(r -> authorities.add(Authorities.teamAdmin(r.getTeam().getId())));
+        member.forEach(t -> authorities.add(Authorities.teamUser(t.getId())));
+        admin.forEach(t -> authorities.add(Authorities.teamAdmin(t.getId())));
+
         ud.setAuthorities(authorities);
 
         return ud;

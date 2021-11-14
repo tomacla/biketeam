@@ -34,11 +34,28 @@ public class TeamAdminUserController extends AbstractController {
         User user = userService.getByStravaId(stravaId).orElse(new User(false, "Inconnu", "Inconnu", stravaId,
                 null, null, null, null, null));
 
-        if (!user.hasTeam(team)) {
-            user.addRole(team, Role.MEMBER);
+        if (!team.isMember(user.getId())) {
+            team.addRole(user, Role.MEMBER);
+            teamService.save(team);
         }
 
-        userService.save(user);
+        return createRedirect(team, "/admin/users");
+
+    }
+
+    @GetMapping(value = "/delete/{userId}")
+    public String removeUser(@PathVariable("teamId") String teamId, @PathVariable("userId") String userId,
+                             Principal principal,
+                             Model model) {
+
+        final Team team = checkTeam(teamId);
+
+        try {
+            final User user = userService.get(userId).orElseThrow(() -> new IllegalArgumentException("User unknown"));
+            team.removeRole(user);
+        } catch (Exception e) {
+            model.addAttribute("errors", List.of(e.getMessage()));
+        }
 
         return createRedirect(team, "/admin/users");
 
@@ -53,8 +70,8 @@ public class TeamAdminUserController extends AbstractController {
 
         try {
             final User user = userService.get(userId).orElseThrow(() -> new IllegalArgumentException("User unknown"));
-            user.addRole(team, Role.ADMIN);
-            userService.save(user);
+            team.addRole(user, Role.ADMIN);
+            teamService.save(team);
         } catch (Exception e) {
             model.addAttribute("errors", List.of(e.getMessage()));
         }
@@ -72,8 +89,8 @@ public class TeamAdminUserController extends AbstractController {
 
         try {
             final User user = userService.get(userId).orElseThrow(() -> new IllegalArgumentException("User unknown"));
-            user.addRole(team, Role.MEMBER);
-            userService.save(user);
+            team.addRole(user, Role.MEMBER);
+            teamService.save(team);
         } catch (Exception e) {
             model.addAttribute("errors", List.of(e.getMessage()));
         }

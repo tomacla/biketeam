@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.web.team;
 
+import info.tomacla.biketeam.common.Country;
 import info.tomacla.biketeam.common.Timezone;
 
 import java.util.Objects;
@@ -98,8 +99,8 @@ public class NewTeamForm {
             return form.getCity();
         }
 
-        public String getCountry() {
-            return form.getCountry();
+        public Country getCountry() {
+            return Country.valueOf(form.getCountry());
         }
 
         public String getDescription() {

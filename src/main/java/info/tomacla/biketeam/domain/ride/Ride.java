@@ -35,8 +35,7 @@ public class Ride {
     @OrderBy("id ASC")
     private Set<RideGroup> groups;
 
-    protected Ride() {
-
+    public Ride() {
     }
 
     public Ride(String teamId,
@@ -137,7 +136,7 @@ public class Ride {
     }
 
     public void setGroups(Set<RideGroup> groups) {
-        Lists.requireNonEmpty(groups, "groups is null");
+        Lists.requireNonEmpty(groups, "groups is null or empty");
         groups.forEach(this::addGroup);
     }
 
@@ -188,16 +187,16 @@ public class Ride {
         groups.add(group);
     }
 
+    public void clearGroups() {
+        groups.clear();
+    }
+
     private int getNextGroupIndex() {
         final Optional<Integer> nextIndex = this.groups.stream().map(RideGroup::getGroupIndex).max(Comparator.naturalOrder());
         if (nextIndex.isEmpty()) {
             return 0;
         }
         return nextIndex.get() + 1;
-    }
-
-    public void clearGroups() {
-        groups.clear();
     }
 
     public boolean hasParticipant(String userId) {

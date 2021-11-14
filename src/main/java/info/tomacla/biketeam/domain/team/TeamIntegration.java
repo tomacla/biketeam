@@ -51,7 +51,11 @@ public class TeamIntegration {
     private boolean heatmapDisplay;
 
     public TeamIntegration() {
+    }
 
+    public TeamIntegration(Team team) {
+        this.team = team;
+        this.teamId = team.getId();
     }
 
     public String getTeamId() {

@@ -26,8 +26,7 @@ public class Publication {
     private String content;
     private boolean imaged;
 
-    protected Publication() {
-
+    public Publication() {
     }
 
     public Publication(String teamId,

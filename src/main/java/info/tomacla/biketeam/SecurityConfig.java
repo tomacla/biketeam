@@ -43,9 +43,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         // requests conf
         http.authorizeRequests(auth -> {
+            auth.antMatchers("/css/**").permitAll();
+            auth.antMatchers("/js/**").permitAll();
+            auth.antMatchers("/teams").permitAll();
+            auth.antMatchers("/users/me").authenticated();
+            auth.antMatchers("/new").authenticated();
+            auth.antMatchers("/*/image").permitAll();
             auth.antMatchers("/admin/**").hasRole("ADMIN");
             auth.antMatchers("/management/**").hasRole("ADMIN");
-            auth.antMatchers("/{teamId}/admin/**").access("@checkTeamAdminService.authorize(authentication, #teamId)");
+            auth.antMatchers("/{teamId}/admin/**").access("@userService.authorizeAdminAccess(authentication, #teamId)");
+            auth.antMatchers("/{teamId}/**").access("@userService.authorizePublicAccess(authentication, #teamId)");
             auth.anyRequest().permitAll();
         });
 

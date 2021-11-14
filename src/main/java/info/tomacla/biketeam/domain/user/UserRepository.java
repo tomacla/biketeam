@@ -1,6 +1,5 @@
 package info.tomacla.biketeam.domain.user;
 
-import info.tomacla.biketeam.domain.team.Team;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,9 +12,5 @@ public interface UserRepository extends CrudRepository<User, String> {
     List<User> findAll();
 
     Optional<User> findByStravaId(Long stravaId);
-
-    List<User> findByEmailNotNullAndRoles_Team(Team team);
-
-    List<User> findByRoles_Team(Team team);
 
 }

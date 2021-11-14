@@ -53,8 +53,8 @@ public abstract class AbstractController {
             model.addAttribute("_user_id", user.getId());
             model.addAttribute("_identity", user.getIdentity());
             if (team != null) {
-                model.addAttribute("_team_admin", user.isAdmin(team.getId()));
-                model.addAttribute("_team_member", user.isMember(team.getId()));
+                model.addAttribute("_team_admin", team.isAdmin(user.getId()));
+                model.addAttribute("_team_member", team.isMember(user.getId()));
             }
         });
 
@@ -109,12 +109,12 @@ public abstract class AbstractController {
         return Optional.empty();
     }
 
-    protected boolean isAdmin(Principal principal, String teamId) {
+    protected boolean isAdmin(Principal principal, Team team) {
         boolean admin = false;
         final Optional<User> optionalUser = getUserFromPrincipal(principal);
         if (optionalUser.isPresent()) {
             final User user = optionalUser.get();
-            admin = user.isAdmin() || user.isAdmin(teamId);
+            admin = user.isAdmin() || team.isAdmin(user.getId());
         }
         return admin;
 

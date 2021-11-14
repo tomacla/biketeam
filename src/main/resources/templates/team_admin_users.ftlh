@@ -27,16 +27,15 @@
                 </li>
                 <#list users as user>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div><#if user.profileImage??><img src="${user.profileImage}" alt="User photo" width="30" height="30" class="rounded"> </#if>${user.firstName!'inconnu'} ${user.lastName!'inconnu'}<span class="text-muted"> - <a class="link-dark" href="https://www.strava.com/athletes/${user.stravaId?c}" target="_blank">${(user.stravaId?c)}</a></span><#if user.isAdmin(team.id)> <i class="bi bi-shield-fill"></i></#if></div>
-                        <#if user.id == _user_id>
-                            <button role="button" disabled="true" class="btn btn-sm btn-success"><i class="bi bi-shield-fill"></i></button>
-                        <#else>
+                        <div><#if user.profileImage??><img src="${user.profileImage}" alt="User photo" width="30" height="30" class="rounded"> </#if>${user.firstName!'inconnu'} ${user.lastName!'inconnu'}<span class="text-muted"> - <a class="link-dark" href="https://www.strava.com/athletes/${user.stravaId?c}" target="_blank">${(user.stravaId?c)}</a></span><#if team.isAdmin(user.id)> <i class="bi bi-shield-fill"></i></#if></div>
+                        <#if user.id != _user_id>
                             <div class="btn-group" role="group">
-                                <#if user.isAdmin(team.id)>
+                                <#if team.isAdmin(user.id)>
                                     <a href="<@common.teamUrl team.id '/admin/users/relegate/${user.id}' />" class="btn btn-success btn-sm" role="button"><i class="bi bi-shield-fill"></i></a>
                                 <#else>
                                     <a href="<@common.teamUrl team.id '/admin/users/promote/${user.id}' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-shield"></i></a>
                                 </#if>
+                                <a href="<@common.teamUrl team.id '/admin/users/delete/${user.id}' />" class="btn btn-danger btn-sm" role="button"><i class="bi bi-trash"></i></a>
                             </div>
                         </#if>
                     </li>

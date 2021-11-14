@@ -42,18 +42,17 @@ public class TeamConfiguration {
     @Column(name = "markdown_page")
     private String markdownPage;
 
-    protected TeamConfiguration() {
-
+    public TeamConfiguration() {
     }
 
-    public TeamConfiguration(String timezone, List<String> defaultSearchTags,
-                             WebPage defaultPage, boolean feedVisible, boolean ridesVisible, boolean tripsVisible) {
-        setTimezone(timezone);
-        setDefaultSearchTags(defaultSearchTags);
-        setDefaultPage(defaultPage);
-        setFeedVisible(feedVisible);
-        setRidesVisible(ridesVisible);
-        setTripsVisible(tripsVisible);
+    public TeamConfiguration(Team team) {
+        this.team = team;
+        this.teamId = team.getId();
+        this.defaultSearchTags = new ArrayList<>();
+        this.feedVisible = true;
+        this.ridesVisible = true;
+        this.tripsVisible = true;
+        this.defaultPage = WebPage.FEED;
     }
 
     public String getTeamId() {

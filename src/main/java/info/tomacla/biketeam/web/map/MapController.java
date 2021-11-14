@@ -63,7 +63,7 @@ public class MapController extends AbstractController {
                 map.getName(),
                 urlService.getMapImageUrl(team, map.getId()),
                 urlService.getMapUrl(team, map.getId()),
-                map.getDescription()
+                getMapOGDescription(map)
         );
 
         addGlobalValues(principal, model, "Map " + map.getName(), team);
@@ -259,6 +259,21 @@ public class MapController extends AbstractController {
             }
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to find image : " + mapId);
+    }
+
+    public String getMapOGDescription(Map map) {
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Distance ").append(map.getLength()).append("km").append(" - ");
+        sb.append(map.getPositiveElevation()).append("m D+").append(" - ");
+        sb.append(map.getType().getLabel());
+        if (!map.getTags().isEmpty()) {
+            sb.append(" - ");
+            map.getTags().forEach(t -> sb.append(t).append(", "));
+        }
+
+        return sb.toString();
+
     }
 
 }

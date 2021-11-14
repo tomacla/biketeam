@@ -18,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.security.Principal;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -140,7 +139,7 @@ public class AdminTeamTripController extends AbstractController {
                 target = new Trip(team.getId(), parser.getType(), parser.getStartDate(),
                         parser.getEndDate(), parser.getLowerSpeed(), parser.getUpperSpeed(), parser.getPublishedAt(timezone),
                         parser.getTitle(), parser.getDescription(), parser.getFile().isPresent(), parser.getMeetingLocation(), parser.getMeetingTime(),
-                        parser.getMeetingPoint().orElse(null), new HashSet<>(), null);
+                        parser.getMeetingPoint().orElse(null));
                 // new group so just add all groups
                 parser.getStages(team.getId(), mapService).forEach(target::addStage);
             }
