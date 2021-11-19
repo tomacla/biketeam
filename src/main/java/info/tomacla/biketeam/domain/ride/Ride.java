@@ -1,8 +1,8 @@
 package info.tomacla.biketeam.domain.ride;
 
-import info.tomacla.biketeam.common.Lists;
-import info.tomacla.biketeam.common.PublishedStatus;
-import info.tomacla.biketeam.common.Strings;
+import info.tomacla.biketeam.common.data.PublishedStatus;
+import info.tomacla.biketeam.common.datatype.Lists;
+import info.tomacla.biketeam.common.datatype.Strings;
 import org.springframework.util.ObjectUtils;
 
 import javax.persistence.*;
@@ -19,6 +19,7 @@ public class Ride {
     private String id;
     @Column(name = "team_id")
     private String teamId;
+    private String permalink;
     @Enumerated(EnumType.STRING)
     @Column(name = "published_status")
     private PublishedStatus publishedStatus;
@@ -32,13 +33,13 @@ public class Ride {
     private String description;
     private boolean imaged;
     @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    @OrderBy("id ASC")
     private Set<RideGroup> groups;
 
     public Ride() {
     }
 
     public Ride(String teamId,
+                String permalink,
                 RideType type,
                 LocalDate date,
                 ZonedDateTime publishedAt,
@@ -48,15 +49,20 @@ public class Ride {
                 Set<RideGroup> groups) {
 
         this.id = UUID.randomUUID().toString();
+
         setTeamId(teamId);
-        this.publishedStatus = PublishedStatus.UNPUBLISHED;
+        setPermalink(permalink);
+        setPublishedStatus(PublishedStatus.UNPUBLISHED);
         setType(type);
         setDate(date);
         setPublishedAt(publishedAt);
         setTitle(title);
+        setPermalink(Strings.normalizePermalink(title));
         setDescription(description);
         setImaged(imaged);
-        this.groups = Objects.requireNonNullElse(groups, new HashSet<>());
+
+        this.groups = new HashSet<>();
+
     }
 
     public String getId() {
@@ -73,6 +79,14 @@ public class Ride {
 
     public void setTeamId(String teamId) {
         this.teamId = Objects.requireNonNull(teamId);
+    }
+
+    public String getPermalink() {
+        return permalink;
+    }
+
+    public void setPermalink(String permalink) {
+        this.permalink = Strings.requireNonBlankOrNull(permalink);
     }
 
     public PublishedStatus getPublishedStatus() {
@@ -136,7 +150,7 @@ public class Ride {
     }
 
     public void setGroups(Set<RideGroup> groups) {
-        Lists.requireNonEmpty(groups, "groups is null or empty");
+        Lists.requireSizeOf(groups, 1, "groups is null or empty");
         groups.forEach(this::addGroup);
     }
 
@@ -175,10 +189,9 @@ public class Ride {
                     target.setName(g.getName());
                     target.setUpperSpeed(g.getUpperSpeed());
                     target.setLowerSpeed(g.getLowerSpeed());
-                    target.setMapId(g.getMapId());
+                    target.setMap(g.getMap());
                 })
         );
-
 
     }
 

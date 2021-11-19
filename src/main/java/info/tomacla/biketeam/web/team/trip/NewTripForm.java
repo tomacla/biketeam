@@ -1,12 +1,13 @@
 package info.tomacla.biketeam.web.team.trip;
 
-import info.tomacla.biketeam.common.Dates;
-import info.tomacla.biketeam.common.Point;
-import info.tomacla.biketeam.common.Strings;
+import info.tomacla.biketeam.common.datatype.Dates;
+import info.tomacla.biketeam.common.datatype.Strings;
+import info.tomacla.biketeam.common.geo.Point;
 import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.map.MapType;
 import info.tomacla.biketeam.domain.trip.TripStage;
 import info.tomacla.biketeam.service.MapService;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.*;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 public class NewTripForm {
 
     private String id;
+    private String permalink;
     private String type;
     private String startDate;
     private String endDate;
@@ -42,6 +44,7 @@ public class NewTripForm {
 
     public NewTripForm(ZonedDateTime defaultDate) {
         setId(null);
+        setPermalink(null);
         setType(null);
         setStartDate(null);
         setEndDate(null);
@@ -69,6 +72,14 @@ public class NewTripForm {
 
     public void setId(String id) {
         this.id = Strings.requireNonBlankOrDefault(id, "new");
+    }
+
+    public String getPermalink() {
+        return permalink;
+    }
+
+    public void setPermalink(String permalink) {
+        this.permalink = Strings.requireNonBlankOrDefault(permalink, "");
     }
 
     public String getType() {
@@ -211,6 +222,13 @@ public class NewTripForm {
             return form.getId();
         }
 
+        public String getPermalink() {
+            if (ObjectUtils.isEmpty(form.getPermalink())) {
+                return null;
+            }
+            return form.getPermalink();
+        }
+
         public String getTitle() {
             return form.getTitle();
         }
@@ -268,14 +286,14 @@ public class NewTripForm {
         public List<TripStage> getStages(String teamId, MapService mapService) {
             return form.getStages().stream().map(st -> {
                 NewTripStageForm.NewTripStageFormParser parser = st.parser();
-                String mapId = null;
+                Map map = null;
                 if (parser.getMapId().isPresent()) {
-                    mapId = mapService.get(teamId, parser.getMapId().get()).isPresent() ? parser.getMapId().get() : null;
+                    map = mapService.get(teamId, parser.getMapId().get()).orElse(null);
                 }
 
                 final TripStage ss = new TripStage(parser.getName(),
                         parser.getDate(),
-                        mapId);
+                        map);
 
                 if (parser.getId() != null) {
                     ss.setId(parser.getId());
@@ -301,6 +319,11 @@ public class NewTripForm {
 
         public NewTripFormBuilder withId(String id) {
             form.setId(id);
+            return this;
+        }
+
+        public NewTripFormBuilder withPermalink(String permalink) {
+            form.setPermalink(permalink);
             return this;
         }
 
@@ -365,17 +388,15 @@ public class NewTripForm {
             return this;
         }
 
-        public NewTripFormBuilder withStages(List<TripStage> stages, String teamId, MapService mapService) {
+        public NewTripFormBuilder withStages(List<TripStage> stages) {
             if (stages != null) {
                 form.setStages(stages.stream().map(st -> {
 
-                    final String mapId = st.getMapId();
+                    String mapId = null;
                     String mapName = null;
-                    if (mapId != null) {
-                        final Optional<Map> optionalMap = mapService.get(teamId, mapId);
-                        if (optionalMap.isPresent()) {
-                            mapName = optionalMap.get().getName();
-                        }
+                    if (st.getMap() != null) {
+                        mapId = st.getMap().getId();
+                        mapName = st.getMap().getName();
                     }
 
                     return NewTripStageForm.builder()

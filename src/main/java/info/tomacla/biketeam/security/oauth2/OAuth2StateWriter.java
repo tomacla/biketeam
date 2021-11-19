@@ -2,7 +2,7 @@ package info.tomacla.biketeam.security.oauth2;
 
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.service.TeamService;
-import info.tomacla.biketeam.service.UrlService;
+import info.tomacla.biketeam.service.url.UrlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.keygen.Base64StringKeyGenerator;
 import org.springframework.security.crypto.keygen.StringKeyGenerator;
@@ -36,14 +36,16 @@ public class OAuth2StateWriter extends Base64StringKeyGenerator {
         if (currentHttpRequest != null) {
             final String customRequestUri = getCustomRequestUri(currentHttpRequest);
             String redirect = null;
-            if (customRequestUri != null) {
+            if (customRequestUri != null && !customRequestUri.equals("/login")) {
                 String teamId = extractTeamId(customRequestUri);
-                String resultUri = extractResulting(customRequestUri);
                 if (!ObjectUtils.isEmpty(teamId)) {
                     final Optional<Team> team = teamService.get(teamId);
                     if (team.isPresent()) {
+                        String resultUri = extractResulting(customRequestUri);
                         final String teamUrl = urlService.getTeamUrl(team.get());
                         redirect = teamUrl + resultUri;
+                    } else {
+                        redirect = urlService.getUrlWithSuffix(customRequestUri);
                     }
                 }
             }

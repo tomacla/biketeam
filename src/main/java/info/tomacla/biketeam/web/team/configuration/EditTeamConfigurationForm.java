@@ -1,6 +1,6 @@
 package info.tomacla.biketeam.web.team.configuration;
 
-import info.tomacla.biketeam.common.Timezone;
+import info.tomacla.biketeam.common.data.Timezone;
 import info.tomacla.biketeam.domain.team.WebPage;
 
 import java.util.ArrayList;

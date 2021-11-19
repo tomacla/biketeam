@@ -1,7 +1,7 @@
 package info.tomacla.biketeam.web;
 
-import info.tomacla.biketeam.common.Country;
-import info.tomacla.biketeam.common.Strings;
+import info.tomacla.biketeam.common.data.Country;
+import info.tomacla.biketeam.common.datatype.Strings;
 
 import java.util.Objects;
 

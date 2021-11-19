@@ -25,7 +25,7 @@ public class AdminUserController extends AbstractController {
                           @RequestParam("stravaId") Long stravaId) {
 
         User user = userService.getByStravaId(stravaId).orElse(new User(false, "Inconnu", "Inconnu", stravaId,
-                null, null, null, null, null));
+                null, null, null));
 
         userService.save(user);
 

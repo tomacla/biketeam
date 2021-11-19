@@ -1,6 +1,6 @@
 package info.tomacla.biketeam.domain.team;
 
-import info.tomacla.biketeam.common.Country;
+import info.tomacla.biketeam.common.data.Country;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -34,7 +34,7 @@ public class SearchTeamSpecification implements Specification<Team> {
             predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("city")), "%" + city.toLowerCase() + "%"));
         }
         if (country != null) {
-            predicates.add(criteriaBuilder.like(root.get("country"), country.name()));
+            predicates.add(criteriaBuilder.equal(root.get("country"), country));
         }
         if (!visibilities.isEmpty()) {
             final CriteriaBuilder.In<Object> visibility = criteriaBuilder.in(root.get("visibility"));

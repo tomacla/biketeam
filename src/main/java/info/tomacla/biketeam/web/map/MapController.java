@@ -1,11 +1,11 @@
 package info.tomacla.biketeam.web.map;
 
-import info.tomacla.biketeam.common.FileExtension;
+import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.domain.map.*;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.service.MapService;
-import info.tomacla.biketeam.service.ThumbnailService;
-import info.tomacla.biketeam.service.UrlService;
+import info.tomacla.biketeam.service.file.ThumbnailService;
+import info.tomacla.biketeam.service.url.UrlService;
 import info.tomacla.biketeam.web.AbstractController;
 import info.tomacla.biketeam.web.ride.dto.AndroidMapDTO;
 import info.tomacla.biketeam.web.ride.dto.GarminMapDTO;
@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerErrorException;
@@ -46,6 +47,7 @@ public class MapController extends AbstractController {
     @GetMapping(value = "/{mapId}")
     public String getMap(@PathVariable("teamId") String teamId,
                          @PathVariable("mapId") String mapId,
+                         @ModelAttribute("error") String error,
                          @RequestParam(required = false, defaultValue = "false") boolean embed,
                          Principal principal,
                          Model model) {
@@ -54,15 +56,15 @@ public class MapController extends AbstractController {
 
         Optional<Map> optionalMap = mapService.get(team.getId(), mapId);
         if (optionalMap.isEmpty()) {
-            return redirectToMaps(team);
+            return viewHandler.redirect(team, "/maps");
         }
 
         Map map = optionalMap.get();
         addOpenGraphValues(team,
                 model,
                 map.getName(),
-                urlService.getMapImageUrl(team, map.getId()),
-                urlService.getMapUrl(team, map.getId()),
+                urlService.getMapImageUrl(team, map),
+                urlService.getMapUrl(team, map),
                 getMapOGDescription(map)
         );
 
@@ -70,6 +72,10 @@ public class MapController extends AbstractController {
         model.addAttribute("map", map);
         model.addAttribute("mapBoxAPIKey", mapBoxAPIKey);
         model.addAttribute("_embed", embed);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
+
         return "map";
 
     }
@@ -86,6 +92,7 @@ public class MapController extends AbstractController {
                           @RequestParam(value = "tags", required = false) List<String> tags,
                           @RequestParam(value = "page", defaultValue = "0", required = false) int page,
                           @RequestParam(value = "pageSize", defaultValue = "9", required = false) int pageSize,
+                          @ModelAttribute("error") String error,
                           Principal principal,
                           Model model) {
 
@@ -124,6 +131,9 @@ public class MapController extends AbstractController {
         model.addAttribute("pages", maps.getTotalPages());
         model.addAttribute("tags", mapService.listTags(team.getId()));
         model.addAttribute("formdata", form);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
         return "maps";
     }
 
@@ -133,7 +143,7 @@ public class MapController extends AbstractController {
                                                           @RequestParam("q") String q) {
         return mapService.searchMaps(teamId, q)
                 .stream()
-                .collect(Collectors.toMap(MapIdNamePostedAtVisibleProjection::getId, MapIdNamePostedAtVisibleProjection::getName));
+                .collect(Collectors.toMap(MapProjection::getId, MapProjection::getName));
 
     }
 
@@ -146,7 +156,7 @@ public class MapController extends AbstractController {
         return mapService.listMaps(teamId, 50).stream()
                 .map(m -> {
                     AndroidMapDTO dto = new AndroidMapDTO();
-                    dto.setId(m.getId());
+                    dto.setId(m.getPermalink());
                     dto.setTitle(m.getName());
                     dto.setDistance(m.getLength());
                     dto.setTags(m.getTags());
@@ -170,7 +180,7 @@ public class MapController extends AbstractController {
                 .map(m -> {
                     GarminMapDTO dto = new GarminMapDTO();
                     dto.setTitle(m.getName());
-                    dto.setUrl(urlService.getMapFitUrl(team, m.getId()));
+                    dto.setUrl(urlService.getMapFitUrl(team, m));
                     return dto;
                 }).collect(Collectors.toList()));
 
@@ -233,6 +243,7 @@ public class MapController extends AbstractController {
     public ResponseEntity<byte[]> getMapImage(@PathVariable("teamId") String teamId,
                                               @PathVariable("mapId") String mapId,
                                               @RequestParam(name = "width", defaultValue = "-1", required = false) int targetWidth) {
+
         final Optional<Path> imageFile = mapService.getImageFile(teamId, mapId);
         if (imageFile.isPresent()) {
             try {

@@ -1,13 +1,16 @@
 package info.tomacla.biketeam.service;
 
-import info.tomacla.biketeam.common.Country;
-import info.tomacla.biketeam.common.FileExtension;
-import info.tomacla.biketeam.common.FileRepositories;
-import info.tomacla.biketeam.common.ImageDescriptor;
+import info.tomacla.biketeam.common.data.Country;
+import info.tomacla.biketeam.common.file.FileExtension;
+import info.tomacla.biketeam.common.file.FileRepositories;
+import info.tomacla.biketeam.common.file.ImageDescriptor;
 import info.tomacla.biketeam.domain.feed.Feed;
 import info.tomacla.biketeam.domain.feed.FeedRepository;
 import info.tomacla.biketeam.domain.team.*;
-import info.tomacla.biketeam.domain.user.Role;
+import info.tomacla.biketeam.domain.userrole.Role;
+import info.tomacla.biketeam.service.file.FileService;
+import info.tomacla.biketeam.service.heatmap.HeatmapService;
+import info.tomacla.biketeam.service.permalink.AbstractPermalinkService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +31,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class TeamService {
+public class TeamService extends AbstractPermalinkService {
 
     private static final Logger log = LoggerFactory.getLogger(TeamService.class);
 
@@ -39,7 +42,25 @@ public class TeamService {
     private FileService fileService;
 
     @Autowired
+    private HeatmapService heatmapService;
+
+    @Autowired
     private FeedRepository feedRepository;
+
+    @Autowired
+    private RideService rideService;
+
+    @Autowired
+    private PublicationService publicationService;
+
+    @Autowired
+    private TripService tripService;
+
+    @Autowired
+    private MapService mapService;
+
+    @Autowired
+    private UserRoleService userRoleService;
 
     public Optional<Team> get(String teamId) {
         return teamRepository.findById(teamId.toLowerCase());
@@ -61,14 +82,6 @@ public class TeamService {
         return teamRepository.findByRoles_UserIdAndRoles_RoleIn(userId, Set.of(Role.ADMIN, Role.MEMBER));
     }
 
-    public List<Team> getUserTeamsAdmin(String userId) {
-        return teamRepository.findByRoles_UserIdAndRoles_RoleIn(userId, Set.of(Role.ADMIN));
-    }
-
-    public List<Team> getUserTeamsMember(String userId) {
-        return teamRepository.findByRoles_UserIdAndRoles_RoleIn(userId, Set.of(Role.MEMBER));
-    }
-
     public List<Feed> listFeed(String teamId) {
         return feedRepository.findAllByTeamIdInAndPublishedAtLessThan(
                 Set.of(teamId),
@@ -84,6 +97,10 @@ public class TeamService {
     }
 
     public void save(Team team) {
+        this.save(team, false);
+    }
+
+    public void save(Team team, boolean newTeam) {
         log.info("Team is updated");
 
         TeamConfiguration teamConfiguration = team.getConfiguration();
@@ -95,6 +112,15 @@ public class TeamService {
         }
 
         teamRepository.save(team);
+
+        if (newTeam) {
+            this.initTeamImage(team);
+        }
+
+        if (team.getIntegration().isHeatmapConfigured()) {
+            heatmapService.generateHeatmap(team);
+        }
+
     }
 
     public List<Team> list() {
@@ -107,7 +133,7 @@ public class TeamService {
     }
 
     public void initTeamImage(Team newTeam) {
-        fileService.store(getClass().getResourceAsStream("/static/css/biketeam-logo.png"),
+        fileService.storeFile(getClass().getResourceAsStream("/static/css/biketeam-logo.png"),
                 FileRepositories.MISC_IMAGES,
                 newTeam.getId(),
                 "logo.png"
@@ -119,24 +145,24 @@ public class TeamService {
         if (optionalFileExtension.isPresent()) {
             deleteImage(teamId);
             Path newImage = fileService.getTempFileFromInputStream(is);
-            fileService.store(newImage, FileRepositories.MISC_IMAGES, teamId, "logo" + optionalFileExtension.get().getExtension());
+            fileService.storeFile(newImage, FileRepositories.MISC_IMAGES, teamId, "logo" + optionalFileExtension.get().getExtension());
         }
     }
 
     public void deleteImage(String teamId) {
         getImage(teamId).ifPresent(image ->
-                fileService.delete(FileRepositories.MISC_IMAGES, teamId, "logo" + image.getExtension().getExtension())
+                fileService.deleteFile(FileRepositories.MISC_IMAGES, teamId, "logo" + image.getExtension().getExtension())
         );
     }
 
     public Optional<ImageDescriptor> getImage(String teamId) {
 
-        Optional<FileExtension> fileExtensionExists = fileService.exists(FileRepositories.MISC_IMAGES, teamId, "logo", FileExtension.byPriority());
+        Optional<FileExtension> fileExtensionExists = fileService.fileExists(FileRepositories.MISC_IMAGES, teamId, "logo", FileExtension.byPriority());
 
         if (fileExtensionExists.isPresent()) {
 
             final FileExtension extension = fileExtensionExists.get();
-            final Path path = fileService.get(FileRepositories.MISC_IMAGES, teamId, "logo" + extension.getExtension());
+            final Path path = fileService.getFile(FileRepositories.MISC_IMAGES, teamId, "logo" + extension.getExtension());
 
             return Optional.of(ImageDescriptor.of(extension, path));
 
@@ -144,10 +170,6 @@ public class TeamService {
 
         return Optional.empty();
 
-    }
-
-    public boolean idExists(String id) {
-        return get(id).isPresent();
     }
 
     public Page<Team> searchTeams(int page, int pageSize, String name, String city, Country country) {
@@ -168,7 +190,35 @@ public class TeamService {
     public Map<String, String> findAllTeamWithDomain() {
         return teamRepository.findAllTeamWithDomain()
                 .stream()
-                .collect(Collectors.toMap(TeamIdDomainProjection::getId, TeamIdDomainProjection::getDomain));
+                .collect(Collectors.toMap(TeamProjection::getId, TeamProjection::getDomain));
+    }
+
+    public void delete(String teamId) {
+        get(teamId).ifPresent(this::delete);
+    }
+
+    // FIXME should be transactional
+    public void delete(Team team) {
+        try {
+            log.info("Request team deletion {}", team.getId());
+            // delete all elements
+            rideService.deleteByTeam(team.getId());
+            publicationService.deleteByTeam(team.getId());
+            tripService.deleteByTeam(team.getId());
+            mapService.deleteByTeam(team.getId());
+            // remove all access to this team
+            userRoleService.deleteByTeam(team.getId());
+            // finaly delete the team
+            teamRepository.deleteById(team.getId());
+            log.info("Team deleted {}", team.getId());
+        } catch (Exception e) {
+            log.error("Unable to delete team " + team.getId(), e);
+        }
+    }
+
+    @Override
+    public boolean permalinkExists(String permalink) {
+        return get(permalink).isPresent();
     }
 
 }

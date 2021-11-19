@@ -1,11 +1,12 @@
 package info.tomacla.biketeam.domain.template;
 
-import info.tomacla.biketeam.common.Point;
-import info.tomacla.biketeam.common.Strings;
+import info.tomacla.biketeam.common.datatype.Strings;
+import info.tomacla.biketeam.common.geo.Point;
 
 import javax.persistence.*;
 import java.time.LocalTime;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Table(name = "ride_group_template")
@@ -41,6 +42,7 @@ public class RideGroupTemplate {
                              String meetingLocation,
                              LocalTime meetingTime,
                              Point meetingPoint) {
+        this.id = UUID.randomUUID().toString(); // tmp id
         setName(name);
         setLowerSpeed(lowerSpeed);
         setUpperSpeed(upperSpeed);

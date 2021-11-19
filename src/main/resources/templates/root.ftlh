@@ -33,7 +33,7 @@
                         </div>
                       <div class="card-body">
 
-                        <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl team.id '' />">${team.name}</a></h5>
+                        <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl team.id '' />"><#if team.visibility == 'PRIVATE'><i class="bi bi-lock-fill"></i> </#if>${team.name}</a></h5>
                         <h6 class="text-muted">${team.city}, ${team.country}</h6>
                       </div>
                     </div>

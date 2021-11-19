@@ -7,8 +7,11 @@ import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.security.Principal;
 import java.util.List;
@@ -21,21 +24,25 @@ public class AdminTeamMapController extends AbstractController {
     @Autowired
     private MapService mapService;
 
-
     @GetMapping
     public String getMaps(@PathVariable("teamId") String teamId,
+                          @ModelAttribute("error") String error,
                           Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
 
         addGlobalValues(principal, model, "Administration - Maps", team);
         model.addAttribute("maps", mapService.listMaps(team.getId()));
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
         return "team_admin_maps";
     }
 
     @GetMapping(value = "/{mapId}")
     public String editMap(@PathVariable("teamId") String teamId,
                           @PathVariable("mapId") String mapId,
+                          @ModelAttribute("error") String error,
                           Principal principal,
                           Model model) {
 
@@ -43,7 +50,7 @@ public class AdminTeamMapController extends AbstractController {
 
         Optional<Map> optionalMap = mapService.get(team.getId(), mapId);
         if (optionalMap.isEmpty()) {
-            return redirectToAdminMaps(team);
+            return viewHandler.redirect(team, "/admin/maps");
         }
 
         Map map = optionalMap.get();
@@ -54,22 +61,26 @@ public class AdminTeamMapController extends AbstractController {
                 .withVisible(map.isVisible())
                 .withTags(map.getTags())
                 .withType(map.getType())
+                .withPermalink(map.getPermalink())
                 .get();
 
         addGlobalValues(principal, model, "Administration - Modifier la map", team);
         model.addAttribute("formdata", form);
         model.addAttribute("map", map);
         model.addAttribute("tags", mapService.listTags(team.getId()));
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
         return "team_admin_maps_new";
 
     }
 
     @PostMapping(value = "/{mapId}")
-    public String editMap(@PathVariable("teamId") String teamId,
-                          @PathVariable("mapId") String mapId,
-                          Principal principal,
-                          Model model,
-                          NewMapForm form) {
+    public RedirectView editMap(@PathVariable("teamId") String teamId,
+                                @PathVariable("mapId") String mapId,
+                                Principal principal, Model model,
+                                RedirectAttributes attributes,
+                                NewMapForm form) {
 
         final Team team = checkTeam(teamId);
 
@@ -77,99 +88,80 @@ public class AdminTeamMapController extends AbstractController {
 
             Optional<Map> optionalMap = mapService.get(team.getId(), mapId);
             if (optionalMap.isEmpty()) {
-                return redirectToAdminMaps(team);
+                return viewHandler.redirectView(team, "/admin/maps");
             }
 
             final NewMapForm.NewMapFormParser parser = form.parser();
 
             Map map = optionalMap.get();
-            String previousName = map.getName();
             map.setName(parser.getName());
             map.setVisible(parser.isVisible());
             map.setTags(parser.getTags());
             map.setType(parser.getType());
+            map.setPermalink(parser.getPermalink());
 
             if (parser.getFile().isPresent()) {
                 MultipartFile uploadedFile = parser.getFile().get();
                 mapService.replaceGpx(team, map, uploadedFile.getInputStream());
             }
 
-            mapService.save(map);
+            mapService.save(map, true);
 
-            if (!map.getName().equals(previousName)) {
-                mapService.renameMap(map);
-            }
-
-            if (parser.getNewId() != null && !parser.getNewId().equals(map.getId())) {
-                mapService.changeMapId(map, parser.getNewId());
-            }
-
-            return redirectToAdminMaps(team);
+            return viewHandler.redirectView(team, "/admin/maps");
 
         } catch (Exception e) {
-            addGlobalValues(principal, model, "Administration - Modifier la map", team);
-            model.addAttribute("errors", List.of(e.getMessage()));
-            model.addAttribute("formdata", form);
-            model.addAttribute("tags", mapService.listTags(team.getId()));
-            return "team_admin_maps_new";
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/admin/maps/" + mapId);
         }
 
     }
 
-
     @PostMapping(value = "/new")
-    public String newMapGpx(@PathVariable("teamId") String teamId,
-                            Model model,
-                            Principal principal,
-                            @RequestParam("file") MultipartFile file) {
+    public RedirectView newMapGpx(@PathVariable("teamId") String teamId,
+                                  Model model,
+                                  Principal principal,
+                                  RedirectAttributes attributes,
+                                  @RequestParam("file") MultipartFile file) {
 
         final Team team = checkTeam(teamId);
 
         try {
 
-            final Map newMap = mapService.save(
+            final Map newMap = mapService.createFromGpx(
                     team,
                     file.getInputStream(),
                     null,
                     null
             );
-            return redirectToAdminMap(team, newMap.getId());
+
+            newMap.setPermalink(mapService.getPermalink(newMap.getName()));
+            mapService.save(newMap);
+
+            return viewHandler.redirectView(team, "/admin/maps/" + newMap.getId());
 
         } catch (Exception e) {
-
-            addGlobalValues(principal, model, "Administration - Maps", team);
-            model.addAttribute("errors", List.of(e.getMessage()));
-            model.addAttribute("maps", mapService.listMaps(team.getId()));
-            return "team_admin_maps";
-
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/admin/maps");
         }
 
     }
 
     @GetMapping(value = "/delete/{mapId}")
-    public String deleteMap(@PathVariable("teamId") String teamId,
-                            @PathVariable("mapId") String mapId,
-                            Principal principal,
-                            Model model) {
+    public RedirectView deleteMap(@PathVariable("teamId") String teamId,
+                                  @PathVariable("mapId") String mapId,
+                                  Principal principal, Model model,
+                                  RedirectAttributes attributes) {
 
         final Team team = checkTeam(teamId);
 
         try {
             mapService.delete(team.getId(), mapId);
+            return viewHandler.redirectView(team, "/admin/maps");
         } catch (Exception e) {
-            model.addAttribute("errors", List.of(e.getMessage()));
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/admin/maps");
         }
 
-        return redirectToAdminMaps(team);
     }
-
-    private String redirectToAdminMaps(Team team) {
-        return createRedirect(team, "/admin/maps");
-    }
-
-    private String redirectToAdminMap(Team team, String mapId) {
-        return createRedirect(team, "/admin/maps/" + mapId);
-    }
-
 
 }

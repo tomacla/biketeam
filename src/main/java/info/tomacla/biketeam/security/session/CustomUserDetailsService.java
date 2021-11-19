@@ -21,9 +21,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
         return OAuth2UserDetails.create(userService.get(s)
-                        .orElseThrow(() -> new UsernameNotFoundException("Logged user can not be found")),
-                teamService.getUserTeamsMember(s),
-                teamService.getUserTeamsAdmin(s));
+                .orElseThrow(() -> new UsernameNotFoundException("Logged user can not be found")));
     }
 
 }

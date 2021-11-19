@@ -1,5 +1,6 @@
 package info.tomacla.biketeam;
 
+import info.tomacla.biketeam.security.login.CustomLoginUrlAuthenticationEntryPoint;
 import info.tomacla.biketeam.security.oauth2.OAuth2StateWriter;
 import info.tomacla.biketeam.security.oauth2.OAuth2SuccessHandler;
 import info.tomacla.biketeam.security.session.CookieHttpSessionIdResolverWithSSO;
@@ -18,7 +19,6 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
@@ -46,9 +46,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             auth.antMatchers("/css/**").permitAll();
             auth.antMatchers("/js/**").permitAll();
             auth.antMatchers("/teams").permitAll();
+            auth.antMatchers("/login").permitAll();
+            auth.antMatchers("/logout").permitAll();
+            auth.antMatchers("/legal-mentions").permitAll();
+            auth.antMatchers("/*/image").permitAll();
+
             auth.antMatchers("/users/me").authenticated();
             auth.antMatchers("/new").authenticated();
-            auth.antMatchers("/*/image").permitAll();
+
             auth.antMatchers("/admin/**").hasRole("ADMIN");
             auth.antMatchers("/management/**").hasRole("ADMIN");
             auth.antMatchers("/{teamId}/admin/**").access("@userService.authorizeAdminAccess(authentication, #teamId)");
@@ -56,8 +61,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             auth.anyRequest().permitAll();
         });
 
+        // handle unauthorized
         http.exceptionHandling(e -> {
-            e.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/"));
+            // user is not authenticated
+            e.authenticationEntryPoint(new CustomLoginUrlAuthenticationEntryPoint("/login"));
+            // user has not access to resource
             e.accessDeniedPage("/?error=Acc%C3%A8s%20interdit");
         });
 
@@ -67,13 +75,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             rm.userDetailsService(userDetailsService);
         });
 
-        // oauth2 cong
+        // oauth2 conf
         http.oauth2Login(oauth2 -> {
             oauth2.failureUrl("/?error=Erreur%20de%20connexion");
-            oauth2.loginPage("/");
+            oauth2.loginPage("/login");
             oauth2.authorizationEndpoint(config -> config.authorizationRequestResolver(oAuth2AuthorizationRequestResolver()));
             oauth2.successHandler(oAuth2SuccessHandler());
         });
+
+        // logout
+        http.logout(logout -> logout.logoutSuccessUrl("/"));
 
 
     }

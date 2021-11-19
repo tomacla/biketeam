@@ -1,14 +1,16 @@
 package info.tomacla.biketeam.web.team;
 
-import info.tomacla.biketeam.common.FileExtension;
-import info.tomacla.biketeam.common.ImageDescriptor;
+import info.tomacla.biketeam.common.file.FileExtension;
+import info.tomacla.biketeam.common.file.ImageDescriptor;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.TeamConfiguration;
 import info.tomacla.biketeam.domain.team.WebPage;
-import info.tomacla.biketeam.domain.user.Role;
 import info.tomacla.biketeam.domain.user.User;
-import info.tomacla.biketeam.service.HeatmapService;
-import info.tomacla.biketeam.service.ThumbnailService;
+import info.tomacla.biketeam.domain.userrole.Role;
+import info.tomacla.biketeam.domain.userrole.UserRole;
+import info.tomacla.biketeam.service.UserRoleService;
+import info.tomacla.biketeam.service.file.ThumbnailService;
+import info.tomacla.biketeam.service.heatmap.HeatmapService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ContentDisposition;
@@ -17,14 +19,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerErrorException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.security.Principal;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = "/{teamId}")
@@ -36,8 +43,12 @@ public class TeamController extends AbstractController {
     @Autowired
     private ThumbnailService thumbnailService;
 
+    @Autowired
+    private UserRoleService userRoleService;
+
     @GetMapping
     public String getFeed(@PathVariable("teamId") String teamId,
+                          @ModelAttribute("error") String error,
                           Principal principal,
                           Model model) {
 
@@ -45,61 +56,73 @@ public class TeamController extends AbstractController {
 
         final TeamConfiguration teamConfiguration = team.getConfiguration();
         if (teamConfiguration.getDefaultPage().equals(WebPage.MAPS)) {
-            return redirectToMaps(team);
+            return viewHandler.redirect(team, "/maps");
         }
         if (teamConfiguration.getDefaultPage().equals(WebPage.RIDES)) {
-            return redirectToRides(team);
+            return viewHandler.redirect(team, "/rides");
         }
         if (teamConfiguration.getDefaultPage().equals(WebPage.TRIPS)) {
-            return redirectToTrips(team);
+            return viewHandler.redirect(team, "/trips");
         }
 
         addGlobalValues(principal, model, team.getName(), team);
         model.addAttribute("feed", teamService.listFeed(team.getId()));
-        model.addAttribute("users", userService.listUsers(team));
+        model.addAttribute("users", team.getRoles().stream().map(UserRole::getUser).collect(Collectors.toSet()));
         model.addAttribute("hasHeatmap", team.getIntegration().isHeatmapDisplay() && heatmapService.get(team.getId()).isPresent());
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
         return "team_root";
     }
 
     @GetMapping(value = "/join")
-    public String joinTeam(@PathVariable("teamId") String teamId,
-                           Principal principal, Model model) {
+    public RedirectView joinTeam(@PathVariable("teamId") String teamId,
+                                 RedirectAttributes attributes,
+                                 Principal principal,
+                                 Model model) {
 
         final Team team = checkTeam(teamId);
 
-        Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
-
-        if (optionalConnectedUser.isPresent()) {
-
-            User connectedUser = optionalConnectedUser.get();
-
-            if (!team.isMember(connectedUser.getId())) {
-                team.addRole(connectedUser, Role.MEMBER);
-                teamService.save(team);
+        try {
+            Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
+            if (optionalConnectedUser.isPresent()) {
+                User connectedUser = optionalConnectedUser.get();
+                if (!team.isMember(connectedUser)) {
+                    userRoleService.save(new UserRole(team, connectedUser, Role.MEMBER));
+                }
             }
+            return viewHandler.redirectView(team, "/");
 
+        } catch (Exception e) {
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/");
         }
 
-        return redirectToFeed(team);
     }
 
     @GetMapping(value = "/leave")
-    public String leaveTeam(@PathVariable("teamId") String teamId,
-                            Principal principal, Model model) {
+    public RedirectView leaveTeam(@PathVariable("teamId") String teamId,
+                                  RedirectAttributes attributes,
+                                  Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
 
-        Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
+        try {
+            Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
 
-        if (optionalConnectedUser.isPresent()) {
-            User connectedUser = optionalConnectedUser.get();
-            if (team.isMember(connectedUser.getId())) {
-                team.removeRole(connectedUser);
-                teamService.save(team);
+            if (optionalConnectedUser.isPresent()) {
+                User connectedUser = optionalConnectedUser.get();
+                if (team.isMember(connectedUser)) {
+                    userRoleService.delete(team, connectedUser);
+                }
             }
-        }
 
-        return redirectToFeed(team);
+            return viewHandler.redirectView(team, "/");
+
+        } catch (Exception e) {
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/");
+        }
     }
 
     @ResponseBody

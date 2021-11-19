@@ -1,8 +1,11 @@
 package info.tomacla.biketeam.service;
 
-import info.tomacla.biketeam.common.FileRepositories;
+import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.domain.map.*;
 import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.service.file.FileService;
+import info.tomacla.biketeam.service.gpx.GpxService;
+import info.tomacla.biketeam.service.permalink.AbstractPermalinkService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -18,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class MapService {
+public class MapService extends AbstractPermalinkService {
 
     private static final Logger log = LoggerFactory.getLogger(MapService.class);
 
@@ -31,56 +35,45 @@ public class MapService {
     @Autowired
     private MapRepository mapRepository;
 
-    @Autowired
-    private TeamService teamService;
+    public void save(Map map) {
+        this.save(map, false);
+    }
 
-    @Autowired
-    private RideService rideService;
-
-    @Autowired
-    private TripService tripService;
-
-    public void delete(String teamId, String mapId) {
-        log.info("Request map deletion {}", mapId);
-        final Optional<Map> optionalMap = get(teamId, mapId);
-        if (optionalMap.isPresent()) {
-            final Map map = optionalMap.get();
-            rideService.removeMapIdInGroups(map.getId());
-            tripService.removeMapIdInStages(map.getId());
-            gpxService.deleteMap(map.getTeamId(), map.getId());
-            mapRepository.delete(map);
+    public void save(Map map, boolean refreshFiles) {
+        mapRepository.save(map);
+        if (refreshFiles) {
+            gpxService.refresh(map);
         }
     }
 
-    public void save(Map map) {
-        mapRepository.save(map);
+    public Map createFromGpx(Team team, InputStream is, String defaultName, String permalink) {
+        log.info("Creating new map with default name {}", defaultName);
+        if (!ObjectUtils.isEmpty(permalink)) {
+            permalink = getPermalink(permalink);
+        }
+        final Map newMap = gpxService.parseAndStore(team, fileService.getTempFileFromInputStream(is), defaultName, permalink);
+        return mapRepository.save(newMap);
     }
 
     public void replaceGpx(Team team, Map map, InputStream is) {
         log.info("Replacing GPX in map {}", map.getId());
-        Path gpx = fileService.getTempFileFromInputStream(is);
-        gpxService.parseAndReplace(team, map, gpx);
+        gpxService.parseAndReplace(team, map, fileService.getTempFileFromInputStream(is));
         mapRepository.save(map);
     }
 
-    public Map save(Team team, InputStream is, String defaultName, String forceId) {
-
-        log.info("Saving new map with default name {}", defaultName);
-
-        Path gpx = fileService.getTempFileFromInputStream(is);
-
-        final Map newMap = gpxService.parseAndStore(team, gpx, defaultName, forceId);
-
-        return mapRepository.save(newMap);
-
-    }
-
     public Optional<Map> get(String teamId, String mapId) {
-        final Optional<Map> optionalMap = mapRepository.findById(mapId);
+        Optional<Map> optionalMap = mapRepository.findById(mapId);
         if (optionalMap.isPresent() && optionalMap.get().getTeamId().equals(teamId)) {
             return optionalMap;
         }
+
+        optionalMap = mapRepository.findByPermalink(mapId);
+        if (optionalMap.isPresent() && optionalMap.get().getTeamId().equals(teamId)) {
+            return optionalMap;
+        }
+
         return Optional.empty();
+
     }
 
     public List<String> listTags(String teamId) {
@@ -88,18 +81,31 @@ public class MapService {
     }
 
     public List<String> listTags(String teamId, String q) {
-        if (q == null || q.isBlank()) {
+        if (ObjectUtils.isEmpty(q)) {
             return mapRepository.findAllDistinctTags(teamId);
         }
         return mapRepository.findDistinctTagsContaining(teamId, q.toLowerCase());
     }
 
-    public List<MapIdNamePostedAtVisibleProjection> searchMaps(String teamId, String q) {
-        return (q == null || q.isBlank()) ? mapRepository.findAllByTeamIdOrderByPostedAtDesc(teamId)
-                : mapRepository.findAllByTeamIdAndNameContainingIgnoreCaseOrderByPostedAtDesc(teamId, q);
+    public void delete(String teamId, String mapId) {
+        get(teamId, mapId).ifPresent(this::delete);
     }
 
-    public List<MapIdNamePostedAtVisibleProjection> listMaps(String teamId) {
+    // TODO should be transactional
+    public void delete(Map map) {
+        log.info("Request map deletion {}", map.getId());
+        mapRepository.removeMapIdInGroups(map.getId());
+        mapRepository.removeMapIdInStages(map.getId());
+        gpxService.delete(map);
+        mapRepository.delete(map);
+        log.info("Map deleted {}", map.getId());
+    }
+
+    public boolean permalinkExists(String permalink) {
+        return mapRepository.findByPermalink(permalink).isPresent();
+    }
+
+    public List<MapProjection> listMaps(String teamId) {
         return mapRepository.findAllByTeamIdOrderByPostedAtDesc(teamId);
     }
 
@@ -115,10 +121,16 @@ public class MapService {
         return mapRepository.findByTeamId(teamId, PageRequest.of(page, pageSize, getPageSort(sortOption)));
     }
 
+    public List<MapProjection> searchMaps(String teamId, String q) {
+        return (q == null || q.isBlank()) ? mapRepository.findAllByTeamIdOrderByPostedAtDesc(teamId)
+                : mapRepository.findAllByTeamIdAndNameContainingIgnoreCaseOrderByPostedAtDesc(teamId, q);
+    }
+
     public Page<Map> searchMaps(String teamId, int page, int pageSize, MapSorterOption sortOption,
                                 double lowerDistance, double upperDistance, MapType type,
                                 double lowerPositiveElevation, double upperPositiveElevation,
                                 List<String> tags, WindDirection windDirection) {
+
         Sort sort = getPageSort(sortOption);
         Pageable pageable = PageRequest.of(page, pageSize, sort);
 
@@ -139,25 +151,34 @@ public class MapService {
     }
 
     public Optional<Path> getFitFile(String teamId, String mapId) {
-        String fitName = mapId + ".fit";
-        if (fileService.exists(FileRepositories.FIT_FILES, teamId, fitName)) {
-            return Optional.of(fileService.get(FileRepositories.FIT_FILES, teamId, fitName));
+        final Optional<Map> optionalMap = get(teamId, mapId);
+        if (optionalMap.isPresent()) {
+            String fitName = optionalMap.get().getId() + ".fit";
+            if (fileService.fileExists(FileRepositories.FIT_FILES, teamId, fitName)) {
+                return Optional.of(fileService.getFile(FileRepositories.FIT_FILES, teamId, fitName));
+            }
         }
         return Optional.empty();
     }
 
     public Optional<Path> getGpxFile(String teamId, String mapId) {
-        String gpxName = mapId + ".gpx";
-        if (fileService.exists(FileRepositories.GPX_FILES, teamId, gpxName)) {
-            return Optional.of(fileService.get(FileRepositories.GPX_FILES, teamId, gpxName));
+        final Optional<Map> optionalMap = get(teamId, mapId);
+        if (optionalMap.isPresent()) {
+            String gpxName = optionalMap.get().getId() + ".gpx";
+            if (fileService.fileExists(FileRepositories.GPX_FILES, teamId, gpxName)) {
+                return Optional.of(fileService.getFile(FileRepositories.GPX_FILES, teamId, gpxName));
+            }
         }
         return Optional.empty();
     }
 
     public Optional<Path> getImageFile(String teamId, String mapId) {
-        String mapImage = mapId + ".png";
-        if (fileService.exists(FileRepositories.MAP_IMAGES, teamId, mapImage)) {
-            return Optional.of(fileService.get(FileRepositories.MAP_IMAGES, teamId, mapImage));
+        final Optional<Map> optionalMap = get(teamId, mapId);
+        if (optionalMap.isPresent()) {
+            String mapImage = optionalMap.get().getId() + ".png";
+            if (fileService.fileExists(FileRepositories.MAP_IMAGES, teamId, mapImage)) {
+                return Optional.of(fileService.getFile(FileRepositories.MAP_IMAGES, teamId, mapImage));
+            }
         }
         return Optional.empty();
     }
@@ -178,38 +199,7 @@ public class MapService {
         return sort;
     }
 
-    public void renameMap(Map map) {
-        gpxService.renameMap(map.getTeamId(), map.getId(), map.getName());
-    }
-
-    public void changeMapId(Map map, String newId) {
-
-        save(new Map(
-                newId,
-                map.getTeamId(),
-                map.getName(),
-                map.getLength(),
-                map.getType(),
-                map.getPostedAt(),
-                map.getPositiveElevation(),
-                map.getNegativeElevation(),
-                map.getTags(),
-                map.getStartPoint(),
-                map.getEndPoint(),
-                map.getWindDirection(),
-                map.isCrossing(),
-                map.isVisible()));
-
-        rideService.changeMapIdInGroups(map.getId(), newId);
-        tripService.changeMapIdInStages(map.getId(), newId);
-        gpxService.changeMapId(map.getTeamId(), map.getId(), newId);
-
-        delete(map.getTeamId(), map.getId());
-
-
-    }
-
-    public void refreshFiles(String teamId, String mapId) {
-        get(teamId, mapId).ifPresent(this::renameMap);
+    public void deleteByTeam(String teamId) {
+        mapRepository.findAllByTeamIdOrderByPostedAtDesc(teamId).stream().map(MapProjection::getId).forEach(mapRepository::deleteById);
     }
 }

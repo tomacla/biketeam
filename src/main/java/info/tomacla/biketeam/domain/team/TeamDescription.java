@@ -1,6 +1,6 @@
 package info.tomacla.biketeam.domain.team;
 
-import info.tomacla.biketeam.common.Strings;
+import info.tomacla.biketeam.common.datatype.Strings;
 
 import javax.persistence.*;
 
@@ -11,12 +11,10 @@ public class TeamDescription {
     @Id
     @Column(name = "team_id")
     private String teamId;
-
     @OneToOne
     @MapsId
     @JoinColumn(name = "team_id")
     private Team team;
-
     @Column(length = 2000)
     private String description;
     private String facebook;
@@ -36,9 +34,9 @@ public class TeamDescription {
     public TeamDescription() {
     }
 
-    public TeamDescription(Team team) {
-        this.team = team;
-        this.teamId = team.getId();
+    public TeamDescription(Team team, String description) {
+        setTeam(team);
+        setDescription(description);
     }
 
     public String getTeamId() {

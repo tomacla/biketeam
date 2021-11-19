@@ -37,12 +37,12 @@
                 <div class="d-block pe-2">
                     <#if _authenticated>
                         <#if trip.hasParticipant(_user_id)>
-                            <a href="<@common.teamUrl team.id '/trips/${trip.id}/remove-participant' />" class="text-nowrap d-block btn btn-sm btn-success"><i class="bi-bicycle bi"></i> J'y vais</a>
+                            <a href="<@common.teamUrl team.id '/trips/${trip.permalink!trip.id}/remove-participant' />" class="text-nowrap d-block btn btn-sm btn-success"><i class="bi-bicycle bi"></i> J'y vais</a>
                         <#else>
-                            <a tabindex="-1" href="<@common.teamUrl team.id '/trips/${trip.id}/add-participant' />" class="text-nowrap d-block btn btn-sm btn-outline-success"><i class="bi-bicycle bi"></i> J'y vais</a>
+                            <a tabindex="-1" href="<@common.teamUrl team.id '/trips/${trip.permalink!trip.id}/add-participant' />" class="text-nowrap d-block btn btn-sm btn-outline-success"><i class="bi-bicycle bi"></i> J'y vais</a>
                          </#if>
                     <#else>
-                            <a href="<@common.teamUrl '' '/oauth2/authorization/strava?requestUri=/${team.id}/trips/${trip.id}/add-participant' />" class="text-nowrap d-block btn btn-sm btn-outline-success"><i class="bi-bicycle bi"></i> J'y vais</a>
+                            <a href="<@common.teamUrl '' '/login?requestUri=/${team.id}/trips/${trip.permalink!trip.id}/add-participant' />" class="text-nowrap d-block btn btn-sm btn-outline-success"><i class="bi-bicycle bi"></i> J'y vais</a>
                     </#if>
                 </div>
                 <div class="p-0 m-0 flex-wrap">
@@ -62,22 +62,22 @@
                 <div class="card-body">
                     <h5 class="card-title">${stage.name}</h5>
                     <h6>${stage.date.format(_date_formatter)}</h6>
-                    <#if (stage.mapId)??>
+                    <#if (stage.map)??>
                         <div class="row justify-content-center">
                             <div class="col-12 col-md-6">
                             <div class="w-100 shadow rounded border d-flex flex-column justify-content-center">
-                                <#if maps[stage.mapId]??>
+                                <#if stage.map??>
                                     <ul class="list-inline mx-auto my-1">
-                                        <li class="list-inline-item"><i class="bi bi-arrow-left-right"></i> ${maps[stage.mapId].length}km</li>
-                                        <li class="list-inline-item"><i class="bi bi-arrow-up"></i> ${maps[stage.mapId].positiveElevation}m</li>
-                                        <li class="list-inline-item"><i class="bi bi-arrow-down"></i> ${maps[stage.mapId].negativeElevation}m</li>
+                                        <li class="list-inline-item"><i class="bi bi-arrow-left-right"></i> ${stage.map.length}km</li>
+                                        <li class="list-inline-item"><i class="bi bi-arrow-up"></i> ${stage.map.positiveElevation}m</li>
+                                        <li class="list-inline-item"><i class="bi bi-arrow-down"></i> ${stage.map.negativeElevation}m</li>
                                     </ul>
                                 </#if>
-                                <a href="<@common.teamUrl team.id '/maps/${stage.mapId}' />"><img src="<@common.teamUrl team.id '/maps/${stage.mapId}/image' />" class="d-block w-100 h-auto" alt="${stage.mapId} image"></a>
+                                <a href="<@common.teamUrl team.id '/maps/${stage.map.permalink!stage.map.id}' />"><img src="<@common.teamUrl team.id '/maps/${stage.map.id}/image' />" class="d-block w-100 h-auto" alt="${stage.map.id} image"></a>
                                 <div class="btn-group" role="group">
-                                    <a download="${trip.title}-${stage.name}.gpx" href="<@common.teamUrl team.id '/maps/${stage.mapId}/gpx' />" class="btn btn-light" role="button"><i class="bi bi-download"></i> GPX</a>
-                                    <a download="${trip.title}-${stage.name}.fit" href="<@common.teamUrl team.id '/maps/${stage.mapId}/fit' />" class="btn btn-light" role="button"><i class="bi bi-download"></i> FIT</a>
-                                    <a href="<@common.teamUrl team.id '/maps/${stage.mapId}' />" class="btn btn-light" role="button"><i class="bi bi-map"></i> Voir</a>
+                                    <a download="${trip.title}-${stage.name}.gpx" href="<@common.teamUrl team.id '/maps/${stage.map.id}/gpx' />" class="btn btn-light" role="button"><i class="bi bi-download"></i> GPX</a>
+                                    <a download="${trip.title}-${stage.name}.fit" href="<@common.teamUrl team.id '/maps/${stage.map.id}/fit' />" class="btn btn-light" role="button"><i class="bi bi-download"></i> FIT</a>
+                                    <a href="<@common.teamUrl team.id '/maps/${stage.map.permalink!stage.map.id}' />" class="btn btn-light" role="button"><i class="bi bi-map"></i> Voir</a>
                                 </div>
                             </div>
                          </div>

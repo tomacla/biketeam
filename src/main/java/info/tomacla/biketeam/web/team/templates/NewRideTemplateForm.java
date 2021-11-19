@@ -1,6 +1,6 @@
 package info.tomacla.biketeam.web.team.templates;
 
-import info.tomacla.biketeam.common.Strings;
+import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.domain.ride.RideType;
 import info.tomacla.biketeam.domain.template.RideGroupTemplate;
 

@@ -9,6 +9,6 @@ import java.util.List;
 public interface RideTemplateRepository extends PagingAndSortingRepository<RideTemplate, String> {
 
     // do not filter by published at (ADMIN)
-    List<RideTemplateIdNameProjection> findAllByTeamIdOrderByNameAsc(String teamId);
+    List<RideTemplateProjection> findAllByTeamIdOrderByNameAsc(String teamId);
 
 }

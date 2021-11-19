@@ -7,10 +7,10 @@ import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.security.Principal;
 import java.util.List;
@@ -26,17 +26,22 @@ public class AdminTeamRideTemplateController extends AbstractController {
 
     @GetMapping
     public String getTemplates(@PathVariable("teamId") String teamId,
+                               @ModelAttribute("error") String error,
                                Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
 
         addGlobalValues(principal, model, "Administration - Templates", team);
         model.addAttribute("templates", rideTemplateService.listTemplates(team.getId()));
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
         return "team_admin_templates";
     }
 
     @GetMapping(value = "/new")
     public String newTemplate(@PathVariable("teamId") String teamId,
+                              @ModelAttribute("error") String error,
                               Principal principal,
                               Model model) {
 
@@ -46,6 +51,9 @@ public class AdminTeamRideTemplateController extends AbstractController {
 
         addGlobalValues(principal, model, "Administration - Nouveau template", team);
         model.addAttribute("formdata", form);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
         return "team_admin_templates_new";
 
     }
@@ -53,6 +61,7 @@ public class AdminTeamRideTemplateController extends AbstractController {
     @GetMapping(value = "/{templateId}")
     public String editTemplate(@PathVariable("teamId") String teamId,
                                @PathVariable("templateId") String templateId,
+                               @ModelAttribute("error") String error,
                                Principal principal,
                                Model model) {
 
@@ -60,7 +69,7 @@ public class AdminTeamRideTemplateController extends AbstractController {
 
         Optional<RideTemplate> optionalTemplate = rideTemplateService.get(team.getId(), templateId);
         if (optionalTemplate.isEmpty()) {
-            return redirectToAdminTemplates(team);
+            return viewHandler.redirect(team, "/admin/templates");
         }
 
         RideTemplate rideTemplate = optionalTemplate.get();
@@ -76,16 +85,20 @@ public class AdminTeamRideTemplateController extends AbstractController {
 
         addGlobalValues(principal, model, "Administration - Modifier le template", team);
         model.addAttribute("formdata", form);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
         return "team_admin_templates_new";
 
     }
 
     @PostMapping(value = "/{templateId}")
-    public String editTemplate(@PathVariable("teamId") String teamId,
-                               @PathVariable("templateId") String templateId,
-                               Principal principal,
-                               Model model,
-                               NewRideTemplateForm form) {
+    public RedirectView editTemplate(@PathVariable("teamId") String teamId,
+                                     @PathVariable("templateId") String templateId,
+                                     RedirectAttributes attributes,
+                                     Principal principal,
+                                     Model model,
+                                     NewRideTemplateForm form) {
 
         final Team team = checkTeam(teamId);
 
@@ -98,7 +111,7 @@ public class AdminTeamRideTemplateController extends AbstractController {
             if (!isNew) {
                 Optional<RideTemplate> optionalTemplate = rideTemplateService.get(team.getId(), templateId);
                 if (optionalTemplate.isEmpty()) {
-                    return redirectToAdminTemplates(team);
+                    return viewHandler.redirectView(team, "/admin/templates");
                 }
                 target = optionalTemplate.get();
                 target.setName(parser.getName());
@@ -115,40 +128,32 @@ public class AdminTeamRideTemplateController extends AbstractController {
 
             rideTemplateService.save(target);
 
-            addGlobalValues(principal, model, "Administration - Templates", team);
-            model.addAttribute("templates", rideTemplateService.listTemplates(team.getId()));
-            return "team_admin_templates";
-
+            return viewHandler.redirectView(team, "/admin/templates");
 
         } catch (Exception e) {
-            addGlobalValues(principal, model, "Administration - Modifier le template", team);
-            model.addAttribute("errors", List.of(e.getMessage()));
-            model.addAttribute("formdata", form);
-            return "team_admin_templates_new";
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/admin/templates/" + templateId);
         }
 
     }
 
     @GetMapping(value = "/delete/{templateId}")
-    public String deleteTemplate(@PathVariable("teamId") String teamId,
-                                 @PathVariable("templateId") String templateId,
-                                 Principal principal,
-                                 Model model) {
+    public RedirectView deleteTemplate(@PathVariable("teamId") String teamId,
+                                       @PathVariable("templateId") String templateId,
+                                       RedirectAttributes attributes,
+                                       Principal principal,
+                                       Model model) {
 
         final Team team = checkTeam(teamId);
 
         try {
             rideTemplateService.delete(team.getId(), templateId);
+            return viewHandler.redirectView(team, "/admin/templates");
         } catch (Exception e) {
-            model.addAttribute("errors", List.of(e.getMessage()));
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/admin/templates");
         }
 
-        return redirectToAdminTemplates(team);
-
-    }
-
-    private String redirectToAdminTemplates(Team team) {
-        return createRedirect(team, "/admin/templates");
     }
 
 }

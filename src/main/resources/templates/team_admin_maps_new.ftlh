@@ -14,7 +14,7 @@
 
                      <div class="col-6">
                           <label for="form-map-name" class="form-label">Nom</label>
-                          <input autocomplete="off" required value="${formdata.name}" name="name" type="text" class="form-control" id="form-map-name" placeholder="Parcours de la semaine">
+                          <input data-element="maps" data-target-id-field="form-map-permalink" autocomplete="off" required value="${formdata.name}" name="name" type="text" class="form-control form-unique-id" id="form-map-name" placeholder="Parcours de la semaine">
                     </div>
 
                     <div class="col-6">
@@ -42,8 +42,8 @@
                     </div>
 
                     <div class="col-6">
-                        <label for="form-map-newId" class="form-label">URL unique</label>
-                        <input data-target-id-field="form-map-newId" minLength="2" maxLength="19" autocomplete="off" required value="${formdata.newId}" name="newId" type="text" class="form-control form-unique-id" id="form-map-newId">
+                        <label for="form-map-permalink" class="form-label">URL unique</label>
+                        <input data-element="maps" data-target-id-field="form-map-permalink" minLength="2" maxLength="19" autocomplete="off" value="${formdata.permalink}" name="permalink" type="text" class="form-control form-unique-id" id="form-map-permalink">
                     </div>
 
 

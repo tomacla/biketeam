@@ -1,6 +1,6 @@
 package info.tomacla.biketeam.security.session;
 
-import info.tomacla.biketeam.service.UrlService;
+import info.tomacla.biketeam.service.url.UrlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.session.web.http.CookieHttpSessionIdResolver;
 import org.springframework.session.web.http.CookieSerializer;

@@ -14,7 +14,7 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
 
-      <ul class="navbar-nav ms-auto">
+      <ul class="navbar-nav ms-auto align-items-center">
         <#if team??>
             <#if _team_admin>
                 <li class="nav-item border-end">
@@ -68,8 +68,8 @@
                 <a class="nav-link" href="<@common.teamUrl '' '/logout' />"><i class="bi bi-door-closed"></i> <span class="d-md-none">Déconnexion</span></a>
             </li>
         <#else>
-            <li class="nav-item">
-                <a href="<@common.teamUrl '' '/oauth2/authorization/strava?requestUri=${springMacroRequestContext.requestUri}' />"><img height="40" src="<@common.teamUrl '' '/css/btn_strava_connectwith_light.png' />" alt="connect with strava"></a>
+            <li class="nav-item ps-2">
+                <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/login?requestUri=${springMacroRequestContext.requestUri}' />">Connexion</a>
             </li>
         </#if>
       </ul>

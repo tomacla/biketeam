@@ -114,13 +114,18 @@ function initUniqueIdField(input) {
 
            if(input.value.length > 2) {
                uniqueIdTimeout = setTimeout(function() {
-                    uniqueId(input.value, function(response) {
+                    var element = input.getAttribute("data-element");
+                    uniqueId(input.value, element, function(response) {
                         var targetIdField = document.getElementById(input.getAttribute("data-target-id-field"));
                         targetIdField.value = response;
                     })
                }, 1000);
            }
        });
+
+        if(input.value.length > 2 && document.getElementById(input.getAttribute("data-target-id-field")).value === '') {
+            input.dispatchEvent(new KeyboardEvent('keyup', {'key':' '}));
+       }
 
     }
 
@@ -291,7 +296,7 @@ function geoCode(toGeoCode, callback) {
     xmlHttp.send(null);
 }
 
-function uniqueId(toUnique, callback) {
+function uniqueId(toUnique, element, callback) {
 
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() {
@@ -300,7 +305,7 @@ function uniqueId(toUnique, callback) {
             callback(r);
         }
     }
-    xmlHttp.open("GET", "/autocomplete/permatitle?title="+encodeURIComponent(toUnique), true); // true for asynchronous
+    xmlHttp.open("GET", "/autocomplete/permalink/" + element + "?title="+encodeURIComponent(toUnique), true); // true for asynchronous
     xmlHttp.send(null);
 }
 

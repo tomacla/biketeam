@@ -1,6 +1,6 @@
 package info.tomacla.biketeam.web.admin.archive;
 
-import info.tomacla.biketeam.service.ArchiveService;
+import info.tomacla.biketeam.service.archive.ArchiveService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

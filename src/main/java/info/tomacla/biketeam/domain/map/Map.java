@@ -1,7 +1,9 @@
 package info.tomacla.biketeam.domain.map;
 
-import info.tomacla.biketeam.common.Point;
-import info.tomacla.biketeam.common.Strings;
+import info.tomacla.biketeam.common.datatype.Strings;
+import info.tomacla.biketeam.common.geo.Point;
+import info.tomacla.biketeam.domain.ride.RideGroup;
+import info.tomacla.biketeam.domain.trip.TripStage;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -18,6 +20,7 @@ public class Map {
     private String id;
     @Column(name = "team_id")
     private String teamId;
+    private String permalink;
     private String name;
     private double length;
     @Column(name = "type")
@@ -53,12 +56,17 @@ public class Map {
     private boolean crossing;
     private boolean visible;
 
+    @OneToMany(mappedBy = "map", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<RideGroup> rideGroups;
+    @OneToMany(mappedBy = "map", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<TripStage> tripStages;
+
     public Map() {
     }
 
-    public Map(String id,
-               String teamId,
+    public Map(String teamId,
                String name,
+               String permalink,
                double length,
                MapType type,
                LocalDate postedAt,
@@ -70,12 +78,14 @@ public class Map {
                WindDirection windDirection,
                boolean crossing,
                boolean visible) {
-        this.id = Objects.requireNonNullElse(id, UUID.randomUUID().toString());
+
+        this.id = UUID.randomUUID().toString();
         setTeamId(teamId);
-        setPostedAt(postedAt);
-        setType(type);
         setName(name);
+        setPermalink(Strings.normalizePermalink(permalink));
         setLength(length);
+        setType(type);
+        setPostedAt(postedAt);
         setPositiveElevation(positiveElevation);
         setNegativeElevation(negativeElevation);
         setTags(new ArrayList<>(tags));
@@ -100,6 +110,14 @@ public class Map {
 
     public void setTeamId(String teamId) {
         this.teamId = Objects.requireNonNull(teamId);
+    }
+
+    public String getPermalink() {
+        return permalink;
+    }
+
+    public void setPermalink(String permalink) {
+        this.permalink = Strings.requireNonBlankOrNull(permalink);
     }
 
     public String getName() {
@@ -196,6 +214,22 @@ public class Map {
 
     public void setVisible(boolean visible) {
         this.visible = visible;
+    }
+
+    public List<RideGroup> getRideGroups() {
+        return rideGroups;
+    }
+
+    public void setRideGroups(List<RideGroup> rideGroups) {
+        this.rideGroups = Objects.requireNonNullElse(rideGroups, new ArrayList<>());
+    }
+
+    public List<TripStage> getTripStages() {
+        return tripStages;
+    }
+
+    public void setTripStages(List<TripStage> tripStages) {
+        this.tripStages = Objects.requireNonNullElse(tripStages, new ArrayList<>());
     }
 
     @Override

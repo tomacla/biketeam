@@ -1,6 +1,7 @@
 package info.tomacla.biketeam.domain.trip;
 
-import info.tomacla.biketeam.common.Strings;
+import info.tomacla.biketeam.common.datatype.Strings;
+import info.tomacla.biketeam.domain.map.Map;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -17,18 +18,19 @@ public class TripStage {
     @Column(name = "date")
     private LocalDate date;
     private String name;
-    @Column(name = "map_id")
-    private String mapId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "map_id")
+    private Map map;
 
     public TripStage() {
     }
 
     public TripStage(String name,
                      LocalDate date,
-                     String mapId) {
+                     Map map) {
         setName(name);
         setDate(date);
-        setMapId(mapId);
+        setMap(map);
     }
 
     public String getId() {
@@ -68,12 +70,12 @@ public class TripStage {
         this.date = Objects.requireNonNull(date, "date is null");
     }
 
-    public String getMapId() {
-        return mapId;
+    public Map getMap() {
+        return map;
     }
 
-    public void setMapId(String mapId) {
-        this.mapId = Strings.requireNonBlankOrNull(mapId);
+    public void setMap(Map map) {
+        this.map = map;
     }
 
     public int getStageIndex() {

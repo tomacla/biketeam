@@ -104,9 +104,9 @@
             <#list maps as map>
                   <div class="col-12 col-md-4">
                     <div class="card">
-                        <a href="<@common.teamUrl team.id '/maps/${map.id}' />"><img src="<@common.teamUrl team.id '/maps/${map.id}/image?width=450' />" class="card-img-top" alt="${map.id} image"></a>
+                        <a href="<@common.teamUrl team.id '/maps/${map.permalink!map.id}' />"><img src="<@common.teamUrl team.id '/maps/${map.id}/image?width=450' />" class="card-img-top" alt="${map.id} image"></a>
                         <div class="card-body">
-                          <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl team.id '/maps/${map.id}' />">${map.name}</a></h5>
+                          <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl team.id '/maps/${map.permalink!map.id}' />">${map.name}</a></h5>
                           <p class="card-text">
                             <i class="bi bi-arrow-left-right"></i> ${map.length}km
                             <i class="bi bi-arrow-up"></i> ${map.positiveElevation}m
@@ -118,7 +118,7 @@
                             <div class="btn-group" role="group">
                                 <a download="${map.name}.gpx" href="<@common.teamUrl team.id '/maps/${map.id}/gpx' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-download"></i> GPX</a>
                                 <a download="${map.name}.fit" href="<@common.teamUrl team.id '/maps/${map.id}/fit' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-download"></i> FIT</a>
-                                <a href="<@common.teamUrl team.id '/maps/${map.id}' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-map"></i> Voir</a>
+                                <a href="<@common.teamUrl team.id '/maps/${map.permalink!map.id}' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-map"></i> Voir</a>
                             </div>
                         </div>
                     </div>

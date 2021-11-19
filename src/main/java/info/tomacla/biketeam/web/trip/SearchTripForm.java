@@ -1,6 +1,6 @@
 package info.tomacla.biketeam.web.trip;
 
-import info.tomacla.biketeam.common.Dates;
+import info.tomacla.biketeam.common.datatype.Dates;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;

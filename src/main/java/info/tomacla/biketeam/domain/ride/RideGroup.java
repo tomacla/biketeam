@@ -1,7 +1,8 @@
 package info.tomacla.biketeam.domain.ride;
 
-import info.tomacla.biketeam.common.Point;
-import info.tomacla.biketeam.common.Strings;
+import info.tomacla.biketeam.common.datatype.Strings;
+import info.tomacla.biketeam.common.geo.Point;
+import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.user.User;
 
 import javax.persistence.*;
@@ -16,14 +17,16 @@ public class RideGroup {
     @Id
     private String id;
     @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "ride_id")
     private Ride ride;
     private String name;
     @Column(name = "lower_speed")
     private double lowerSpeed;
     @Column(name = "upper_speed")
     private double upperSpeed;
-    @Column(name = "map_id")
-    private String mapId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "map_id")
+    private Map map;
     @Column(name = "meeting_location")
     private String meetingLocation;
     @Column(name = "meeting_time")
@@ -47,19 +50,18 @@ public class RideGroup {
     public RideGroup(String name,
                      double lowerSpeed,
                      double upperSpeed,
-                     String mapId,
+                     Map map,
                      String meetingLocation,
                      LocalTime meetingTime,
-                     Point meetingPoint,
-                     Set<User> participants) {
+                     Point meetingPoint) {
         setName(name);
         setLowerSpeed(lowerSpeed);
         setUpperSpeed(upperSpeed);
-        setMapId(mapId);
+        setMap(map);
         setMeetingLocation(meetingLocation);
         setMeetingTime(meetingTime);
         setMeetingPoint(meetingPoint);
-        setParticipants(participants);
+        setParticipants(new HashSet<>());
     }
 
     public String getId() {
@@ -107,12 +109,12 @@ public class RideGroup {
         this.upperSpeed = upperSpeed;
     }
 
-    public String getMapId() {
-        return mapId;
+    public Map getMap() {
+        return map;
     }
 
-    public void setMapId(String mapId) {
-        this.mapId = Strings.requireNonBlankOrNull(mapId);
+    public void setMap(Map map) {
+        this.map = map;
     }
 
     public String getMeetingLocation() {
@@ -155,14 +157,14 @@ public class RideGroup {
         return participants;
     }
 
-    public void setParticipants(Set<User> participants) {
-        this.participants = Objects.requireNonNullElse(participants, new HashSet<>());
-    }
-
     public List<User> getSortedParticipants() {
         return participants.stream()
                 .sorted(Comparator.comparing(User::getId))
                 .collect(Collectors.toList());
+    }
+
+    public void setParticipants(Set<User> participants) {
+        this.participants = Objects.requireNonNullElse(participants, new HashSet<>());
     }
 
     public int getGroupIndex() {

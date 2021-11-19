@@ -1,6 +1,6 @@
 package info.tomacla.biketeam.web.team.trip;
 
-import info.tomacla.biketeam.common.PublishedStatus;
+import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.trip.Trip;
 import info.tomacla.biketeam.service.MapService;
@@ -9,11 +9,11 @@ import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.security.Principal;
 import java.time.ZoneId;
@@ -32,18 +32,24 @@ public class AdminTeamTripController extends AbstractController {
     private MapService mapService;
 
     @GetMapping
-    public String getTrips(@PathVariable("teamId") String teamId, Principal principal, Model model) {
+    public String getTrips(@PathVariable("teamId") String teamId,
+                           @ModelAttribute("error") String error,
+                           Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
 
         addGlobalValues(principal, model, "Administration - Trips", team);
         model.addAttribute("trips", tripService.listTrips(team.getId()));
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
         return "team_admin_trips";
 
     }
 
     @GetMapping(value = "/new")
     public String newTrip(@PathVariable("teamId") String teamId,
+                          @ModelAttribute("error") String error,
                           Principal principal,
                           Model model) {
 
@@ -53,7 +59,11 @@ public class AdminTeamTripController extends AbstractController {
 
         addGlobalValues(principal, model, "Administration - Nouveau trip", team);
         model.addAttribute("formdata", form);
+        model.addAttribute("imaged", false);
         model.addAttribute("published", false);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
         return "team_admin_trips_new";
 
     }
@@ -61,6 +71,7 @@ public class AdminTeamTripController extends AbstractController {
     @GetMapping(value = "/{tripId}")
     public String editTrip(@PathVariable("teamId") String teamId,
                            @PathVariable("tripId") String tripId,
+                           @ModelAttribute("error") String error,
                            Principal principal,
                            Model model) {
 
@@ -68,13 +79,14 @@ public class AdminTeamTripController extends AbstractController {
 
         Optional<Trip> optionalTrip = tripService.get(team.getId(), tripId);
         if (optionalTrip.isEmpty()) {
-            return redirectToAdminTrips(team);
+            return viewHandler.redirect(team, "/admin/trips");
         }
 
         Trip trip = optionalTrip.get();
 
         NewTripForm form = NewTripForm.builder(ZonedDateTime.now(), team.getZoneId())
                 .withId(trip.getId())
+                .withPermalink(trip.getPermalink())
                 .withStartDate(trip.getStartDate())
                 .withEndDate(trip.getEndDate())
                 .withDescription(trip.getDescription())
@@ -86,22 +98,27 @@ public class AdminTeamTripController extends AbstractController {
                 .withMeetingLocation(trip.getMeetingLocation())
                 .withMeetingPoint(trip.getMeetingPoint())
                 .withMeetingTime(trip.getMeetingTime())
-                .withStages(trip.getSortedStages(), team.getId(), mapService)
+                .withStages(trip.getSortedStages())
                 .get();
 
         addGlobalValues(principal, model, "Administration - Modifier le trip", team);
         model.addAttribute("formdata", form);
+        model.addAttribute("imaged", trip.isImaged());
         model.addAttribute("published", trip.getPublishedStatus().equals(PublishedStatus.PUBLISHED));
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
         return "team_admin_trips_new";
 
     }
 
     @PostMapping(value = "/{tripId}")
-    public String editTrip(@PathVariable("teamId") String teamId,
-                           @PathVariable("tripId") String tripId,
-                           Principal principal,
-                           Model model,
-                           NewTripForm form) {
+    public RedirectView editTrip(@PathVariable("teamId") String teamId,
+                                 @PathVariable("tripId") String tripId,
+                                 RedirectAttributes attributes,
+                                 Principal principal,
+                                 Model model,
+                                 NewTripForm form) {
 
         final Team team = checkTeam(teamId);
 
@@ -115,7 +132,7 @@ public class AdminTeamTripController extends AbstractController {
             if (!isNew) {
                 Optional<Trip> optionalTrip = tripService.get(team.getId(), tripId);
                 if (optionalTrip.isEmpty()) {
-                    return redirectToAdminTrips(team);
+                    return viewHandler.redirectView(team, "/admin/trips");
                 }
                 target = optionalTrip.get();
                 target.setStartDate(parser.getStartDate());
@@ -132,6 +149,7 @@ public class AdminTeamTripController extends AbstractController {
                 target.setMeetingPoint(parser.getMeetingPoint().orElse(null));
                 target.setMeetingLocation(parser.getMeetingLocation());
                 target.setMeetingTime(parser.getMeetingTime());
+                target.setPermalink(parser.getPermalink());
 
                 target.addOrReplaceStages(parser.getStages(teamId, mapService));
 
@@ -152,41 +170,33 @@ public class AdminTeamTripController extends AbstractController {
 
             tripService.save(target);
 
-            addGlobalValues(principal, model, "Administration - Trips", team);
-            model.addAttribute("trips", tripService.listTrips(team.getId()));
-            return "team_admin_trips";
-
+            return viewHandler.redirectView(team, "/admin/trips");
 
         } catch (Exception e) {
-            addGlobalValues(principal, model, "Administration - Modifier le trip", team);
-            model.addAttribute("errors", List.of(e.getMessage()));
-            model.addAttribute("formdata", form);
-            return "team_admin_trips_new";
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/admin/trips/" + tripId);
         }
 
     }
 
 
     @GetMapping(value = "/delete/{tripId}")
-    public String deleteTrip(@PathVariable("teamId") String teamId,
-                             @PathVariable("tripId") String tripId,
-                             Principal principal,
-                             Model model) {
+    public RedirectView deleteTrip(@PathVariable("teamId") String teamId,
+                                   @PathVariable("tripId") String tripId,
+                                   RedirectAttributes attributes,
+                                   Principal principal,
+                                   Model model) {
 
         final Team team = checkTeam(teamId);
 
         try {
             tripService.delete(team.getId(), tripId);
+            return viewHandler.redirectView(team, "/admin/trips");
         } catch (Exception e) {
-            model.addAttribute("errors", List.of(e.getMessage()));
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/admin/trips");
         }
 
-        return redirectToAdminTrips(team);
-
-    }
-
-    private String redirectToAdminTrips(Team team) {
-        return createRedirect(team, "/admin/trips");
     }
 
 }

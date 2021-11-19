@@ -1,13 +1,15 @@
 package info.tomacla.biketeam.service;
 
-import info.tomacla.biketeam.common.FileExtension;
-import info.tomacla.biketeam.common.FileRepositories;
-import info.tomacla.biketeam.common.ImageDescriptor;
-import info.tomacla.biketeam.common.PublishedStatus;
+import info.tomacla.biketeam.common.data.PublishedStatus;
+import info.tomacla.biketeam.common.file.FileExtension;
+import info.tomacla.biketeam.common.file.FileRepositories;
+import info.tomacla.biketeam.common.file.ImageDescriptor;
 import info.tomacla.biketeam.domain.trip.Trip;
 import info.tomacla.biketeam.domain.trip.TripIdTitleDateProjection;
 import info.tomacla.biketeam.domain.trip.TripRepository;
-import info.tomacla.biketeam.service.externalpublication.ExternalPublisher;
+import info.tomacla.biketeam.service.broadcast.Broadcaster;
+import info.tomacla.biketeam.service.file.FileService;
+import info.tomacla.biketeam.service.permalink.AbstractPermalinkService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +27,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class TripService {
+public class TripService extends AbstractPermalinkService {
 
     private static final Logger log = LoggerFactory.getLogger(TripService.class);
 
@@ -39,18 +41,41 @@ public class TripService {
     private TeamService teamService;
 
     @Autowired
-    private ExternalPublisher externalPublisher;
+    private Broadcaster broadcaster;
+
+    public Optional<Trip> get(String teamId, String tripId) {
+        Optional<Trip> optionalTrip = tripRepository.findById(tripId);
+        if (optionalTrip.isPresent() && optionalTrip.get().getTeamId().equals(teamId)) {
+            return optionalTrip;
+        }
+
+        optionalTrip = tripRepository.findByPermalink(tripId);
+        if (optionalTrip.isPresent() && optionalTrip.get().getTeamId().equals(teamId)) {
+            return optionalTrip;
+        }
+
+
+        return Optional.empty();
+    }
 
     public Optional<ImageDescriptor> getImage(String teamId, String tripId) {
 
-        Optional<FileExtension> fileExtensionExists = fileService.exists(FileRepositories.TRIP_IMAGES, teamId, tripId, FileExtension.byPriority());
+        final Optional<Trip> optionalTrip = get(teamId, tripId);
 
-        if (fileExtensionExists.isPresent()) {
+        if (optionalTrip.isPresent()) {
 
-            final FileExtension extension = fileExtensionExists.get();
-            final Path path = fileService.get(FileRepositories.TRIP_IMAGES, teamId, tripId + extension.getExtension());
+            final Trip trip = optionalTrip.get();
 
-            return Optional.of(ImageDescriptor.of(extension, path));
+            Optional<FileExtension> fileExtensionExists = fileService.fileExists(FileRepositories.TRIP_IMAGES, teamId, trip.getId(), FileExtension.byPriority());
+
+            if (fileExtensionExists.isPresent()) {
+
+                final FileExtension extension = fileExtensionExists.get();
+                final Path path = fileService.getFile(FileRepositories.TRIP_IMAGES, teamId, trip.getId() + extension.getExtension());
+
+                return Optional.of(ImageDescriptor.of(extension, path));
+
+            }
 
         }
 
@@ -68,7 +93,7 @@ public class TripService {
                     log.info("Publishing trip {} for team {}", trip.getId(), team.getId());
                     trip.setPublishedStatus(PublishedStatus.PUBLISHED);
                     save(trip);
-                    externalPublisher.publish(team, trip);
+                    broadcaster.broadcast(team, trip);
                 })
         );
 
@@ -82,13 +107,6 @@ public class TripService {
         return tripRepository.findAllByTeamIdOrderByStartDateDesc(teamId);
     }
 
-    public Optional<Trip> get(String teamId, String tripId) {
-        final Optional<Trip> optionalTrip = tripRepository.findById(tripId);
-        if (optionalTrip.isPresent() && optionalTrip.get().getTeamId().equals(teamId)) {
-            return optionalTrip;
-        }
-        return Optional.empty();
-    }
 
     public void delete(String teamId, String tripId) {
         log.info("Request trip deletion {}", tripId);
@@ -98,14 +116,6 @@ public class TripService {
             deleteImage(trip.getTeamId(), trip.getId());
             tripRepository.delete(trip);
         }
-    }
-
-    public void removeMapIdInStages(String mapId) {
-        tripRepository.removeMapIdInStages(mapId);
-    }
-
-    public void changeMapIdInStages(String oldMapId, String newMapId) {
-        tripRepository.updateMapIdInStages(oldMapId, newMapId);
     }
 
     public Page<Trip> searchTrips(String teamId, int page, int pageSize,
@@ -124,14 +134,21 @@ public class TripService {
         if (optionalFileExtension.isPresent()) {
             this.deleteImage(teamId, tripId);
             Path newImage = fileService.getTempFileFromInputStream(is);
-            fileService.store(newImage, FileRepositories.TRIP_IMAGES, teamId, tripId + optionalFileExtension.get().getExtension());
+            fileService.storeFile(newImage, FileRepositories.TRIP_IMAGES, teamId, tripId + optionalFileExtension.get().getExtension());
         }
     }
 
     public void deleteImage(String teamId, String tripId) {
         getImage(teamId, tripId).ifPresent(image ->
-                fileService.delete(FileRepositories.TRIP_IMAGES, teamId, tripId + image.getExtension().getExtension())
+                fileService.deleteFile(FileRepositories.TRIP_IMAGES, teamId, tripId + image.getExtension().getExtension())
         );
     }
 
+    public boolean permalinkExists(String permalink) {
+        return tripRepository.findByPermalink(permalink).isPresent();
+    }
+
+    public void deleteByTeam(String teamId) {
+        tripRepository.findAllByTeamIdOrderByStartDateDesc(teamId).stream().map(TripIdTitleDateProjection::getId).forEach(tripRepository::deleteById);
+    }
 }

@@ -1,8 +1,8 @@
 package info.tomacla.biketeam.web.team.ride;
 
-import info.tomacla.biketeam.common.Dates;
-import info.tomacla.biketeam.common.Point;
-import info.tomacla.biketeam.common.Strings;
+import info.tomacla.biketeam.common.datatype.Dates;
+import info.tomacla.biketeam.common.datatype.Strings;
+import info.tomacla.biketeam.common.geo.Point;
 import org.springframework.util.ObjectUtils;
 
 import java.time.LocalTime;

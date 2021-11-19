@@ -1,9 +1,9 @@
 package info.tomacla.biketeam.web.publication;
 
-import info.tomacla.biketeam.common.FileExtension;
-import info.tomacla.biketeam.common.ImageDescriptor;
+import info.tomacla.biketeam.common.file.FileExtension;
+import info.tomacla.biketeam.common.file.ImageDescriptor;
 import info.tomacla.biketeam.service.PublicationService;
-import info.tomacla.biketeam.service.ThumbnailService;
+import info.tomacla.biketeam.service.file.ThumbnailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;

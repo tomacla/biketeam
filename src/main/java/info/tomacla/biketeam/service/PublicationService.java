@@ -1,13 +1,14 @@
 package info.tomacla.biketeam.service;
 
-import info.tomacla.biketeam.common.FileExtension;
-import info.tomacla.biketeam.common.FileRepositories;
-import info.tomacla.biketeam.common.ImageDescriptor;
-import info.tomacla.biketeam.common.PublishedStatus;
+import info.tomacla.biketeam.common.data.PublishedStatus;
+import info.tomacla.biketeam.common.file.FileExtension;
+import info.tomacla.biketeam.common.file.FileRepositories;
+import info.tomacla.biketeam.common.file.ImageDescriptor;
 import info.tomacla.biketeam.domain.publication.Publication;
-import info.tomacla.biketeam.domain.publication.PublicationIdTitlePublishedAtProjection;
+import info.tomacla.biketeam.domain.publication.PublicationProjection;
 import info.tomacla.biketeam.domain.publication.PublicationRepository;
-import info.tomacla.biketeam.service.externalpublication.ExternalPublisher;
+import info.tomacla.biketeam.service.broadcast.Broadcaster;
+import info.tomacla.biketeam.service.file.FileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,24 +35,13 @@ public class PublicationService {
     private FileService fileService;
 
     @Autowired
-    private ExternalPublisher externalPublisher;
+    private Broadcaster broadcaster;
 
-    public void publishPublications() {
-        teamService.list().forEach(team ->
-                publicationRepository.findAllByTeamIdAndPublishedStatusAndPublishedAtLessThan(
-                        team.getId(),
-                        PublishedStatus.UNPUBLISHED,
-                        ZonedDateTime.now(team.getZoneId())
-                ).forEach(pub -> {
-                    log.info("Publishing publication {}", pub.getId());
-                    pub.setPublishedStatus(PublishedStatus.PUBLISHED);
-                    publicationRepository.save(pub);
-                    externalPublisher.publish(team, pub);
-                })
-        );
+    public void save(Publication publication) {
+        publicationRepository.save(publication);
     }
 
-    public List<PublicationIdTitlePublishedAtProjection> listPublications(String teamId) {
+    public List<PublicationProjection> listPublications(String teamId) {
         return publicationRepository.findAllByTeamIdOrderByPublishedAtDesc(teamId);
     }
 
@@ -61,10 +51,6 @@ public class PublicationService {
             return optionalPublication;
         }
         return Optional.empty();
-    }
-
-    public void save(Publication publication) {
-        publicationRepository.save(publication);
     }
 
     public void delete(String teamId, String publicationId) {
@@ -79,18 +65,18 @@ public class PublicationService {
 
     public void deleteImage(String teamId, String publicationId) {
         getImage(teamId, publicationId).ifPresent(image ->
-                fileService.delete(FileRepositories.PUBLICATION_IMAGES, teamId, publicationId + image.getExtension().getExtension())
+                fileService.deleteFile(FileRepositories.PUBLICATION_IMAGES, teamId, publicationId + image.getExtension().getExtension())
         );
     }
 
     public Optional<ImageDescriptor> getImage(String teamId, String publicationId) {
 
-        Optional<FileExtension> fileExtensionExists = fileService.exists(FileRepositories.PUBLICATION_IMAGES, teamId, publicationId, FileExtension.byPriority());
+        Optional<FileExtension> fileExtensionExists = fileService.fileExists(FileRepositories.PUBLICATION_IMAGES, teamId, publicationId, FileExtension.byPriority());
 
         if (fileExtensionExists.isPresent()) {
 
             final FileExtension extension = fileExtensionExists.get();
-            final Path path = fileService.get(FileRepositories.PUBLICATION_IMAGES, teamId, publicationId + extension.getExtension());
+            final Path path = fileService.getFile(FileRepositories.PUBLICATION_IMAGES, teamId, publicationId + extension.getExtension());
 
             return Optional.of(ImageDescriptor.of(extension, path));
 
@@ -105,8 +91,26 @@ public class PublicationService {
         if (optionalFileExtension.isPresent()) {
             deleteImage(teamId, publicationId);
             Path newImage = fileService.getTempFileFromInputStream(is);
-            fileService.store(newImage, FileRepositories.PUBLICATION_IMAGES, teamId, publicationId + optionalFileExtension.get().getExtension());
+            fileService.storeFile(newImage, FileRepositories.PUBLICATION_IMAGES, teamId, publicationId + optionalFileExtension.get().getExtension());
         }
     }
 
+    public void publishPublications() {
+        teamService.list().forEach(team ->
+                publicationRepository.findAllByTeamIdAndPublishedStatusAndPublishedAtLessThan(
+                        team.getId(),
+                        PublishedStatus.UNPUBLISHED,
+                        ZonedDateTime.now(team.getZoneId())
+                ).forEach(pub -> {
+                    log.info("Publishing publication {}", pub.getId());
+                    pub.setPublishedStatus(PublishedStatus.PUBLISHED);
+                    publicationRepository.save(pub);
+                    broadcaster.broadcast(team, pub);
+                })
+        );
+    }
+
+    public void deleteByTeam(String teamId) {
+        publicationRepository.findAllByTeamIdOrderByPublishedAtDesc(teamId).stream().map(PublicationProjection::getId).forEach(publicationRepository::deleteById);
+    }
 }

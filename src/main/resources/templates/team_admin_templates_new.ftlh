@@ -69,7 +69,7 @@
                       <label for="form-ride-type" class="form-label">Type</label>
                       <select required name="type" class="form-select" id="form-ride-type">
                         <option value="REGULAR"<#if formdata.type == 'REGULAR'> selected</#if>>Sortie régulière</option>
-                        <option value="SPECIAL"<#if formdata.type == 'SPECIAL'> selected</#if>>Evénement exceptionnel</option>
+                        <option value="SPECIAL"<#if formdata.type == 'SPECIAL'> selected</#if>>Evénement</option>
                         <option value="RACE"<#if formdata.type == 'RACE'> selected</#if>>Course</option>
                       </select>
                     </div>

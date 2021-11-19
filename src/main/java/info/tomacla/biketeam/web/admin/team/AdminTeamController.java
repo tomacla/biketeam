@@ -1,8 +1,6 @@
 package info.tomacla.biketeam.web.admin.team;
 
-import info.tomacla.biketeam.service.deletion.DeletionService;
 import info.tomacla.biketeam.web.AbstractController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,9 +14,6 @@ import java.util.List;
 @RequestMapping(value = "/admin/teams")
 public class AdminTeamController extends AbstractController {
 
-    @Autowired
-    private DeletionService deletionService;
-
     @GetMapping
     public String getTeams(Principal principal, Model model) {
         addGlobalValues(principal, model, "Administration - Groupes", null);
@@ -31,7 +26,7 @@ public class AdminTeamController extends AbstractController {
                              Model model) {
 
         try {
-            deletionService.deleteTeam(teamId);
+            teamService.delete(teamId);
         } catch (Exception e) {
             model.addAttribute("errors", List.of(e.getMessage()));
         }

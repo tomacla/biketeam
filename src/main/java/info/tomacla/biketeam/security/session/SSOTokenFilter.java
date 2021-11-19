@@ -1,6 +1,6 @@
 package info.tomacla.biketeam.security.session;
 
-import info.tomacla.biketeam.service.UrlService;
+import info.tomacla.biketeam.service.url.UrlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.session.web.http.CookieSerializer;
@@ -56,7 +56,7 @@ public class SSOTokenFilter extends OncePerRequestFilter {
 
     }
 
-    // FIXME : this should be written using spring bean and configurable variables
+    // TODO : this should be written using spring bean and configurable variables
     protected void setRememberMeCookie(String cookieValue, HttpServletResponse response) {
         Cookie cookie = new Cookie("remember-me", cookieValue);
         cookie.setMaxAge(1209600);

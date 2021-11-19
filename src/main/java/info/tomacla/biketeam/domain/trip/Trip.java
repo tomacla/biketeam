@@ -1,9 +1,9 @@
 package info.tomacla.biketeam.domain.trip;
 
-import info.tomacla.biketeam.common.Lists;
-import info.tomacla.biketeam.common.Point;
-import info.tomacla.biketeam.common.PublishedStatus;
-import info.tomacla.biketeam.common.Strings;
+import info.tomacla.biketeam.common.data.PublishedStatus;
+import info.tomacla.biketeam.common.datatype.Lists;
+import info.tomacla.biketeam.common.datatype.Strings;
+import info.tomacla.biketeam.common.geo.Point;
 import info.tomacla.biketeam.domain.map.MapType;
 import info.tomacla.biketeam.domain.user.User;
 import org.springframework.util.ObjectUtils;
@@ -23,6 +23,7 @@ public class Trip {
     private String id;
     @Column(name = "team_id")
     private String teamId;
+    private String permalink;
     @Column(name = "start_date")
     private LocalDate startDate;
     @Column(name = "end_date")
@@ -87,6 +88,7 @@ public class Trip {
         setEndDate(endDate);
         setPublishedAt(publishedAt);
         setTitle(title);
+        setPermalink(Strings.normalizePermalink(title));
         setDescription(description);
         setImaged(imaged);
         setMeetingLocation(meetingLocation);
@@ -113,6 +115,14 @@ public class Trip {
 
     public void setTeamId(String teamId) {
         this.teamId = Objects.requireNonNull(teamId);
+    }
+
+    public String getPermalink() {
+        return permalink;
+    }
+
+    public void setPermalink(String permalink) {
+        this.permalink = permalink;
     }
 
     public PublishedStatus getPublishedStatus() {
@@ -259,7 +269,7 @@ public class Trip {
         existingStages.forEach(g ->
                 this.stages.stream().filter(gg -> g.getId().equals(gg.getId())).findFirst().ifPresent(target -> {
                     target.setName(g.getName());
-                    target.setMapId(g.getMapId());
+                    target.setMap(g.getMap());
                     target.setDate(g.getDate());
                 })
         );
@@ -300,14 +310,14 @@ public class Trip {
         return participants;
     }
 
-    public void setParticipants(Set<User> participants) {
-        this.participants = Objects.requireNonNullElse(participants, new HashSet<>());
-    }
-
     public List<User> getSortedParticipants() {
         return participants.stream()
                 .sorted(Comparator.comparing(User::getId))
                 .collect(Collectors.toList());
+    }
+
+    public void setParticipants(Set<User> participants) {
+        this.participants = Objects.requireNonNullElse(participants, new HashSet<>());
     }
 
     @Override

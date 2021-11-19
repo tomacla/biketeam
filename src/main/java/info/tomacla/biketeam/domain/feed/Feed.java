@@ -13,6 +13,7 @@ public class Feed {
 
     @Id
     private String id;
+    private String permalink;
     @Column(name = "team_id")
     private String teamId;
     @Column(name = "team_name")
@@ -34,6 +35,14 @@ public class Feed {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getPermalink() {
+        return permalink;
+    }
+
+    public void setPermalink(String permalink) {
+        this.permalink = permalink;
     }
 
     public String getTeamId() {

@@ -55,9 +55,7 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
                     stravaId,
                     (String) attributes.get("username"),
                     (String) attributes.get("city"),
-                    (String) attributes.get("profile_medium"),
-                    null,
-                    null
+                    (String) attributes.get("profile_medium")
             );
             userService.save(u);
 
@@ -74,7 +72,7 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
 
         }
 
-        return OAuth2UserDetails.create(u, teamService.getUserTeamsMember(u.getId()), teamService.getUserTeamsAdmin(u.getId()));
+        return OAuth2UserDetails.create(u);
 
     }
 

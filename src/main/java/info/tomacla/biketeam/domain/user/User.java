@@ -1,7 +1,9 @@
 package info.tomacla.biketeam.domain.user;
 
-import info.tomacla.biketeam.common.Strings;
+import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.domain.ride.RideGroup;
+import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.domain.userrole.UserRole;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -28,8 +30,6 @@ public class User {
     private String city;
     @Column(name = "profile_image", length = 500)
     private String profileImage;
-    @ManyToMany(mappedBy = "participants", fetch = FetchType.LAZY)
-    private Set<RideGroup> rideGroups;
     @Column(name = "email")
     private String email;
     @Column(name = "email_publish_trips")
@@ -38,6 +38,11 @@ public class User {
     private boolean emailPublishRides;
     @Column(name = "email_publish_publications")
     private boolean emailPublishPublications;
+
+    @ManyToMany(mappedBy = "participants", fetch = FetchType.LAZY)
+    private Set<RideGroup> rideGroups;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private Set<UserRole> roles;
 
     public User() {
 
@@ -49,9 +54,7 @@ public class User {
                 Long stravaId,
                 String stravaUserName,
                 String city,
-                String profileImage,
-                Set<RideGroup> rideGroups,
-                Set<UserRole> roles) {
+                String profileImage) {
         this.id = UUID.randomUUID().toString();
         setAdmin(admin);
         setStravaId(stravaId);
@@ -60,7 +63,10 @@ public class User {
         setLastName(lastName);
         setCity(city);
         setProfileImage(profileImage);
-        setRideGroups(rideGroups);
+
+        setRoles(new HashSet<>());
+        setRideGroups(new HashSet<>());
+
     }
 
     public String getId() {
@@ -133,6 +139,18 @@ public class User {
 
     public void setRideGroups(Set<RideGroup> rideGroups) {
         this.rideGroups = Objects.requireNonNullElse(rideGroups, new HashSet<>());
+    }
+
+    public Set<UserRole> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<UserRole> roles) {
+        this.roles = Objects.requireNonNullElse(roles, new HashSet<>());
+    }
+
+    public void removeTeam(Team team) {
+        this.roles.removeIf(role -> role.getTeam().equals(team));
     }
 
     public String getIdentity() {

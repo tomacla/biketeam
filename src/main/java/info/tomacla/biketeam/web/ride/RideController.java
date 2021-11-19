@@ -1,17 +1,18 @@
 package info.tomacla.biketeam.web.ride;
 
-import info.tomacla.biketeam.common.FileExtension;
-import info.tomacla.biketeam.common.ImageDescriptor;
-import info.tomacla.biketeam.common.PublishedStatus;
-import info.tomacla.biketeam.domain.map.Map;
+import info.tomacla.biketeam.common.data.PublishedStatus;
+import info.tomacla.biketeam.common.file.FileExtension;
+import info.tomacla.biketeam.common.file.ImageDescriptor;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.team.Team;
-import info.tomacla.biketeam.domain.user.Role;
 import info.tomacla.biketeam.domain.user.User;
+import info.tomacla.biketeam.domain.userrole.Role;
+import info.tomacla.biketeam.domain.userrole.UserRole;
 import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.service.RideService;
-import info.tomacla.biketeam.service.ThumbnailService;
+import info.tomacla.biketeam.service.UserRoleService;
+import info.tomacla.biketeam.service.file.ThumbnailService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,17 +23,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerErrorException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.security.Principal;
 import java.time.LocalDate;
-import java.util.Objects;
+import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = "/{teamId}/rides")
@@ -47,9 +50,13 @@ public class RideController extends AbstractController {
     @Autowired
     private ThumbnailService thumbnailService;
 
+    @Autowired
+    private UserRoleService userRoleService;
+
     @GetMapping(value = "/{rideId}")
     public String getRide(@PathVariable("teamId") String teamId,
                           @PathVariable("rideId") String rideId,
+                          @ModelAttribute("error") String error,
                           Principal principal,
                           Model model) {
 
@@ -57,28 +64,20 @@ public class RideController extends AbstractController {
 
         Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
         if (optionalRide.isEmpty()) {
-            return redirectToRides(team);
+            return viewHandler.redirect(team, "/rides");
         }
 
         Ride ride = optionalRide.get();
 
         if (!ride.getPublishedStatus().equals(PublishedStatus.PUBLISHED) && !isAdmin(principal, team)) {
-            return redirectToRides(team);
+            return viewHandler.redirect(team, "/rides");
         }
-
-        final java.util.Map<String, Map> maps = ride.getGroups().stream()
-                .map(RideGroup::getMapId)
-                .filter(Objects::nonNull)
-                .distinct()
-                .map(mapId -> mapService.get(teamId, mapId))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toMap(Map::getId, m -> m));
-
 
         addGlobalValues(principal, model, "Ride " + ride.getTitle(), team);
         model.addAttribute("ride", ride);
-        model.addAttribute("maps", maps);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
         return "ride";
     }
 
@@ -88,6 +87,7 @@ public class RideController extends AbstractController {
                            @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
                            @RequestParam(value = "page", defaultValue = "0", required = false) int page,
                            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
+                           @ModelAttribute("error") String error,
                            Principal principal,
                            Model model) {
 
@@ -114,73 +114,90 @@ public class RideController extends AbstractController {
         model.addAttribute("rides", rides.getContent());
         model.addAttribute("pages", rides.getTotalPages());
         model.addAttribute("formdata", form);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
         return "rides";
 
     }
 
     @GetMapping(value = "/{rideId}/add-participant/{groupId}")
-    public String addParticipantToRide(@PathVariable("teamId") String teamId,
-                                       @PathVariable("rideId") String rideId,
-                                       @PathVariable("groupId") String groupId,
-                                       Principal principal, Model model) {
+    public RedirectView addParticipantToRide(@PathVariable("teamId") String teamId,
+                                             @PathVariable("rideId") String rideId,
+                                             @PathVariable("groupId") String groupId,
+                                             RedirectAttributes attributes,
+                                             Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
 
-        Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
-        if (optionalRide.isEmpty()) {
-            return redirectToRides(team);
-        }
-
-        Ride ride = optionalRide.get();
-        Optional<RideGroup> optionalGroup = ride.getGroups().stream().filter(rg -> rg.getId().equals(groupId)).findFirst();
-        Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
-
-        if (optionalConnectedUser.isPresent() && optionalGroup.isPresent()) {
-            RideGroup rideGroup = optionalGroup.get();
-            User connectedUser = optionalConnectedUser.get();
-
-            if (!team.isMember(connectedUser.getId())) {
-                team.addRole(connectedUser, Role.MEMBER);
-                teamService.save(team);
+        try {
+            Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
+            if (optionalRide.isEmpty()) {
+                return viewHandler.redirectView(team, "/rides");
             }
 
-            if (!ride.hasParticipant(connectedUser.getId())) {
-                rideGroup.addParticipant(connectedUser);
-                rideService.save(ride);
+            Ride ride = optionalRide.get();
+            Optional<RideGroup> optionalGroup = ride.getGroups().stream().filter(rg -> rg.getId().equals(groupId)).findFirst();
+            Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
+
+            if (optionalConnectedUser.isPresent() && optionalGroup.isPresent()) {
+                RideGroup rideGroup = optionalGroup.get();
+                User connectedUser = optionalConnectedUser.get();
+
+                if (!team.isMember(connectedUser)) {
+                    final UserRole userRole = new UserRole(team, connectedUser, Role.MEMBER);
+                    userRoleService.save(userRole);
+                }
+
+                if (!ride.hasParticipant(connectedUser.getId())) {
+                    rideGroup.addParticipant(connectedUser);
+                    rideService.save(ride);
+                }
+
             }
 
-        }
+            return viewHandler.redirectView(team, "/rides/" + rideId);
 
-        return redirectToRide(team, rideId);
+        } catch (Exception e) {
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/rides/" + rideId);
+        }
     }
 
     @GetMapping(value = "/{rideId}/remove-participant/{groupId}")
-    public String removeParticipantToRide(@PathVariable("teamId") String teamId,
-                                          @PathVariable("rideId") String rideId,
-                                          @PathVariable("groupId") String groupId,
-                                          Principal principal, Model model) {
+    public RedirectView removeParticipantFromRide(@PathVariable("teamId") String teamId,
+                                                  @PathVariable("rideId") String rideId,
+                                                  @PathVariable("groupId") String groupId,
+                                                  RedirectAttributes attributes,
+                                                  Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
 
-        Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
-        if (optionalRide.isEmpty()) {
-            return redirectToRides(team);
+        try {
+            Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
+            if (optionalRide.isEmpty()) {
+                return viewHandler.redirectView(team, "/rides");
+            }
+
+            Ride ride = optionalRide.get();
+            Optional<RideGroup> optionalGroup = ride.getGroups().stream().filter(rg -> rg.getId().equals(groupId)).findFirst();
+            Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
+
+            if (optionalConnectedUser.isPresent() && optionalGroup.isPresent()) {
+                RideGroup rideGroup = optionalGroup.get();
+                User connectedUser = optionalConnectedUser.get();
+
+                rideGroup.removeParticipant(connectedUser);
+                rideService.save(ride);
+
+            }
+
+            return viewHandler.redirectView(team, "/rides/" + rideId);
+
+        } catch (Exception e) {
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/rides/" + rideId);
         }
-
-        Ride ride = optionalRide.get();
-        Optional<RideGroup> optionalGroup = ride.getGroups().stream().filter(rg -> rg.getId().equals(groupId)).findFirst();
-        Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
-
-        if (optionalConnectedUser.isPresent() && optionalGroup.isPresent()) {
-            RideGroup rideGroup = optionalGroup.get();
-            User connectedUser = optionalConnectedUser.get();
-
-            rideGroup.removeParticipant(connectedUser);
-            rideService.save(ride);
-
-        }
-
-        return redirectToRide(team, rideId);
     }
 
     @ResponseBody
@@ -188,6 +205,7 @@ public class RideController extends AbstractController {
     public ResponseEntity<byte[]> getRideImage(@PathVariable("teamId") String teamId,
                                                @PathVariable("rideId") String rideId,
                                                @RequestParam(name = "width", defaultValue = "-1", required = false) int targetWidth) {
+
         final Optional<ImageDescriptor> image = rideService.getImage(teamId, rideId);
         if (image.isPresent()) {
             try {

@@ -1,6 +1,6 @@
 package info.tomacla.biketeam.domain.trip;
 
-import info.tomacla.biketeam.common.PublishedStatus;
+import info.tomacla.biketeam.common.data.PublishedStatus;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;

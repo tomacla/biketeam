@@ -1,6 +1,6 @@
 package info.tomacla.biketeam.web.user;
 
-import info.tomacla.biketeam.common.Strings;
+import info.tomacla.biketeam.common.datatype.Strings;
 
 public class EditUserForm {
 

@@ -1,7 +1,7 @@
 package info.tomacla.biketeam.domain.team;
 
-import info.tomacla.biketeam.common.Strings;
-import info.tomacla.biketeam.common.Timezone;
+import info.tomacla.biketeam.common.data.Timezone;
+import info.tomacla.biketeam.common.datatype.Strings;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -20,7 +20,6 @@ public class TeamConfiguration {
     @MapsId
     @JoinColumn(name = "team_id")
     private Team team;
-
     private String timezone;
     @ElementCollection
     @CollectionTable(
@@ -45,14 +44,14 @@ public class TeamConfiguration {
     public TeamConfiguration() {
     }
 
-    public TeamConfiguration(Team team) {
-        this.team = team;
-        this.teamId = team.getId();
-        this.defaultSearchTags = new ArrayList<>();
-        this.feedVisible = true;
-        this.ridesVisible = true;
-        this.tripsVisible = true;
-        this.defaultPage = WebPage.FEED;
+    public TeamConfiguration(Team team, String timezone) {
+        setTeam(team);
+        setDefaultSearchTags(new ArrayList<>());
+        setFeedVisible(true);
+        setRidesVisible(true);
+        setTripsVisible(true);
+        setDefaultPage(WebPage.FEED);
+        setTimezone(timezone);
     }
 
     public String getTeamId() {

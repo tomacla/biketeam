@@ -1,6 +1,6 @@
 package info.tomacla.biketeam.web.team.ride;
 
-import info.tomacla.biketeam.common.PublishedStatus;
+import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.template.RideTemplate;
@@ -11,8 +11,11 @@ import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.security.Principal;
 import java.time.ZoneId;
@@ -33,21 +36,27 @@ public class AdminTeamRideController extends AbstractController {
     @Autowired
     private RideTemplateService rideTemplateService;
 
-
     @GetMapping
-    public String getRides(@PathVariable("teamId") String teamId, Principal principal, Model model) {
+    public String getRides(@PathVariable("teamId") String teamId,
+                           @ModelAttribute("error") String error,
+                           Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
 
         addGlobalValues(principal, model, "Administration - Rides", team);
         model.addAttribute("rides", rideService.listRides(team.getId()));
         model.addAttribute("templates", rideTemplateService.listTemplates(team.getId()));
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
         return "team_admin_rides";
+
     }
 
     @GetMapping(value = "/new")
     public String newRide(@PathVariable("teamId") String teamId,
                           @RequestParam(value = "templateId", required = false, defaultValue = "empty-1") String templateId,
+                          @ModelAttribute("error") String error,
                           Principal principal,
                           Model model) {
 
@@ -73,7 +82,11 @@ public class AdminTeamRideController extends AbstractController {
 
         addGlobalValues(principal, model, "Administration - Nouveau ride", team);
         model.addAttribute("formdata", form);
+        model.addAttribute("imaged", false);
         model.addAttribute("published", false);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
         return "team_admin_rides_new";
 
     }
@@ -81,6 +94,7 @@ public class AdminTeamRideController extends AbstractController {
     @GetMapping(value = "/{rideId}")
     public String editRide(@PathVariable("teamId") String teamId,
                            @PathVariable("rideId") String rideId,
+                           @ModelAttribute("error") String error,
                            Principal principal,
                            Model model) {
 
@@ -88,34 +102,40 @@ public class AdminTeamRideController extends AbstractController {
 
         Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
         if (optionalRide.isEmpty()) {
-            return redirectToAdminRides(team);
+            return viewHandler.redirect(team, "/admin/rides");
         }
 
         Ride ride = optionalRide.get();
 
         NewRideForm form = NewRideForm.builder(ride.getGroups().size(), ZonedDateTime.now(), team.getZoneId())
                 .withId(ride.getId())
+                .withPermalink(ride.getPermalink())
                 .withDate(ride.getDate())
                 .withDescription(ride.getDescription())
                 .withType(ride.getType())
                 .withPublishedAt(ride.getPublishedAt(), team.getZoneId())
                 .withTitle(ride.getTitle())
-                .withGroups(ride.getSortedGroups(), team.getId(), mapService)
+                .withGroups(ride.getSortedGroups())
                 .get();
 
         addGlobalValues(principal, model, "Administration - Modifier le ride", team);
         model.addAttribute("formdata", form);
+        model.addAttribute("imaged", ride.isImaged());
         model.addAttribute("published", ride.getPublishedStatus().equals(PublishedStatus.PUBLISHED));
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
         return "team_admin_rides_new";
 
     }
 
     @PostMapping(value = "/{rideId}")
-    public String editRide(@PathVariable("teamId") String teamId,
-                           @PathVariable("rideId") String rideId,
-                           Principal principal,
-                           Model model,
-                           NewRideForm form) {
+    public RedirectView editRide(@PathVariable("teamId") String teamId,
+                                 @PathVariable("rideId") String rideId,
+                                 RedirectAttributes attributes,
+                                 Principal principal,
+                                 Model model,
+                                 NewRideForm form) {
 
         final Team team = checkTeam(teamId);
 
@@ -129,7 +149,7 @@ public class AdminTeamRideController extends AbstractController {
             if (!isNew) {
                 Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
                 if (optionalRide.isEmpty()) {
-                    return redirectToAdminRides(team);
+                    return viewHandler.redirectView(team, "/admin/rides");
                 }
                 target = optionalRide.get();
                 target.setDate(parser.getDate());
@@ -139,12 +159,14 @@ public class AdminTeamRideController extends AbstractController {
                 }
                 target.setTitle(parser.getTitle());
                 target.setDescription(parser.getDescription());
+                target.setPermalink(parser.getPermalink());
                 target.setType(parser.getType());
 
                 target.addOrReplaceGroups(parser.getGroups(teamId, mapService));
 
             } else {
-                target = new Ride(team.getId(), parser.getType(), parser.getDate(), parser.getPublishedAt(timezone),
+
+                target = new Ride(team.getId(), parser.getPermalink(), parser.getType(), parser.getDate(), parser.getPublishedAt(timezone),
                         parser.getTitle(), parser.getDescription(), parser.getFile().isPresent(), null);
                 if (parser.getTemplateId() != null) {
                     rideTemplateService.increment(team.getId(), parser.getTemplateId());
@@ -161,42 +183,35 @@ public class AdminTeamRideController extends AbstractController {
 
             rideService.save(target);
 
-            addGlobalValues(principal, model, "Administration - Rides", team);
-            model.addAttribute("rides", rideService.listRides(team.getId()));
-            model.addAttribute("templates", rideTemplateService.listTemplates(team.getId()));
-            return "team_admin_rides";
+            return viewHandler.redirectView(team, "/admin/rides");
 
 
         } catch (Exception e) {
-            addGlobalValues(principal, model, "Administration - Modifier le ride", team);
-            model.addAttribute("errors", List.of(e.getMessage()));
-            model.addAttribute("formdata", form);
-            return "team_admin_rides_new";
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/admin/rides/" + rideId);
         }
 
     }
 
 
     @GetMapping(value = "/delete/{rideId}")
-    public String deleteRide(@PathVariable("teamId") String teamId,
-                             @PathVariable("rideId") String rideId,
-                             Principal principal,
-                             Model model) {
+    public RedirectView deleteRide(@PathVariable("teamId") String teamId,
+                                   @PathVariable("rideId") String rideId,
+                                   RedirectAttributes attributes,
+                                   Principal principal,
+                                   Model model) {
 
         final Team team = checkTeam(teamId);
 
         try {
             rideService.delete(team.getId(), rideId);
+            return viewHandler.redirectView(team, "/admin/rides");
         } catch (Exception e) {
-            model.addAttribute("errors", List.of(e.getMessage()));
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/admin/rides");
         }
 
-        return redirectToAdminRides(team);
 
-    }
-
-    private String redirectToAdminRides(Team team) {
-        return createRedirect(team, "/admin/rides");
     }
 
 }

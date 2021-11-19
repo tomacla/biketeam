@@ -1,6 +1,6 @@
 package info.tomacla.biketeam.web.team.configuration;
 
-import info.tomacla.biketeam.common.Strings;
+import info.tomacla.biketeam.common.datatype.Strings;
 
 public class EditTeamPageForm {
 

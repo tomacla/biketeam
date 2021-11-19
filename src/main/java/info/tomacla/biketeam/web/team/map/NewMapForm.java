@@ -1,6 +1,6 @@
 package info.tomacla.biketeam.web.team.map;
 
-import info.tomacla.biketeam.common.Strings;
+import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.domain.map.MapType;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,7 +13,7 @@ import java.util.Optional;
 public class NewMapForm {
 
     private String id;
-    private String newId;
+    private String permalink;
     private String name;
     private String type;
     private String visible;
@@ -22,7 +22,7 @@ public class NewMapForm {
 
     public NewMapForm() {
         setId(null);
-        setNewId(null);
+        setPermalink(null);
         setName(null);
         setType(null);
         setVisible("on");
@@ -42,12 +42,12 @@ public class NewMapForm {
         this.id = Strings.requireNonBlankOrDefault(id, "new");
     }
 
-    public String getNewId() {
-        return newId;
+    public String getPermalink() {
+        return permalink;
     }
 
-    public void setNewId(String newId) {
-        this.newId = Strings.requireNonBlankOrDefault(newId, "");
+    public void setPermalink(String permalink) {
+        this.permalink = Strings.requireNonBlankOrDefault(permalink, "");
     }
 
     public String getName() {
@@ -110,11 +110,11 @@ public class NewMapForm {
             return form.getId();
         }
 
-        public String getNewId() {
-            if (ObjectUtils.isEmpty(form.getNewId())) {
+        public String getPermalink() {
+            if (ObjectUtils.isEmpty(form.getPermalink())) {
                 return null;
             }
-            return form.getNewId();
+            return Strings.normalizePermalink(form.getPermalink());
         }
 
         public String getName() {
@@ -152,7 +152,11 @@ public class NewMapForm {
 
         public NewMapFormBuilder withId(String id) {
             form.setId(id);
-            form.setNewId(id);
+            return this;
+        }
+
+        public NewMapFormBuilder withPermalink(String permalink) {
+            form.setPermalink(permalink);
             return this;
         }
 

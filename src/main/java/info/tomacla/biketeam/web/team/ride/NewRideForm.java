@@ -1,24 +1,29 @@
 package info.tomacla.biketeam.web.team.ride;
 
-import info.tomacla.biketeam.common.Dates;
-import info.tomacla.biketeam.common.Strings;
+import info.tomacla.biketeam.common.datatype.Dates;
+import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.ride.RideType;
 import info.tomacla.biketeam.domain.template.RideGroupTemplate;
 import info.tomacla.biketeam.domain.template.RideTemplate;
 import info.tomacla.biketeam.service.MapService;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class NewRideForm {
 
     private String id;
+    private String permalink;
     private String type;
     private String date;
     private String publishedAtDate;
@@ -35,6 +40,7 @@ public class NewRideForm {
 
     public NewRideForm(int numberOfGroups) {
         setId(null);
+        setPermalink(null);
         setType(null);
         setDate(null);
         setPublishedAtDate(null);
@@ -51,6 +57,7 @@ public class NewRideForm {
 
     public NewRideForm(RideTemplate rideTemplate) {
         setId(null);
+        setPermalink(null);
         setType(rideTemplate.getType().name());
         setDate(null);
         setPublishedAtDate(null);
@@ -90,6 +97,14 @@ public class NewRideForm {
 
     public void setId(String id) {
         this.id = Strings.requireNonBlankOrDefault(id, "new");
+    }
+
+    public String getPermalink() {
+        return permalink;
+    }
+
+    public void setPermalink(String permalink) {
+        this.permalink = Strings.requireNonBlankOrDefault(permalink, "");
     }
 
     public String getType() {
@@ -184,6 +199,13 @@ public class NewRideForm {
             return form.getId();
         }
 
+        public String getPermalink() {
+            if (ObjectUtils.isEmpty(form.getPermalink())) {
+                return null;
+            }
+            return form.getPermalink();
+        }
+
         public String getTitle() {
             return form.getTitle();
         }
@@ -221,18 +243,17 @@ public class NewRideForm {
         public List<RideGroup> getGroups(String teamId, MapService mapService) {
             return form.getGroups().stream().map(g -> {
                 NewRideGroupForm.NewRideGroupFormParser parser = g.parser();
-                String mapId = null;
+                Map map = null;
                 if (parser.getMapId().isPresent()) {
-                    mapId = mapService.get(teamId, parser.getMapId().get()).isPresent() ? parser.getMapId().get() : null;
+                    map = mapService.get(teamId, parser.getMapId().get()).orElse(null);
                 }
                 final RideGroup gg = new RideGroup(parser.getName(),
                         parser.getLowerSpeed(),
                         parser.getUpperSpeed(),
-                        mapId,
+                        map,
                         parser.getMeetingLocation(),
                         parser.getMeetingTime(),
-                        parser.getMeetingPoint().orElse(null),
-                        new HashSet<>());
+                        parser.getMeetingPoint().orElse(null));
 
                 if (parser.getId() != null) {
                     gg.setId(parser.getId());
@@ -266,6 +287,11 @@ public class NewRideForm {
             return this;
         }
 
+        public NewRideFormBuilder withPermalink(String permalink) {
+            form.setPermalink(permalink);
+            return this;
+        }
+
         public NewRideFormBuilder withTitle(String title) {
             form.setTitle(title);
             return this;
@@ -292,17 +318,15 @@ public class NewRideForm {
             return this;
         }
 
-        public NewRideFormBuilder withGroups(List<RideGroup> groups, String teamId, MapService mapService) {
+        public NewRideFormBuilder withGroups(List<RideGroup> groups) {
             if (groups != null) {
                 form.setGroups(groups.stream().map(g -> {
 
-                    final String mapId = g.getMapId();
+                    String mapId = null;
                     String mapName = null;
-                    if (mapId != null) {
-                        final Optional<Map> optionalMap = mapService.get(teamId, mapId);
-                        if (optionalMap.isPresent()) {
-                            mapName = optionalMap.get().getName();
-                        }
+                    if (g.getMap() != null) {
+                        mapId = g.getMap().getId();
+                        mapName = g.getMap().getName();
                     }
 
                     return NewRideGroupForm.builder()

@@ -1,6 +1,6 @@
 package info.tomacla.biketeam.domain.team;
 
-import info.tomacla.biketeam.domain.user.Role;
+import info.tomacla.biketeam.domain.userrole.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -23,6 +23,6 @@ public interface TeamRepository extends PagingAndSortingRepository<Team, String>
     List<Team> findByRoles_UserIdAndRoles_RoleIn(String userId, Set<Role> roles);
 
     @Query(value = "select team_id as id, domain as domain from team_configuration where domain is not null", nativeQuery = true)
-    List<TeamIdDomainProjection> findAllTeamWithDomain();
+    List<TeamProjection> findAllTeamWithDomain();
 
 }

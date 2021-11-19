@@ -4,7 +4,6 @@ import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.Visibility;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.user.UserRepository;
-import info.tomacla.biketeam.domain.user.UserRole;
 import info.tomacla.biketeam.security.Authorities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,12 +15,11 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
 
-    private static final Logger log = LoggerFactory.getLogger(TaskService.class);
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -51,15 +49,7 @@ public class UserService {
     }
 
     public List<User> listUsers() {
-        return userRepository.findAll();
-    }
-
-    public List<User> listUsers(Team team) {
-        return team.getRoles().stream().map(UserRole::getUserId)
-                .map(this::get)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toList());
+        return userRepository.findAllByOrderByIdAsc();
     }
 
     public void promote(String userId) {
@@ -78,29 +68,9 @@ public class UserService {
         });
     }
 
-    @PostConstruct
-    public void init() {
-
-        log.info("Initializing application data");
-
-        if (getByStravaId(adminStravaId).isEmpty()) {
-            save(new User(true,
-                    adminFirstName,
-                    adminLastName,
-                    adminStravaId,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null));
-        }
-
-    }
-
     public boolean authorizeAdminAccess(Authentication authentication, String teamId) {
         return authentication.getAuthorities().contains(Authorities.admin())
                 || authentication.getAuthorities().contains(Authorities.teamAdmin(teamId));
-
     }
 
     public boolean authorizePublicAccess(Authentication authentication, String teamId) {
@@ -119,5 +89,25 @@ public class UserService {
 
     }
 
+    public List<User> listUsersWithMailActivated(Team team) {
+        return userRepository.findByEmailNotNullAndRoles_Team(team);
+    }
+
+    @PostConstruct
+    public void init() {
+
+        log.info("Initializing application data");
+
+        if (getByStravaId(adminStravaId).isEmpty()) {
+            save(new User(true,
+                    adminFirstName,
+                    adminLastName,
+                    adminStravaId,
+                    null,
+                    null,
+                    null));
+        }
+
+    }
 
 }

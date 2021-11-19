@@ -92,7 +92,7 @@
                 <div class="row">
                     <div class="col-6 mb-3">
                       <label for="form-ride-title" class="form-label">Titre</label>
-                      <input autocomplete="off" required value="${formdata.title}" name="title" type="text" class="form-control" id="form-ride-title" placeholder="Ride du mercredi">
+                      <input data-element="rides" data-target-id-field="form-ride-permalink" autocomplete="off" required value="${formdata.title}" name="title" type="text" class="form-control form-unique-id" id="form-ride-title" placeholder="Ride du mercredi">
                     </div>
                     <div class="col-6 mb-3">
                       <label for="form-ride-date" class="form-label">Date</label>
@@ -102,14 +102,20 @@
                       <label for="form-ride-type" class="form-label">Type</label>
                       <select required name="type" class="form-select" id="form-ride-type">
                         <option value="REGULAR"<#if formdata.type == 'REGULAR'> selected</#if>>Sortie régulière</option>
-                        <option value="SPECIAL"<#if formdata.type == 'SPECIAL'> selected</#if>>Evénement exceptionnel</option>
+                        <option value="SPECIAL"<#if formdata.type == 'SPECIAL'> selected</#if>>Evénement</option>
                         <option value="RACE"<#if formdata.type == 'RACE'> selected</#if>>Course</option>
                       </select>
                     </div>
-                    <div class="col-6 mb-3">
-                      <label for="form-ride-file" class="form-label">Image associée (PNG ou JPG)</label>
-                      <input autocomplete="off" name="file" accept=".png,.jpg,.jpeg" class="form-control form-size-check" type="file" id="form-ride-file">
+                    <div class="col-6">
+                        <label for="form-ride-permalink" class="form-label">URL unique</label>
+                        <input data-element="rides" data-target-id-field="form-ride-permalink" minLength="2" maxLength="19" autocomplete="off" value="${formdata.permalink}" name="permalink" type="text" class="form-control form-unique-id" id="form-ride-permalink">
                     </div>
+
+                </div>
+
+                <div class="mb-3">
+                  <label for="form-ride-file" class="form-label">Image associée (PNG ou JPG) <#if imaged><i class="bi bi-check-circle-fill"></i></#if></label>
+                  <input autocomplete="off" name="file" accept=".png,.jpg,.jpeg" class="form-control form-size-check" type="file" id="form-ride-file">
                 </div>
 
                 <div class="mb-3">

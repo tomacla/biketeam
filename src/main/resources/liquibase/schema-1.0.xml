@@ -767,6 +767,87 @@
 
     </changeSet>
 
+    <changeSet id="GITHUB-89-permalinks" author="tomacla">
+
+        <addColumn tableName="ride">
+            <column name="permalink" type="VARCHAR(255)" />
+        </addColumn>
+
+        <addColumn tableName="trip">
+            <column name="permalink" type="VARCHAR(255)" />
+        </addColumn>
+
+        <addColumn tableName="map">
+            <column name="permalink" type="VARCHAR(255)" />
+        </addColumn>
+
+       <dropForeignKeyConstraint baseTableName="map_tags" constraintName="fk_map_tags_map_id" />
+
+        <sql>update map set permalink = id</sql>
+        <sql>update map set id = md5(random()::text || clock_timestamp()::text)::uuid::text</sql>
+
+        <sql>update ride_group set map_id = m.id from map m where map_id is not null and m.permalink = map_id</sql>
+        <sql>update trip_stage set map_id = m.id from map m where map_id is not null and m.permalink = map_id</sql>
+        <sql>update map_tags set map_id = m.id from map m where m.permalink = map_id</sql>
+
+        <addUniqueConstraint
+                columnNames="permalink"
+                constraintName="ride_permalink"
+                tableName="ride"
+        />
+
+        <addUniqueConstraint
+                columnNames="permalink"
+                constraintName="map_permalink"
+                tableName="map"
+        />
+
+        <addUniqueConstraint
+                columnNames="permalink"
+                constraintName="trip_permalink"
+                tableName="trip"
+        />
+
+        <addForeignKeyConstraint baseTableName="map_tags"
+                                 baseColumnNames="map_id"
+                                 constraintName="fk_map_tags_map_id"
+                                 referencedTableName="map"
+                                 referencedColumnNames="id"/>
+
+    </changeSet>
+
+    <changeSet id="GITHUB-89-permalinks-enhancement" author="tomacla">
+
+        <addForeignKeyConstraint baseTableName="ride_group"
+                                 baseColumnNames="map_id"
+                                 constraintName="fk_ride_group_map"
+                                 referencedTableName="map"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="trip_stage"
+                                 baseColumnNames="map_id"
+                                 constraintName="fk_trip_stage_map"
+                                 referencedTableName="map"
+                                 referencedColumnNames="id"/>
+
+    </changeSet>
+
+    <changeSet id="GITHUB-89-permalinks-in-feed" author="tomacla">
+
+        <dropView viewName="feed" />
+
+        <createView viewName="feed" replaceIfExists="true">
+            select r.id as id, r.permalink as permalink, r.team_id as team_id, t.name as team_name, 'RIDE' as type, r.published_at as published_at, r.date as date, r.title as title,
+            r.description as content, r.imaged as imaged FROM ride r, team t where t.id = r.team_id and r.published_status = 'PUBLISHED'
+            UNION
+            select p.id as id, NULL as permalink, p.team_id as team_id, t.name as team_name, 'PUBLICATION' as type, p.published_at as published_at, NULL as date, p.title as title,
+            p.content as content, p.imaged as imaged FROM publication p, team t where t.id = p.team_id and p.published_status = 'PUBLISHED'
+            UNION
+            select tr.id as id, tr.permalink as permalink, tr.team_id as team_id, t.name as team_name, 'TRIP' as type, tr.published_at as published_at, tr.start_date as date, tr.title as title,
+            tr.description as content, tr.imaged as imaged FROM trip tr, team t where t.id = tr.team_id and tr.published_status = 'PUBLISHED'
+        </createView>
+
+    </changeSet>
 
 </databaseChangeLog>
 

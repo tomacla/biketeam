@@ -1,7 +1,7 @@
 package info.tomacla.biketeam.web.team;
 
-import info.tomacla.biketeam.common.Country;
-import info.tomacla.biketeam.common.Timezone;
+import info.tomacla.biketeam.common.data.Country;
+import info.tomacla.biketeam.common.data.Timezone;
 
 import java.util.Objects;
 

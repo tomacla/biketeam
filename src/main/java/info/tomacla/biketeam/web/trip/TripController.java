@@ -1,17 +1,17 @@
 package info.tomacla.biketeam.web.trip;
 
-import info.tomacla.biketeam.common.FileExtension;
-import info.tomacla.biketeam.common.ImageDescriptor;
-import info.tomacla.biketeam.common.PublishedStatus;
-import info.tomacla.biketeam.domain.map.Map;
+import info.tomacla.biketeam.common.data.PublishedStatus;
+import info.tomacla.biketeam.common.file.FileExtension;
+import info.tomacla.biketeam.common.file.ImageDescriptor;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.trip.Trip;
-import info.tomacla.biketeam.domain.trip.TripStage;
-import info.tomacla.biketeam.domain.user.Role;
 import info.tomacla.biketeam.domain.user.User;
+import info.tomacla.biketeam.domain.userrole.Role;
+import info.tomacla.biketeam.domain.userrole.UserRole;
 import info.tomacla.biketeam.service.MapService;
-import info.tomacla.biketeam.service.ThumbnailService;
 import info.tomacla.biketeam.service.TripService;
+import info.tomacla.biketeam.service.UserRoleService;
+import info.tomacla.biketeam.service.file.ThumbnailService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,17 +22,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerErrorException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.security.Principal;
 import java.time.LocalDate;
-import java.util.Objects;
+import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = "/{teamId}/trips")
@@ -47,9 +49,13 @@ public class TripController extends AbstractController {
     @Autowired
     private ThumbnailService thumbnailService;
 
+    @Autowired
+    private UserRoleService userRoleService;
+
     @GetMapping(value = "/{tripId}")
     public String getTrip(@PathVariable("teamId") String teamId,
                           @PathVariable("tripId") String tripId,
+                          @ModelAttribute("error") String error,
                           Principal principal,
                           Model model) {
 
@@ -57,28 +63,20 @@ public class TripController extends AbstractController {
 
         Optional<Trip> optionalTrip = tripService.get(team.getId(), tripId);
         if (optionalTrip.isEmpty()) {
-            return redirectToTrips(team);
+            return viewHandler.redirect(team, "/trips");
         }
 
         Trip trip = optionalTrip.get();
 
         if (!trip.getPublishedStatus().equals(PublishedStatus.PUBLISHED) && !isAdmin(principal, team)) {
-            return redirectToTrips(team);
+            return viewHandler.redirect(team, "/trips");
         }
-
-        final java.util.Map<String, Map> maps = trip.getStages().stream()
-                .map(TripStage::getMapId)
-                .filter(Objects::nonNull)
-                .distinct()
-                .map(mapId -> mapService.get(teamId, mapId))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toMap(Map::getId, m -> m));
-
 
         addGlobalValues(principal, model, "Trip " + trip.getTitle(), team);
         model.addAttribute("trip", trip);
-        model.addAttribute("maps", maps);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
         return "trip";
     }
 
@@ -88,6 +86,7 @@ public class TripController extends AbstractController {
                            @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
                            @RequestParam(value = "page", defaultValue = "0", required = false) int page,
                            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
+                           @ModelAttribute("error") String error,
                            Principal principal,
                            Model model) {
 
@@ -114,66 +113,83 @@ public class TripController extends AbstractController {
         model.addAttribute("trips", trips.getContent());
         model.addAttribute("pages", trips.getTotalPages());
         model.addAttribute("formdata", form);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
+
         return "trips";
 
     }
 
     @GetMapping(value = "/{tripId}/add-participant")
-    public String addParticipantToTrip(@PathVariable("teamId") String teamId,
-                                       @PathVariable("tripId") String tripId,
-                                       Principal principal, Model model) {
+    public RedirectView addParticipantToTrip(@PathVariable("teamId") String teamId,
+                                             @PathVariable("tripId") String tripId,
+                                             RedirectAttributes attributes,
+                                             Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
 
-        Optional<Trip> optionalTrip = tripService.get(team.getId(), tripId);
-        if (optionalTrip.isEmpty()) {
-            return redirectToTrips(team);
-        }
-
-        Trip trip = optionalTrip.get();
-        Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
-
-        if (optionalConnectedUser.isPresent()) {
-            User connectedUser = optionalConnectedUser.get();
-
-            if (!team.isMember(connectedUser.getId())) {
-                team.addRole(connectedUser, Role.MEMBER);
-                teamService.save(team);
+        try {
+            Optional<Trip> optionalTrip = tripService.get(team.getId(), tripId);
+            if (optionalTrip.isEmpty()) {
+                return viewHandler.redirectView(team, "/trips");
             }
 
-            if (!trip.hasParticipant(connectedUser.getId())) {
-                trip.addParticipant(connectedUser);
-                tripService.save(trip);
+            Trip trip = optionalTrip.get();
+            Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
+
+            if (optionalConnectedUser.isPresent()) {
+                User connectedUser = optionalConnectedUser.get();
+
+                if (!team.isMember(connectedUser)) {
+                    userRoleService.save(new UserRole(team, connectedUser, Role.MEMBER));
+                }
+
+                if (!trip.hasParticipant(connectedUser.getId())) {
+                    trip.addParticipant(connectedUser);
+                    tripService.save(trip);
+                }
+
             }
 
-        }
+            return viewHandler.redirectView(team, "/trips/" + tripId);
 
-        return redirectToTrip(team, tripId);
+        } catch (Exception e) {
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/trips/" + tripId);
+        }
     }
 
     @GetMapping(value = "/{tripId}/remove-participant")
-    public String removeParticipantToTrip(@PathVariable("teamId") String teamId,
-                                          @PathVariable("tripId") String tripId,
-                                          Principal principal, Model model) {
+    public RedirectView removeParticipantToTrip(@PathVariable("teamId") String teamId,
+                                                @PathVariable("tripId") String tripId,
+                                                RedirectAttributes attributes,
+                                                Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
 
-        Optional<Trip> optionalTrip = tripService.get(team.getId(), tripId);
-        if (optionalTrip.isEmpty()) {
-            return redirectToTrips(team);
+        try {
+            Optional<Trip> optionalTrip = tripService.get(team.getId(), tripId);
+            if (optionalTrip.isEmpty()) {
+                return viewHandler.redirectView(team, "/trips");
+            }
+
+            Trip trip = optionalTrip.get();
+            Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
+
+            if (optionalConnectedUser.isPresent()) {
+                User connectedUser = optionalConnectedUser.get();
+                trip.removeParticipant(connectedUser);
+                tripService.save(trip);
+
+            }
+
+            return viewHandler.redirectView(team, "/trips/" + tripId);
+
+        } catch (Exception e) {
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/trips/" + tripId);
         }
-
-        Trip trip = optionalTrip.get();
-        Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
-
-        if (optionalConnectedUser.isPresent()) {
-            User connectedUser = optionalConnectedUser.get();
-            trip.removeParticipant(connectedUser);
-            tripService.save(trip);
-
-        }
-
-        return redirectToTrip(team, tripId);
     }
 
     @ResponseBody

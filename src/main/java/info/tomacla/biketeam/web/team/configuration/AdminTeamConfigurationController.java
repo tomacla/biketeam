@@ -1,20 +1,20 @@
 package info.tomacla.biketeam.web.team.configuration;
 
-import info.tomacla.biketeam.common.Point;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.TeamConfiguration;
 import info.tomacla.biketeam.domain.team.TeamDescription;
 import info.tomacla.biketeam.domain.team.TeamIntegration;
-import info.tomacla.biketeam.service.FileService;
-import info.tomacla.biketeam.service.HeatmapService;
 import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.security.Principal;
 import java.util.List;
@@ -24,19 +24,14 @@ import java.util.List;
 public class AdminTeamConfigurationController extends AbstractController {
 
     @Autowired
-    private FileService fileService;
-
-    @Autowired
     private MapService mapService;
 
     @Value("${contact.email}")
-    private String smtpFrom;
-
-    @Autowired
-    private HeatmapService heatmapService;
+    private String contactEmail;
 
     @GetMapping
     public String getSiteGeneral(@PathVariable("teamId") String teamId,
+                                 @ModelAttribute("error") String error,
                                  Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
@@ -51,18 +46,21 @@ public class AdminTeamConfigurationController extends AbstractController {
 
         addGlobalValues(principal, model, "Administration - Général", team);
         model.addAttribute("formdata", form);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
         return "team_admin_general";
+
     }
 
     @PostMapping
-    public String updateSiteGeneral(@PathVariable("teamId") String teamId,
-                                    Principal principal, Model model,
-                                    EditTeamGeneralForm form) {
+    public RedirectView updateSiteGeneral(@PathVariable("teamId") String teamId,
+                                          Principal principal, Model model,
+                                          RedirectAttributes attributes,
+                                          EditTeamGeneralForm form) {
 
         final Team team = checkTeam(teamId);
-
         final TeamDescription teamDescription = team.getDescription();
-
         final EditTeamGeneralForm.EditTeamGeneralFormParser parser = form.parser();
 
         try {
@@ -72,25 +70,21 @@ public class AdminTeamConfigurationController extends AbstractController {
             team.setVisibility(parser.getVisibility());
             teamService.save(team);
 
-            addGlobalValues(principal, model, "Administration - Général", team);
-            model.addAttribute("formdata", form);
-            return "team_admin_general";
+            return viewHandler.redirectView(team, "/admin");
 
         } catch (Exception e) {
-            addGlobalValues(principal, model, "Administration - Général", team);
-            model.addAttribute("errors", List.of(e.getMessage()));
-            model.addAttribute("formdata", form);
-            return "team_admin_general";
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/admin");
         }
 
     }
 
     @GetMapping(value = "/description")
     public String getSiteDescription(@PathVariable("teamId") String teamId,
+                                     @ModelAttribute("error") String error,
                                      Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
-
 
         final TeamDescription teamDescription = team.getDescription();
 
@@ -107,19 +101,20 @@ public class AdminTeamConfigurationController extends AbstractController {
 
         addGlobalValues(principal, model, "Administration - Description", team);
         model.addAttribute("formdata", form);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
         return "team_admin_description";
     }
 
     @PostMapping(value = "/description")
-    public String updateSiteDescription(@PathVariable("teamId") String teamId,
-                                        Principal principal, Model model,
-                                        EditTeamDescriptionForm form) {
+    public RedirectView updateSiteDescription(@PathVariable("teamId") String teamId,
+                                              Principal principal, Model model,
+                                              RedirectAttributes attributes,
+                                              EditTeamDescriptionForm form) {
 
         final Team team = checkTeam(teamId);
-
-
         final TeamDescription teamDescription = team.getDescription();
-
         final EditTeamDescriptionForm.EditTeamDescriptionFormParser parser = form.parser();
 
         try {
@@ -134,26 +129,22 @@ public class AdminTeamConfigurationController extends AbstractController {
             teamDescription.setOther(parser.getOther());
             teamService.save(team);
 
-            addGlobalValues(principal, model, "Administration - Description", team);
-            model.addAttribute("formdata", form);
-            return "team_admin_description";
+            return viewHandler.redirectView(team, "/admin/description");
+
 
         } catch (Exception e) {
-            addGlobalValues(principal, model, "Administration - Description", team);
-            model.addAttribute("errors", List.of(e.getMessage()));
-            model.addAttribute("formdata", form);
-            return "team_admin_description";
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/admin/description");
         }
 
     }
 
     @GetMapping(value = "/configuration")
     public String getSiteConfiguration(@PathVariable("teamId") String teamId,
+                                       @ModelAttribute("error") String error,
                                        Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
-
-
         final TeamConfiguration teamConfiguration = team.getConfiguration();
 
         EditTeamConfigurationForm form = EditTeamConfigurationForm.builder()
@@ -169,23 +160,25 @@ public class AdminTeamConfigurationController extends AbstractController {
         model.addAttribute("formdata", form);
         model.addAttribute("timezones", getAllAvailableTimeZones());
         model.addAttribute("tags", mapService.listTags(team.getId()));
-        model.addAttribute("adminContact", smtpFrom);
+        model.addAttribute("adminContact", contactEmail);
         model.addAttribute("domain", teamConfiguration.getDomain());
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
         return "team_admin_configuration";
     }
 
     @PostMapping(value = "/configuration")
-    public String updateSiteConfiguration(@PathVariable("teamId") String teamId,
-                                          Principal principal,
-                                          Model model,
-                                          EditTeamConfigurationForm form) {
+    public RedirectView updateSiteConfiguration(@PathVariable("teamId") String teamId,
+                                                Principal principal, Model model,
+                                                RedirectAttributes attributes,
+                                                EditTeamConfigurationForm form) {
 
         final Team team = checkTeam(teamId);
-
-
         final TeamConfiguration teamConfiguration = team.getConfiguration();
 
         try {
+
             EditTeamConfigurationForm.EditTeamConfigurationFormParser parser = form.parser();
 
             teamConfiguration.setTimezone(parser.getTimezone());
@@ -196,22 +189,11 @@ public class AdminTeamConfigurationController extends AbstractController {
             teamConfiguration.setTripsVisible(parser.isTripsVisible());
             teamService.save(team);
 
-            addGlobalValues(principal, model, "Administration - Configuration", team);
-            model.addAttribute("formdata", form);
-            model.addAttribute("timezones", getAllAvailableTimeZones());
-            model.addAttribute("tags", mapService.listTags(team.getId()));
-            model.addAttribute("adminContact", smtpFrom);
-            model.addAttribute("domain", teamConfiguration.getDomain());
-            return "team_admin_configuration";
+            return viewHandler.redirectView(team, "/admin/configuration");
 
         } catch (Exception e) {
-            addGlobalValues(principal, model, "Administration - Configuration", team);
-            model.addAttribute("formdata", form);
-            model.addAttribute("timezones", getAllAvailableTimeZones());
-            model.addAttribute("tags", mapService.listTags(team.getId()));
-            model.addAttribute("adminContact", smtpFrom);
-            model.addAttribute("domain", teamConfiguration.getDomain());
-            return "team_admin_configuration";
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/admin/configuration");
 
         }
 
@@ -219,11 +201,10 @@ public class AdminTeamConfigurationController extends AbstractController {
 
     @GetMapping(value = "/page")
     public String getSitePage(@PathVariable("teamId") String teamId,
+                              @ModelAttribute("error") String error,
                               Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
-
-
         final TeamConfiguration teamConfiguration = team.getConfiguration();
 
         EditTeamPageForm form = EditTeamPageForm.builder()
@@ -232,14 +213,17 @@ public class AdminTeamConfigurationController extends AbstractController {
 
         addGlobalValues(principal, model, "Administration - Configuration", team);
         model.addAttribute("formdata", form);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
         return "team_admin_page_configuration";
     }
 
     @PostMapping(value = "/page")
-    public String updateSitePage(@PathVariable("teamId") String teamId,
-                                 Principal principal,
-                                 Model model,
-                                 EditTeamPageForm form) {
+    public RedirectView updateSitePage(@PathVariable("teamId") String teamId,
+                                       Principal principal, Model model,
+                                       RedirectAttributes attributes,
+                                       EditTeamPageForm form) {
 
         final Team team = checkTeam(teamId);
 
@@ -252,26 +236,21 @@ public class AdminTeamConfigurationController extends AbstractController {
             teamConfiguration.setMarkdownPage(parser.getMarkdownPage());
             teamService.save(team);
 
-            addGlobalValues(principal, model, "Administration - Configuration", team);
-            model.addAttribute("formdata", form);
-            return "team_admin_page_configuration";
+            return viewHandler.redirectView(team, "/admin/page");
 
         } catch (Exception e) {
-            addGlobalValues(principal, model, "Administration - Configuration", team);
-            model.addAttribute("formdata", form);
-            return "team_admin_page_configuration";
-
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/admin/page");
         }
 
     }
 
     @GetMapping(value = "/integration")
     public String getSiteIntegration(@PathVariable("teamId") String teamId,
+                                     @ModelAttribute("error") String error,
                                      Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
-
-
         final TeamIntegration teamIntegration = team.getIntegration();
 
         EditTeamIntegrationForm form = EditTeamIntegrationForm.builder()
@@ -291,23 +270,23 @@ public class AdminTeamConfigurationController extends AbstractController {
 
         addGlobalValues(principal, model, "Administration - Intégrations", team);
         model.addAttribute("formdata", form);
-        model.addAttribute("adminContact", smtpFrom);
+        model.addAttribute("adminContact", contactEmail);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
         return "team_admin_integration";
     }
 
     @PostMapping(value = "/integration")
-    public String updateSiteIntegration(@PathVariable("teamId") String teamId,
-                                        Principal principal, Model model,
-                                        EditTeamIntegrationForm form) {
+    public RedirectView updateSiteIntegration(@PathVariable("teamId") String teamId,
+                                              Principal principal, Model model,
+                                              RedirectAttributes attributes,
+                                              EditTeamIntegrationForm form) {
 
         final Team team = checkTeam(teamId);
-
-
         final TeamIntegration teamIntegration = team.getIntegration();
 
         try {
-
-            Point beforeEdit = team.getIntegration().getHeatmapCenter();
 
             final EditTeamIntegrationForm.EditTeamIntegrationFormParser parser = form.parser();
 
@@ -325,54 +304,46 @@ public class AdminTeamConfigurationController extends AbstractController {
             teamIntegration.setHeatmapDisplay(parser.isHeatmapDisplay());
             teamService.save(team);
 
-            if (team.getIntegration().isHeatmapConfigured() && !team.getIntegration().getHeatmapCenter().equals(beforeEdit)) {
-                heatmapService.generateHeatmap(team);
-            }
-
-            addGlobalValues(principal, model, "Administration - Intégrations", team);
-            model.addAttribute("formdata", form);
-            model.addAttribute("adminContact", smtpFrom);
-            return "team_admin_integration";
+            return viewHandler.redirectView(team, "/admin/integration");
 
         } catch (Exception e) {
-            model.addAttribute("errors", List.of(e.getMessage()));
-            addGlobalValues(principal, model, "Administration - Intégrations", team);
-            model.addAttribute("formdata", form);
-            model.addAttribute("adminContact", smtpFrom);
-            return "team_admin_integration";
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/admin/integration");
         }
 
     }
 
     @GetMapping(value = "/logo")
     public String getLogo(@PathVariable("teamId") String teamId,
-                          Principal principal,
-                          Model model) {
+                          @ModelAttribute("error") String error,
+                          Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
 
-
         addGlobalValues(principal, model, "Administration - Logo", team);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
         return "team_admin_logo";
     }
 
     @PostMapping(value = "/logo")
-    public String updateLogo(@PathVariable("teamId") String teamId,
-                             Principal principal, Model model,
-                             @RequestParam("file") MultipartFile file) {
+    public RedirectView updateLogo(@PathVariable("teamId") String teamId,
+                                   Principal principal, Model model,
+                                   RedirectAttributes attributes,
+                                   @RequestParam("file") MultipartFile file) {
 
         final Team team = checkTeam(teamId);
 
-
         try {
-            teamService.saveImage(team.getId(), file.getInputStream(), file.getOriginalFilename());
-        } catch (Exception e) {
-            model.addAttribute("errors", List.of(e.getMessage()));
-        } finally {
-            addGlobalValues(principal, model, "Administration - Général", team);
-        }
 
-        return "team_admin_logo";
+            teamService.saveImage(team.getId(), file.getInputStream(), file.getOriginalFilename());
+            return viewHandler.redirectView(team, "/admin/logo");
+
+        } catch (Exception e) {
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/admin/logo");
+        }
 
     }
 

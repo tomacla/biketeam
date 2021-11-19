@@ -1,7 +1,7 @@
 package info.tomacla.biketeam.domain.team;
 
-import info.tomacla.biketeam.common.Point;
-import info.tomacla.biketeam.common.Strings;
+import info.tomacla.biketeam.common.datatype.Strings;
+import info.tomacla.biketeam.common.geo.Point;
 
 import javax.persistence.*;
 

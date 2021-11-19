@@ -10,7 +10,7 @@ import java.util.Optional;
 public class SSOService {
 
     // IMPROVE use a guava cache instead of this
-    // FIXME should be stored in case of load balancing
+    // TODO should be stored in case of load balancing
     private Map<String, SSOToken> ssoTokens = new HashMap<>();
 
     public String getSSOToken(String sessionId, String rememberMe) {

@@ -1,7 +1,7 @@
 package info.tomacla.biketeam.domain.publication;
 
-import info.tomacla.biketeam.common.PublishedStatus;
-import info.tomacla.biketeam.common.Strings;
+import info.tomacla.biketeam.common.data.PublishedStatus;
+import info.tomacla.biketeam.common.datatype.Strings;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;
@@ -36,10 +36,10 @@ public class Publication {
                        boolean imaged) {
         this.id = UUID.randomUUID().toString();
         setTeamId(teamId);
-        this.publishedStatus = PublishedStatus.UNPUBLISHED;
-        setPublishedAt(publishedAt);
         setTitle(title);
         setContent(content);
+        setPublishedAt(publishedAt);
+        setPublishedStatus(PublishedStatus.UNPUBLISHED);
         setImaged(imaged);
     }
 

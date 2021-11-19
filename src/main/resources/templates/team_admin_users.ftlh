@@ -19,23 +19,23 @@
         </form>
         <hr/>
 
-        <#if users?size gt 0>
+        <#if roles?size gt 0>
             <ul class="list-group">
                 <li class="list-group-item list-group-item-secondary d-flex justify-content-between align-items-center">
                     <div>Identité<span class="text-muted"> - ID Strava</span></div>
-                    <div>Administrateur</div>
+                    <div>Actions</div>
                 </li>
-                <#list users as user>
+                <#list roles as role>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div><#if user.profileImage??><img src="${user.profileImage}" alt="User photo" width="30" height="30" class="rounded"> </#if>${user.firstName!'inconnu'} ${user.lastName!'inconnu'}<span class="text-muted"> - <a class="link-dark" href="https://www.strava.com/athletes/${user.stravaId?c}" target="_blank">${(user.stravaId?c)}</a></span><#if team.isAdmin(user.id)> <i class="bi bi-shield-fill"></i></#if></div>
-                        <#if user.id != _user_id>
+                        <div><#if role.user.profileImage??><img src="${role.user.profileImage}" alt="User photo" width="30" height="30" class="rounded"> </#if>${role.user.firstName!'inconnu'} ${role.user.lastName!'inconnu'}<span class="text-muted"> - <a class="link-dark" href="https://www.strava.com/athletes/${role.user.stravaId?c}" target="_blank">${(role.user.stravaId?c)}</a></span><#if role.role == 'ADMIN'> <i class="bi bi-shield-fill"></i></#if></div>
+                        <#if role.user.id != _user_id>
                             <div class="btn-group" role="group">
-                                <#if team.isAdmin(user.id)>
-                                    <a href="<@common.teamUrl team.id '/admin/users/relegate/${user.id}' />" class="btn btn-success btn-sm" role="button"><i class="bi bi-shield-fill"></i></a>
+                                <#if role.role == 'ADMIN'>
+                                    <a href="<@common.teamUrl team.id '/admin/users/relegate/${role.user.id}' />" class="btn btn-success btn-sm" role="button"><i class="bi bi-shield-fill"></i></a>
                                 <#else>
-                                    <a href="<@common.teamUrl team.id '/admin/users/promote/${user.id}' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-shield"></i></a>
+                                    <a href="<@common.teamUrl team.id '/admin/users/promote/${role.user.id}' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-shield"></i></a>
                                 </#if>
-                                <a href="<@common.teamUrl team.id '/admin/users/delete/${user.id}' />" class="btn btn-danger btn-sm" role="button"><i class="bi bi-trash"></i></a>
+                                <a href="<@common.teamUrl team.id '/admin/users/delete/${role.user.id}' />" class="btn btn-danger btn-sm" role="button"><i class="bi bi-trash"></i></a>
                             </div>
                         </#if>
                     </li>

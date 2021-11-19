@@ -1,13 +1,13 @@
 package info.tomacla.biketeam.web;
 
 
-import info.tomacla.biketeam.common.Dates;
+import info.tomacla.biketeam.common.datatype.Dates;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.security.OAuth2UserDetails;
 import info.tomacla.biketeam.service.TeamService;
-import info.tomacla.biketeam.service.UrlService;
 import info.tomacla.biketeam.service.UserService;
+import info.tomacla.biketeam.service.url.UrlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.RememberMeAuthenticationToken;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -32,6 +32,8 @@ public abstract class AbstractController {
     @Autowired
     private UrlService urlService;
 
+    protected ViewHandler viewHandler = new ViewHandler();
+
     // TODO do this automatically with annotation or other way
     protected void addGlobalValues(Principal principal, Model model, String pageTitle, Team team) {
 
@@ -53,8 +55,8 @@ public abstract class AbstractController {
             model.addAttribute("_user_id", user.getId());
             model.addAttribute("_identity", user.getIdentity());
             if (team != null) {
-                model.addAttribute("_team_admin", team.isAdmin(user.getId()));
-                model.addAttribute("_team_member", team.isMember(user.getId()));
+                model.addAttribute("_team_admin", team.isAdmin(user));
+                model.addAttribute("_team_member", team.isMember(user));
             }
         });
 
@@ -114,7 +116,7 @@ public abstract class AbstractController {
         final Optional<User> optionalUser = getUserFromPrincipal(principal);
         if (optionalUser.isPresent()) {
             final User user = optionalUser.get();
-            admin = user.isAdmin() || team.isAdmin(user.getId());
+            admin = user.isAdmin() || team.isAdmin(user);
         }
         return admin;
 
@@ -125,36 +127,10 @@ public abstract class AbstractController {
     }
 
     protected Team checkTeam(String teamId) {
+        // FIXME redirect exception to root
         return teamService.get(teamId).orElseThrow(() -> new IllegalArgumentException("Unknown team " + teamId));
     }
 
-    protected String redirectToRides(Team team) {
-        return createRedirect(team, "/rides");
-    }
-
-    protected String redirectToTrips(Team team) {
-        return createRedirect(team, "/trips");
-    }
-
-    protected String redirectToRide(Team team, String rideId) {
-        return createRedirect(team, "/rides/" + rideId);
-    }
-
-    protected String redirectToTrip(Team team, String tripId) {
-        return createRedirect(team, "/trips/" + tripId);
-    }
-
-    protected String redirectToMaps(Team team) {
-        return createRedirect(team, "/maps");
-    }
-
-    protected String redirectToMap(Team team, String mapId) {
-        return createRedirect(team, "/maps/" + mapId);
-    }
-
-    protected String redirectToFeed(Team team) {
-        return createRedirect(team, "/");
-    }
 
     protected String createRedirect(Team team, String suffix) {
         if (team.getConfiguration().isDomainConfigured()) {

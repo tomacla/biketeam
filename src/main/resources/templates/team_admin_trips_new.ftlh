@@ -85,7 +85,7 @@
                 <div class="row">
                     <div class="col-6 mb-3">
                       <label for="form-trip-title" class="form-label">Titre</label>
-                      <input autocomplete="off" required value="${formdata.title}" name="title" type="text" class="form-control" id="form-trip-title" placeholder="Voyage AR">
+                      <input data-element="trips" data-target-id-field="form-trip-permalink" autocomplete="off" required value="${formdata.title}" name="title" type="text" class="form-control form-unique-id" id="form-trip-title" placeholder="Voyage AR">
                     </div>
                     <div class="col-6 mb-3">
                       <label for="form-trip-type" class="form-label">Type</label>
@@ -130,16 +130,23 @@
                     </div>
                 </div>
 
+                <div class="mb-3">
+                  <label for="form-trip-description" class="form-label">Description</label>
+                  <textarea required name="description" class="form-control" id="form-trip-description" rows="5">${formdata.description}</textarea>
+                </div>
+
                 <div class="row">
-                    <div class="mb-3 col-12">
-                      <label for="form-trip-description" class="form-label">Description</label>
-                      <textarea required name="description" class="form-control" id="form-trip-description" rows="5">${formdata.description}</textarea>
-                    </div>
 
                     <div class="col-6 mb-3">
-                      <label for="form-trip-file" class="form-label">Image associée (PNG ou JPG)</label>
+                      <label for="form-trip-file" class="form-label">Image associée (PNG ou JPG) <#if imaged><i class="bi bi-check-circle-fill"></i></#if></label>
                       <input autocomplete="off" name="file" accept=".png,.jpg,.jpeg" class="form-control form-size-check" type="file" id="form-trip-file">
                     </div>
+
+                     <div class="col-6">
+                        <label for="form-trip-permalink" class="form-label">URL unique</label>
+                        <input data-element="trips" data-target-id-field="form-trip-permalink" minLength="2" maxLength="19" autocomplete="off" value="${formdata.permalink}" name="permalink" type="text" class="form-control form-unique-id" id="form-trip-permalink">
+                    </div>
+
                 </div>
 
                 <hr/>

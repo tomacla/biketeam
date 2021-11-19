@@ -35,9 +35,9 @@
                         </div>
                         <div class="card-body">
                         <#if feedItem.type == 'RIDE'>
-                            <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl feedItem.teamId '/rides/'+ feedItem.id />">${feedItem.title}</a> - ${feedItem.date.format(_date_formatter)}</h5>
+                            <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl feedItem.teamId '/rides/'+ feedItem.permalink!feedItem.id />">${feedItem.title}</a> - ${feedItem.date.format(_date_formatter)}</h5>
                         <#elseif feedItem.type == 'TRIP'>
-                            <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl feedItem.teamId '/trips/'+ feedItem.id />">${feedItem.title}</a> - ${feedItem.date.format(_date_formatter)}</h5>
+                            <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl feedItem.teamId '/trips/'+ feedItem.permalink!feedItem.id />">${feedItem.title}</a> - ${feedItem.date.format(_date_formatter)}</h5>
                         <#else>
                             <h5 class="card-title">${feedItem.title}</h5>
                         </#if>
@@ -49,9 +49,9 @@
                               <div class="row justify-content-center">
                                 <div class="col-12 col-md-6">
                                   <#if feedItem.type == 'RIDE'>
-                                    <a href="<@common.teamUrl feedItem.teamId '/rides/'+ feedItem.id />"><img src="<@common.teamUrl feedItem.teamId '/rides/${feedItem.id}/image?width=500' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${feedItem.title} image"></a>
+                                    <a href="<@common.teamUrl feedItem.teamId '/rides/'+ feedItem.permalink!feedItem.id />"><img src="<@common.teamUrl feedItem.teamId '/rides/${feedItem.id}/image?width=500' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${feedItem.title} image"></a>
                                   <#elseif feedItem.type == 'TRIP'>
-                                    <a href="<@common.teamUrl feedItem.teamId '/trips/'+ feedItem.id />"><img src="<@common.teamUrl feedItem.teamId '/trips/${feedItem.id}/image?width=500' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${feedItem.title} image"></a>
+                                    <a href="<@common.teamUrl feedItem.teamId '/trips/'+ feedItem.permalink!feedItem.id />"><img src="<@common.teamUrl feedItem.teamId '/trips/${feedItem.id}/image?width=500' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${feedItem.title} image"></a>
                                   <#elseif feedItem.type == 'PUBLICATION'>
                                     <img src="<@common.teamUrl feedItem.teamId '/publications/${feedItem.id}/image?width=500' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${feedItem.title} image">
                                   </#if>
@@ -61,11 +61,11 @@
                         </div>
                         <#if feedItem.type == 'RIDE'>
                             <div class="card-footer text-center">
-                                <a href="<@common.teamUrl feedItem.teamId '/rides/'+ feedItem.id />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye-fill"></i> Voir</a>
+                                <a href="<@common.teamUrl feedItem.teamId '/rides/'+ feedItem.permalink!feedItem.id />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye-fill"></i> Voir</a>
                             </div>
                         <#elseif feedItem.type == 'TRIP'>
                             <div class="card-footer text-center">
-                                <a href="<@common.teamUrl feedItem.teamId '/trips/'+ feedItem.id />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye-fill"></i> Voir</a>
+                                <a href="<@common.teamUrl feedItem.teamId '/trips/'+ feedItem.permalink!feedItem.id />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye-fill"></i> Voir</a>
                             </div>
                         </#if>
                     </div>

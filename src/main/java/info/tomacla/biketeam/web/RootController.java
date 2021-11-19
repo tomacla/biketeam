@@ -1,22 +1,24 @@
 package info.tomacla.biketeam.web;
 
-import info.tomacla.biketeam.common.Country;
-import info.tomacla.biketeam.common.Strings;
+import info.tomacla.biketeam.common.data.Country;
 import info.tomacla.biketeam.domain.feed.Feed;
 import info.tomacla.biketeam.domain.team.Team;
-import info.tomacla.biketeam.domain.user.Role;
 import info.tomacla.biketeam.domain.user.User;
-import info.tomacla.biketeam.service.TeamService;
-import info.tomacla.biketeam.service.externalpublication.FacebookService;
+import info.tomacla.biketeam.domain.userrole.Role;
+import info.tomacla.biketeam.domain.userrole.UserRole;
+import info.tomacla.biketeam.service.*;
+import info.tomacla.biketeam.service.facebook.FacebookService;
 import info.tomacla.biketeam.web.team.NewTeamForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,10 +31,35 @@ public class RootController extends AbstractController {
     protected TeamService teamService;
 
     @Autowired
+    private MapService mapService;
+
+    @Autowired
+    private RideService rideService;
+
+    @Autowired
+    private TripService tripService;
+
+    @Autowired
     private FacebookService facebookService;
 
+    @Autowired
+    private UserRoleService userRoleService;
+
     @GetMapping
-    public String getRoot(@RequestParam(required = false, name = "error") String error, Principal principal, Model model) {
+    public String getRoot(@RequestParam(required = false, name = "error") String error,
+                          @ModelAttribute(name = "error") String modelError,
+                          Principal principal, Model model) {
+
+        List<String> errors = new ArrayList<>();
+        if (!ObjectUtils.isEmpty(error)) {
+            errors.add(error);
+        }
+        if (!ObjectUtils.isEmpty(modelError)) {
+            errors.add(modelError);
+        }
+        if (!errors.isEmpty()) {
+            model.addAttribute("errors", errors);
+        }
 
         final Optional<User> userFromPrincipal = getUserFromPrincipal(principal);
         if (userFromPrincipal.isPresent()) {
@@ -58,6 +85,13 @@ public class RootController extends AbstractController {
             return "root";
         }
 
+    }
+
+    @GetMapping(value = "login")
+    public String loginPage(@RequestParam(value = "requestUri", required = false) final String referer, Principal principal, Model model) {
+        addGlobalValues(principal, model, "Connexion", null);
+        model.addAttribute("referer", referer == null ? "/" : referer);
+        return "login";
     }
 
     @GetMapping(value = "new")
@@ -88,10 +122,9 @@ public class RootController extends AbstractController {
                     parser.getTimezone(),
                     parser.getDescription());
 
-            newTeam.addRole(targetAdmin, Role.ADMIN);
+            teamService.save(newTeam, true);
 
-            teamService.save(newTeam);
-            teamService.initTeamImage(newTeam);
+            userRoleService.save(new UserRole(newTeam, targetAdmin, Role.ADMIN));
 
             return "redirect:/" + newTeam.getId();
 
@@ -156,21 +189,31 @@ public class RootController extends AbstractController {
     }
 
     @ResponseBody
-    @RequestMapping(value = "/autocomplete/permatitle", method = RequestMethod.GET)
-    public String autocompleteMaps(@RequestParam("title") String title,
-                                   @RequestParam(required = false, defaultValue = "20") int maxSize) {
-        String permatitle = Strings.permatitleFromString(title);
-        permatitle = permatitle.toLowerCase();
-        if (permatitle.length() > maxSize) {
-            permatitle = permatitle.substring(0, maxSize);
-        }
-        for (int i = 0; teamService.idExists(permatitle); i++) {
-            if (permatitle.length() == maxSize) {
-                permatitle = permatitle.substring(0, maxSize - 2);
-            }
-            permatitle = permatitle + (i + 2);
-        }
-        return permatitle;
+    @RequestMapping(value = "/autocomplete/permalink/teams", method = RequestMethod.GET)
+    public String autocompleteTeamPermalink(@RequestParam("title") String title,
+                                            @RequestParam(required = false, defaultValue = "20") int maxSize) {
+        return teamService.getPermalink(title, maxSize, true);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/autocomplete/permalink/maps", method = RequestMethod.GET)
+    public String autocompleteMapPermalink(@RequestParam("title") String title,
+                                           @RequestParam(required = false, defaultValue = "100") int maxSize) {
+        return mapService.getPermalink(title, maxSize, false);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/autocomplete/permalink/rides", method = RequestMethod.GET)
+    public String autocompleteRidePermalink(@RequestParam("title") String title,
+                                            @RequestParam(required = false, defaultValue = "100") int maxSize) {
+        return rideService.getPermalink(title, maxSize, false);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/autocomplete/permalink/trips", method = RequestMethod.GET)
+    public String autocompleteTripPermalink(@RequestParam("title") String title,
+                                            @RequestParam(required = false, defaultValue = "100") int maxSize) {
+        return tripService.getPermalink(title, maxSize, false);
     }
 
     @ResponseBody

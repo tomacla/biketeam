@@ -1,7 +1,7 @@
 package info.tomacla.biketeam.service;
 
 import info.tomacla.biketeam.domain.template.RideTemplate;
-import info.tomacla.biketeam.domain.template.RideTemplateIdNameProjection;
+import info.tomacla.biketeam.domain.template.RideTemplateProjection;
 import info.tomacla.biketeam.domain.template.RideTemplateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +19,7 @@ public class RideTemplateService {
     @Autowired
     private RideTemplateRepository rideTemplateRepository;
 
-    public List<RideTemplateIdNameProjection> listTemplates(String teamId) {
+    public List<RideTemplateProjection> listTemplates(String teamId) {
         return rideTemplateRepository.findAllByTeamIdOrderByNameAsc(teamId);
     }
 
@@ -49,4 +49,5 @@ public class RideTemplateService {
             }
         });
     }
+
 }
