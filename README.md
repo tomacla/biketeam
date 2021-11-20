@@ -50,6 +50,14 @@ spring.security.oauth2.client.registration.strava.client-id=xxx
 spring.security.oauth2.client.registration.strava.client-secret=xxx
 spring.security.oauth2.client.registration.strava.redirect-uri=http[s]://your-domain/login/oauth2/code/strava
 spring.security.oauth2.client.provider.strava.token-uri=https://www.strava.com/oauth/token?client_id=xxx&client_secret=xxx
+# Spring security with Google
+spring.security.oauth2.client.registration.google.client-id=xxx
+spring.security.oauth2.client.registration.google.client-secret=xxx
+spring.security.oauth2.client.registration.google.redirect-uri=http[s]://your-domain/login/oauth2/code/google
+# Spring security with Facebook
+spring.security.oauth2.client.registration.facebook.client-id=xxx
+spring.security.oauth2.client.registration.facebook.client-secret=xxx
+spring.security.oauth2.client.registration.facebook.redirect-uri=http[s]://your-domain/login/oauth2/code/facebook
 ## User used as primary admin
 admin.strava-id=xxx
 admin.first-name=admin
@@ -59,7 +67,7 @@ archive.directory=/path/to/archives
 file.repository=./data/repository
 ## Mapbox integration
 mapbox.api-key=xx
-## Facebook integration (optional)
+## Facebook integration (optional and only for publication not signin)
 facebook.app-id=xx
 facebook.app-secret=xx
 ## Contact email

@@ -5,7 +5,9 @@
     <div class="d-none d-md-block col-4">
 
         <div class="border rounded p-2">
-            <img class="d-block mt-2 mx-auto rounded" src="${_profile_image}" alt="profile">
+            <#if _user.profileImage??>
+                <img class="d-block mt-2 mx-auto rounded" src="${_user.profileImage}" alt="profile">
+            </#if>
             <h5 class="text-center mt-2 pb-2">${user.identity}</h5>
 
            <div class="text-center my-4">
@@ -24,6 +26,8 @@
                         </a>
                     </#list>
                 </div>
+            <#else>
+                <p class="text-muted">Vous n'avez rejoint aucun groupe.</p>
             </#if>
 
         </div>

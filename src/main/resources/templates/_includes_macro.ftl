@@ -73,7 +73,11 @@
             </#list>
         <#else>
             <div class="alert alert-warning" role="alert">
-               Ce groupe n'a pas d'actualité récente.
+                <#if withTeam>
+                    Vous n'avez pas d'actualité récente.
+                <#else>
+                    Ce groupe n'a pas d'actualité récente.
+                </#if>
              </div>
         </#if>
     </div>

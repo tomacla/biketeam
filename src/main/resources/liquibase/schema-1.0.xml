@@ -849,6 +849,18 @@
 
     </changeSet>
 
+    <changeSet id="GITHUB-83-add-oauth2" author="tomacla">
+
+        <addColumn tableName="user_account">
+            <column name="facebook_id" type="VARCHAR(100)" />
+        </addColumn>
+
+        <addColumn tableName="user_account">
+            <column name="google_id" type="VARCHAR(100)" />
+        </addColumn>
+
+    </changeSet>
+
 </databaseChangeLog>
 
 

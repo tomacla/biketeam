@@ -50,10 +50,9 @@ public abstract class AbstractController {
 
         getUserFromPrincipal(principal).ifPresent(user -> {
             model.addAttribute("_authenticated", true);
+            model.addAttribute("_user", user);
+
             model.addAttribute("_admin", user.isAdmin());
-            model.addAttribute("_profile_image", user.getProfileImage());
-            model.addAttribute("_user_id", user.getId());
-            model.addAttribute("_identity", user.getIdentity());
             if (team != null) {
                 model.addAttribute("_team_admin", team.isAdmin(user));
                 model.addAttribute("_team_member", team.isMember(user));

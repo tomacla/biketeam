@@ -20,6 +20,10 @@ public class User {
     private boolean admin;
     @Column(name = "strava_id", unique = true)
     private Long stravaId;
+    @Column(name = "facebook_id", unique = true)
+    private String facebookId;
+    @Column(name = "google_id", unique = true)
+    private String googleId;
     @Column(name = "strava_user_name", unique = true)
     private String stravaUserName;
     @Column(name = "first_name")
@@ -54,7 +58,9 @@ public class User {
                 Long stravaId,
                 String stravaUserName,
                 String city,
-                String profileImage) {
+                String profileImage,
+                String facebookId,
+                String googleId) {
         this.id = UUID.randomUUID().toString();
         setAdmin(admin);
         setStravaId(stravaId);
@@ -63,6 +69,8 @@ public class User {
         setLastName(lastName);
         setCity(city);
         setProfileImage(profileImage);
+        setFacebookId(facebookId);
+        setGoogleId(googleId);
 
         setRoles(new HashSet<>());
         setRideGroups(new HashSet<>());
@@ -91,6 +99,22 @@ public class User {
 
     public void setStravaId(Long stravaId) {
         this.stravaId = stravaId;
+    }
+
+    public String getFacebookId() {
+        return facebookId;
+    }
+
+    public void setFacebookId(String facebookId) {
+        this.facebookId = facebookId;
+    }
+
+    public String getGoogleId() {
+        return googleId;
+    }
+
+    public void setGoogleId(String googleId) {
+        this.googleId = googleId;
     }
 
     public String getStravaUserName() {

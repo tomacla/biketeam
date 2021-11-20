@@ -14,6 +14,13 @@ public interface UserRepository extends CrudRepository<User, String> {
 
     Optional<User> findByStravaId(Long stravaId);
 
+    Optional<User> findByEmail(String email);
+
+    Optional<User> findByFacebookId(String facebookId);
+
+    Optional<User> findByGoogleId(String googleId);
+
     List<User> findByEmailNotNullAndRoles_Team(Team team);
+
 
 }

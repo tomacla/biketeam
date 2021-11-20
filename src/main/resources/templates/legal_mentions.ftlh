@@ -23,7 +23,7 @@
 
         <dl>
             <dt>Profil utilisateur</dt>
-            <dd>Nous collectons une liste des utilisateurs s'étant connectés au moins une fois et ne conservons les données suivantes (si disponible lors de la connexion avec Strava) : id de profil strava, nom, prénom, ville et image de profil.</dd>
+            <dd>Nous collectons une liste des utilisateurs s'étant connectés au moins une fois et ne conservons les données suivantes (si disponible lors de la connexion avec le fournisseur d'identité choisi) : id de profil strava, id du profil facebook, id du profil google, email, nom, prénom, ville et image de profil.</dd>
             <dt>Données de participations aux rides</dt>
             <dd>Nous collectons la liste des participants à chaque ride de chaque groupe Biketeam. Les participants peuvent à tout moment s'ajouter ou se retirer d'un ride.</dd>
         </dl>

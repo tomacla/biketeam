@@ -7,7 +7,6 @@ import info.tomacla.biketeam.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -15,8 +14,6 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -36,7 +33,21 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
 
         DefaultOAuth2User user = (DefaultOAuth2User) super.loadUser(userRequest);
 
-        List<GrantedAuthority> authorities = new ArrayList<>(user.getAuthorities());
+
+        if (userRequest.getClientRegistration().getRegistrationId().equals("facebook")) {
+            return handleFacebookProvider(user);
+        } else if (userRequest.getClientRegistration().getRegistrationId().equals("google")) {
+            return handleGoogleProvider(user);
+        } else if (userRequest.getClientRegistration().getRegistrationId().equals("strava")) {
+            return handleStravaProvider(user);
+        }
+
+        return user;
+
+
+    }
+
+    private OAuth2UserDetails handleStravaProvider(DefaultOAuth2User user) {
         Map<String, Object> attributes = user.getAttributes();
         Long stravaId = Long.valueOf((Integer) attributes.get("id"));
 
@@ -55,7 +66,9 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
                     stravaId,
                     (String) attributes.get("username"),
                     (String) attributes.get("city"),
-                    (String) attributes.get("profile_medium")
+                    (String) attributes.get("profile_medium"),
+                    null,
+                    null
             );
             userService.save(u);
 
@@ -73,7 +86,112 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
         }
 
         return OAuth2UserDetails.create(u);
+    }
 
+
+    private OAuth2UserDetails handleGoogleProvider(DefaultOAuth2User user) {
+        Map<String, Object> attributes = user.getAttributes();
+        String googleId = (String) attributes.get("sub");
+
+        log.debug("Load user with google id {}", googleId);
+
+        Optional<User> optionalUser = userService.getByGoogleId(googleId);
+        if (optionalUser.isEmpty() && attributes.get("email") != null) {
+            optionalUser = userService.getByEmail((String) attributes.get("email"));
+        }
+
+        User u;
+        if (optionalUser.isEmpty()) {
+
+            log.debug("Register new user with google id {}", googleId);
+
+            u = new User(
+                    false,
+                    (String) attributes.get("given_name"),
+                    (String) attributes.get("family_name"),
+                    null,
+                    null,
+                    null,
+                    (String) attributes.get("picture"),
+                    null,
+                    googleId
+            );
+
+            if (attributes.get("email") != null) {
+                u.setEmail((String) attributes.get("email"));
+            }
+
+            userService.save(u);
+
+        } else {
+            u = optionalUser.get();
+
+            if (attributes.get("email") != null) {
+                u.setEmail((String) attributes.get("email"));
+            }
+
+            u.setGoogleId(googleId);
+
+        }
+
+        return OAuth2UserDetails.create(u);
+    }
+
+    private OAuth2UserDetails handleFacebookProvider(DefaultOAuth2User user) {
+        Map<String, Object> attributes = user.getAttributes();
+        String facebookId = (String) attributes.get("id");
+
+        log.debug("Load user with facebook id {}", facebookId);
+
+        Optional<User> optionalUser = userService.getByFacebookId(facebookId);
+        if (optionalUser.isEmpty() && attributes.get("email") != null) {
+            optionalUser = userService.getByEmail((String) attributes.get("email"));
+        }
+
+        User u;
+        if (optionalUser.isEmpty()) {
+
+            log.debug("Register new user with facebook id {}", facebookId);
+
+            String fullName = (String) attributes.get("name");
+            final String[] nameParts = fullName.split(" ");
+            String firstName = fullName;
+            String lastName = "";
+            if (nameParts.length > 1) {
+                firstName = nameParts[0];
+                lastName = nameParts[1];
+            }
+
+            u = new User(
+                    false,
+                    firstName,
+                    lastName,
+                    null,
+                    null,
+                    null,
+                    null,
+                    facebookId,
+                    null
+            );
+
+            if (attributes.get("email") != null) {
+                u.setEmail((String) attributes.get("email"));
+            }
+
+            userService.save(u);
+
+        } else {
+            u = optionalUser.get();
+
+            if (attributes.get("email") != null) {
+                u.setEmail((String) attributes.get("email"));
+            }
+
+            u.setFacebookId(facebookId);
+
+        }
+
+        return OAuth2UserDetails.create(u);
     }
 
 }

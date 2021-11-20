@@ -65,10 +65,10 @@
                         <div class="d-flex flex-row align-items-start justify-content-between">
                             <div class="d-block pe-2">
                                 <#if _authenticated>
-                                    <#if group.hasParticipant(_user_id)>
+                                    <#if group.hasParticipant(_user.id)>
                                         <a href="<@common.teamUrl team.id '/rides/${ride.permalink!ride.id}/remove-participant/${group.id}' />" class="text-nowrap d-block btn btn-sm btn-success"><i class="bi-bicycle bi"></i> J'y vais</a>
                                     <#else>
-                                        <a tabindex="-1" href="<@common.teamUrl team.id '/rides/${ride.permalink!ride.id}/add-participant/${group.id}' />" class="text-nowrap d-block btn btn-sm btn-outline-success <#if ride.isParticipantInAnotherGroup(group.id, _user_id)>disabled</#if>"><i class="bi-bicycle bi"></i> J'y vais</a>
+                                        <a tabindex="-1" href="<@common.teamUrl team.id '/rides/${ride.permalink!ride.id}/add-participant/${group.id}' />" class="text-nowrap d-block btn btn-sm btn-outline-success <#if ride.isParticipantInAnotherGroup(group.id, _user.id)>disabled</#if>"><i class="bi-bicycle bi"></i> J'y vais</a>
                                      </#if>
                                 <#else>
                                         <a href="<@common.teamUrl '' '/login?requestUri=/${team.id}/rides/${ride.permalink!ride.id}/add-participant/${group.id}' />" class="text-nowrap d-block btn btn-sm btn-outline-success"><i class="bi-bicycle bi"></i> J'y vais</a>

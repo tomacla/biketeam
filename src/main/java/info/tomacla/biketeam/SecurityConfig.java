@@ -12,15 +12,22 @@ import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.client.JdbcOAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.OAuth2AuthorizationFailureHandler;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.util.ReflectionUtils;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.lang.reflect.Field;
 
 @Configuration
@@ -46,7 +53,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             auth.antMatchers("/css/**").permitAll();
             auth.antMatchers("/js/**").permitAll();
             auth.antMatchers("/teams").permitAll();
-            auth.antMatchers("/login").permitAll();
+            auth.antMatchers("/login/**").permitAll();
             auth.antMatchers("/logout").permitAll();
             auth.antMatchers("/legal-mentions").permitAll();
             auth.antMatchers("/*/image").permitAll();

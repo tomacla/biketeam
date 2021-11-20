@@ -40,6 +40,18 @@ public class UserService {
         return userRepository.findByStravaId(stravaId);
     }
 
+    public Optional<User> getByFacebookId(String facebookId) {
+        return userRepository.findByFacebookId(facebookId);
+    }
+
+    public Optional<User> getByGoogleId(String googleId) {
+        return userRepository.findByGoogleId(googleId);
+    }
+
+    public Optional<User> getByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
     public void save(User user) {
         userRepository.save(user);
     }
@@ -80,7 +92,7 @@ public class UserService {
             return true;
         }
 
-        final Team team = teamService.get(teamId).orElseThrow(() -> new IllegalArgumentException("Unknown team"));
+        final Team team = teamService.get(teamId).orElseThrow(() -> new IllegalArgumentException("Unknown team " + teamId));
         if (team.getVisibility().equals(Visibility.PUBLIC) || team.getVisibility().equals(Visibility.PUBLIC_UNLISTED)) {
             return true;
         }
@@ -105,9 +117,12 @@ public class UserService {
                     adminStravaId,
                     null,
                     null,
+                    null,
+                    null,
                     null));
         }
 
     }
+
 
 }

@@ -52,7 +52,7 @@
         </#if>
         <#if _authenticated>
             <li class="nav-item">
-               <a class="nav-link" href="<@common.teamUrl '' '/users/me' />"><img class="rounded" height="24" src="${_profile_image}" alt="profile"> ${_identity}</a>
+               <a class="nav-link" href="<@common.teamUrl '' '/users/me' />"><#if _user.profileImage??><img class="rounded" height="24" src="${_user.profileImage}" alt="profile"></#if> ${_user.identity}</a>
             </li>
             <#if _admin>
                 <li class="nav-item">

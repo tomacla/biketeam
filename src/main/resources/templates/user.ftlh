@@ -8,7 +8,9 @@
 
             <h5>${(user.firstName)!'inconnu'} ${(user.lastName)!'inconnu'}</h5>
             <div class="mb-3">
-                <img class="rounded" src="${user.profileImage}" alt="profile">
+                <#if user.profileImage??>
+                    <img class="rounded" src="${user.profileImage}" alt="profile">
+                </#if>
             </div>
             <dl class="mb-3">
                 <#if user.stravaId??>

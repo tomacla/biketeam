@@ -50,7 +50,7 @@ public class TeamAdminUserController extends AbstractController {
             final Optional<User> optionalUser = userService.getByStravaId(stravaId);
             User target;
             if (optionalUser.isEmpty()) {
-                target = new User(false, "Inconnu", "Inconnu", stravaId, null, null, null);
+                target = new User(false, "Inconnu", "Inconnu", stravaId, null, null, null, null, null);
             } else {
                 target = optionalUser.get();
             }
