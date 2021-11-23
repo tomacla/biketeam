@@ -70,7 +70,6 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
                     null,
                     null
             );
-            userService.save(u);
 
         } else {
 
@@ -81,9 +80,10 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
             u.setLastName((String) attributes.get("lastname"));
             u.setCity((String) attributes.get("city"));
             u.setProfileImage((String) attributes.get("profile_medium"));
-            userService.save(u);
 
         }
+
+        userService.save(u);
 
         return OAuth2UserDetails.create(u);
     }
@@ -121,8 +121,6 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
                 u.setEmail((String) attributes.get("email"));
             }
 
-            userService.save(u);
-
         } else {
             u = optionalUser.get();
 
@@ -133,6 +131,8 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
             u.setGoogleId(googleId);
 
         }
+
+        userService.save(u);
 
         return OAuth2UserDetails.create(u);
     }
@@ -178,8 +178,6 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
                 u.setEmail((String) attributes.get("email"));
             }
 
-            userService.save(u);
-
         } else {
             u = optionalUser.get();
 
@@ -190,6 +188,8 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
             u.setFacebookId(facebookId);
 
         }
+
+        userService.save(u);
 
         return OAuth2UserDetails.create(u);
     }

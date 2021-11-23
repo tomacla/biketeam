@@ -13,14 +13,32 @@
                 </#if>
             </div>
             <dl class="mb-3">
-                <#if user.stravaId??>
-                    <dt>Strava</dt>
-                    <dd><a class="link-dark" href="https://www.strava.com/athletes/${user.stravaId?c}" target="_blank">${(user.stravaId?c)}</a></dd>
-                </#if>
+                <dt>Ville</dt>
                 <#if user.city??>
-                    <dt>Ville</dt>
                     <dd>${user.city}</dd>
+                <#else>
+                    <dd class="text-muted">Non renseignée</dd>
                 </#if>
+                <hr/>
+                <dt><i class="bi bi-strava"></i> Strava</dt>
+                <#if user.stravaId??>
+                        <dd><a class="link-dark" href="https://www.strava.com/athletes/${user.stravaId?c}" target="_blank">${(user.stravaId?c)}</a></dd>
+                <#else>
+                    <dd class="text-muted">Non connecté</dd>
+                </#if>
+                <dt><i class="bi bi-google"></i> Google</dt>
+                <#if user.googleId??>
+                    <dd>Connecté</dd>
+                <#else>
+                    <dd class="text-muted">Non connecté</dd>
+                </#if>
+                <dt><i class="bi bi-facebook"></i> Facebook</dt>
+                <#if user.facebookId??>
+                        <dd>Connecté</dd>
+                <#else>
+                    <dd class="text-muted">Non connecté</dd>
+                </#if>
+
             </dl>
 
         </div>
@@ -30,7 +48,27 @@
     <div class="col-12 col-md-8">
 
         <form name="form-user" action="<@common.teamUrl '' '/users/me' />" method="POST" class="border rounded p-4">
-            <div class="mb-3">
+
+             <h5>Strava</h5>
+
+             <div class="alert alert-info" role="alert">
+                Le Strava ID permet de reconnaitre l'utilisateur lors de la connexion avec Strava.
+              </div>
+
+             <div class="mb-3">
+               <label for="form-user-strava" class="form-label">Strava ID</label>
+               <input autocomplete="off" name="stravaId" value="${formdata.stravaId}" type="text" class="form-control" id="form-user-strava">
+             </div>
+
+             <hr/>
+
+             <h5>Email</h5>
+
+             <div class="alert alert-info" role="alert">
+                 L'adresse email permet de reconnaitre l'utilisateur lors de la connexion Google ou Facebook.
+               </div>
+
+              <div class="mb-3">
                 <label for="form-user-email" class="form-label">Email</label>
                 <input autocomplete="off" name="email" value="${formdata.email}" type="email" class="form-control" id="form-user-email">
               </div>

@@ -28,6 +28,7 @@ public class UserController extends AbstractController {
 
         final EditUserForm form = EditUserForm.builder()
                 .withEmail(user.getEmail())
+                .withStravaId(user.getStravaId())
                 .withEmailPublishPublications(user.isEmailPublishPublications())
                 .withEmailPublishRides(user.isEmailPublishRides())
                 .withEmailPublishTrips(user.isEmailPublishTrips())
@@ -55,6 +56,7 @@ public class UserController extends AbstractController {
 
         final User user = optionalConnectedUser.get();
         user.setEmail(parser.getEmail());
+        user.setStravaId(parser.getStravaId());
         user.setEmailPublishPublications(parser.isEmailPublishPublications());
         user.setEmailPublishRides(parser.isEmailPublishRides());
         user.setEmailPublishTrips(parser.isEmailPublishTrips());

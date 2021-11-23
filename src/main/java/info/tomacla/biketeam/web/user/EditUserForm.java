@@ -1,15 +1,18 @@
 package info.tomacla.biketeam.web.user;
 
 import info.tomacla.biketeam.common.datatype.Strings;
+import org.springframework.util.ObjectUtils;
 
 public class EditUserForm {
 
+    private String stravaId;
     private String email;
     private String emailPublishTrips;
     private String emailPublishRides;
     private String emailPublishPublications;
 
     public EditUserForm() {
+        setStravaId(null);
         setEmail(null);
         setEmailPublishPublications(null);
         setEmailPublishRides(null);
@@ -18,6 +21,14 @@ public class EditUserForm {
 
     public static EditUserFormBuilder builder() {
         return new EditUserFormBuilder();
+    }
+
+    public String getStravaId() {
+        return stravaId;
+    }
+
+    public void setStravaId(String stravaId) {
+        this.stravaId = Strings.requireNonBlankOrDefault(stravaId, "");
     }
 
     public String getEmail() {
@@ -64,6 +75,13 @@ public class EditUserForm {
             this.form = form;
         }
 
+        public Long getStravaId() {
+            if(ObjectUtils.isEmpty(form.getStravaId())) {
+                return null;
+            }
+            return Long.valueOf(form.getStravaId());
+        }
+
         public String getEmail() {
             return form.getEmail();
         }
@@ -92,6 +110,11 @@ public class EditUserForm {
 
         public EditUserFormBuilder withEmail(String email) {
             form.setEmail(email);
+            return this;
+        }
+
+        public EditUserFormBuilder withStravaId(Long stravaId) {
+            form.setStravaId(stravaId != null ? String.valueOf(stravaId) : null);
             return this;
         }
 
