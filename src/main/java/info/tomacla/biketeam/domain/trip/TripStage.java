@@ -6,13 +6,14 @@ import info.tomacla.biketeam.domain.map.Map;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Table(name = "trip_stage")
 public class TripStage {
 
     @Id
-    private String id;
+    private String id = UUID.randomUUID().toString();
     @ManyToOne(fetch = FetchType.EAGER)
     private Trip trip;
     @Column(name = "date")
@@ -22,36 +23,20 @@ public class TripStage {
     @JoinColumn(name = "map_id")
     private Map map;
 
-    public TripStage() {
-    }
-
-    public TripStage(String name,
-                     LocalDate date,
-                     Map map) {
-        setName(name);
-        setDate(date);
-        setMap(map);
-    }
-
     public String getId() {
         return id;
     }
 
     public void setId(String id) {
-        this.id = id;
+        this.id = Objects.requireNonNull(id, "id is null");
     }
 
     public Trip getTrip() {
         return trip;
     }
 
-    public void setTrip(Trip trip, int index) {
-        this.trip = Objects.requireNonNull(trip);
-        this.id = trip.getId() + "-" + index;
-    }
-
-    public void removeTrip() {
-        this.trip = null;
+    public void setTrip(Trip trip) {
+        this.trip = trip;
     }
 
     public String getName() {
@@ -76,11 +61,6 @@ public class TripStage {
 
     public void setMap(Map map) {
         this.map = map;
-    }
-
-    public int getStageIndex() {
-        final String[] parts = this.id.split("-");
-        return Integer.parseInt(parts[parts.length - 1]);
     }
 
     @Override

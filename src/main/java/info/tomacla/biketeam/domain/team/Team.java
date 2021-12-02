@@ -13,19 +13,20 @@ import java.time.ZoneOffset;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "team")
 public class Team {
 
     @Id
-    private String id;
+    private String id = UUID.randomUUID().toString();
     private String name;
     private String city;
     @Enumerated(EnumType.STRING)
-    private Country country;
+    private Country country = Country.FR;
     @Column(name = "created_at")
-    private LocalDate createdAt;
+    private LocalDate createdAt = LocalDate.now(ZoneOffset.UTC);
     @OneToOne(mappedBy = "team", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private TeamDescription description;
@@ -36,33 +37,14 @@ public class Team {
     @PrimaryKeyJoinColumn
     private TeamIntegration integration;
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private Set<UserRole> roles;
+    private Set<UserRole> roles = new HashSet<>();
     @Enumerated(EnumType.STRING)
-    private Visibility visibility;
+    private Visibility visibility = Visibility.PUBLIC;
 
     public Team() {
-    }
-
-    public Team(String id,
-                String name,
-                String city,
-                Country country,
-                String timezone,
-                String defaultDescription) {
-
-        setId(id.toLowerCase());
-        setName(name);
-        setCity(city);
-        setCountry(country);
-
-        setRoles(new HashSet<>());
-        setCreatedAt(LocalDate.now(ZoneOffset.UTC));
-        setVisibility(Visibility.PUBLIC);
-
-        setDescription(new TeamDescription(this, defaultDescription));
-        setConfiguration(new TeamConfiguration(this, timezone));
-        setIntegration(new TeamIntegration(this));
-
+        setConfiguration(new TeamConfiguration());
+        setIntegration(new TeamIntegration());
+        setDescription(new TeamDescription());
     }
 
     public String getId() {
@@ -70,7 +52,7 @@ public class Team {
     }
 
     public void setId(String id) {
-        this.id = Objects.requireNonNull(id);
+        this.id = Strings.requireNonBlank(id, "id is null").toLowerCase();
     }
 
     public String getName() {
@@ -102,7 +84,7 @@ public class Team {
     }
 
     public void setCreatedAt(LocalDate createdAt) {
-        this.createdAt = createdAt;
+        this.createdAt = Objects.requireNonNull(createdAt);
     }
 
     public TeamDescription getDescription() {
@@ -111,6 +93,7 @@ public class Team {
 
     public void setDescription(TeamDescription description) {
         this.description = Objects.requireNonNull(description);
+        this.description.setTeam(this);
     }
 
     public TeamConfiguration getConfiguration() {
@@ -119,6 +102,7 @@ public class Team {
 
     public void setConfiguration(TeamConfiguration configuration) {
         this.configuration = Objects.requireNonNull(configuration);
+        this.configuration.setTeam(this);
     }
 
     public TeamIntegration getIntegration() {
@@ -127,6 +111,7 @@ public class Team {
 
     public void setIntegration(TeamIntegration integration) {
         this.integration = Objects.requireNonNull(integration);
+        this.integration.setTeam(this);
     }
 
     public Visibility getVisibility() {
@@ -134,7 +119,7 @@ public class Team {
     }
 
     public void setVisibility(Visibility visibility) {
-        this.visibility = Objects.requireNonNull(visibility);
+        this.visibility = Objects.requireNonNullElse(visibility, Visibility.PUBLIC);
     }
 
     public Set<UserRole> getRoles() {
@@ -150,25 +135,15 @@ public class Team {
     }
 
     public boolean isAdmin(User user) {
-        for (UserRole role : this.roles) {
-            if (role.getUser().equals(user) && role.getRole().equals(Role.ADMIN)) {
-                return true;
-            }
-        }
-        return false;
+        return this.roles.stream().anyMatch(role -> role.getUser().equals(user) && role.getRole().equals(Role.ADMIN));
     }
 
     public boolean isMember(User user) {
-        for (UserRole role : this.roles) {
-            if (role.getUser().equals(user)) {
-                return true;
-            }
-        }
-        return false;
+        return this.roles.stream().anyMatch(role -> role.getUser().equals(user));
     }
 
     public void removeUser(User user) {
-        this.roles.removeIf(role -> role.getUser().equals(user));
+        this.roles.remove(user);
     }
 
     @Override

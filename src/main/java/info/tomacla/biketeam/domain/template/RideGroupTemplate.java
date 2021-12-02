@@ -13,7 +13,7 @@ import java.util.UUID;
 public class RideGroupTemplate {
 
     @Id
-    private String id;
+    private String id = UUID.randomUUID().toString();
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ride_template_id")
     private RideTemplate rideTemplate;
@@ -33,39 +33,20 @@ public class RideGroupTemplate {
     @Embedded
     private Point meetingPoint;
 
-    public RideGroupTemplate() {
-    }
-
-    public RideGroupTemplate(String name,
-                             double lowerSpeed,
-                             double upperSpeed,
-                             String meetingLocation,
-                             LocalTime meetingTime,
-                             Point meetingPoint) {
-        this.id = UUID.randomUUID().toString(); // tmp id
-        setName(name);
-        setLowerSpeed(lowerSpeed);
-        setUpperSpeed(upperSpeed);
-        setMeetingLocation(meetingLocation);
-        setMeetingTime(meetingTime);
-        setMeetingPoint(meetingPoint);
-    }
-
     public String getId() {
         return id;
     }
 
     public void setId(String id) {
-        this.id = id;
+        this.id = Objects.requireNonNull(id, "id is null");
     }
 
     public RideTemplate getRideTemplate() {
         return rideTemplate;
     }
 
-    public void setRideTemplate(RideTemplate rideTemplate, int index) {
-        this.rideTemplate = Objects.requireNonNull(rideTemplate);
-        this.id = rideTemplate.getId() + "-" + index;
+    public void setRideTemplate(RideTemplate rideTemplate) {
+        this.rideTemplate = Objects.requireNonNull(rideTemplate, "rideTemplate is null");
     }
 
     public String getName() {
@@ -105,7 +86,7 @@ public class RideGroupTemplate {
     }
 
     public void setMeetingTime(LocalTime meetingTime) {
-        this.meetingTime = Objects.requireNonNull(meetingTime);
+        this.meetingTime = Objects.requireNonNull(meetingTime, "meetingTime is null");
     }
 
     public Point getMeetingPoint() {

@@ -19,22 +19,21 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     public static final String DEFAULT = "/";
     public static final String SEPARATOR = ",";
 
-    @Autowired
+
     private SSOService ssoService;
+
+    @Autowired
+    public OAuth2SuccessHandler(SSOService ssoService) {
+        this.ssoService = ssoService;
+    }
 
     @Override
     protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response) {
 
-        UriComponents uriComponents = UriComponentsBuilder.newInstance()
-                .query(request.getQueryString())
-                .build();
-
-        MultiValueMap<String, String> queryParams = uriComponents.getQueryParams();
-        String stateEncoded = queryParams.getFirst("state");
-        if (stateEncoded == null) {
+        String stateDecoded = getStateDecoded(request);
+        if (stateDecoded == null) {
             return DEFAULT;
         }
-        String stateDecoded = URLDecoder.decode(stateEncoded, StandardCharsets.UTF_8);
         String[] split = stateDecoded.split(SEPARATOR);
         if (split.length == 2) {
             String referer = split[1];
@@ -54,11 +53,28 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         return super.determineTargetUrl(request, response);
     }
 
+    private String getStateDecoded(HttpServletRequest request) {
+        UriComponents uriComponents = UriComponentsBuilder.newInstance()
+                .query(request.getQueryString())
+                .build();
+
+        MultiValueMap<String, String> queryParams = uriComponents.getQueryParams();
+        String stateEncoded = queryParams.getFirst("state");
+
+        if (stateEncoded == null) {
+            return null;
+        }
+
+        return URLDecoder.decode(stateEncoded, StandardCharsets.UTF_8);
+    }
+
     private String getRememberMe(HttpServletRequest request) {
         final Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equalsIgnoreCase("remember-me")) {
-                return cookie.getValue();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equalsIgnoreCase("remember-me")) {
+                    return cookie.getValue();
+                }
             }
         }
         return null;

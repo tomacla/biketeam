@@ -146,7 +146,7 @@ public class AdminTeamTripController extends AbstractController {
                 target.setType(parser.getType());
                 target.setLowerSpeed(parser.getLowerSpeed());
                 target.setUpperSpeed(parser.getUpperSpeed());
-                target.setMeetingPoint(parser.getMeetingPoint().orElse(null));
+                target.setMeetingPoint(parser.getMeetingPoint());
                 target.setMeetingLocation(parser.getMeetingLocation());
                 target.setMeetingTime(parser.getMeetingTime());
                 target.setPermalink(parser.getPermalink());
@@ -154,10 +154,22 @@ public class AdminTeamTripController extends AbstractController {
                 target.addOrReplaceStages(parser.getStages(teamId, mapService));
 
             } else {
-                target = new Trip(team.getId(), parser.getType(), parser.getStartDate(),
-                        parser.getEndDate(), parser.getLowerSpeed(), parser.getUpperSpeed(), parser.getPublishedAt(timezone),
-                        parser.getTitle(), parser.getDescription(), parser.getFile().isPresent(), parser.getMeetingLocation(), parser.getMeetingTime(),
-                        parser.getMeetingPoint().orElse(null));
+                target = new Trip();
+                target.setTeamId(team.getId());
+                target.setType(parser.getType());
+                target.setStartDate(parser.getStartDate());
+                target.setEndDate(parser.getEndDate());
+                target.setLowerSpeed(parser.getLowerSpeed());
+                target.setUpperSpeed(parser.getUpperSpeed());
+                target.setPublishedAt(parser.getPublishedAt(timezone));
+                target.setTitle(parser.getTitle());
+                target.setDescription(parser.getDescription());
+                target.setImaged(parser.getFile().isPresent());
+                target.setMeetingLocation(parser.getMeetingLocation());
+                target.setMeetingTime(parser.getMeetingTime());
+                target.setMeetingPoint(parser.getMeetingPoint());
+                target.setPermalink(parser.getPermalink());
+
                 // new group so just add all groups
                 parser.getStages(team.getId(), mapService).forEach(target::addStage);
             }

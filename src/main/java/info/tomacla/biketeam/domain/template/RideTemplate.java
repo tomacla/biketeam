@@ -13,45 +13,25 @@ import java.util.stream.Collectors;
 public class RideTemplate {
 
     @Id
-    private String id;
+    private String id = UUID.randomUUID().toString();
     @Column(name = "team_id")
     private String teamId;
     private String name;
     @Enumerated(EnumType.STRING)
-    private RideType type;
+    private RideType type = RideType.REGULAR;
     @Column(length = 8000)
     private String description;
     @OneToMany(mappedBy = "rideTemplate", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private Set<RideGroupTemplate> groups;
+    private Set<RideGroupTemplate> groups = new HashSet<>();
     @Column
     private Integer increment;
-
-    @Transient
-    private int nextGroupIndex = 0;
-
-    public RideTemplate() {
-    }
-
-    public RideTemplate(String teamId,
-                        String name,
-                        RideType type,
-                        String description) {
-
-        this.id = UUID.randomUUID().toString();
-        setTeamId(teamId);
-        setName(name);
-        setType(type);
-        setDescription(description);
-        this.groups = new HashSet<>();
-
-    }
 
     public String getId() {
         return id;
     }
 
     protected void setId(String id) {
-        this.id = id;
+        this.id = Objects.requireNonNull(id, "id is null");
     }
 
     public String getTeamId() {
@@ -59,7 +39,7 @@ public class RideTemplate {
     }
 
     public void setTeamId(String teamId) {
-        this.teamId = Objects.requireNonNull(teamId);
+        this.teamId = Objects.requireNonNull(teamId, "teamId is null");
     }
 
     public String getName() {
@@ -75,7 +55,7 @@ public class RideTemplate {
     }
 
     public void setType(RideType type) {
-        this.type = Objects.requireNonNull(type, "type is null");
+        this.type = Objects.requireNonNullElse(type, RideType.REGULAR);
     }
 
     public String getDescription() {
@@ -91,7 +71,11 @@ public class RideTemplate {
     }
 
     public void setIncrement(Integer increment) {
-        this.increment = increment;
+        if (increment == null || increment < 0) {
+            this.increment = null;
+        } else {
+            this.increment = increment;
+        }
     }
 
     public Set<RideGroupTemplate> getGroups() {
@@ -110,11 +94,12 @@ public class RideTemplate {
     }
 
     public void addGroup(RideGroupTemplate group) {
-        group.setRideTemplate(this, nextGroupIndex++);
+        group.setRideTemplate(this);
         groups.add(group);
     }
 
     public void clearGroups() {
+        this.groups.forEach(group -> group.setRideTemplate(null));
         this.groups.clear();
     }
 

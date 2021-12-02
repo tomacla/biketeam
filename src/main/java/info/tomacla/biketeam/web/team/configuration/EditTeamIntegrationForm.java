@@ -6,35 +6,19 @@ import org.springframework.util.ObjectUtils;
 
 public class EditTeamIntegrationForm {
 
-    private String facebookGroupDetails;
-    private String facebookPublishTrips;
-    private String facebookPublishRides;
-    private String facebookPublishPublications;
-    private String mattermostApiToken;
-    private String mattermostChannelID;
-    private String mattermostApiEndpoint;
-    private String mattermostPublishTrips;
-    private String mattermostPublishRides;
-    private String mattermostPublishPublications;
-    private String heatmapCenterLat;
-    private String heatmapCenterLng;
-    private String heatmapDisplay;
-
-    public EditTeamIntegrationForm() {
-        setFacebookGroupDetails(null);
-        setFacebookPublishPublications(null);
-        setFacebookPublishRides(null);
-        setFacebookPublishTrips(null);
-        setMattermostApiEndpoint(null);
-        setMattermostApiToken(null);
-        setMattermostChannelID(null);
-        setMattermostPublishPublications(null);
-        setMattermostPublishRides(null);
-        setMattermostPublishTrips(null);
-        setHeatmapCenterLat(null);
-        setHeatmapCenterLng(null);
-        setHeatmapDisplay(null);
-    }
+    private String facebookGroupDetails = null;
+    private String facebookPublishTrips = null;
+    private String facebookPublishRides = null;
+    private String facebookPublishPublications = null;
+    private String mattermostApiToken = "";
+    private String mattermostChannelID = "";
+    private String mattermostApiEndpoint = "";
+    private String mattermostPublishTrips = null;
+    private String mattermostPublishRides = null;
+    private String mattermostPublishPublications = null;
+    private String heatmapCenterLat = "";
+    private String heatmapCenterLng = "";
+    private String heatmapDisplay = null;
 
     public static EditTeamIntegrationFormBuilder builder() {
         return new EditTeamIntegrationFormBuilder();
@@ -174,15 +158,15 @@ public class EditTeamIntegrationForm {
         }
 
         public String getMattermostApiToken() {
-            return form.getMattermostApiToken();
+            return Strings.requireNonBlankOrNull(form.getMattermostApiToken());
         }
 
         public String getMattermostChannelID() {
-            return form.getMattermostChannelID();
+            return Strings.requireNonBlankOrNull(form.getMattermostChannelID());
         }
 
         public String getMattermostApiEndpoint() {
-            return form.getMattermostApiEndpoint();
+            return Strings.requireNonBlankOrNull(form.getMattermostApiEndpoint());
         }
 
         public boolean isMattermostPublishRides() {

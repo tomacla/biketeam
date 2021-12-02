@@ -24,40 +24,54 @@ public class OAuth2StateWriter extends Base64StringKeyGenerator {
 
     private final StringKeyGenerator generator = new Base64StringKeyGenerator(Base64.getUrlEncoder());
 
-    @Autowired
     private UrlService urlService;
+    private TeamService teamService;
 
     @Autowired
-    private TeamService teamService;
+    public OAuth2StateWriter(UrlService urlService, TeamService teamService) {
+        this.urlService = urlService;
+        this.teamService = teamService;
+    }
 
     @Override
     public String generateKey() {
         HttpServletRequest currentHttpRequest = getCurrentHttpRequest();
         if (currentHttpRequest != null) {
-            final String customRequestUri = getCustomRequestUri(currentHttpRequest);
-            String redirect = null;
-            if (customRequestUri != null && !customRequestUri.equals("/login")) {
-                String teamId = extractTeamId(customRequestUri);
-                if (!ObjectUtils.isEmpty(teamId)) {
-                    final Optional<Team> team = teamService.get(teamId);
-                    if (team.isPresent()) {
-                        String resultUri = extractResulting(customRequestUri);
-                        final String teamUrl = urlService.getTeamUrl(team.get());
-                        redirect = teamUrl + resultUri;
-                    } else {
-                        redirect = urlService.getUrlWithSuffix(customRequestUri);
-                    }
-                }
-            }
-
-            if (!ObjectUtils.isEmpty(redirect)) {
-                return generator.generateKey()
-                        + OAuth2SuccessHandler.SEPARATOR
-                        + redirect;
+            String key = generateKey(currentHttpRequest);
+            if (key != null) {
+                return key;
             }
 
         }
         return generator.generateKey();
+    }
+
+    protected String generateKey(HttpServletRequest currentHttpRequest) {
+
+        final String customRequestUri = getCustomRequestUri(currentHttpRequest);
+        String redirect = null;
+        if (customRequestUri != null && !customRequestUri.equals("/login")) {
+            String teamId = extractTeamId(customRequestUri);
+            if (!ObjectUtils.isEmpty(teamId)) {
+                final Optional<Team> team = teamService.get(teamId);
+                if (team.isPresent()) {
+                    String resultUri = extractResulting(customRequestUri);
+                    final String teamUrl = urlService.getTeamUrl(team.get());
+                    redirect = teamUrl + resultUri;
+                } else {
+                    redirect = urlService.getUrlWithSuffix(customRequestUri);
+                }
+            }
+        }
+
+        if (!ObjectUtils.isEmpty(redirect)) {
+            return generator.generateKey()
+                    + OAuth2SuccessHandler.SEPARATOR
+                    + redirect;
+        }
+
+        return null;
+
     }
 
     private HttpServletRequest getCurrentHttpRequest() {

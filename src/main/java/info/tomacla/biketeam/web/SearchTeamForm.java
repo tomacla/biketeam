@@ -7,19 +7,11 @@ import java.util.Objects;
 
 public class SearchTeamForm {
 
-    private int page;
-    private int pageSize;
-    private String name;
-    private String city;
-    private String country;
-
-    public SearchTeamForm() {
-        setPage(0);
-        setPageSize(9);
-        setName(null);
-        setCountry(null);
-        setCity(null);
-    }
+    private int page = 0;
+    private int pageSize = 9;
+    private String name = "";
+    private String city = "";
+    private String country = "";
 
     public static SearchTeamFormBuilder builder() {
         return new SearchTeamFormBuilder();
@@ -94,7 +86,7 @@ public class SearchTeamForm {
         }
 
         public Country getCountry() {
-            if (form.getCountry() != null && !form.getCountry().isBlank()) {
+            if (!Strings.isBlank(form.getCountry())) {
                 return Country.valueOf(form.getCountry());
             }
             return null;

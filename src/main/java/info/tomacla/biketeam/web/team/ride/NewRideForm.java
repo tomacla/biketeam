@@ -8,7 +8,6 @@ import info.tomacla.biketeam.domain.ride.RideType;
 import info.tomacla.biketeam.domain.template.RideGroupTemplate;
 import info.tomacla.biketeam.domain.template.RideTemplate;
 import info.tomacla.biketeam.service.MapService;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
@@ -22,52 +21,35 @@ import java.util.stream.Collectors;
 
 public class NewRideForm {
 
-    private String id;
-    private String permalink;
-    private String type;
-    private String date;
-    private String publishedAtDate;
-    private String publishedAtTime;
-    private String title;
-    private String description;
-    private String templateId;
-    private MultipartFile file;
-    private List<NewRideGroupForm> groups;
+    private String id = "new";
+    private String permalink = "";
+    private String type = RideType.REGULAR.name();
+    private String date = "";
+    private String publishedAtDate = Dates.formatDate(LocalDate.now());
+    private String publishedAtTime = "12:00";
+    private String title = "";
+    private String description = "";
+    private String templateId = "";
+    private MultipartFile file = null;
+    private List<NewRideGroupForm> groups = new ArrayList<>();
 
     public NewRideForm() {
         this(1);
     }
 
     public NewRideForm(int numberOfGroups) {
-        setId(null);
-        setPermalink(null);
-        setType(null);
-        setDate(null);
-        setPublishedAtDate(null);
-        setPublishedAtTime(null);
-        setTitle(null);
-        setFile(null);
-        setDescription(null);
-        setTemplateId(null);
-        groups = new ArrayList<>();
         for (int i = 0; i < (Math.max(numberOfGroups, 1)); i++) {
             groups.add(NewRideGroupForm.builder().withName("G" + (i + 1)).get());
         }
     }
 
     public NewRideForm(RideTemplate rideTemplate) {
-        setId(null);
-        setPermalink(null);
         setType(rideTemplate.getType().name());
-        setDate(null);
-        setPublishedAtDate(null);
-        setPublishedAtTime(null);
         if (rideTemplate.getIncrement() != null) {
             setTitle(rideTemplate.getName() + " #" + rideTemplate.getIncrement());
         } else {
             setTitle(rideTemplate.getName());
         }
-        setFile(null);
         setDescription(rideTemplate.getDescription());
         setTemplateId(rideTemplate.getId());
         groups = new ArrayList<>();
@@ -196,18 +178,15 @@ public class NewRideForm {
         }
 
         public String getId() {
-            return form.getId();
+            return Strings.requireNonBlankOrNull(form.getId());
         }
 
         public String getPermalink() {
-            if (ObjectUtils.isEmpty(form.getPermalink())) {
-                return null;
-            }
-            return form.getPermalink();
+            return Strings.requireNonBlankOrNull(form.getPermalink());
         }
 
         public String getTitle() {
-            return form.getTitle();
+            return Strings.requireNonBlankOrNull(form.getTitle());
         }
 
         public LocalDate getDate() {
@@ -223,14 +202,11 @@ public class NewRideForm {
         }
 
         public String getDescription() {
-            return form.getDescription();
+            return Strings.requireNonBlankOrNull(form.getDescription());
         }
 
         public String getTemplateId() {
-            if (form.getTemplateId() == null || form.getTemplateId().isBlank()) {
-                return null;
-            }
-            return form.getTemplateId();
+            return Strings.requireNonBlankOrNull(form.getTemplateId());
         }
 
         public Optional<MultipartFile> getFile() {
@@ -244,16 +220,17 @@ public class NewRideForm {
             return form.getGroups().stream().map(g -> {
                 NewRideGroupForm.NewRideGroupFormParser parser = g.parser();
                 Map map = null;
-                if (parser.getMapId().isPresent()) {
-                    map = mapService.get(teamId, parser.getMapId().get()).orElse(null);
+                if (parser.getMapId() != null) {
+                    map = mapService.get(teamId, parser.getMapId()).orElse(null);
                 }
-                final RideGroup gg = new RideGroup(parser.getName(),
-                        parser.getLowerSpeed(),
-                        parser.getUpperSpeed(),
-                        map,
-                        parser.getMeetingLocation(),
-                        parser.getMeetingTime(),
-                        parser.getMeetingPoint().orElse(null));
+                final RideGroup gg = new RideGroup();
+                gg.setName(parser.getName());
+                gg.setLowerSpeed(parser.getLowerSpeed());
+                gg.setUpperSpeed(parser.getUpperSpeed());
+                gg.setMap(map);
+                gg.setMeetingLocation(parser.getMeetingLocation());
+                gg.setMeetingTime(parser.getMeetingTime());
+                gg.setMeetingPoint(parser.getMeetingPoint());
 
                 if (parser.getId() != null) {
                     gg.setId(parser.getId());

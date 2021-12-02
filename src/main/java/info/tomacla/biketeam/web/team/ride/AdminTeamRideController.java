@@ -166,8 +166,16 @@ public class AdminTeamRideController extends AbstractController {
 
             } else {
 
-                target = new Ride(team.getId(), parser.getPermalink(), parser.getType(), parser.getDate(), parser.getPublishedAt(timezone),
-                        parser.getTitle(), parser.getDescription(), parser.getFile().isPresent(), null);
+                target = new Ride();
+                target.setTeamId(team.getId());
+                target.setPermalink(parser.getPermalink());
+                target.setType(parser.getType());
+                target.setDate(parser.getDate());
+                target.setPublishedAt(parser.getPublishedAt(timezone));
+                target.setTitle(parser.getTitle());
+                target.setDescription(parser.getDescription());
+                target.setImaged(parser.getFile().isPresent());
+
                 if (parser.getTemplateId() != null) {
                     rideTemplateService.increment(team.getId(), parser.getTemplateId());
                 }

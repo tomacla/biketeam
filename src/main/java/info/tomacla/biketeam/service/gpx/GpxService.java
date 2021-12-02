@@ -80,22 +80,21 @@ public class GpxService {
         info.tomacla.biketeam.common.geo.Point start = new info.tomacla.biketeam.common.geo.Point(startPoint.getLatDeg(), startPoint.getLonDeg());
         info.tomacla.biketeam.common.geo.Point end = new info.tomacla.biketeam.common.geo.Point(endPoint.getLatDeg(), endPoint.getLonDeg());
 
-        Map newMap = new Map(
-                team.getId(),
-                gpxPath.getName(),
-                permalink,
-                Rounder.round2Decimals(Math.round(10.0 * gpxPath.getDist()) / 10000.0),
-                MapType.ROAD,
-                LocalDate.now(team.getZoneId()),
-                Rounder.round1Decimal(gpxPath.getTotalElevation()),
-                Rounder.round1Decimal(gpxPath.getTotalElevationNegative()),
-                team.getConfiguration().getDefaultSearchTags(),
-                start,
-                end,
-                WindDirection.findDirectionFromVector(wind),
-                crossing,
-                true
-        );
+        Map newMap = new Map();
+        newMap.setTeamId(team.getId());
+        newMap.setName(gpxPath.getName());
+        newMap.setLength(Rounder.round2Decimals(Math.round(10.0 * gpxPath.getDist()) / 10000.0));
+        newMap.setPermalink(permalink);
+        newMap.setType(MapType.ROAD);
+        newMap.setPostedAt(LocalDate.now(team.getZoneId()));
+        newMap.setPositiveElevation(Rounder.round1Decimal(gpxPath.getTotalElevation()));
+        newMap.setNegativeElevation(Rounder.round1Decimal(gpxPath.getTotalElevationNegative()));
+        newMap.setTags(team.getConfiguration().getDefaultSearchTags());
+        newMap.setStartPoint(start);
+        newMap.setEndPoint(end);
+        newMap.setWindDirection(WindDirection.findDirectionFromVector(wind));
+        newMap.setCrossing(crossing);
+        newMap.setVisible(true);
 
         fileService.storeFile(storedGpx, FileRepositories.GPX_FILES, team.getId(), newMap.getId() + ".gpx");
         fileService.storeFile(storedFit, FileRepositories.FIT_FILES, team.getId(), newMap.getId() + ".fit");

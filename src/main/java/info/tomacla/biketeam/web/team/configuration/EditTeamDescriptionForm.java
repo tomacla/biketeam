@@ -1,28 +1,19 @@
 package info.tomacla.biketeam.web.team.configuration;
 
+import info.tomacla.biketeam.common.datatype.Strings;
+
 import java.util.Objects;
 
 public class EditTeamDescriptionForm {
 
-    private String facebook;
-    private String twitter;
-    private String email;
-    private String phoneNumber;
-    private String addressStreetLine;
-    private String addressPostalCode;
-    private String addressCity;
-    private String other;
-
-    public EditTeamDescriptionForm() {
-        setFacebook("");
-        setTwitter("");
-        setEmail("");
-        setPhoneNumber("");
-        setAddressCity("");
-        setAddressPostalCode("");
-        setAddressStreetLine("");
-        setOther("");
-    }
+    private String facebook = "";
+    private String twitter = "";
+    private String email = "";
+    private String phoneNumber = "";
+    private String addressStreetLine = "";
+    private String addressPostalCode = "";
+    private String addressCity = "";
+    private String other = "";
 
     public static EditTeamDescriptionFormBuilder builder() {
         return new EditTeamDescriptionFormBuilder();
@@ -105,35 +96,35 @@ public class EditTeamDescriptionForm {
         }
 
         public String getFacebook() {
-            return form.getFacebook();
+            return Strings.requireNonBlankOrNull(form.getFacebook());
         }
 
         public String getTwitter() {
-            return form.getTwitter();
+            return Strings.requireNonBlankOrNull(form.getTwitter());
         }
 
         public String getEmail() {
-            return form.getEmail();
+            return Strings.requireNonBlankOrNull(form.getEmail());
         }
 
         public String getPhoneNumber() {
-            return form.getPhoneNumber();
+            return Strings.requireNonBlankOrNull(form.getPhoneNumber());
         }
 
         public String getAddressStreetLine() {
-            return form.getAddressStreetLine();
+            return Strings.requireNonBlankOrNull(form.getAddressStreetLine());
         }
 
         public String getAddressPostalCode() {
-            return form.getAddressPostalCode();
+            return Strings.requireNonBlankOrNull(form.getAddressPostalCode());
         }
 
         public String getAddressCity() {
-            return form.getAddressCity();
+            return Strings.requireNonBlankOrNull(form.getAddressCity());
         }
 
         public String getOther() {
-            return form.getOther();
+            return Strings.requireNonBlankOrNull(form.getOther());
         }
 
 

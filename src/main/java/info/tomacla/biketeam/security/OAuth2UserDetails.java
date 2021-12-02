@@ -86,6 +86,7 @@ public class OAuth2UserDetails implements Serializable, UserDetails, OAuth2User 
         attrs.put("identity", u.getIdentity());
         attrs.put("stravaId", u.getStravaId());
         attrs.put("facebookId", u.getFacebookId());
+        attrs.put("googleId", u.getGoogleId());
         attrs.put("stravaUserName", u.getStravaUserName());
         ud.setAttributes(attrs);
 

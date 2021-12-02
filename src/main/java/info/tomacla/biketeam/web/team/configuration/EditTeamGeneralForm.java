@@ -1,20 +1,15 @@
 package info.tomacla.biketeam.web.team.configuration;
 
+import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.domain.team.Visibility;
 
 import java.util.Objects;
 
 public class EditTeamGeneralForm {
 
-    private String name;
-    private String description;
-    private String visibility;
-
-    public EditTeamGeneralForm() {
-        setName(null);
-        setDescription(null);
-        setVisibility(null);
-    }
+    private String name = "";
+    private String description = "";
+    private String visibility = Visibility.PUBLIC.name();
 
     public static EditTeamGeneralFormBuilder builder() {
         return new EditTeamGeneralFormBuilder();
@@ -57,7 +52,7 @@ public class EditTeamGeneralForm {
         }
 
         public String getDescription() {
-            return form.getDescription();
+            return Strings.requireNonBlankOrNull(form.getDescription());
         }
 
         public Visibility getVisibility() {
@@ -65,7 +60,7 @@ public class EditTeamGeneralForm {
         }
 
         public String getName() {
-            return form.getName();
+            return Strings.requireNonBlankOrNull(form.getName());
         }
 
 

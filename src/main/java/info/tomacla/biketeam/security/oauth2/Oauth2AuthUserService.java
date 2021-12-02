@@ -22,29 +22,33 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
 
     private static final Logger log = LoggerFactory.getLogger(Oauth2AuthUserService.class);
 
-    @Autowired
     private UserService userService;
+    private TeamService teamService;
 
     @Autowired
-    private TeamService teamService;
+    public Oauth2AuthUserService(UserService userService, TeamService teamService) {
+        this.userService = userService;
+        this.teamService = teamService;
+    }
+
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-
         DefaultOAuth2User user = (DefaultOAuth2User) super.loadUser(userRequest);
+        final String registrationId = userRequest.getClientRegistration().getRegistrationId();
+        return loadUser(user, registrationId);
+    }
 
-
-        if (userRequest.getClientRegistration().getRegistrationId().equals("facebook")) {
-            return handleFacebookProvider(user);
-        } else if (userRequest.getClientRegistration().getRegistrationId().equals("google")) {
-            return handleGoogleProvider(user);
-        } else if (userRequest.getClientRegistration().getRegistrationId().equals("strava")) {
-            return handleStravaProvider(user);
+    protected OAuth2User loadUser(DefaultOAuth2User user, String registrationId) {
+        switch (registrationId) {
+            case "facebook":
+                return handleFacebookProvider(user);
+            case "google":
+                return handleGoogleProvider(user);
+            case "strava":
+                return handleStravaProvider(user);
         }
-
         return user;
-
-
     }
 
     private OAuth2UserDetails handleStravaProvider(DefaultOAuth2User user) {
@@ -59,23 +63,20 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
 
             log.debug("Register new user with strava id {}", stravaId);
 
-            u = new User(
-                    false,
-                    (String) attributes.get("firstname"),
-                    (String) attributes.get("lastname"),
-                    stravaId,
-                    (String) attributes.get("username"),
-                    (String) attributes.get("city"),
-                    (String) attributes.get("profile_medium"),
-                    null,
-                    null
-            );
+            u = new User();
+            u.setFirstName((String) attributes.get("firstname"));
+            u.setLastName((String) attributes.get("lastname"));
+            u.setStravaId(stravaId);
+            u.setStravaUserName((String) attributes.get("username"));
+            u.setCity((String) attributes.get("city"));
+            u.setProfileImage((String) attributes.get("profile_medium"));
 
         } else {
 
             log.debug("Updating existing user with strava id {}", stravaId);
 
             u = optionalUser.get();
+            u.setStravaUserName((String) attributes.get("username"));
             u.setFirstName((String) attributes.get("firstname"));
             u.setLastName((String) attributes.get("lastname"));
             u.setCity((String) attributes.get("city"));
@@ -105,17 +106,11 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
 
             log.debug("Register new user with google id {}", googleId);
 
-            u = new User(
-                    false,
-                    (String) attributes.get("given_name"),
-                    (String) attributes.get("family_name"),
-                    null,
-                    null,
-                    null,
-                    (String) attributes.get("picture"),
-                    null,
-                    googleId
-            );
+            u = new User();
+            u.setFirstName((String) attributes.get("given_name"));
+            u.setLastName((String) attributes.get("family_name"));
+            u.setProfileImage((String) attributes.get("picture"));
+            u.setGoogleId(googleId);
 
             if (attributes.get("email") != null) {
                 u.setEmail((String) attributes.get("email"));
@@ -162,17 +157,10 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
                 lastName = nameParts[1];
             }
 
-            u = new User(
-                    false,
-                    firstName,
-                    lastName,
-                    null,
-                    null,
-                    null,
-                    null,
-                    facebookId,
-                    null
-            );
+            u = new User();
+            u.setFirstName(firstName);
+            u.setLastName(lastName);
+            u.setFacebookId(facebookId);
 
             if (attributes.get("email") != null) {
                 u.setEmail((String) attributes.get("email"));

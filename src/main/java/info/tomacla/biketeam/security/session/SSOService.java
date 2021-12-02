@@ -9,6 +9,15 @@ import java.util.Optional;
 @Service
 public class SSOService {
 
+    private Long expiracy = 20L;
+
+    public SSOService() {
+    }
+
+    public SSOService(Long expiracy) {
+        this.expiracy = expiracy;
+    }
+
     // IMPROVE use a guava cache instead of this
     // TODO should be stored in case of load balancing
     private Map<String, SSOToken> ssoTokens = new HashMap<>();
@@ -23,7 +32,7 @@ public class SSOService {
         purgeTokens();
         if (ssoTokenString != null) {
             SSOToken ssoToken = ssoTokens.get(ssoTokenString);
-            if (ssoToken != null && ssoToken.isValid()) {
+            if (ssoToken != null && ssoToken.isValid(expiracy)) {
                 return Optional.ofNullable(ssoToken.getSessionId());
             }
         }
@@ -34,7 +43,7 @@ public class SSOService {
         purgeTokens();
         if (ssoTokenString != null) {
             SSOToken ssoToken = ssoTokens.get(ssoTokenString);
-            if (ssoToken != null && ssoToken.isValid()) {
+            if (ssoToken != null && ssoToken.isValid(expiracy)) {
                 return Optional.ofNullable(ssoToken.getRememberMe());
             }
         }
@@ -42,7 +51,7 @@ public class SSOService {
     }
 
     private void purgeTokens() {
-        ssoTokens.entrySet().removeIf(e -> !e.getValue().isValid());
+        ssoTokens.entrySet().removeIf(e -> !e.getValue().isValid(expiracy));
     }
 
 }

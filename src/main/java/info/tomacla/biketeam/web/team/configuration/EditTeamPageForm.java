@@ -4,11 +4,7 @@ import info.tomacla.biketeam.common.datatype.Strings;
 
 public class EditTeamPageForm {
 
-    private String markdownPage;
-
-    public EditTeamPageForm() {
-        setMarkdownPage(null);
-    }
+    private String markdownPage = "";
 
     public static EditTeamPageFormBuilder builder() {
         return new EditTeamPageFormBuilder();
@@ -35,7 +31,7 @@ public class EditTeamPageForm {
         }
 
         public String getMarkdownPage() {
-            return form.getMarkdownPage();
+            return Strings.requireNonBlankOrNull(form.getMarkdownPage());
         }
 
     }

@@ -37,7 +37,7 @@ public class UserRole {
     }
 
     public void setId(String id) {
-        this.id = id;
+        this.id = Objects.requireNonNull(id);
     }
 
     public Role getRole() {
@@ -45,7 +45,7 @@ public class UserRole {
     }
 
     public void setRole(Role role) {
-        this.role = role;
+        this.role = Objects.requireNonNull(role);
     }
 
     public User getUser() {
@@ -53,7 +53,7 @@ public class UserRole {
     }
 
     public void setUser(User user) {
-        this.user = user;
+        this.user = Objects.requireNonNull(user);
     }
 
     public Team getTeam() {

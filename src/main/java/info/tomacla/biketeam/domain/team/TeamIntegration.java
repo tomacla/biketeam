@@ -4,6 +4,7 @@ import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.common.geo.Point;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 
 @Entity
@@ -50,20 +51,12 @@ public class TeamIntegration {
     @Column(name = "heatmap_display")
     private boolean heatmapDisplay;
 
-    public TeamIntegration() {
-    }
-
-    public TeamIntegration(Team team) {
-        this.team = team;
-        this.teamId = team.getId();
-    }
-
     public String getTeamId() {
         return teamId;
     }
 
     public void setTeamId(String teamId) {
-        this.teamId = teamId;
+        this.teamId = Objects.requireNonNull(teamId, "teamId is null");
     }
 
     public Team getTeam() {
@@ -71,7 +64,7 @@ public class TeamIntegration {
     }
 
     public void setTeam(Team team) {
-        this.team = team;
+        this.team = Objects.requireNonNull(team);
         this.teamId = team.getId();
     }
 
@@ -120,7 +113,7 @@ public class TeamIntegration {
     }
 
     public boolean isMattermostConfigured() {
-        return this.mattermostApiEndpoint != null && this.mattermostChannelID != null && this.mattermostApiToken != null;
+        return !Strings.isBlank(this.mattermostApiEndpoint, this.mattermostChannelID, this.mattermostApiToken);
     }
 
     public String getMattermostApiToken() {
@@ -191,4 +184,16 @@ public class TeamIntegration {
         return this.heatmapCenter != null;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TeamIntegration that = (TeamIntegration) o;
+        return teamId.equals(that.teamId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(teamId);
+    }
 }

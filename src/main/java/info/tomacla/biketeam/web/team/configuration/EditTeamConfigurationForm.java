@@ -9,21 +9,12 @@ import java.util.Objects;
 
 public class EditTeamConfigurationForm {
 
-    private String timezone;
-    private List<String> defaultSearchTags;
-    private String defaultPage;
-    private String feedVisible;
-    private String ridesVisible;
-    private String tripsVisible;
-
-    public EditTeamConfigurationForm() {
-        setTimezone(Timezone.DEFAULT_TIMEZONE);
-        setDefaultSearchTags(new ArrayList<>());
-        setDefaultPage("");
-        setFeedVisible(null);
-        setRidesVisible(null);
-        setTripsVisible(null);
-    }
+    private String timezone = Timezone.DEFAULT_TIMEZONE;
+    private List<String> defaultSearchTags = new ArrayList<>();
+    private String defaultPage = WebPage.FEED.name();
+    private String feedVisible = null;
+    private String ridesVisible = null;
+    private String tripsVisible = null;
 
     public static EditTeamConfigurationFormBuilder builder() {
         return new EditTeamConfigurationFormBuilder();

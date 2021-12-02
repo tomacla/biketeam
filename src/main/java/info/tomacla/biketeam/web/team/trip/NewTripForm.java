@@ -7,7 +7,6 @@ import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.map.MapType;
 import info.tomacla.biketeam.domain.trip.TripStage;
 import info.tomacla.biketeam.service.MapService;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.*;
@@ -20,44 +19,29 @@ import java.util.stream.Collectors;
 
 public class NewTripForm {
 
-    private String id;
-    private String permalink;
-    private String type;
-    private String startDate;
-    private String endDate;
-    private String publishedAtDate;
-    private String publishedAtTime;
-    private String title;
-    private String description;
-    private double lowerSpeed;
-    private double upperSpeed;
-    private String meetingLocation;
-    private double meetingPointLat;
-    private double meetingPointLng;
-    private String meetingTime;
+    private String id = "new";
+    private String permalink = "";
+    private String type = MapType.ROAD.name();
+    private String startDate = "";
+    private String endDate = "";
+    private String publishedAtDate = "";
+    private String publishedAtTime = "";
+    private String title = "";
+    private String description = "";
+    private double lowerSpeed = 28;
+    private double upperSpeed = 30;
+    private String meetingLocation = "";
+    private double meetingPointLat = 0.0;
+    private double meetingPointLng = 0.0;
+    private String meetingTime = "08:00";
     private MultipartFile file;
-    private List<NewTripStageForm> stages;
+    private List<NewTripStageForm> stages = new ArrayList<>();
 
     public NewTripForm() {
         this(ZonedDateTime.now(ZoneOffset.UTC));
     }
 
     public NewTripForm(ZonedDateTime defaultDate) {
-        setId(null);
-        setPermalink(null);
-        setType(null);
-        setStartDate(null);
-        setEndDate(null);
-        setPublishedAtDate(null);
-        setPublishedAtTime(null);
-        setTitle(null);
-        setFile(null);
-        setDescription(null);
-        setMeetingLocation(null);
-        setMeetingTime("08:00");
-        setLowerSpeed(28);
-        setUpperSpeed(30);
-        stages = new ArrayList<>();
         stages.add(NewTripStageForm.builder().withName("Aller").withDate(defaultDate.toLocalDate()).get());
         stages.add(NewTripStageForm.builder().withName("Retour").withDate(defaultDate.plus(1, ChronoUnit.DAYS).toLocalDate()).get());
     }
@@ -219,18 +203,15 @@ public class NewTripForm {
         }
 
         public String getId() {
-            return form.getId();
+            return Strings.requireNonBlankOrNull(form.getId());
         }
 
         public String getPermalink() {
-            if (ObjectUtils.isEmpty(form.getPermalink())) {
-                return null;
-            }
-            return form.getPermalink();
+            return Strings.requireNonBlankOrNull(form.getPermalink());
         }
 
         public String getTitle() {
-            return form.getTitle();
+            return Strings.requireNonBlankOrNull(form.getTitle());
         }
 
         public LocalDate getStartDate() {
@@ -250,7 +231,7 @@ public class NewTripForm {
         }
 
         public String getDescription() {
-            return form.getDescription();
+            return Strings.requireNonBlankOrNull(form.getDescription());
         }
 
         public double getLowerSpeed() {
@@ -262,14 +243,14 @@ public class NewTripForm {
         }
 
         public String getMeetingLocation() {
-            return form.getMeetingLocation();
+            return Strings.requireNonBlankOrNull(form.getMeetingLocation());
         }
 
-        public Optional<Point> getMeetingPoint() {
+        public Point getMeetingPoint() {
             if (form.getMeetingPointLat() != 0.0 && form.getMeetingPointLng() != 0.0) {
-                return Optional.of(new Point(form.getMeetingPointLat(), form.getMeetingPointLng()));
+                return new Point(form.getMeetingPointLat(), form.getMeetingPointLng());
             }
-            return Optional.empty();
+            return null;
         }
 
         public LocalTime getMeetingTime() {
@@ -291,9 +272,10 @@ public class NewTripForm {
                     map = mapService.get(teamId, parser.getMapId().get()).orElse(null);
                 }
 
-                final TripStage ss = new TripStage(parser.getName(),
-                        parser.getDate(),
-                        map);
+                final TripStage ss = new TripStage();
+                ss.setName(parser.getName());
+                ss.setDate(parser.getDate());
+                ss.setMap(map);
 
                 if (parser.getId() != null) {
                     ss.setId(parser.getId());

@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.common.file;
 
+import info.tomacla.biketeam.common.datatype.Strings;
 import liquibase.util.file.FilenameUtils;
 import org.springframework.http.MediaType;
 
@@ -29,7 +30,7 @@ public enum FileExtension {
     }
 
     public static Optional<FileExtension> findByFileName(String fileName) {
-        if (fileName == null || fileName.isBlank()) {
+        if (Strings.isBlank(fileName)) {
             return Optional.empty();
         }
 

@@ -4,7 +4,10 @@ import info.tomacla.biketeam.security.login.CustomLoginUrlAuthenticationEntryPoi
 import info.tomacla.biketeam.security.oauth2.OAuth2StateWriter;
 import info.tomacla.biketeam.security.oauth2.OAuth2SuccessHandler;
 import info.tomacla.biketeam.security.session.CookieHttpSessionIdResolverWithSSO;
+import info.tomacla.biketeam.security.session.SSOService;
 import info.tomacla.biketeam.security.session.SSOTokenFilter;
+import info.tomacla.biketeam.service.TeamService;
+import info.tomacla.biketeam.service.url.UrlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,22 +15,15 @@ import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.client.JdbcOAuth2AuthorizedClientService;
-import org.springframework.security.oauth2.client.OAuth2AuthorizationFailureHandler;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.util.ReflectionUtils;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.lang.reflect.Field;
 
 @Configuration
@@ -36,6 +32,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private UserDetailsService userDetailsService;
+
+    @Autowired
+    private UrlService urlService;
+
+    @Autowired
+    private TeamService teamService;
+
+    @Autowired
+    private SSOService ssoService;
 
     @Autowired
     private ClientRegistrationRepository clientRegistrationRepository;
@@ -98,7 +103,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public OAuth2SuccessHandler oAuth2SuccessHandler() {
-        return new OAuth2SuccessHandler();
+        return new OAuth2SuccessHandler(ssoService);
     }
 
     @Bean
@@ -119,7 +124,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public CookieHttpSessionIdResolverWithSSO customCookieHttpSessionIdResolver() {
-        return new CookieHttpSessionIdResolverWithSSO();
+        return new CookieHttpSessionIdResolverWithSSO(urlService, ssoService);
     }
 
     @Bean
@@ -129,7 +134,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public OAuth2StateWriter oAuth2StateWriter() {
-        return new OAuth2StateWriter();
+        return new OAuth2StateWriter(urlService, teamService);
     }
 
 }

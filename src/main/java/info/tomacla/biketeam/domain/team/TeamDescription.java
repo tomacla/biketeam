@@ -3,6 +3,7 @@ package info.tomacla.biketeam.domain.team;
 import info.tomacla.biketeam.common.datatype.Strings;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table(name = "team_description")
@@ -31,20 +32,12 @@ public class TeamDescription {
     @Column(length = 2000)
     private String other;
 
-    public TeamDescription() {
-    }
-
-    public TeamDescription(Team team, String description) {
-        setTeam(team);
-        setDescription(description);
-    }
-
     public String getTeamId() {
         return teamId;
     }
 
     public void setTeamId(String teamId) {
-        this.teamId = teamId;
+        this.teamId = Objects.requireNonNull(teamId, "teamId is null");
     }
 
     public Team getTeam() {
@@ -52,8 +45,8 @@ public class TeamDescription {
     }
 
     public void setTeam(Team team) {
+        this.team = Objects.requireNonNull(team);
         this.teamId = team.getId();
-        this.team = team;
     }
 
     public String getDescription() {
@@ -128,5 +121,16 @@ public class TeamDescription {
         this.other = Strings.requireNonBlankOrNull(other);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TeamDescription that = (TeamDescription) o;
+        return teamId.equals(that.teamId);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(teamId);
+    }
 }

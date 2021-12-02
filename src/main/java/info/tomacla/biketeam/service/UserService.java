@@ -111,15 +111,13 @@ public class UserService {
         log.info("Initializing application data");
 
         if (getByStravaId(adminStravaId).isEmpty()) {
-            save(new User(true,
-                    adminFirstName,
-                    adminLastName,
-                    adminStravaId,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null));
+
+            User root = new User();
+            root.setAdmin(true);
+            root.setFirstName(adminFirstName);
+            root.setLastName(adminLastName);
+            root.setStravaId(adminStravaId);
+            save(root);
         }
 
     }

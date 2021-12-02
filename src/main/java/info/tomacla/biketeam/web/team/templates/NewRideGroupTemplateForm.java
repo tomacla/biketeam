@@ -5,27 +5,17 @@ import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.common.geo.Point;
 
 import java.time.LocalTime;
-import java.util.Optional;
 
 public class NewRideGroupTemplateForm {
 
-    private String id;
-    private String name;
-    private double lowerSpeed;
-    private double upperSpeed;
-    private String meetingLocation;
-    private double meetingPointLat;
-    private double meetingPointLng;
-    private String meetingTime;
-
-    public NewRideGroupTemplateForm() {
-        setId(null);
-        setName(null);
-        setLowerSpeed(28);
-        setUpperSpeed(30);
-        setMeetingTime("12:00");
-        setMeetingLocation(null);
-    }
+    private String id = "new";
+    private String name = "";
+    private double lowerSpeed = 28;
+    private double upperSpeed = 30;
+    private String meetingLocation = "";
+    private double meetingPointLat = 0.0;
+    private double meetingPointLng = 0.0;
+    private String meetingTime = "12:00";
 
     public static NewRideGroupTemplateFormBuilder builder() {
         return new NewRideGroupTemplateFormBuilder();
@@ -108,11 +98,11 @@ public class NewRideGroupTemplateForm {
         }
 
         public String getId() {
-            return form.getId();
+            return Strings.requireNonBlankOrNull(form.getId());
         }
 
         public String getName() {
-            return form.getName();
+            return Strings.requireNonBlankOrNull(form.getName());
         }
 
         public double getLowerSpeed() {
@@ -124,14 +114,14 @@ public class NewRideGroupTemplateForm {
         }
 
         public String getMeetingLocation() {
-            return form.getMeetingLocation();
+            return Strings.requireNonBlankOrNull(form.getMeetingLocation());
         }
 
-        public Optional<Point> getMeetingPoint() {
+        public Point getMeetingPoint() {
             if (form.getMeetingPointLat() != 0.0 && form.getMeetingPointLng() != 0.0) {
-                return Optional.of(new Point(form.getMeetingPointLat(), form.getMeetingPointLng()));
+                return new Point(form.getMeetingPointLat(), form.getMeetingPointLng());
             }
-            return Optional.empty();
+            return null;
         }
 
         public LocalTime getMeetingTime() {

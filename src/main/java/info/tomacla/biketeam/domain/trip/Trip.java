@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class Trip {
 
     @Id
-    private String id;
+    private String id = UUID.randomUUID().toString();
     @Column(name = "team_id")
     private String teamId;
     private String permalink;
@@ -43,10 +43,10 @@ public class Trip {
     @Embedded
     private Point meetingPoint;
     @Enumerated(EnumType.STRING)
-    private MapType type;
+    private MapType type = MapType.ROAD;
     @Enumerated(EnumType.STRING)
     @Column(name = "published_status")
-    private PublishedStatus publishedStatus;
+    private PublishedStatus publishedStatus = PublishedStatus.UNPUBLISHED;
     @Column(name = "published_at")
     private ZonedDateTime publishedAt;
     private String title;
@@ -55,58 +55,20 @@ public class Trip {
     private boolean imaged;
     @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @OrderBy("id ASC")
-    private Set<TripStage> stages;
+    private Set<TripStage> stages = new HashSet<>();
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "trip_participant",
             joinColumns = @JoinColumn(name = "trip_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Set<User> participants;
-
-    public Trip() {
-    }
-
-    public Trip(String teamId,
-                MapType type,
-                LocalDate startDate,
-                LocalDate endDate,
-                double lowerSpeed,
-                double upperSpeed,
-                ZonedDateTime publishedAt,
-                String title,
-                String description,
-                boolean imaged,
-                String meetingLocation,
-                LocalTime meetingTime,
-                Point meetingPoint) {
-
-        this.id = UUID.randomUUID().toString();
-        setTeamId(teamId);
-        this.publishedStatus = PublishedStatus.UNPUBLISHED;
-        setType(type);
-        setStartDate(startDate);
-        setEndDate(endDate);
-        setPublishedAt(publishedAt);
-        setTitle(title);
-        setPermalink(Strings.normalizePermalink(title));
-        setDescription(description);
-        setImaged(imaged);
-        setMeetingLocation(meetingLocation);
-        setMeetingTime(meetingTime);
-        setMeetingPoint(meetingPoint);
-        setLowerSpeed(lowerSpeed);
-        setUpperSpeed(upperSpeed);
-
-        this.participants = new HashSet<>();
-        this.stages = new HashSet<>();
-    }
+    private Set<User> participants = new HashSet<>();
 
     public String getId() {
         return id;
     }
 
     protected void setId(String id) {
-        this.id = id;
+        this.id = Objects.requireNonNull(id, "id is null");
     }
 
     public String getTeamId() {
@@ -114,7 +76,7 @@ public class Trip {
     }
 
     public void setTeamId(String teamId) {
-        this.teamId = Objects.requireNonNull(teamId);
+        this.teamId = Objects.requireNonNull(teamId, "team id is null");
     }
 
     public String getPermalink() {
@@ -122,7 +84,7 @@ public class Trip {
     }
 
     public void setPermalink(String permalink) {
-        this.permalink = permalink;
+        this.permalink = Strings.requireNonBlankOrNull(permalink);
     }
 
     public PublishedStatus getPublishedStatus() {
@@ -138,7 +100,7 @@ public class Trip {
     }
 
     public void setType(MapType type) {
-        this.type = Objects.requireNonNull(type, "type is null");
+        this.type = Objects.requireNonNullElse(type, MapType.ROAD);
     }
 
     public LocalDate getStartDate() {
@@ -234,7 +196,7 @@ public class Trip {
     }
 
     public void setStages(Set<TripStage> stages) {
-        Lists.requireNonEmpty(stages, "stages is null");
+        Lists.requireSizeOf(stages, 2, "stages is null");
         stages.forEach(this::addStage);
     }
 
@@ -251,21 +213,23 @@ public class Trip {
 
     public void addOrReplaceStages(List<TripStage> updatedStages) {
 
-        // remove deleted stages
         final Set<String> updatedStagesId = updatedStages.stream().map(TripStage::getId).filter(id -> !ObjectUtils.isEmpty(id)).collect(Collectors.toSet());
+        final Set<String> existingStagesId = this.stages.stream().map(TripStage::getId).collect(Collectors.toSet());
+
+        // remove deleted stages
         this.stages.forEach(stage -> {
             if (!updatedStagesId.contains(stage.getId())) {
-                stage.removeTrip(); // needed for hibernate
+                stage.setTrip(null); // needed for hibernate
             }
         });
         stages.removeIf(g -> !updatedStagesId.contains(g.getId()));
 
         // add new stages
-        final List<TripStage> newStages = updatedStages.stream().filter(g -> g.getId() == null).collect(Collectors.toList());
+        final List<TripStage> newStages = updatedStages.stream().filter(g -> !existingStagesId.contains(g.getId())).collect(Collectors.toList());
         newStages.forEach(this::addStage);
 
         // update existing stages
-        final List<TripStage> existingStages = updatedStages.stream().filter(g -> g.getId() != null).collect(Collectors.toList());
+        final List<TripStage> existingStages = updatedStages.stream().filter(g -> existingStagesId.contains(g.getId())).collect(Collectors.toList());
         existingStages.forEach(g ->
                 this.stages.stream().filter(gg -> g.getId().equals(gg.getId())).findFirst().ifPresent(target -> {
                     target.setName(g.getName());
@@ -278,20 +242,8 @@ public class Trip {
     }
 
     public void addStage(TripStage stage) {
-        stage.setTrip(this, getNextStageIndex());
+        stage.setTrip(this);
         stages.add(stage);
-    }
-
-    public void clearStages() {
-        stages.clear();
-    }
-
-    private int getNextStageIndex() {
-        final Optional<Integer> nextIndex = this.stages.stream().map(TripStage::getStageIndex).max(Comparator.naturalOrder());
-        if (nextIndex.isEmpty()) {
-            return 0;
-        }
-        return nextIndex.get() + 1;
     }
 
     public boolean hasParticipant(String userId) {
@@ -303,7 +255,7 @@ public class Trip {
     }
 
     public void removeParticipant(User participant) {
-        this.getParticipants().removeIf(u -> u.equals(participant));
+        this.getParticipants().remove(participant);
     }
 
     public Set<User> getParticipants() {

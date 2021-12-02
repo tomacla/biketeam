@@ -7,6 +7,7 @@ import info.tomacla.biketeam.domain.trip.TripStage;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -17,7 +18,7 @@ import java.util.UUID;
 public class Map {
 
     @Id
-    private String id;
+    private String id = UUID.randomUUID().toString();
     @Column(name = "team_id")
     private String teamId;
     private String permalink;
@@ -25,15 +26,15 @@ public class Map {
     private double length;
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
-    private MapType type;
+    private MapType type = MapType.ROAD;
     @Column(name = "positive_elevation")
     private double positiveElevation;
     @Column(name = "negative_elevation")
     private double negativeElevation;
     @Column(name = "posted_at")
-    private LocalDate postedAt;
+    private LocalDate postedAt = LocalDate.now(ZoneOffset.UTC);
     @ElementCollection
-    private List<String> tags;
+    private List<String> tags = new ArrayList<>();
     @AttributeOverrides({
             @AttributeOverride(name = "lat", column = @Column(name = "start_point_lat")),
             @AttributeOverride(name = "lng", column = @Column(name = "start_point_lng"))
@@ -52,56 +53,21 @@ public class Map {
     })
     @Column(name = "wind_direction")
     @Enumerated(EnumType.STRING)
-    private WindDirection windDirection;
+    private WindDirection windDirection = WindDirection.NORTH;
     private boolean crossing;
     private boolean visible;
 
     @OneToMany(mappedBy = "map", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<RideGroup> rideGroups;
+    private List<RideGroup> rideGroups = new ArrayList<>();
     @OneToMany(mappedBy = "map", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<TripStage> tripStages;
-
-    public Map() {
-    }
-
-    public Map(String teamId,
-               String name,
-               String permalink,
-               double length,
-               MapType type,
-               LocalDate postedAt,
-               double positiveElevation,
-               double negativeElevation,
-               List<String> tags,
-               Point startPoint,
-               Point endPoint,
-               WindDirection windDirection,
-               boolean crossing,
-               boolean visible) {
-
-        this.id = UUID.randomUUID().toString();
-        setTeamId(teamId);
-        setName(name);
-        setPermalink(Strings.normalizePermalink(permalink));
-        setLength(length);
-        setType(type);
-        setPostedAt(postedAt);
-        setPositiveElevation(positiveElevation);
-        setNegativeElevation(negativeElevation);
-        setTags(new ArrayList<>(tags));
-        setStartPoint(startPoint);
-        setEndPoint(endPoint);
-        setWindDirection(windDirection);
-        setCrossing(crossing);
-        setVisible(visible);
-    }
+    private List<TripStage> tripStages = new ArrayList<>();
 
     public String getId() {
         return id;
     }
 
     public void setId(String id) {
-        this.id = id;
+        this.id = Objects.requireNonNull(id, "id is null");
     }
 
     public String getTeamId() {
@@ -109,7 +75,7 @@ public class Map {
     }
 
     public void setTeamId(String teamId) {
-        this.teamId = Objects.requireNonNull(teamId);
+        this.teamId = Objects.requireNonNull(teamId, "teamId is null");
     }
 
     public String getPermalink() {
@@ -125,7 +91,7 @@ public class Map {
     }
 
     public void setName(String name) {
-        this.name = Strings.requireNonBlank(name, "name is null");
+        this.name = Strings.requireNonBlank(name, "name is blank");
     }
 
     public double getLength() {
@@ -141,7 +107,7 @@ public class Map {
     }
 
     public void setType(MapType type) {
-        this.type = Objects.requireNonNull(type);
+        this.type = Objects.requireNonNullElse(type, MapType.ROAD);
     }
 
     public double getPositiveElevation() {
@@ -165,7 +131,7 @@ public class Map {
     }
 
     public void setPostedAt(LocalDate postedAt) {
-        this.postedAt = postedAt;
+        this.postedAt = Objects.requireNonNull(postedAt, "postedAt is null");
     }
 
     public List<String> getTags() {
@@ -181,7 +147,7 @@ public class Map {
     }
 
     public void setStartPoint(Point startPoint) {
-        this.startPoint = Objects.requireNonNull(startPoint);
+        this.startPoint = Objects.requireNonNull(startPoint, "startPoint is null");
     }
 
     public Point getEndPoint() {
@@ -189,7 +155,7 @@ public class Map {
     }
 
     public void setEndPoint(Point endPoint) {
-        this.endPoint = Objects.requireNonNull(endPoint);
+        this.endPoint = Objects.requireNonNull(endPoint, "endPoint is null");
     }
 
     public WindDirection getWindDirection() {
@@ -197,7 +163,7 @@ public class Map {
     }
 
     public void setWindDirection(WindDirection windDirection) {
-        this.windDirection = Objects.requireNonNull(windDirection);
+        this.windDirection = Objects.requireNonNull(windDirection, "windDirection is null");
     }
 
     public boolean isCrossing() {

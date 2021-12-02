@@ -109,12 +109,12 @@ public class AdminTeamPublicationController extends AbstractController {
                 publication.setPublishedAt(parser.getPublishedAt(timezone));
 
             } else {
-                publication = new Publication(team.getId(),
-                        parser.getTitle(),
-                        parser.getContent(),
-                        parser.getPublishedAt(timezone),
-                        parser.getFile().isPresent()
-                );
+                publication = new Publication();
+                publication.setTeamId(team.getId());
+                publication.setTitle(parser.getTitle());
+                publication.setContent(parser.getContent());
+                publication.setPublishedAt(parser.getPublishedAt(timezone));
+                publication.setImaged(parser.getFile().isPresent());
             }
 
             if (parser.getFile().isPresent()) {

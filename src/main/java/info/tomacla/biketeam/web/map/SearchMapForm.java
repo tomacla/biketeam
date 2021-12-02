@@ -10,29 +10,16 @@ import java.util.Objects;
 
 public class SearchMapForm {
 
-    private int page;
-    private int pageSize;
-    private double lowerDistance;
-    private double upperDistance;
-    private double lowerPositiveElevation;
-    private double upperPositiveElevation;
-    private String sort;
-    private String type;
-    private String windDirection;
-    private List<String> tags;
-
-    public SearchMapForm() {
-        setPage(0);
-        setPageSize(9);
-        setLowerDistance(1);
-        setUpperDistance(1000);
-        setLowerPositiveElevation(0);
-        setUpperPositiveElevation(3000);
-        setTags(new ArrayList<>());
-        setWindDirection("");
-        setType("");
-        setSort("");
-    }
+    private int page = 0;
+    private int pageSize = 9;
+    private double lowerDistance = 1;
+    private double upperDistance = 1000;
+    private double lowerPositiveElevation = 0;
+    private double upperPositiveElevation = 3000;
+    private String sort = "";
+    private String type = "";
+    private String windDirection = "";
+    private List<String> tags = new ArrayList<>();
 
     public static SearchMapFormBuilder builder() {
         return new SearchMapFormBuilder();

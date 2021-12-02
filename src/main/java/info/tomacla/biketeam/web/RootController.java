@@ -111,16 +111,19 @@ public class RootController extends AbstractController {
 
             final NewTeamForm.NewTeamFormParser parser = form.parser();
 
-            teamService.get(parser.getId().toLowerCase()).ifPresent(team -> {
+            String targetId = parser.getId().toLowerCase();
+
+            teamService.get(targetId).ifPresent(team -> {
                 throw new IllegalArgumentException("Team " + team.getId() + " already exists");
             });
 
-            final Team newTeam = new Team(parser.getId().toLowerCase(),
-                    parser.getName(),
-                    parser.getCity(),
-                    parser.getCountry(),
-                    parser.getTimezone(),
-                    parser.getDescription());
+            final Team newTeam = new Team();
+            newTeam.setId(targetId);
+            newTeam.setName(parser.getName());
+            newTeam.setCity(parser.getCity());
+            newTeam.setCountry(parser.getCountry());
+            newTeam.getDescription().setDescription(parser.getDescription());
+            newTeam.getConfiguration().setTimezone(parser.getTimezone());
 
             teamService.save(newTeam, true);
 

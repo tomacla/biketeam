@@ -118,7 +118,11 @@ public class AdminTeamRideTemplateController extends AbstractController {
                 target.setDescription(parser.getDescription());
                 target.setType(parser.getType());
             } else {
-                target = new RideTemplate(team.getId(), parser.getName(), parser.getType(), parser.getDescription());
+                target = new RideTemplate();
+                target.setTeamId(team.getId());
+                target.setName(parser.getName());
+                target.setType(parser.getType());
+                target.setDescription(parser.getDescription());
             }
 
             target.setIncrement(parser.getIncrement());

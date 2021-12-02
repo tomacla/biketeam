@@ -16,8 +16,8 @@ import java.util.UUID;
 public class User {
 
     @Id
-    private String id;
-    private boolean admin;
+    private String id = UUID.randomUUID().toString();
+    private boolean admin = false;
     @Column(name = "strava_id", unique = true)
     private Long stravaId;
     @Column(name = "facebook_id", unique = true)
@@ -27,9 +27,9 @@ public class User {
     @Column(name = "strava_user_name", unique = true)
     private String stravaUserName;
     @Column(name = "first_name")
-    private String firstName;
+    private String firstName = "Inconnu";
     @Column(name = "last_name")
-    private String lastName;
+    private String lastName = "Inconnu";
     @Column(name = "city")
     private String city;
     @Column(name = "profile_image", length = 500)
@@ -44,45 +44,16 @@ public class User {
     private boolean emailPublishPublications;
 
     @ManyToMany(mappedBy = "participants", fetch = FetchType.LAZY)
-    private Set<RideGroup> rideGroups;
+    private Set<RideGroup> rideGroups = new HashSet<>();
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private Set<UserRole> roles;
-
-    public User() {
-
-    }
-
-    public User(boolean admin,
-                String firstName,
-                String lastName,
-                Long stravaId,
-                String stravaUserName,
-                String city,
-                String profileImage,
-                String facebookId,
-                String googleId) {
-        this.id = UUID.randomUUID().toString();
-        setAdmin(admin);
-        setStravaId(stravaId);
-        setStravaUserName(stravaUserName);
-        setFirstName(firstName);
-        setLastName(lastName);
-        setCity(city);
-        setProfileImage(profileImage);
-        setFacebookId(facebookId);
-        setGoogleId(googleId);
-
-        setRoles(new HashSet<>());
-        setRideGroups(new HashSet<>());
-
-    }
+    private Set<UserRole> roles = new HashSet<>();
 
     public String getId() {
         return id;
     }
 
-    protected void setId(String id) {
-        this.id = id;
+    public void setId(String id) {
+        this.id = Objects.requireNonNull(id, "id is null");
     }
 
     public boolean isAdmin() {
@@ -146,7 +117,7 @@ public class User {
     }
 
     public void setCity(String city) {
-        this.city = city;
+        this.city = Strings.requireNonBlankOrNull(city);
     }
 
     public String getProfileImage() {
@@ -154,7 +125,7 @@ public class User {
     }
 
     public void setProfileImage(String profileImage) {
-        this.profileImage = profileImage;
+        this.profileImage = Strings.requireNonBlankOrNull(profileImage);
     }
 
     public Set<RideGroup> getRideGroups() {

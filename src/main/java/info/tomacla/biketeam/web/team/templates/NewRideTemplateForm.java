@@ -12,25 +12,18 @@ import java.util.stream.Collectors;
 
 public class NewRideTemplateForm {
 
-    private String id;
-    private String name;
-    private String type;
-    private String description;
-    private List<NewRideGroupTemplateForm> groups;
-    private String increment;
+    private String id = "new";
+    private String name = "";
+    private String type = RideType.REGULAR.name();
+    private String description = "";
+    private List<NewRideGroupTemplateForm> groups = new ArrayList<>();
+    private String increment = "";
 
     public NewRideTemplateForm() {
         this(1);
     }
 
     public NewRideTemplateForm(int numberOfGroups) {
-        setId(null);
-        setName(null);
-        setType(null);
-        setDescription(null);
-        setIncrement(null);
-
-        groups = new ArrayList<>();
         for (int i = 0; i < (Math.max(numberOfGroups, 1)); i++) {
             groups.add(NewRideGroupTemplateForm.builder().withName("G" + (i + 1)).get());
         }
@@ -101,11 +94,11 @@ public class NewRideTemplateForm {
         }
 
         public String getId() {
-            return form.getId();
+            return Strings.requireNonBlankOrNull(form.getId());
         }
 
         public String getName() {
-            return form.getName();
+            return Strings.requireNonBlankOrNull(form.getName());
         }
 
         public RideType getType() {
@@ -113,11 +106,11 @@ public class NewRideTemplateForm {
         }
 
         public String getDescription() {
-            return form.getDescription();
+            return Strings.requireNonBlankOrNull(form.getDescription());
         }
 
         public Integer getIncrement() {
-            if (form.getIncrement() == null || form.getIncrement().isBlank()) {
+            if (Strings.isBlank(form.getIncrement())) {
                 return null;
             }
             return Integer.valueOf(form.getIncrement());
@@ -126,12 +119,21 @@ public class NewRideTemplateForm {
         public Set<RideGroupTemplate> getGroups() {
             return form.getGroups().stream().map(g -> {
                 NewRideGroupTemplateForm.NewRideGroupTemplateFormParser parser = g.parser();
-                return new RideGroupTemplate(parser.getName(),
-                        parser.getLowerSpeed(),
-                        parser.getUpperSpeed(),
-                        parser.getMeetingLocation(),
-                        parser.getMeetingTime(),
-                        parser.getMeetingPoint().orElse(null));
+                final RideGroupTemplate gt = new RideGroupTemplate();
+
+                gt.setName(parser.getName());
+                gt.setLowerSpeed(parser.getLowerSpeed());
+                gt.setUpperSpeed(parser.getUpperSpeed());
+                gt.setMeetingLocation(parser.getMeetingLocation());
+                gt.setMeetingTime(parser.getMeetingTime());
+                gt.setMeetingPoint(parser.getMeetingPoint());
+
+                if (parser.getId() != null) {
+                    gt.setId(parser.getId());
+                }
+
+                return gt;
+
             }).collect(Collectors.toSet());
         }
 

@@ -20,46 +20,33 @@ public class TeamConfiguration {
     @MapsId
     @JoinColumn(name = "team_id")
     private Team team;
-    private String timezone;
+    private String timezone = Timezone.DEFAULT_TIMEZONE;
     @ElementCollection
     @CollectionTable(
             name = "TEAM_CONFIGURATION_DEFAULT_SEARCH_TAGS",
             joinColumns = @JoinColumn(name = "team_configuration_id", referencedColumnName = "team_id")
     )
-    private List<String> defaultSearchTags;
+    private List<String> defaultSearchTags = new ArrayList<>();
     @Column(name = "default_page")
     @Enumerated(EnumType.STRING)
-    private WebPage defaultPage;
+    private WebPage defaultPage = WebPage.FEED;
     @Column(name = "feed_visible")
-    private boolean feedVisible;
+    private boolean feedVisible = true;
     @Column(name = "rides_visible")
-    private boolean ridesVisible;
+    private boolean ridesVisible = true;
     @Column(name = "trips_visible")
-    private boolean tripsVisible;
+    private boolean tripsVisible = true;
     @Column
     private String domain;
     @Column(name = "markdown_page")
     private String markdownPage;
-
-    public TeamConfiguration() {
-    }
-
-    public TeamConfiguration(Team team, String timezone) {
-        setTeam(team);
-        setDefaultSearchTags(new ArrayList<>());
-        setFeedVisible(true);
-        setRidesVisible(true);
-        setTripsVisible(true);
-        setDefaultPage(WebPage.FEED);
-        setTimezone(timezone);
-    }
 
     public String getTeamId() {
         return teamId;
     }
 
     public void setTeamId(String teamId) {
-        this.teamId = teamId;
+        this.teamId = Objects.requireNonNull(teamId, "teamId is null");
     }
 
     public Team getTeam() {
@@ -67,8 +54,8 @@ public class TeamConfiguration {
     }
 
     public void setTeam(Team team) {
+        this.team = Objects.requireNonNull(team);
         this.teamId = team.getId();
-        this.team = team;
     }
 
     public String getTimezone() {
@@ -92,7 +79,7 @@ public class TeamConfiguration {
     }
 
     public void setDefaultPage(WebPage defaultPage) {
-        this.defaultPage = Objects.requireNonNull(defaultPage);
+        this.defaultPage = Objects.requireNonNullElse(defaultPage, WebPage.FEED);
     }
 
     public boolean isFeedVisible() {
@@ -140,7 +127,19 @@ public class TeamConfiguration {
     }
 
     public boolean isMarkdownPageWritten() {
-        return this.markdownPage != null && !this.markdownPage.trim().equals("");
+        return !Strings.isBlank(this.markdownPage);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TeamConfiguration that = (TeamConfiguration) o;
+        return teamId.equals(that.teamId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(teamId);
+    }
 }

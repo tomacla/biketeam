@@ -3,7 +3,7 @@ package info.tomacla.biketeam.common.datatype;
 import org.springframework.util.ObjectUtils;
 
 import java.text.Normalizer;
-import java.util.Objects;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,30 +12,37 @@ public class Strings {
     public static final Pattern EMAIL = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$",
             Pattern.CASE_INSENSITIVE);
 
+    public static boolean isBlank(String... s) {
+        return Arrays.stream(s).anyMatch(Strings::isBlank);
+    }
+
+    public static boolean isBlank(String s) {
+        return ObjectUtils.isEmpty(s) || s.isBlank();
+    }
+
     public static String requireNonBlank(String s, String message) {
-        Objects.requireNonNull(s);
-        if (s.isBlank()) {
+        if (isBlank(s)) {
             throw new IllegalArgumentException(message);
         }
-        return s;
+        return s.trim();
     }
 
     public static String requireNonBlankOrNull(String s) {
-        if (s == null || s.isBlank()) {
+        if (isBlank(s)) {
             return null;
         }
-        return s;
+        return s.trim();
     }
 
     public static String requireNonBlankOrDefault(String s, String defaultValue) {
-        if (s == null || s.isBlank()) {
+        if (isBlank(s)) {
             return defaultValue;
         }
-        return s;
+        return s.trim();
     }
 
     public static String normalizePermalink(String permalink) {
-        if (ObjectUtils.isEmpty(permalink)) {
+        if (isBlank(permalink)) {
             return null;
         }
         String normalized = Normalizer.normalize(permalink, Normalizer.Form.NFD);
@@ -46,7 +53,7 @@ public class Strings {
     }
 
     public static boolean isEmail(String s) {
-        if (s == null || s.isBlank()) {
+        if (isBlank(s)) {
             return false;
         }
 

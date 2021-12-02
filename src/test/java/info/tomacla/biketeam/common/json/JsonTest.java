@@ -1,7 +1,6 @@
 package info.tomacla.biketeam.common.json;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import info.tomacla.biketeam.common.json.Json;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;

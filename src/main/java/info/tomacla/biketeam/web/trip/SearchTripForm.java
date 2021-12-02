@@ -8,17 +8,10 @@ import java.util.Objects;
 
 public class SearchTripForm {
 
-    private int page;
-    private int pageSize;
-    private String from;
-    private String to;
-
-    public SearchTripForm() {
-        setPage(0);
-        setPageSize(10);
-        setTo(null);
-        setFrom(null);
-    }
+    private int page = 0;
+    private int pageSize = 10;
+    private String from = Dates.formatDate(LocalDate.now().minus(1, ChronoUnit.MONTHS));
+    private String to = Dates.formatDate(LocalDate.now().plus(1, ChronoUnit.MONTHS));
 
     public static SearchTripFormBuilder builder() {
         return new SearchTripFormBuilder();

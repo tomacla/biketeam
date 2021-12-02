@@ -86,14 +86,14 @@ public class TeamService extends AbstractPermalinkService {
         return feedRepository.findAllByTeamIdInAndPublishedAtLessThan(
                 Set.of(teamId),
                 ZonedDateTime.now(ZoneOffset.UTC), // TODO should be user timezone and not UTC
-                PageRequest.of(0, 15, Sort.by("publishedAt").descending())).getContent();
+                PageRequest.of(0, 10, Sort.by("publishedAt").descending())).getContent();
     }
 
     public List<Feed> listFeed(Set<String> teamIds) {
         return feedRepository.findAllByTeamIdInAndPublishedAtLessThan(
                 teamIds,
                 ZonedDateTime.now(ZoneOffset.UTC), // TODO should be user timezone and not UTC
-                PageRequest.of(0, 15, Sort.by("publishedAt").descending())).getContent();
+                PageRequest.of(0, 10, Sort.by("publishedAt").descending())).getContent();
     }
 
     public void save(Team team) {

@@ -17,9 +17,9 @@ public class FileServiceTest {
         FileService fileService = create();
         Path source = Paths.get(fileService.getClass().getClassLoader().getResource("image-test.jpg").toURI());
         assertFalse(fileService.fileExists("test-store", "teamid", "new-file"));
-        fileService.storeFile(source, "test-store", "teamid","new-file");
-        assertTrue(fileService.fileExists("test-store", "teamid","new-file"));
-        fileService.getFile("test-store", "teamid","new-file");
+        fileService.storeFile(source, "test-store", "teamid", "new-file");
+        assertTrue(fileService.fileExists("test-store", "teamid", "new-file"));
+        fileService.getFile("test-store", "teamid", "new-file");
     }
 
     private FileService create() {

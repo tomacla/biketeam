@@ -2,7 +2,6 @@ package info.tomacla.biketeam.web.team.map;
 
 import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.domain.map.MapType;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -12,23 +11,13 @@ import java.util.Optional;
 
 public class NewMapForm {
 
-    private String id;
-    private String permalink;
-    private String name;
-    private String type;
-    private String visible;
-    private List<String> tags;
-    private MultipartFile file;
-
-    public NewMapForm() {
-        setId(null);
-        setPermalink(null);
-        setName(null);
-        setType(null);
-        setVisible("on");
-        setTags(null);
-        setFile(null);
-    }
+    private String id = "new";
+    private String permalink = "";
+    private String name = "";
+    private String type = MapType.ROAD.name();
+    private String visible = "on";
+    private List<String> tags = new ArrayList<>();
+    private MultipartFile file = null;
 
     public static NewMapFormBuilder builder() {
         return new NewMapFormBuilder();
@@ -111,14 +100,14 @@ public class NewMapForm {
         }
 
         public String getPermalink() {
-            if (ObjectUtils.isEmpty(form.getPermalink())) {
+            if (Strings.isBlank(form.getPermalink())) {
                 return null;
             }
             return Strings.normalizePermalink(form.getPermalink());
         }
 
         public String getName() {
-            return form.getName();
+            return Strings.requireNonBlankOrNull(form.getName());
         }
 
         public boolean isVisible() {

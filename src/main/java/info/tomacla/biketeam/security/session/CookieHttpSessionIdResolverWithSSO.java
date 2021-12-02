@@ -24,12 +24,14 @@ public class CookieHttpSessionIdResolverWithSSO implements HttpSessionIdResolver
             .concat(".WRITTEN_SESSION_ID_ATTR");
 
     private CookieSerializer cookieSerializer = new DefaultCookieSerializer();
-
-    @Autowired
     private UrlService urlService;
+    private SSOService ssoService;
 
     @Autowired
-    private SSOService ssoService;
+    public CookieHttpSessionIdResolverWithSSO(UrlService urlService, SSOService ssoService) {
+        this.urlService = urlService;
+        this.ssoService = ssoService;
+    }
 
     @PostConstruct
     public void init() {

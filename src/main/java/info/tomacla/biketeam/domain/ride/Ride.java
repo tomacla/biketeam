@@ -7,6 +7,7 @@ import org.springframework.util.ObjectUtils;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -16,61 +17,31 @@ import java.util.stream.Collectors;
 public class Ride {
 
     @Id
-    private String id;
+    private String id = UUID.randomUUID().toString();
     @Column(name = "team_id")
     private String teamId;
     private String permalink;
     @Enumerated(EnumType.STRING)
     @Column(name = "published_status")
-    private PublishedStatus publishedStatus;
+    private PublishedStatus publishedStatus = PublishedStatus.UNPUBLISHED;
     @Enumerated(EnumType.STRING)
-    private RideType type;
+    private RideType type = RideType.REGULAR;
     private LocalDate date;
     @Column(name = "published_at")
-    private ZonedDateTime publishedAt;
+    private ZonedDateTime publishedAt = ZonedDateTime.now(ZoneOffset.UTC);
     private String title;
     @Column(length = 8000)
     private String description;
     private boolean imaged;
     @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private Set<RideGroup> groups;
-
-    public Ride() {
-    }
-
-    public Ride(String teamId,
-                String permalink,
-                RideType type,
-                LocalDate date,
-                ZonedDateTime publishedAt,
-                String title,
-                String description,
-                boolean imaged,
-                Set<RideGroup> groups) {
-
-        this.id = UUID.randomUUID().toString();
-
-        setTeamId(teamId);
-        setPermalink(permalink);
-        setPublishedStatus(PublishedStatus.UNPUBLISHED);
-        setType(type);
-        setDate(date);
-        setPublishedAt(publishedAt);
-        setTitle(title);
-        setPermalink(Strings.normalizePermalink(title));
-        setDescription(description);
-        setImaged(imaged);
-
-        this.groups = new HashSet<>();
-
-    }
+    private Set<RideGroup> groups = new HashSet<>();
 
     public String getId() {
         return id;
     }
 
     protected void setId(String id) {
-        this.id = id;
+        this.id = Objects.requireNonNull(id, "id is null");
     }
 
     public String getTeamId() {
@@ -78,7 +49,7 @@ public class Ride {
     }
 
     public void setTeamId(String teamId) {
-        this.teamId = Objects.requireNonNull(teamId);
+        this.teamId = Objects.requireNonNull(teamId, "teamId is null");
     }
 
     public String getPermalink() {
@@ -94,7 +65,7 @@ public class Ride {
     }
 
     public void setPublishedStatus(PublishedStatus publishedStatus) {
-        this.publishedStatus = Objects.requireNonNull(publishedStatus);
+        this.publishedStatus = Objects.requireNonNull(publishedStatus, "publishedStatus is null");
     }
 
     public RideType getType() {
@@ -102,7 +73,7 @@ public class Ride {
     }
 
     public void setType(RideType type) {
-        this.type = Objects.requireNonNull(type, "type is null");
+        this.type = Objects.requireNonNullElse(type, RideType.REGULAR);
     }
 
     public LocalDate getDate() {
@@ -126,7 +97,7 @@ public class Ride {
     }
 
     public void setTitle(String title) {
-        this.title = Strings.requireNonBlank(title, "title is null");
+        this.title = Strings.requireNonBlank(title, "title is blank");
     }
 
     public String getDescription() {
@@ -150,7 +121,7 @@ public class Ride {
     }
 
     public void setGroups(Set<RideGroup> groups) {
-        Lists.requireSizeOf(groups, 1, "groups is null or empty");
+        Lists.requireSizeOf(groups, 1, "groups must have at least 1 element");
         groups.forEach(this::addGroup);
     }
 
@@ -167,21 +138,23 @@ public class Ride {
 
     public void addOrReplaceGroups(List<RideGroup> updatedGroups) {
 
-        // remove deleted groups
         final Set<String> updatedGroupsId = updatedGroups.stream().map(RideGroup::getId).filter(id -> !ObjectUtils.isEmpty(id)).collect(Collectors.toSet());
+        final Set<String> existingGroupsId = this.groups.stream().map(RideGroup::getId).collect(Collectors.toSet());
+
+        // remove deleted groups
         this.groups.forEach(group -> {
             if (!updatedGroupsId.contains(group.getId())) {
-                group.removeRide(); // needed for hibernate
+                group.setRide(null); // needed for hibernate
             }
         });
         groups.removeIf(g -> !updatedGroupsId.contains(g.getId()));
 
         // add new groups
-        final List<RideGroup> newGroups = updatedGroups.stream().filter(g -> g.getId() == null).collect(Collectors.toList());
+        final List<RideGroup> newGroups = updatedGroups.stream().filter(g -> !existingGroupsId.contains(g.getId())).collect(Collectors.toList());
         newGroups.forEach(this::addGroup);
 
         // update existing groups
-        final List<RideGroup> existingGroups = updatedGroups.stream().filter(g -> g.getId() != null).collect(Collectors.toList());
+        final List<RideGroup> existingGroups = updatedGroups.stream().filter(g -> existingGroupsId.contains(g.getId())).collect(Collectors.toList());
         existingGroups.forEach(g ->
                 this.groups.stream().filter(gg -> g.getId().equals(gg.getId())).findFirst().ifPresent(target -> {
                     target.setMeetingLocation(g.getMeetingLocation());
@@ -196,24 +169,12 @@ public class Ride {
     }
 
     public void addGroup(RideGroup group) {
-        group.setRide(this, getNextGroupIndex());
+        group.setRide(this);
         groups.add(group);
     }
 
-    public void clearGroups() {
-        groups.clear();
-    }
-
-    private int getNextGroupIndex() {
-        final Optional<Integer> nextIndex = this.groups.stream().map(RideGroup::getGroupIndex).max(Comparator.naturalOrder());
-        if (nextIndex.isEmpty()) {
-            return 0;
-        }
-        return nextIndex.get() + 1;
-    }
-
     public boolean hasParticipant(String userId) {
-        return this.getGroups().stream().map(g -> g.hasParticipant(userId)).filter(p -> p).count() != 0L;
+        return this.getGroups().stream().anyMatch(g -> g.hasParticipant(userId));
     }
 
     public boolean isParticipantInAnotherGroup(String groupId, String userId) {

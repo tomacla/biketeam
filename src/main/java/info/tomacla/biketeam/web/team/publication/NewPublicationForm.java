@@ -11,21 +11,12 @@ import java.util.Optional;
 
 public class NewPublicationForm {
 
-    private String id;
-    private String title;
-    private String content;
-    private String publishedAtDate;
-    private String publishedAtTime;
-    private MultipartFile file;
-
-    public NewPublicationForm() {
-        setId(null);
-        setTitle(null);
-        setContent(null);
-        setPublishedAtDate(null);
-        setPublishedAtTime(null);
-        setFile(null);
-    }
+    private String id = "new";
+    private String title = "";
+    private String content = "";
+    private String publishedAtDate = Dates.formatDate(LocalDate.now());
+    private String publishedAtTime = "12:00";
+    private MultipartFile file = null;
 
     public static NewPublicationFormBuilder builder(ZonedDateTime defaultPublishedAt, ZoneId timezone) {
         return new NewPublicationFormBuilder(defaultPublishedAt, timezone);
@@ -100,11 +91,11 @@ public class NewPublicationForm {
         }
 
         public String getTitle() {
-            return form.getTitle();
+            return Strings.requireNonBlankOrNull(form.getTitle());
         }
 
         public String getContent() {
-            return form.getContent();
+            return Strings.requireNonBlankOrNull(form.getContent());
         }
 
         public ZonedDateTime getPublishedAt(ZoneId timezone) {

@@ -4,7 +4,6 @@ import info.tomacla.biketeam.common.geo.Vector;
 import org.springframework.data.util.Pair;
 
 import java.util.Comparator;
-import java.util.List;
 import java.util.stream.Stream;
 
 public enum WindDirection {

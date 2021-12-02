@@ -3,34 +3,21 @@ package info.tomacla.biketeam.web.team.ride;
 import info.tomacla.biketeam.common.datatype.Dates;
 import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.common.geo.Point;
-import org.springframework.util.ObjectUtils;
 
 import java.time.LocalTime;
-import java.util.Optional;
 
 public class NewRideGroupForm {
 
-    private String id;
-    private String name;
-    private double lowerSpeed;
-    private double upperSpeed;
-    private String mapId;
-    private String mapName;
-    private String meetingLocation;
-    private double meetingPointLat;
-    private double meetingPointLng;
-    private String meetingTime;
-
-    public NewRideGroupForm() {
-        setId(null);
-        setName(null);
-        setMapId(null);
-        setMapName(null);
-        setMeetingLocation(null);
-        setMeetingTime("12:00");
-        setLowerSpeed(28);
-        setUpperSpeed(30);
-    }
+    private String id = "";
+    private String name = "";
+    private double lowerSpeed = 28;
+    private double upperSpeed = 30;
+    private String mapId = "";
+    private String mapName = "";
+    private String meetingLocation = "";
+    private double meetingPointLat = 0.0;
+    private double meetingPointLng = 0.0;
+    private String meetingTime = "12:00";
 
     public static NewRideGroupFormBuilder builder() {
         return new NewRideGroupFormBuilder();
@@ -129,14 +116,11 @@ public class NewRideGroupForm {
         }
 
         public String getId() {
-            if (ObjectUtils.isEmpty(form.getId())) {
-                return null;
-            }
-            return form.getId();
+            return Strings.requireNonBlankOrNull(form.getId());
         }
 
         public String getName() {
-            return form.getName();
+            return Strings.requireNonBlankOrNull(form.getName());
         }
 
         public double getLowerSpeed() {
@@ -148,25 +132,22 @@ public class NewRideGroupForm {
         }
 
         public String getMeetingLocation() {
-            return form.getMeetingLocation();
+            return Strings.requireNonBlankOrNull(form.getMeetingLocation());
         }
 
-        public Optional<Point> getMeetingPoint() {
+        public Point getMeetingPoint() {
             if (form.getMeetingPointLat() != 0.0 && form.getMeetingPointLng() != 0.0) {
-                return Optional.of(new Point(form.getMeetingPointLat(), form.getMeetingPointLng()));
+                return new Point(form.getMeetingPointLat(), form.getMeetingPointLng());
             }
-            return Optional.empty();
+            return null;
         }
 
         public LocalTime getMeetingTime() {
             return LocalTime.parse(form.getMeetingTime());
         }
 
-        public Optional<String> getMapId() {
-            if (!form.getMapId().isBlank()) {
-                return Optional.of(form.getMapId());
-            }
-            return Optional.empty();
+        public String getMapId() {
+            return Strings.requireNonBlankOrNull(form.getMapId());
         }
 
     }

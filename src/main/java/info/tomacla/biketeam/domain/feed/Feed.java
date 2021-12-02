@@ -3,6 +3,7 @@ package info.tomacla.biketeam.domain.feed;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -117,7 +118,7 @@ public class Feed {
     }
 
     public void setBadges(List<String> badges) {
-        this.badges = badges;
+        this.badges = Objects.requireNonNullElse(badges, new ArrayList<>());
     }
 
     @Override

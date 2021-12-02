@@ -4,6 +4,7 @@ import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.datatype.Strings;
 
 import javax.persistence.*;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -13,42 +14,25 @@ import java.util.UUID;
 public class Publication {
 
     @Id
-    private String id;
+    private String id = UUID.randomUUID().toString();
     @Column(name = "team_id")
     private String teamId;
     @Enumerated(EnumType.STRING)
     @Column(name = "published_status")
-    private PublishedStatus publishedStatus;
+    private PublishedStatus publishedStatus = PublishedStatus.UNPUBLISHED;
     private String title;
     @Column(name = "published_at")
-    private ZonedDateTime publishedAt;
+    private ZonedDateTime publishedAt = ZonedDateTime.now(ZoneOffset.UTC);
     @Column(length = 8000)
     private String content;
     private boolean imaged;
-
-    public Publication() {
-    }
-
-    public Publication(String teamId,
-                       String title,
-                       String content,
-                       ZonedDateTime publishedAt,
-                       boolean imaged) {
-        this.id = UUID.randomUUID().toString();
-        setTeamId(teamId);
-        setTitle(title);
-        setContent(content);
-        setPublishedAt(publishedAt);
-        setPublishedStatus(PublishedStatus.UNPUBLISHED);
-        setImaged(imaged);
-    }
 
     public String getId() {
         return id;
     }
 
     protected void setId(String id) {
-        this.id = id;
+        this.id = Objects.requireNonNull(id, "id is null");
     }
 
     public String getTeamId() {
@@ -56,7 +40,7 @@ public class Publication {
     }
 
     public void setTeamId(String teamId) {
-        this.teamId = Objects.requireNonNull(teamId);
+        this.teamId = Objects.requireNonNull(teamId, "teamId is null");
     }
 
     public PublishedStatus getPublishedStatus() {
@@ -64,7 +48,7 @@ public class Publication {
     }
 
     public void setPublishedStatus(PublishedStatus publishedStatus) {
-        this.publishedStatus = Objects.requireNonNull(publishedStatus);
+        this.publishedStatus = Objects.requireNonNull(publishedStatus, "publishedStatus is null");
     }
 
     public String getTitle() {
@@ -72,7 +56,7 @@ public class Publication {
     }
 
     public void setTitle(String title) {
-        this.title = Strings.requireNonBlank(title, "title is null");
+        this.title = Strings.requireNonBlank(title, "title is blank");
     }
 
     public ZonedDateTime getPublishedAt() {
@@ -88,7 +72,7 @@ public class Publication {
     }
 
     public void setContent(String content) {
-        this.content = Strings.requireNonBlank(content, "content is null");
+        this.content = Strings.requireNonBlank(content, "content is blank");
     }
 
     public boolean isImaged() {

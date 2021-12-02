@@ -1,9 +1,8 @@
 package info.tomacla.biketeam.common.math;
 
-import info.tomacla.biketeam.common.math.Rounder;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RounderTest {
 

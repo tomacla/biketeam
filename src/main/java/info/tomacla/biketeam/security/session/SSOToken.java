@@ -26,8 +26,8 @@ public class SSOToken {
                 rememberMe);
     }
 
-    public boolean isValid() {
-        return ChronoUnit.SECONDS.between(generatedAt, ZonedDateTime.now(ZoneOffset.UTC)) <= 20L;
+    public boolean isValid(long expiracy) {
+        return ChronoUnit.SECONDS.between(generatedAt, ZonedDateTime.now(ZoneOffset.UTC)) < expiracy;
     }
 
     public String getToken() {

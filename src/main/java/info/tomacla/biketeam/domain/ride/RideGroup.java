@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class RideGroup {
 
     @Id
-    private String id;
+    private String id = UUID.randomUUID().toString();
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ride_id")
     private Ride ride;
@@ -42,47 +42,22 @@ public class RideGroup {
             name = "ride_group_participant",
             joinColumns = @JoinColumn(name = "ride_group_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Set<User> participants;
-
-    public RideGroup() {
-    }
-
-    public RideGroup(String name,
-                     double lowerSpeed,
-                     double upperSpeed,
-                     Map map,
-                     String meetingLocation,
-                     LocalTime meetingTime,
-                     Point meetingPoint) {
-        setName(name);
-        setLowerSpeed(lowerSpeed);
-        setUpperSpeed(upperSpeed);
-        setMap(map);
-        setMeetingLocation(meetingLocation);
-        setMeetingTime(meetingTime);
-        setMeetingPoint(meetingPoint);
-        setParticipants(new HashSet<>());
-    }
+    private Set<User> participants = new HashSet<>();
 
     public String getId() {
         return id;
     }
 
     public void setId(String id) {
-        this.id = id;
+        this.id = Objects.requireNonNull(id, "id is null");
     }
 
     public Ride getRide() {
         return ride;
     }
 
-    public void setRide(Ride ride, int index) {
-        this.ride = Objects.requireNonNull(ride);
-        this.id = ride.getId() + "-" + index;
-    }
-
-    public void removeRide() {
-        this.ride = null;
+    public void setRide(Ride ride) {
+        this.ride = ride;
     }
 
     public String getName() {
@@ -90,7 +65,7 @@ public class RideGroup {
     }
 
     public void setName(String name) {
-        this.name = Strings.requireNonBlank(name, "name is null");
+        this.name = Strings.requireNonBlank(name, "name is blank");
     }
 
     public double getLowerSpeed() {
@@ -130,7 +105,7 @@ public class RideGroup {
     }
 
     public void setMeetingTime(LocalTime meetingTime) {
-        this.meetingTime = Objects.requireNonNull(meetingTime);
+        this.meetingTime = Objects.requireNonNull(meetingTime, "meetingTime is null");
     }
 
     public Point getMeetingPoint() {
@@ -150,7 +125,7 @@ public class RideGroup {
     }
 
     public void removeParticipant(User participant) {
-        this.getParticipants().removeIf(u -> u.equals(participant));
+        this.getParticipants().remove(participant);
     }
 
     public Set<User> getParticipants() {
@@ -167,11 +142,6 @@ public class RideGroup {
         this.participants = Objects.requireNonNullElse(participants, new HashSet<>());
     }
 
-    public int getGroupIndex() {
-        final String[] parts = this.id.split("-");
-        return Integer.parseInt(parts[parts.length - 1]);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -184,6 +154,5 @@ public class RideGroup {
     public int hashCode() {
         return Objects.hash(id);
     }
-
 
 }
