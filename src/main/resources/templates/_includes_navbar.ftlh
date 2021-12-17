@@ -28,7 +28,7 @@
             </#if>
             <#if team.configuration.markdownPageWritten>
                 <li class="nav-item">
-                  <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/' + team.id + '/faq')> active</#if>" href="<@common.teamUrl team.id '/page' />">FAQ</a>
+                  <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/' + team.id + '/faq')> active</#if>" href="<@common.teamUrl team.id '/faq' />">FAQ</a>
                 </li>
             </#if>
             <#if team.configuration.ridesVisible>

@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.security.Principal;
 
 @Controller
-@RequestMapping(value = "/{teamId}/page")
-public class PageController extends AbstractController {
+@RequestMapping(value = "/{teamId}/faq")
+public class FAQController extends AbstractController {
 
     @GetMapping
     public String getPage(@PathVariable("teamId") String teamId,

@@ -2,7 +2,7 @@ package info.tomacla.biketeam.web.team.configuration;
 
 import info.tomacla.biketeam.common.datatype.Strings;
 
-public class EditTeamPageForm {
+public class EditTeamFAQForm {
 
     private String markdownPage = "";
 
@@ -24,9 +24,9 @@ public class EditTeamPageForm {
 
     public static class EditTeamPageFormParser {
 
-        private final EditTeamPageForm form;
+        private final EditTeamFAQForm form;
 
-        protected EditTeamPageFormParser(EditTeamPageForm form) {
+        protected EditTeamPageFormParser(EditTeamFAQForm form) {
             this.form = form;
         }
 
@@ -38,10 +38,10 @@ public class EditTeamPageForm {
 
     public static class EditTeamPageFormBuilder {
 
-        private final EditTeamPageForm form;
+        private final EditTeamFAQForm form;
 
         protected EditTeamPageFormBuilder() {
-            this.form = new EditTeamPageForm();
+            this.form = new EditTeamFAQForm();
         }
 
         public EditTeamPageFormBuilder withMarkdownPage(String markdownPage) {
@@ -49,7 +49,7 @@ public class EditTeamPageForm {
             return this;
         }
 
-        public EditTeamPageForm get() {
+        public EditTeamFAQForm get() {
             return form;
         }
 

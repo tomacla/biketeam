@@ -6,7 +6,7 @@
 
     <div class="col-12 col-md-8">
 
-        <form name="form-configuration" action="<@common.teamUrl team.id '/admin/page' />" method="POST" class="border rounded p-4">
+        <form name="form-configuration" action="<@common.teamUrl team.id '/admin/faq' />" method="POST" class="border rounded p-4">
 
                 <h5>FAQ</h5>
 

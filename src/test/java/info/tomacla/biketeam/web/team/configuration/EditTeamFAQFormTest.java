@@ -5,14 +5,14 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class EditTeamPageFormTest {
+public class EditTeamFAQFormTest {
 
     @Test
     public void test() {
 
-        final EditTeamPageForm form = EditTeamPageForm.builder().withMarkdownPage("toto").get();
+        final EditTeamFAQForm form = EditTeamFAQForm.builder().withMarkdownPage("toto").get();
 
-        final EditTeamPageForm.EditTeamPageFormParser parser = form.parser();
+        final EditTeamFAQForm.EditTeamPageFormParser parser = form.parser();
 
         assertEquals("toto", parser.getMarkdownPage());
 
@@ -21,9 +21,9 @@ public class EditTeamPageFormTest {
     @Test
     public void testDefault() {
 
-        final EditTeamPageForm form = EditTeamPageForm.builder().get();
+        final EditTeamFAQForm form = EditTeamFAQForm.builder().get();
 
-        final EditTeamPageForm.EditTeamPageFormParser parser = form.parser();
+        final EditTeamFAQForm.EditTeamPageFormParser parser = form.parser();
 
         assertNull(parser.getMarkdownPage());
 

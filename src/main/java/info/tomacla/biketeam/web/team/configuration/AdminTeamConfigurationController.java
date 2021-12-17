@@ -199,7 +199,7 @@ public class AdminTeamConfigurationController extends AbstractController {
 
     }
 
-    @GetMapping(value = "/page")
+    @GetMapping(value = "/faq")
     public String getSitePage(@PathVariable("teamId") String teamId,
                               @ModelAttribute("error") String error,
                               Principal principal, Model model) {
@@ -207,7 +207,7 @@ public class AdminTeamConfigurationController extends AbstractController {
         final Team team = checkTeam(teamId);
         final TeamConfiguration teamConfiguration = team.getConfiguration();
 
-        EditTeamPageForm form = EditTeamPageForm.builder()
+        EditTeamFAQForm form = EditTeamFAQForm.builder()
                 .withMarkdownPage(teamConfiguration.getMarkdownPage())
                 .get();
 
@@ -219,11 +219,11 @@ public class AdminTeamConfigurationController extends AbstractController {
         return "team_admin_page_configuration";
     }
 
-    @PostMapping(value = "/page")
+    @PostMapping(value = "/faq")
     public RedirectView updateSitePage(@PathVariable("teamId") String teamId,
                                        Principal principal, Model model,
                                        RedirectAttributes attributes,
-                                       EditTeamPageForm form) {
+                                       EditTeamFAQForm form) {
 
         final Team team = checkTeam(teamId);
 
@@ -231,16 +231,16 @@ public class AdminTeamConfigurationController extends AbstractController {
         final TeamConfiguration teamConfiguration = team.getConfiguration();
 
         try {
-            final EditTeamPageForm.EditTeamPageFormParser parser = form.parser();
+            final EditTeamFAQForm.EditTeamPageFormParser parser = form.parser();
 
             teamConfiguration.setMarkdownPage(parser.getMarkdownPage());
             teamService.save(team);
 
-            return viewHandler.redirectView(team, "/admin/page");
+            return viewHandler.redirectView(team, "/admin/faq");
 
         } catch (Exception e) {
             attributes.addFlashAttribute("error", e.getMessage());
-            return viewHandler.redirectView(team, "/admin/page");
+            return viewHandler.redirectView(team, "/admin/faq");
         }
 
     }
