@@ -19,6 +19,7 @@ public class TeamDescription {
     @Column(length = 2000)
     private String description;
     private String facebook;
+    private String instagram;
     private String twitter;
     private String email;
     @Column(name = "phone_number")
@@ -63,6 +64,14 @@ public class TeamDescription {
 
     public void setFacebook(String facebook) {
         this.facebook = Strings.requireNonBlankOrNull(facebook);
+    }
+
+    public String getInstagram() {
+        return instagram;
+    }
+
+    public void setInstagram(String instagram) {
+        this.instagram = Strings.requireNonBlankOrNull(instagram);
     }
 
     public String getTwitter() {

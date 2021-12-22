@@ -5,6 +5,7 @@ import info.tomacla.biketeam.common.datatype.Lists;
 import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.common.geo.Point;
 import info.tomacla.biketeam.domain.map.MapType;
+import info.tomacla.biketeam.domain.message.TripMessage;
 import info.tomacla.biketeam.domain.user.User;
 import org.springframework.util.ObjectUtils;
 
@@ -62,6 +63,8 @@ public class Trip {
             joinColumns = @JoinColumn(name = "trip_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> participants = new HashSet<>();
+    @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private Set<TripMessage> messages = new HashSet<>();
 
     public String getId() {
         return id;
@@ -270,6 +273,24 @@ public class Trip {
 
     public void setParticipants(Set<User> participants) {
         this.participants = Objects.requireNonNullElse(participants, new HashSet<>());
+    }
+
+    public Set<TripMessage> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(Set<TripMessage> messages) {
+        this.messages = Objects.requireNonNullElse(messages, new HashSet<>());
+    }
+
+    public List<TripMessage> getSortedMessages() {
+        return messages.stream()
+                .sorted(Comparator.comparing(TripMessage::getPublishedAt))
+                .collect(Collectors.toList());
+    }
+
+    public void removeMessage(String messageId) {
+        this.messages.removeIf(message -> message.getId().equals(messageId));
     }
 
     @Override

@@ -90,6 +90,7 @@ public class AdminTeamConfigurationController extends AbstractController {
 
         EditTeamDescriptionForm form = EditTeamDescriptionForm.builder()
                 .withFacebook(teamDescription.getFacebook())
+                .withInstagram(teamDescription.getInstagram())
                 .withTwitter(teamDescription.getTwitter())
                 .withEmail(teamDescription.getEmail())
                 .withPhoneNumber(teamDescription.getPhoneNumber())
@@ -120,6 +121,7 @@ public class AdminTeamConfigurationController extends AbstractController {
         try {
 
             teamDescription.setFacebook(parser.getFacebook());
+            teamDescription.setInstagram(parser.getInstagram());
             teamDescription.setTwitter(parser.getTwitter());
             teamDescription.setEmail(parser.getEmail());
             teamDescription.setPhoneNumber(parser.getPhoneNumber());

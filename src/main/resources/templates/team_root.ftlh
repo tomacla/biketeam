@@ -6,7 +6,7 @@
 
         <section class="border p-2 mb-3 rounded">
             <div class="d-flex flex-row justify-content-between mb-3">
-                <h5>${team.name} <#if (team.description.facebook)??><span class="small ps-2"><a target="_blank" href="https://www.facebook.com/${team.description.facebook}"><i class="bi bi-facebook"></i></a></#if> <#if (team.description.twitter)??><a target="_blank" href="https://www.twitter.com/${team.description.twitter}"><i class="bi bi-twitter"></i></a></#if></span></h5>
+                <h5>${team.name} <#if (team.description.facebook)??><span class="small ps-2"><a target="_blank" href="https://www.facebook.com/${team.description.facebook}"><i class="bi bi-facebook"></i></a></#if> <#if (team.description.twitter)??><a target="_blank" href="https://www.twitter.com/${team.description.twitter}"><i class="bi bi-twitter"></i></a></#if> <#if (team.description.instagram)??><span class="small"><a target="_blank" href="https://www.instagram.com/${team.description.instagram}"><i class="bi bi-instagram"></i></a></#if></span></h5>
                 <div>
                     <#if _authenticated>
                         <#if _team_admin>

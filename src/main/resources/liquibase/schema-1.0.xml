@@ -861,6 +861,99 @@
 
     </changeSet>
 
+    <changeSet id="GITHUB-41-ride-trip-messages" author="tomacla">
+
+        <createTable tableName="ride_message">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="team_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ride_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="VARCHAR(2000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="published_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="ride_message" columnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="ride_message"
+                                 baseColumnNames="team_id"
+                                 constraintName="fk_ride_message_team_id"
+                                 referencedTableName="team"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="ride_message"
+                                 baseColumnNames="ride_id"
+                                 constraintName="fk_ride_message_id"
+                                 referencedTableName="ride"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="ride_message"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_ride_message_user_id"
+                                 referencedTableName="user_account"
+                                 referencedColumnNames="id"/>
+
+        <createTable tableName="trip_message">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="team_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="trip_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="VARCHAR(2000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="published_at" type="timestamp with time zone">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="trip_message" columnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="trip_message"
+                                 baseColumnNames="team_id"
+                                 constraintName="fk_trip_message_team_id"
+                                 referencedTableName="team"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="trip_message"
+                                 baseColumnNames="trip_id"
+                                 constraintName="fk_trip_message_id"
+                                 referencedTableName="trip"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="trip_message"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_trip_message_user_id"
+                                 referencedTableName="user_account"
+                                 referencedColumnNames="id"/>
+
+
+    </changeSet>
+
+    <changeSet id="add-instagram-field" author="tomacla">
+        <addColumn tableName="team_description">
+            <column name="instagram" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
 
 

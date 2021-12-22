@@ -16,6 +16,7 @@ public class EditTeamDescriptionFormTest {
                 .withAddressStreetLine("street")
                 .withEmail("foo@bar.com")
                 .withFacebook("facebook")
+                .withInstagram("instagram")
                 .withTwitter("twitter")
                 .withOther("hello world")
                 .withPhoneNumber("0123456789")
@@ -28,6 +29,7 @@ public class EditTeamDescriptionFormTest {
         assertEquals("street", parser.getAddressStreetLine());
         assertEquals("foo@bar.com", parser.getEmail());
         assertEquals("facebook", parser.getFacebook());
+        assertEquals("instagram", parser.getInstagram());
         assertEquals("twitter", parser.getTwitter());
         assertEquals("hello world", parser.getOther());
         assertEquals("0123456789", parser.getPhoneNumber());
@@ -46,6 +48,7 @@ public class EditTeamDescriptionFormTest {
         assertNull(parser.getAddressStreetLine());
         assertNull(parser.getEmail());
         assertNull(parser.getFacebook());
+        assertNull(parser.getInstagram());
         assertNull(parser.getTwitter());
         assertNull(parser.getOther());
         assertNull(parser.getPhoneNumber());

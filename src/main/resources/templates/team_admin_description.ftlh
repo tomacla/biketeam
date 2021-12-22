@@ -25,6 +25,11 @@
                   <span class="input-group-text">https://www.twitter.com/</span>
                   <input autocomplete="off" name="twitter" value="${formdata.twitter}" type="text" class="form-control" id="form-description-twitter" placeholder="biketeam">
                 </div>
+                <label for="form-description-instagram" class="form-label">Lien instagram</label>
+                <div class="input-group mb-3">
+                  <span class="input-group-text">https://www.instagram.com/</span>
+                  <input autocomplete="off" name="instagram" value="${formdata.instagram}" type="text" class="form-control" id="form-description-instagram" placeholder="biketeam">
+                </div>
                 <div class="mb-3">
                   <label for="form-description-email" class="form-label">Email</label>
                   <input autocomplete="off" name="email" value="${formdata.email}" type="email" class="form-control" id="form-description-email" placeholder="exemple@email.com">

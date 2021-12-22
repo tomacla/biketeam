@@ -3,6 +3,7 @@ package info.tomacla.biketeam.domain.ride;
 import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.datatype.Lists;
 import info.tomacla.biketeam.common.datatype.Strings;
+import info.tomacla.biketeam.domain.message.RideMessage;
 import org.springframework.util.ObjectUtils;
 
 import javax.persistence.*;
@@ -35,6 +36,8 @@ public class Ride {
     private boolean imaged;
     @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<RideGroup> groups = new HashSet<>();
+    @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private Set<RideMessage> messages = new HashSet<>();
 
     public String getId() {
         return id;
@@ -184,6 +187,24 @@ public class Ride {
             }
         }
         return false;
+    }
+
+    public Set<RideMessage> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(Set<RideMessage> messages) {
+        this.messages = Objects.requireNonNullElse(messages, new HashSet<>());
+    }
+
+    public List<RideMessage> getSortedMessages() {
+        return messages.stream()
+                .sorted(Comparator.comparing(RideMessage::getPublishedAt))
+                .collect(Collectors.toList());
+    }
+
+    public void removeMessage(String messageId) {
+        this.messages.removeIf(message -> message.getId().equals(messageId));
     }
 
     @Override

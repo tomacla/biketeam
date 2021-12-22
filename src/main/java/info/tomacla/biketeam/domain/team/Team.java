@@ -135,6 +135,9 @@ public class Team {
     }
 
     public boolean isAdmin(User user) {
+        if (user.isAdmin()) {
+            return true;
+        }
         return this.roles.stream().anyMatch(role -> role.getUser().equals(user) && role.getRole().equals(Role.ADMIN));
     }
 

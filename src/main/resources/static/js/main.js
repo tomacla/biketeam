@@ -38,6 +38,7 @@ document.addEventListener("DOMContentLoaded", function() {
     Array.from(document.getElementsByClassName('markdown-content')).forEach(markdownContent);
     Array.from(document.getElementsByClassName('markdown-content-toc')).forEach(markdownContentToc);
     Array.from(document.getElementsByClassName('form-unique-id')).forEach(initUniqueIdField);
+    Array.from(document.getElementsByClassName('scroll-down')).forEach(scrollToBottom);
     Tags.init();
 
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
@@ -64,6 +65,10 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
 });
+
+function scrollToBottom(element) {
+    element.scrollTop = element.scrollHeight;
+}
 
 function initFormSizeCheck(input) {
     input.addEventListener('change', (event) => {

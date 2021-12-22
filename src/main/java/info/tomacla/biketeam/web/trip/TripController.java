@@ -3,12 +3,14 @@ package info.tomacla.biketeam.web.trip;
 import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
+import info.tomacla.biketeam.domain.message.TripMessage;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.trip.Trip;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.userrole.Role;
 import info.tomacla.biketeam.domain.userrole.UserRole;
 import info.tomacla.biketeam.service.MapService;
+import info.tomacla.biketeam.service.MessageService;
 import info.tomacla.biketeam.service.TripService;
 import info.tomacla.biketeam.service.UserRoleService;
 import info.tomacla.biketeam.service.file.ThumbnailService;
@@ -51,6 +53,9 @@ public class TripController extends AbstractController {
 
     @Autowired
     private UserRoleService userRoleService;
+
+    @Autowired
+    private MessageService messageService;
 
     @GetMapping(value = "/{tripId}")
     public String getTrip(@PathVariable("teamId") String teamId,
@@ -181,6 +186,88 @@ public class TripController extends AbstractController {
                 User connectedUser = optionalConnectedUser.get();
                 trip.removeParticipant(connectedUser);
                 tripService.save(trip);
+
+            }
+
+            return viewHandler.redirectView(team, "/trips/" + tripId);
+
+        } catch (Exception e) {
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/trips/" + tripId);
+        }
+    }
+
+    @PostMapping(value = "/{tripId}/add-message")
+    public RedirectView addMessage(@PathVariable("teamId") String teamId,
+                                   @PathVariable("tripId") String tripId,
+                                   @RequestParam("content") String content,
+                                   RedirectAttributes attributes,
+                                   Principal principal,
+                                   Model model) {
+
+        final Team team = checkTeam(teamId);
+
+        try {
+
+            Optional<Trip> optionalTrip = tripService.get(team.getId(), tripId);
+            if (optionalTrip.isEmpty()) {
+                return viewHandler.redirectView(team, "/trips");
+            }
+
+            Trip trip = optionalTrip.get();
+            Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
+
+            if (optionalConnectedUser.isPresent()) {
+
+                User connectedUser = optionalConnectedUser.get();
+
+                TripMessage tripMessage = new TripMessage();
+                tripMessage.setTrip(trip);
+                tripMessage.setUser(connectedUser);
+                tripMessage.setContent(content);
+
+                messageService.save(tripMessage);
+
+            }
+
+            return viewHandler.redirectView(team, "/trips/" + tripId);
+
+        } catch (Exception e) {
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/trips/" + tripId);
+        }
+    }
+
+    @GetMapping(value = "/{tripId}/remove-message/{messageId}")
+    public RedirectView removeMessage(@PathVariable("teamId") String teamId,
+                                      @PathVariable("tripId") String tripId,
+                                      @PathVariable("messageId") String messageId,
+                                      RedirectAttributes attributes,
+                                      Principal principal,
+                                      Model model) {
+
+        final Team team = checkTeam(teamId);
+
+        try {
+
+            Optional<Trip> optionalTrip = tripService.get(team.getId(), tripId);
+            if (optionalTrip.isEmpty()) {
+                return viewHandler.redirectView(team, "/trips");
+            }
+
+            Trip trip = optionalTrip.get();
+            Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
+            final Optional<TripMessage> optionalMessage = messageService.getTripMessage(messageId);
+
+            if (optionalConnectedUser.isPresent() && optionalMessage.isPresent()) {
+
+                User connectedUser = optionalConnectedUser.get();
+                final TripMessage message = optionalMessage.get();
+
+                if (message.getTrip().equals(trip) && (message.getUser().equals(connectedUser) || team.isAdmin(connectedUser))) {
+                    trip.removeMessage(messageId);
+                    messageService.deleteTripMessage(messageId);
+                }
 
             }
 

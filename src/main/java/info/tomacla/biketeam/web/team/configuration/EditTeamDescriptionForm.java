@@ -7,6 +7,7 @@ import java.util.Objects;
 public class EditTeamDescriptionForm {
 
     private String facebook = "";
+    private String instagram = "";
     private String twitter = "";
     private String email = "";
     private String phoneNumber = "";
@@ -25,6 +26,14 @@ public class EditTeamDescriptionForm {
 
     public void setFacebook(String facebook) {
         this.facebook = Objects.requireNonNullElse(facebook, "");
+    }
+
+    public String getInstagram() {
+        return instagram;
+    }
+
+    public void setInstagram(String instagram) {
+        this.instagram = Objects.requireNonNullElse(instagram, "");
     }
 
     public String getTwitter() {
@@ -99,6 +108,10 @@ public class EditTeamDescriptionForm {
             return Strings.requireNonBlankOrNull(form.getFacebook());
         }
 
+        public String getInstagram() {
+            return Strings.requireNonBlankOrNull(form.getInstagram());
+        }
+
         public String getTwitter() {
             return Strings.requireNonBlankOrNull(form.getTwitter());
         }
@@ -140,6 +153,11 @@ public class EditTeamDescriptionForm {
 
         public EditTeamDescriptionFormBuilder withFacebook(String facebook) {
             form.setFacebook(facebook);
+            return this;
+        }
+
+        public EditTeamDescriptionFormBuilder withInstagram(String instagram) {
+            form.setInstagram(instagram);
             return this;
         }
 
