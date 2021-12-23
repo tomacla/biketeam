@@ -263,6 +263,7 @@ public class AdminTeamConfigurationController extends AbstractController {
                 .withMattermostApiEndpoint(teamIntegration.getMattermostApiEndpoint())
                 .withMattermostApiToken(teamIntegration.getMattermostApiToken())
                 .withMattermostChannelID(teamIntegration.getMattermostChannelID())
+                .withMattermostMessageChannelID(teamIntegration.getMattermostMessageChannelID())
                 .withMattermostPublishPublications(teamIntegration.isMattermostPublishPublications())
                 .withMattermostPublishRides(teamIntegration.isMattermostPublishRides())
                 .withMattermostPublishTrips(teamIntegration.isMattermostPublishTrips())
@@ -298,6 +299,7 @@ public class AdminTeamConfigurationController extends AbstractController {
             teamIntegration.setFacebookPublishTrips(parser.isFacebookPublishTrips());
             teamIntegration.setMattermostApiToken(parser.getMattermostApiToken());
             teamIntegration.setMattermostChannelID(parser.getMattermostChannelID());
+            teamIntegration.setMattermostMessageChannelID(parser.getMattermostMessageChannelID());
             teamIntegration.setMattermostApiEndpoint(parser.getMattermostApiEndpoint());
             teamIntegration.setMattermostPublishPublications(parser.isMattermostPublishPublications());
             teamIntegration.setMattermostPublishRides(parser.isMattermostPublishRides());

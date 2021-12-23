@@ -67,7 +67,6 @@
                   <label for="form-integration-mattermostchannelid" class="form-label">ID du channel</label>
                   <input autocomplete="off" name="mattermostChannelID" value="${formdata.mattermostChannelID}" type="text" class="form-control" id="form-integration-mattermostchannelid">
                 </div>
-
                 <div class="row mb-3">
                     <div class="col-4">
                          <div class="form-check form-switch">
@@ -87,6 +86,10 @@
                              <label class="form-check-label" for="form-configuration-mtpubs">Publier les publications</label>
                            </div>
                     </div>
+                 </div>
+                 <div class="mb-3">
+                   <label for="form-integration-mattermostmessagechannelid" class="form-label">ID du channel (Notification de messages)</label>
+                   <input autocomplete="off" name="mattermostMessageChannelID" value="${formdata.mattermostMessageChannelID}" type="text" class="form-control" id="form-integration-mattermostmessagechannelid">
                  </div>
             </div>
 

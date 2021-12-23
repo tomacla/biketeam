@@ -10,6 +10,4 @@ public interface TripMessageRepository extends CrudRepository<TripMessage, Strin
 
     List<TripMessage> findAll();
 
-    List<TripMessage> findByTeamId(String teamId);
-
 }

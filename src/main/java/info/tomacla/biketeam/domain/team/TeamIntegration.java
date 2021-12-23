@@ -34,6 +34,8 @@ public class TeamIntegration {
     private String mattermostApiToken;
     @Column(name = "mattermost_channel_id")
     private String mattermostChannelID;
+    @Column(name = "mattermost_message_channel_id")
+    private String mattermostMessageChannelID;
     @Column(name = "mattermost_api_endpoint")
     private String mattermostApiEndpoint;
     @Column(name = "mattermost_publish_trips")
@@ -130,6 +132,14 @@ public class TeamIntegration {
 
     public void setMattermostChannelID(String mattermostChannelID) {
         this.mattermostChannelID = Strings.requireNonBlankOrNull(mattermostChannelID);
+    }
+
+    public String getMattermostMessageChannelID() {
+        return mattermostMessageChannelID;
+    }
+
+    public void setMattermostMessageChannelID(String mattermostMessageChannelID) {
+        this.mattermostMessageChannelID = Strings.requireNonBlankOrNull(mattermostMessageChannelID);
     }
 
     public String getMattermostApiEndpoint() {

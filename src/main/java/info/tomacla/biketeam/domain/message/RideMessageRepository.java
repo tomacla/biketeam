@@ -10,6 +10,4 @@ public interface RideMessageRepository extends CrudRepository<RideMessage, Strin
 
     List<RideMessage> findAll();
 
-    List<RideMessage> findByTeamId(String teamId);
-
 }

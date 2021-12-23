@@ -234,7 +234,7 @@ public class RideController extends AbstractController {
                 rideMessage.setUser(connectedUser);
                 rideMessage.setContent(content);
 
-                messageService.save(rideMessage);
+                messageService.save(team, rideMessage);
 
             }
 

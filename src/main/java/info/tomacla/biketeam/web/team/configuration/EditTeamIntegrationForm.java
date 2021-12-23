@@ -12,6 +12,7 @@ public class EditTeamIntegrationForm {
     private String facebookPublishPublications = null;
     private String mattermostApiToken = "";
     private String mattermostChannelID = "";
+    private String mattermostMessageChannelID = "";
     private String mattermostApiEndpoint = "";
     private String mattermostPublishTrips = null;
     private String mattermostPublishRides = null;
@@ -70,6 +71,14 @@ public class EditTeamIntegrationForm {
 
     public void setMattermostChannelID(String mattermostChannelID) {
         this.mattermostChannelID = Strings.requireNonBlankOrDefault(mattermostChannelID, "");
+    }
+
+    public String getMattermostMessageChannelID() {
+        return mattermostMessageChannelID;
+    }
+
+    public void setMattermostMessageChannelID(String mattermostMessageChannelID) {
+        this.mattermostMessageChannelID = Strings.requireNonBlankOrDefault(mattermostMessageChannelID, "");
     }
 
     public String getMattermostApiEndpoint() {
@@ -165,6 +174,10 @@ public class EditTeamIntegrationForm {
             return Strings.requireNonBlankOrNull(form.getMattermostChannelID());
         }
 
+        public String getMattermostMessageChannelID() {
+            return Strings.requireNonBlankOrNull(form.getMattermostMessageChannelID());
+        }
+
         public String getMattermostApiEndpoint() {
             return Strings.requireNonBlankOrNull(form.getMattermostApiEndpoint());
         }
@@ -191,6 +204,7 @@ public class EditTeamIntegrationForm {
         public boolean isHeatmapDisplay() {
             return form.getHeatmapDisplay() != null && form.getHeatmapDisplay().equals("on");
         }
+
 
     }
 
@@ -232,6 +246,11 @@ public class EditTeamIntegrationForm {
             return this;
         }
 
+        public EditTeamIntegrationFormBuilder withMattermostMessageChannelID(String mattermostMessageChannelID) {
+            form.setMattermostMessageChannelID(mattermostMessageChannelID);
+            return this;
+        }
+
         public EditTeamIntegrationFormBuilder withMattermostPublishRides(boolean mattermostPublishRides) {
             form.setMattermostPublishRides(mattermostPublishRides ? "on" : null);
             return this;
@@ -268,6 +287,8 @@ public class EditTeamIntegrationForm {
         public EditTeamIntegrationForm get() {
             return form;
         }
+
+
     }
 
 }

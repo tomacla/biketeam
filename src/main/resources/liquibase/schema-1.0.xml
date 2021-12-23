@@ -954,6 +954,12 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="add-mattermost-notification-message" author="tomacla">
+        <addColumn tableName="team_integration">
+            <column name="mattermost_message_channel_id" type="VARCHAR(100)"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
 
 

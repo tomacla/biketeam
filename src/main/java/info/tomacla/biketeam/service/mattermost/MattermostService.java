@@ -1,6 +1,9 @@
 package info.tomacla.biketeam.service.mattermost;
 
 import info.tomacla.biketeam.common.datatype.Dates;
+import info.tomacla.biketeam.domain.message.Message;
+import info.tomacla.biketeam.domain.message.RideMessage;
+import info.tomacla.biketeam.domain.message.TripMessage;
 import info.tomacla.biketeam.domain.publication.Publication;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
@@ -51,7 +54,7 @@ public class MattermostService implements BroadcastService {
         sb.append("Toutes les infos : ").append(urlService.getRideUrl(team, ride));
 
         final String content = sb.toString();
-        this.broadcast(team, content);
+        this.send(team, team.getIntegration().getMattermostChannelID(), content);
 
     }
 
@@ -70,7 +73,7 @@ public class MattermostService implements BroadcastService {
         sb.append("Toutes les infos : ").append(urlService.getTripUrl(team, trip));
 
         final String content = sb.toString();
-        this.broadcast(team, content);
+        this.send(team, team.getIntegration().getMattermostChannelID(), content);
 
     }
 
@@ -88,11 +91,33 @@ public class MattermostService implements BroadcastService {
         sb.append("Toutes les infos : ").append(urlService.getTeamUrl(team));
 
         final String content = sb.toString();
-        this.broadcast(team, content);
+        this.send(team, team.getIntegration().getMattermostChannelID(), content);
 
     }
 
-    private void broadcast(Team team, String content) {
+    public void notify(Team team, Message message) {
+
+        if (team.getIntegration().getMattermostMessageChannelID() == null) {
+            return;
+        }
+
+        log.info("Notify message {} to mattermost", message.getId());
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Nouveau message").append("\n");
+        sb.append(message.getContent()).append("\n");
+        if(message instanceof TripMessage) {
+            sb.append("Pour répondre : ").append(urlService.getTripUrl(team, ((TripMessage) message).getTrip()));
+        } else if(message instanceof RideMessage) {
+            sb.append("Pour répondre : ").append(urlService.getRideUrl(team, ((RideMessage) message).getRide()));
+        }
+
+        final String content = sb.toString();
+        this.send(team, team.getIntegration().getMattermostMessageChannelID(), content);
+
+    }
+
+    private void send(Team team, String channelId, String content) {
 
         if (!isConfigured(team)) {
             return;
@@ -106,7 +131,7 @@ public class MattermostService implements BroadcastService {
             httpHeaders.setContentType(MediaType.APPLICATION_JSON);
             httpHeaders.set("Authorization", "Bearer " + team.getIntegration().getMattermostApiToken());
             Map<String, String> payload = new HashMap<>();
-            payload.put("channel_id", team.getIntegration().getMattermostChannelID());
+            payload.put("channel_id", channelId);
             payload.put("message", content);
 
             HttpEntity<Map<String, String>> request = new HttpEntity<>(payload, httpHeaders);
@@ -118,5 +143,7 @@ public class MattermostService implements BroadcastService {
         }
 
     }
+
+
 
 }

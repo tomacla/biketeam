@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "ride_message")
-public class RideMessage {
+public class RideMessage implements Message {
 
     @Id
     private String id = UUID.randomUUID().toString();

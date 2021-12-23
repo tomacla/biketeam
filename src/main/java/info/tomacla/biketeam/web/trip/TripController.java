@@ -226,7 +226,7 @@ public class TripController extends AbstractController {
                 tripMessage.setUser(connectedUser);
                 tripMessage.setContent(content);
 
-                messageService.save(tripMessage);
+                messageService.save(team, tripMessage);
 
             }
 

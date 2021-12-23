@@ -20,6 +20,7 @@ public class EditTeamIntegrationFormTest {
                 .withHeatmapDisplay(true)
                 .withHeatmapCenter(new Point(10.0, 5.0))
                 .withMattermostChannelID("channelId")
+                .withMattermostMessageChannelID("mchannelId")
                 .withMattermostApiToken("apitoken")
                 .withMattermostApiEndpoint("endpoint")
                 .withFacebookGroupDetails(false)
@@ -35,6 +36,7 @@ public class EditTeamIntegrationFormTest {
         assertTrue(parser.isFacebookPublishTrips());
         assertFalse(parser.isFacebookGroupDetails());
         assertEquals("channelId", parser.getMattermostChannelID());
+        assertEquals("mchannelId", parser.getMattermostMessageChannelID());
         assertEquals("apitoken", parser.getMattermostApiToken());
         assertEquals("endpoint", parser.getMattermostApiEndpoint());
         assertTrue(parser.isHeatmapDisplay());
@@ -57,8 +59,9 @@ public class EditTeamIntegrationFormTest {
         assertFalse(parser.isFacebookPublishRides());
         assertFalse(parser.isFacebookPublishTrips());
         assertFalse(parser.isFacebookGroupDetails());
-        assertNull(parser.getMattermostChannelID());
-        assertNull(parser.getMattermostChannelID());
+        assertNull(parser.getMattermostMessageChannelID());
+        assertNull(parser.getMattermostApiEndpoint());
+        assertNull(parser.getMattermostApiToken());
         assertNull(parser.getMattermostChannelID());
         assertFalse(parser.isHeatmapDisplay());
         assertNull(parser.getHeatmapCenter());
