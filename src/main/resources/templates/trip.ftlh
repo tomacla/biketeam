@@ -98,7 +98,7 @@
                 <div class="bg-light border rounded p-2 mb-4 overflow-auto scroll-down" style="max-height: 60vh;">
 
                     <#list trip.sortedMessages as message>
-                        <div class="<#if _user.id == message.user.id>bg-light border-success<#else>bg-white</#if> small border rounded mb-1 p-1">
+                        <div class="<#if _user?? && _user.id == message.user.id>bg-light border-success<#else>bg-white</#if> small border rounded mb-1 p-1">
                             <p class="p-1 m-0">${message.content}</p>
                             <div class="d-flex justify-content-between align-items-end border-top pt-1">
                                 <span class="text-muted">${message.publishedAt.format(_date_formatter)}<#if _team_admin || _user.id == message.user.id> <a class="link-danger" href="<@common.teamUrl team.id '/trips/' + trip.id + '/remove-message/' + message.id />"><i class="bi bi-trash"></i></a></#if></span>
