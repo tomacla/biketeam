@@ -190,13 +190,14 @@ public class MapController extends AbstractController {
     @RequestMapping(value = "/{mapId}/gpx", method = RequestMethod.GET, produces = "application/gpx+xml")
     public ResponseEntity<byte[]> getMapGpxFile(@PathVariable("teamId") String teamId, @PathVariable("mapId") String mapId) {
         final Optional<Path> gpxFile = mapService.getGpxFile(teamId, mapId);
-        if (gpxFile.isPresent()) {
+        final Optional<Map> map = mapService.get(teamId, mapId);
+        if (map.isPresent() && gpxFile.isPresent()) {
             try {
 
                 HttpHeaders headers = new HttpHeaders();
                 headers.add("Content-Type", "application/gpx+xml");
                 headers.setContentDisposition(ContentDisposition.builder("inline")
-                        .filename(mapId + ".gpx")
+                        .filename(Optional.ofNullable(map.get().getPermalink()).orElse(map.get().getId()) + ".gpx")
                         .build());
 
                 return new ResponseEntity<>(
@@ -216,13 +217,14 @@ public class MapController extends AbstractController {
     @RequestMapping(value = "/{mapId}/fit", method = RequestMethod.GET, produces = "application/fit")
     public ResponseEntity<byte[]> getFitFile(@PathVariable("teamId") String teamId, @PathVariable("mapId") String mapId) {
         final Optional<Path> fitFile = mapService.getFitFile(teamId, mapId);
-        if (fitFile.isPresent()) {
+        final Optional<Map> map = mapService.get(teamId, mapId);
+        if (map.isPresent() && fitFile.isPresent()) {
             try {
 
                 HttpHeaders headers = new HttpHeaders();
                 headers.add("Content-Type", "application/vnd.ant.fit");
                 headers.setContentDisposition(ContentDisposition.builder("inline")
-                        .filename(mapId + ".fit")
+                        .filename(Optional.ofNullable(map.get().getPermalink()).orElse(map.get().getId()) + ".fit")
                         .build());
 
                 return new ResponseEntity<>(
