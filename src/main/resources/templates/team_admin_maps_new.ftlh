@@ -18,7 +18,7 @@
                     </div>
 
                     <div class="col-6">
-                        <label for="form-map-tags" class="form-label">Type</label>
+                        <label for="form-map-type" class="form-label">Type</label>
                         <select name="type" class="form-select" id="form-map-type">
                             <option<#if map.type == 'ROAD'> selected</#if> value="ROAD">Route</option>
                             <option<#if map.type == 'GRAVEL'> selected</#if> value="GRAVEL">Gravel</option>
