@@ -46,7 +46,7 @@ public class RideGroupTemplate {
     }
 
     public void setRideTemplate(RideTemplate rideTemplate) {
-        this.rideTemplate = Objects.requireNonNull(rideTemplate, "rideTemplate is null");
+        this.rideTemplate = rideTemplate;
     }
 
     public String getName() {

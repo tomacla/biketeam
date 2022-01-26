@@ -42,7 +42,7 @@ public class NewRideGroupTemplateFormTest {
 
         final NewRideGroupTemplateForm.NewRideGroupTemplateFormParser parser = form.parser();
 
-        assertEquals("new", parser.getId());
+        assertNull(parser.getId());
         assertNull(parser.getName());
         assertEquals(28, parser.getLowerSpeed());
         assertEquals(30, parser.getUpperSpeed());

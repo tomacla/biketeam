@@ -8,7 +8,7 @@ import java.time.LocalTime;
 
 public class NewRideGroupTemplateForm {
 
-    private String id = "new";
+    private String id = "";
     private String name = "";
     private double lowerSpeed = 28;
     private double upperSpeed = 30;
@@ -26,7 +26,7 @@ public class NewRideGroupTemplateForm {
     }
 
     public void setId(String id) {
-        this.id = Strings.requireNonBlankOrDefault(id, "new");
+        this.id = Strings.requireNonBlankOrDefault(id, "");
     }
 
     public String getName() {
