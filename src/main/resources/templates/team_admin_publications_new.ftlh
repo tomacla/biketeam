@@ -1,5 +1,21 @@
 <#include "_includes_head.ftlh">
 
+<#if !published>
+    <script type="text/javascript">
+
+            function validateForm(form) {
+
+                var submitDate = document.getElementById('form-ride-publishedat-date').value;
+                var submitTime = document.getElementById('form-ride-publishedat-time').value;
+                var submitDateTime = new Date(Date.parse(submitDate+'T'+submitTime));
+
+                return confirm('La publication sera publiée le ' + submitDateTime.toLocaleDateString() + ' à ' + submitTime + '. Confirmez vous la création de la publication ?');
+
+            }
+
+    </script>
+</#if>
+
 <div class="row pt-2 justify-content-center">
 
     <#include "_includes_team_admin_aside.ftlh">
@@ -8,7 +24,9 @@
     
         <form enctype="multipart/form-data" name="form-publication"
             action="<@common.teamUrl team.id '/admin/publications/' + formdata.id />"
-            method="POST" class="border rounded p-4">
+            <#if !published>onsubmit="return validateForm(this);"</#if>
+            method="POST"
+            class="border rounded p-4">
 
                 <div class="row mb-3 border rounded bg-light p-2">
                     <#if published>

@@ -2,6 +2,18 @@
 
 <script type="text/javascript">
 
+    <#if !published>
+        function validateForm(form) {
+
+            var submitDate = document.getElementById('form-ride-publishedat-date').value;
+            var submitTime = document.getElementById('form-ride-publishedat-time').value;
+            var submitDateTime = new Date(Date.parse(submitDate+'T'+submitTime));
+
+            return confirm('Le ride sera publié le ' + submitDateTime.toLocaleDateString() + ' à ' + submitTime + '. Confirmez vous la création du ride ?');
+
+        }
+    </#if>
+
     function resetGroupIndexes() {
         var groupContainer = document.getElementById('form-ride-groups');
         var groups = [...groupContainer.getElementsByClassName("form-ride-group")];
@@ -69,6 +81,7 @@
             name="form-ride"
             action="<@common.teamUrl team.id '/admin/rides/' + formdata.id />"
             method="POST"
+            <#if !published>onsubmit="return validateForm(this);"</#if>
             class="border rounded p-4">
 
                 <input type="hidden" name="templateId" id="form-ride-templateId" value="${formdata.templateId}">

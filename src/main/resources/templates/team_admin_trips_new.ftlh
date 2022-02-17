@@ -2,6 +2,18 @@
 
 <script type="text/javascript">
 
+    <#if !published>
+        function validateForm(form) {
+
+            var submitDate = document.getElementById('form-trip-publishedat-date').value;
+            var submitTime = document.getElementById('form-trip-publishedat-time').value;
+            var submitDateTime = new Date(Date.parse(submitDate+'T'+submitTime));
+
+            return confirm('Le trip sera publié le ' + submitDateTime.toLocaleDateString() + ' à ' + submitTime + '. Confirmez vous la création du trip ?');
+
+        }
+    </#if>
+
     function resetStageIndexes() {
         var groupContainer = document.getElementById('form-trip-stages');
         var groups = [...groupContainer.getElementsByClassName("form-trip-stage")];
@@ -64,6 +76,7 @@
             name="form-trip"
             action="<@common.teamUrl team.id '/admin/trips/' + formdata.id />"
             method="POST"
+            <#if !published>onsubmit="return validateForm(this);"</#if>
             class="border rounded p-4">
 
                 <div class="row mb-3 border rounded bg-light p-2">
