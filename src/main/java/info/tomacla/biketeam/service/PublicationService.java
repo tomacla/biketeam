@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -37,6 +38,7 @@ public class PublicationService {
     @Autowired
     private Broadcaster broadcaster;
 
+    @Transactional
     public void save(Publication publication) {
         publicationRepository.save(publication);
     }
@@ -53,6 +55,7 @@ public class PublicationService {
         return Optional.empty();
     }
 
+    @Transactional
     public void delete(String teamId, String publicationId) {
         log.info("Request publication deletion {}", publicationId);
         final Optional<Publication> optionalPublication = get(teamId, publicationId);

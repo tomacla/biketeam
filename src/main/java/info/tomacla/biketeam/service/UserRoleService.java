@@ -6,6 +6,7 @@ import info.tomacla.biketeam.domain.userrole.UserRole;
 import info.tomacla.biketeam.domain.userrole.UserRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -19,10 +20,12 @@ public class UserRoleService {
         return userRoleRepository.findById(UserRole.getId(team, user));
     }
 
+    @Transactional
     public void save(UserRole userRole) {
         userRoleRepository.save(userRole);
     }
 
+    @Transactional
     public void delete(Team team, User user) {
         get(team, user).ifPresent(userRole -> {
             team.removeUser(user);

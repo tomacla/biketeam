@@ -106,9 +106,9 @@ public class MattermostService implements BroadcastService {
         StringBuilder sb = new StringBuilder();
         sb.append("Nouveau message").append("\n");
         sb.append(message.getContent()).append("\n");
-        if(message instanceof TripMessage) {
+        if (message instanceof TripMessage) {
             sb.append("Pour répondre : ").append(urlService.getTripUrl(team, ((TripMessage) message).getTrip()));
-        } else if(message instanceof RideMessage) {
+        } else if (message instanceof RideMessage) {
             sb.append("Pour répondre : ").append(urlService.getRideUrl(team, ((RideMessage) message).getRide()));
         }
 
@@ -143,7 +143,6 @@ public class MattermostService implements BroadcastService {
         }
 
     }
-
 
 
 }

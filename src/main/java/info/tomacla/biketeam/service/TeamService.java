@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -49,6 +50,9 @@ public class TeamService extends AbstractPermalinkService {
 
     @Autowired
     private RideService rideService;
+
+    @Autowired
+    private RideTemplateService rideTemplateService;
 
     @Autowired
     private PublicationService publicationService;
@@ -100,6 +104,7 @@ public class TeamService extends AbstractPermalinkService {
         this.save(team, false);
     }
 
+    @Transactional
     public void save(Team team, boolean newTeam) {
         log.info("Team is updated");
 
@@ -197,11 +202,12 @@ public class TeamService extends AbstractPermalinkService {
         get(teamId).ifPresent(this::delete);
     }
 
-    // FIXME should be transactional
+    @Transactional
     public void delete(Team team) {
         try {
             log.info("Request team deletion {}", team.getId());
             // delete all elements
+            rideTemplateService.deleteByTeam(team.getId());
             rideService.deleteByTeam(team.getId());
             publicationService.deleteByTeam(team.getId());
             tripService.deleteByTeam(team.getId());

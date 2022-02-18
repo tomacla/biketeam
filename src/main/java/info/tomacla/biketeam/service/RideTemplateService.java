@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,15 +32,18 @@ public class RideTemplateService {
         return Optional.empty();
     }
 
+    @Transactional
     public void save(RideTemplate template) {
         rideTemplateRepository.save(template);
     }
 
+    @Transactional
     public void delete(String teamId, String templateId) {
         log.info("Request ride template deletion {}", templateId);
         get(teamId, templateId).ifPresent(template -> rideTemplateRepository.delete(template));
     }
 
+    @Transactional
     public void increment(String teamId, String templateId) {
         log.info("Request ride template increment {}", templateId);
         get(teamId, templateId).ifPresent(template -> {
@@ -50,4 +54,7 @@ public class RideTemplateService {
         });
     }
 
+    public void deleteByTeam(String teamId) {
+        rideTemplateRepository.findAllByTeamIdOrderByNameAsc(teamId).stream().map(RideTemplateProjection::getId).forEach(rideTemplateRepository::deleteById);
+    }
 }

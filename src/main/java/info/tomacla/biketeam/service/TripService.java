@@ -18,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -99,6 +100,7 @@ public class TripService extends AbstractPermalinkService {
 
     }
 
+    @Transactional
     public void save(Trip trip) {
         tripRepository.save(trip);
     }
@@ -107,7 +109,7 @@ public class TripService extends AbstractPermalinkService {
         return tripRepository.findAllByTeamIdOrderByStartDateDesc(teamId);
     }
 
-
+    @Transactional
     public void delete(String teamId, String tripId) {
         log.info("Request trip deletion {}", tripId);
         final Optional<Trip> optionalTrip = get(teamId, tripId);

@@ -18,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -83,6 +84,7 @@ public class RideService extends AbstractPermalinkService {
 
     }
 
+    @Transactional
     public void save(Ride ride) {
         rideRepository.save(ride);
     }
@@ -107,7 +109,7 @@ public class RideService extends AbstractPermalinkService {
 
     }
 
-
+    @Transactional
     public void delete(String teamId, String rideId) {
         log.info("Request ride deletion {}", rideId);
         final Optional<Ride> optionalRide = get(teamId, rideId);

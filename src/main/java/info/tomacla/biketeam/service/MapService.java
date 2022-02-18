@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.io.InputStream;
@@ -39,6 +40,7 @@ public class MapService extends AbstractPermalinkService {
         this.save(map, false);
     }
 
+    @Transactional
     public void save(Map map, boolean refreshFiles) {
         mapRepository.save(map);
         if (refreshFiles) {
@@ -91,7 +93,7 @@ public class MapService extends AbstractPermalinkService {
         get(teamId, mapId).ifPresent(this::delete);
     }
 
-    // TODO should be transactional
+    @Transactional
     public void delete(Map map) {
         log.info("Request map deletion {}", map.getId());
         mapRepository.removeMapIdInGroups(map.getId());
