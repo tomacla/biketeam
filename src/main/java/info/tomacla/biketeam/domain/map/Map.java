@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "map")
@@ -139,7 +140,7 @@ public class Map {
     }
 
     public void setTags(List<String> tags) {
-        this.tags = Objects.requireNonNullElse(tags, new ArrayList<>());
+        this.tags = Objects.requireNonNullElse(new ArrayList<>(tags), new ArrayList<>());
     }
 
     public Point getStartPoint() {
