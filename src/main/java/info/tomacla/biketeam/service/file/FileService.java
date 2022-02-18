@@ -2,6 +2,7 @@ package info.tomacla.biketeam.service.file;
 
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.FileRepositories;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 public class FileService {
@@ -42,6 +44,27 @@ public class FileService {
 
     public boolean fileExists(String directory, String teamId, String fileName) {
         return Files.exists(Path.of(fileRepository, directory, teamId, fileName));
+    }
+
+    public List<String> listSubDirectories(String directory) {
+        try {
+            return Files.walk(Path.of(fileRepository, directory))
+                    .filter(Files::isDirectory)
+                    .map(p -> p.getFileName().toString())
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            log.error("Unable to list sub directories : " + directory, e);
+            throw new RuntimeException("Unable to list sub directories : " + directory, e);
+        }
+    }
+
+    public void deleteDirectory(String directory, String teamId) {
+        try {
+            FileUtils.deleteDirectory(Path.of(fileRepository, directory, teamId).toFile());
+        } catch (IOException e) {
+            log.error("Unable to delete directory : " + teamId, e);
+            throw new RuntimeException("Unable to delete directory : " + teamId, e);
+        }
     }
 
     public Path getDirectory(String directory, String teamId) {
