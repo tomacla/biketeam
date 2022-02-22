@@ -2,6 +2,7 @@ package info.tomacla.biketeam.web;
 
 import info.tomacla.biketeam.common.data.Country;
 import info.tomacla.biketeam.domain.feed.Feed;
+import info.tomacla.biketeam.domain.feed.FeedSorter;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.userrole.Role;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.security.Principal;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -67,7 +69,9 @@ public class RootController extends AbstractController {
 
             final List<Team> teams = teamService.getUserTeams(user.getId());
 
-            final List<Feed> feeds = teamService.listFeed(teams.stream().map(Team::getId).collect(Collectors.toSet()));
+            // TODO should be user time zone and not UTC
+            final List<Feed> feeds = teamService.listFeed(teams.stream().map(Team::getId).collect(Collectors.toSet()), ZoneOffset.UTC);
+
             addGlobalValues(principal, model, "Accueil", null);
             if (error != null) {
                 model.addAttribute("errors", List.of(error));

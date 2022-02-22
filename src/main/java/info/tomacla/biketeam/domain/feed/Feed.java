@@ -134,4 +134,13 @@ public class Feed {
         return Objects.hash(id);
     }
 
+    @Override
+    public String toString() {
+        return "Feed{" +
+                "id='" + id + '\'' +
+                ", teamId='" + teamId + '\'' +
+                ", type=" + type +
+                ", title='" + title + '\'' +
+                '}';
+    }
 }

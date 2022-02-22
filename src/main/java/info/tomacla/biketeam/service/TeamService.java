@@ -6,6 +6,7 @@ import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
 import info.tomacla.biketeam.domain.feed.Feed;
 import info.tomacla.biketeam.domain.feed.FeedRepository;
+import info.tomacla.biketeam.domain.feed.FeedSorter;
 import info.tomacla.biketeam.domain.team.*;
 import info.tomacla.biketeam.domain.userrole.Role;
 import info.tomacla.biketeam.service.file.FileService;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -86,18 +88,16 @@ public class TeamService extends AbstractPermalinkService {
         return teamRepository.findByRoles_UserIdAndRoles_RoleIn(userId, Set.of(Role.ADMIN, Role.MEMBER));
     }
 
-    public List<Feed> listFeed(String teamId) {
-        return feedRepository.findAllByTeamIdInAndPublishedAtLessThan(
-                Set.of(teamId),
-                ZonedDateTime.now(ZoneOffset.UTC), // TODO should be user timezone and not UTC
-                PageRequest.of(0, 10, Sort.by("publishedAt").descending())).getContent();
+    public List<Feed> listFeed(Team team) {
+        return this.listFeed(Set.of(team.getId()), ZoneId.of(team.getConfiguration().getTimezone()));
     }
 
-    public List<Feed> listFeed(Set<String> teamIds) {
+    public List<Feed> listFeed(Set<String> teamIds, ZoneId zoneId) {
         return feedRepository.findAllByTeamIdInAndPublishedAtLessThan(
                 teamIds,
-                ZonedDateTime.now(ZoneOffset.UTC), // TODO should be user timezone and not UTC
-                PageRequest.of(0, 10, Sort.by("publishedAt").descending())).getContent();
+                ZonedDateTime.now(zoneId),
+                PageRequest.of(0, 10, Sort.by("publishedAt").descending())).getContent()
+                .stream().sorted(FeedSorter.get(zoneId)).collect(Collectors.toList());
     }
 
     public void save(Team team) {
