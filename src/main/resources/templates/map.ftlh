@@ -37,17 +37,13 @@
 
     </div>
 
-    <!-- mobile -->
-    <div class="col-12 d-block d-md-none">
-        <div style="width:100%; height:<#if !_embed>31vh;<#else>40vh</#if>;" id="map-container-sm"></div>
-    </div>
-
-    <!-- desktop/tablet -->
-    <div class="col-12 d-none d-md-block">
-        <div style="width:100%; height:500px;" id="map-container-md"></div>
+    <div class="col-12">
+        <div style="width:100%; height:<#if !_embed>500px<#else>31vh</#if>;" id="map-container-md"></div>
     </div>
 
     <script type="text/javascript">
+
+        var map = null;
 
         function initMap(mapContainerId) {
 
@@ -91,11 +87,9 @@
         setTimeout(function() {
             var gpxUrl = '<@common.teamUrl team.id '/maps/${map.id}/gpx' />';
 
-            var embedMapSm = initMap('map-container-sm');
-            displayElevation(embedMapSm, gpxUrl);
+            map = initMap('map-container-md');
+            displayElevation(map, gpxUrl);
 
-            var embedMapMd = initMap('map-container-md');
-            displayElevation(embedMapMd, gpxUrl);
         }, 500);
 
 
