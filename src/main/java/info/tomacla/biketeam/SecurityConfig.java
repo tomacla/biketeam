@@ -55,6 +55,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         // requests conf
         http.authorizeRequests(auth -> {
+
             auth.antMatchers("/css/**").permitAll();
             auth.antMatchers("/js/**").permitAll();
             auth.antMatchers("/teams").permitAll();
@@ -62,6 +63,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             auth.antMatchers("/logout").permitAll();
             auth.antMatchers("/legal-mentions").permitAll();
             auth.antMatchers("/*/image").permitAll();
+
+            auth.antMatchers("/api/**").permitAll();
 
             auth.antMatchers("/users/me").authenticated();
             auth.antMatchers("/new").authenticated();

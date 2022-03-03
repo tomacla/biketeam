@@ -178,8 +178,12 @@ public class TeamService extends AbstractPermalinkService {
     }
 
     public Page<Team> searchTeams(int page, int pageSize, String name, String city, Country country) {
+        return this.searchTeams(page, pageSize, name, city, country, Sort.Order.asc("name").ignoreCase());
+    }
 
-        Sort sort = Sort.by(Sort.Order.asc("name").ignoreCase());
+    public Page<Team> searchTeams(int page, int pageSize, String name, String city, Country country, Sort.Order sortOrder) {
+
+        Sort sort = Sort.by(sortOrder);
         Pageable pageable = PageRequest.of(page, pageSize, sort);
 
         SearchTeamSpecification spec = new SearchTeamSpecification(
