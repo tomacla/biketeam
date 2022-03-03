@@ -43,18 +43,21 @@ public class TeamDTO {
         dto.country = team.getCountry().name();
         dto.createdAt = team.getCreatedAt();
         dto.visibility = team.getVisibility();
-        dto.other = team.getDescription().getOther();
-        dto.social = new TeamSocialDTO();
-        dto.social.facebook = team.getDescription().getFacebook();
-        dto.social.twitter = team.getDescription().getTwitter();
-        dto.social.instagram = team.getDescription().getInstagram();
-        dto.contact = new TeamContactDTO();
-        dto.contact.email = team.getDescription().getEmail();
-        dto.contact.phoneNumber = team.getDescription().getPhoneNumber();
-        dto.contact.addressStreetLine = team.getDescription().getAddressStreetLine();
-        dto.contact.addressPostalCode = team.getDescription().getAddressPostalCode();
-        dto.contact.addressCity = team.getDescription().getAddressCity();
-        dto.heatmap = team.getIntegration().isHeatmapDisplay() && team.getIntegration().isHeatmapConfigured();
+
+        if (team.getVisibility().equals(Visibility.PUBLIC) || team.getVisibility().equals(Visibility.PUBLIC_UNLISTED)) {
+            dto.other = team.getDescription().getOther();
+            dto.social = new TeamSocialDTO();
+            dto.social.facebook = team.getDescription().getFacebook();
+            dto.social.twitter = team.getDescription().getTwitter();
+            dto.social.instagram = team.getDescription().getInstagram();
+            dto.contact = new TeamContactDTO();
+            dto.contact.email = team.getDescription().getEmail();
+            dto.contact.phoneNumber = team.getDescription().getPhoneNumber();
+            dto.contact.addressStreetLine = team.getDescription().getAddressStreetLine();
+            dto.contact.addressPostalCode = team.getDescription().getAddressPostalCode();
+            dto.contact.addressCity = team.getDescription().getAddressCity();
+            dto.heatmap = team.getIntegration().isHeatmapDisplay() && team.getIntegration().isHeatmapConfigured();
+        }
 
         return dto;
 

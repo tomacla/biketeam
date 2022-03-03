@@ -1,14 +1,19 @@
 package info.tomacla.biketeam.api;
 
+import info.tomacla.biketeam.api.dto.FeedDTO;
+import info.tomacla.biketeam.api.dto.MemberDTO;
 import info.tomacla.biketeam.api.dto.TeamDTO;
 import info.tomacla.biketeam.common.data.Country;
+import info.tomacla.biketeam.domain.feed.Feed;
 import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.domain.team.Visibility;
 import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.web.SearchTeamForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,10 +64,42 @@ public class TeamAPI {
     }
 
     @GetMapping(path = "/{teamId}", produces = "application/json")
-    public ResponseEntity<TeamDTO> getBook(@PathVariable String teamId) {
+    public ResponseEntity<TeamDTO> getTeam(@PathVariable String teamId) {
         return teamService.get(teamId)
                 .map(value -> ResponseEntity.ok().body(TeamDTO.valueOf(value)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping(path = "/{teamId}/feed", produces = "application/json")
+    public ResponseEntity<List<FeedDTO>> getTeamFeed(@PathVariable String teamId) {
+
+        final Optional<Team> optionalTeam = teamService.get(teamId);
+        if(optionalTeam.isPresent()) {
+            final Team team = optionalTeam.get();
+            if(team.getVisibility().equals(Visibility.PRIVATE) || team.getVisibility().equals(Visibility.PRIVATE_UNLISTED)) {
+             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+            return ResponseEntity.ok().body(teamService.listFeed(team).stream().map(FeedDTO::valueOf).collect(Collectors.toList()));
+        }
+
+        return ResponseEntity.notFound().build();
+
+    }
+
+    @GetMapping(path = "/{teamId}/members", produces = "application/json")
+    public ResponseEntity<List<MemberDTO>> getTeamMembers(@PathVariable String teamId) {
+
+        final Optional<Team> optionalTeam = teamService.get(teamId);
+        if(optionalTeam.isPresent()) {
+            final Team team = optionalTeam.get();
+            if(team.getVisibility().equals(Visibility.PRIVATE) || team.getVisibility().equals(Visibility.PRIVATE_UNLISTED)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+            return ResponseEntity.ok().body(team.getRoles().stream().map(ur -> MemberDTO.valueOf(ur.getUser())).collect(Collectors.toList()));
+        }
+
+        return ResponseEntity.notFound().build();
+
     }
 
 }
