@@ -35,6 +35,10 @@ public class TeamDTO {
 
     public static TeamDTO valueOf(Team team) {
 
+        if(team == null) {
+            return null;
+        }
+
         TeamDTO dto = new TeamDTO();
         dto.id = team.getId();
         dto.name = team.getName();

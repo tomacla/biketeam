@@ -8,6 +8,11 @@ public class MemberDTO {
     public String profileImage;
 
     public static MemberDTO valueOf(User user) {
+
+        if(user == null) {
+            return null;
+        }
+
         MemberDTO dto = new MemberDTO();
         dto.identity = user.getIdentity();
         dto.profileImage = user.getProfileImage();

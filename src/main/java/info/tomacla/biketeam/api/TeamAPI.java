@@ -4,7 +4,6 @@ import info.tomacla.biketeam.api.dto.FeedDTO;
 import info.tomacla.biketeam.api.dto.MemberDTO;
 import info.tomacla.biketeam.api.dto.TeamDTO;
 import info.tomacla.biketeam.common.data.Country;
-import info.tomacla.biketeam.domain.feed.Feed;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.Visibility;
 import info.tomacla.biketeam.service.TeamService;
@@ -23,10 +22,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/teams")
-public class TeamAPI {
-
-    @Autowired
-    private TeamService teamService;
+public class TeamAPI extends AbstractAPI {
 
     @GetMapping(produces = "application/json")
     public ResponseEntity<List<TeamDTO>> getTeams(@RequestParam(value = "name", required = false) String name,
@@ -74,10 +70,10 @@ public class TeamAPI {
     public ResponseEntity<List<FeedDTO>> getTeamFeed(@PathVariable String teamId) {
 
         final Optional<Team> optionalTeam = teamService.get(teamId);
-        if(optionalTeam.isPresent()) {
+        if (optionalTeam.isPresent()) {
             final Team team = optionalTeam.get();
-            if(team.getVisibility().equals(Visibility.PRIVATE) || team.getVisibility().equals(Visibility.PRIVATE_UNLISTED)) {
-             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            if (team.getVisibility().equals(Visibility.PRIVATE) || team.getVisibility().equals(Visibility.PRIVATE_UNLISTED)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
             return ResponseEntity.ok().body(teamService.listFeed(team).stream().map(FeedDTO::valueOf).collect(Collectors.toList()));
         }
@@ -90,9 +86,9 @@ public class TeamAPI {
     public ResponseEntity<List<MemberDTO>> getTeamMembers(@PathVariable String teamId) {
 
         final Optional<Team> optionalTeam = teamService.get(teamId);
-        if(optionalTeam.isPresent()) {
+        if (optionalTeam.isPresent()) {
             final Team team = optionalTeam.get();
-            if(team.getVisibility().equals(Visibility.PRIVATE) || team.getVisibility().equals(Visibility.PRIVATE_UNLISTED)) {
+            if (team.getVisibility().equals(Visibility.PRIVATE) || team.getVisibility().equals(Visibility.PRIVATE_UNLISTED)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
             return ResponseEntity.ok().body(team.getRoles().stream().map(ur -> MemberDTO.valueOf(ur.getUser())).collect(Collectors.toList()));

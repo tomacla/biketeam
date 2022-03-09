@@ -3,7 +3,6 @@ package info.tomacla.biketeam.api.dto;
 import info.tomacla.biketeam.domain.feed.Feed;
 import info.tomacla.biketeam.domain.feed.FeedType;
 
-import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -23,6 +22,10 @@ public class FeedDTO {
     public boolean imaged;
 
     public static FeedDTO valueOf(Feed feed) {
+
+        if(feed == null) {
+            return null;
+        }
 
         FeedDTO dto = new FeedDTO();
         dto.id = feed.getId();
