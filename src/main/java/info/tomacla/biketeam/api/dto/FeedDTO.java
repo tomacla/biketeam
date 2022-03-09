@@ -23,7 +23,7 @@ public class FeedDTO {
 
     public static FeedDTO valueOf(Feed feed) {
 
-        if(feed == null) {
+        if (feed == null) {
             return null;
         }
 

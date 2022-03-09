@@ -64,7 +64,7 @@ public class RideAPI extends AbstractAPI {
     }
 
     @GetMapping(path = "/{rideId}", produces = "application/json")
-    public ResponseEntity<RideDTO> getTeam(@PathVariable String teamId, @PathVariable String rideId) {
+    public ResponseEntity<RideDTO> getRide(@PathVariable String teamId, @PathVariable String rideId) {
 
         final Team team = checkTeam(teamId);
         if (team.getVisibility().equals(Visibility.PRIVATE) || team.getVisibility().equals(Visibility.PRIVATE_UNLISTED)) {

@@ -1,16 +1,10 @@
 package info.tomacla.biketeam.api.dto;
 
-import info.tomacla.biketeam.common.geo.Point;
 import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.map.MapType;
-import info.tomacla.biketeam.domain.map.WindDirection;
 
-import javax.persistence.*;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class MapDTO {
 
@@ -28,7 +22,7 @@ public class MapDTO {
 
     public static MapDTO valueOf(Map map) {
 
-        if(map == null) {
+        if (map == null) {
             return null;
         }
 

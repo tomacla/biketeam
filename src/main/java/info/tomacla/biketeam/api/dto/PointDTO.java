@@ -1,7 +1,6 @@
 package info.tomacla.biketeam.api.dto;
 
 import info.tomacla.biketeam.common.geo.Point;
-import info.tomacla.biketeam.domain.ride.Ride;
 
 public class PointDTO {
 
@@ -10,7 +9,7 @@ public class PointDTO {
 
     public static PointDTO valueOf(Point point) {
 
-        if(point == null) {
+        if (point == null) {
             return null;
         }
 

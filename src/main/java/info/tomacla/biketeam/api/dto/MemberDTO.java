@@ -9,7 +9,7 @@ public class MemberDTO {
 
     public static MemberDTO valueOf(User user) {
 
-        if(user == null) {
+        if (user == null) {
             return null;
         }
 

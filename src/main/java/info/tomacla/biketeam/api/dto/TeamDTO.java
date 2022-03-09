@@ -35,7 +35,7 @@ public class TeamDTO {
 
     public static TeamDTO valueOf(Team team) {
 
-        if(team == null) {
+        if (team == null) {
             return null;
         }
 
