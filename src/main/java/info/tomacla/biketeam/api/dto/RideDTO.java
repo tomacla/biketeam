@@ -1,7 +1,6 @@
 package info.tomacla.biketeam.api.dto;
 
 import info.tomacla.biketeam.common.data.PublishedStatus;
-import info.tomacla.biketeam.domain.message.RideMessage;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.ride.RideType;
@@ -25,31 +24,7 @@ public class RideDTO {
     public String description;
     public boolean imaged;
     public List<RideGroupDTO> groups;
-    public List<RideMessageDTO> messages;
-
-
-    public static class RideMessageDTO {
-
-        public String id;
-        public MemberDTO author;
-        public ZonedDateTime publishedAt;
-        public String content;
-
-        public static RideMessageDTO valueOf(RideMessage rideMessage) {
-
-            if (rideMessage == null) {
-                return null;
-            }
-            RideMessageDTO dto = new RideMessageDTO();
-            dto.id = rideMessage.getId();
-            dto.author = MemberDTO.valueOf(rideMessage.getUser());
-            dto.publishedAt = rideMessage.getPublishedAt();
-            dto.content = rideMessage.getContent();
-            return dto;
-
-        }
-
-    }
+    public List<MessageDTO> messages;
 
     public static class RideGroupDTO {
 
@@ -103,7 +78,7 @@ public class RideDTO {
         dto.title = ride.getTitle();
         dto.description = ride.getDescription();
         dto.imaged = ride.isImaged();
-        dto.messages = ride.getMessages().stream().map(RideMessageDTO::valueOf).collect(Collectors.toList());
+        dto.messages = ride.getMessages().stream().map(MessageDTO::valueOf).collect(Collectors.toList());
         dto.groups = ride.getGroups().stream().map(RideGroupDTO::valueOf).collect(Collectors.toList());
         return dto;
 
