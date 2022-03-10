@@ -1,6 +1,6 @@
 <#include "_includes_head.ftlh">
 
-<#if !published>
+<#if formdata.id == 'new'>
     <script type="text/javascript">
 
             function validateForm(form) {
@@ -24,7 +24,7 @@
     
         <form enctype="multipart/form-data" name="form-publication"
             action="<@common.teamUrl team.id '/admin/publications/' + formdata.id />"
-            <#if !published>onsubmit="return validateForm(this);"</#if>
+            <#if formdata.id == 'new'>onsubmit="return validateForm(this);"</#if>
             method="POST"
             class="border rounded p-4">
 

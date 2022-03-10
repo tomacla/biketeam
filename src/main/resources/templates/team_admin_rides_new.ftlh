@@ -2,7 +2,7 @@
 
 <script type="text/javascript">
 
-    <#if !published>
+    <#if formdata.id == 'new'>
         function validateForm(form) {
 
             var submitDate = document.getElementById('form-ride-publishedat-date').value;
@@ -81,7 +81,7 @@
             name="form-ride"
             action="<@common.teamUrl team.id '/admin/rides/' + formdata.id />"
             method="POST"
-            <#if !published>onsubmit="return validateForm(this);"</#if>
+            <#if formdata.id == 'new'>onsubmit="return validateForm(this);"</#if>
             class="border rounded p-4">
 
                 <input type="hidden" name="templateId" id="form-ride-templateId" value="${formdata.templateId}">

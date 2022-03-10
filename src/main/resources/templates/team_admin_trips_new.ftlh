@@ -2,7 +2,7 @@
 
 <script type="text/javascript">
 
-    <#if !published>
+    <#if  formdata.id == 'new'>
         function validateForm(form) {
 
             var submitDate = document.getElementById('form-trip-publishedat-date').value;
@@ -76,7 +76,7 @@
             name="form-trip"
             action="<@common.teamUrl team.id '/admin/trips/' + formdata.id />"
             method="POST"
-            <#if !published>onsubmit="return validateForm(this);"</#if>
+            <#if  formdata.id == 'new'>onsubmit="return validateForm(this);"</#if>
             class="border rounded p-4">
 
                 <div class="row mb-3 border rounded bg-light p-2">
