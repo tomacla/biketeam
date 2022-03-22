@@ -89,6 +89,7 @@ public class MapController extends AbstractController {
                           @RequestParam(value = "sort", required = false) MapSorterOption sort,
                           @RequestParam(value = "windDirection", required = false) WindDirection windDirection,
                           @RequestParam(value = "type", required = false) MapType type,
+                          @RequestParam(value = "name", required = false) String name,
                           @RequestParam(value = "tags", required = false) List<String> tags,
                           @RequestParam(value = "page", defaultValue = "0", required = false) int page,
                           @RequestParam(value = "pageSize", defaultValue = "9", required = false) int pageSize,
@@ -109,6 +110,7 @@ public class MapController extends AbstractController {
                 .withPage(page)
                 .withPageSize(pageSize)
                 .withType(type)
+                .withName(name)
                 .get();
 
         SearchMapForm.SearchMapFormParser parser = form.parser();
@@ -118,6 +120,7 @@ public class MapController extends AbstractController {
                 parser.getPage(),
                 parser.getPageSize(),
                 parser.getSort(),
+                parser.getName(),
                 parser.getLowerDistance(),
                 parser.getUpperDistance(),
                 parser.getType(),

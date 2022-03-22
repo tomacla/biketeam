@@ -129,7 +129,7 @@ public class MapService extends AbstractPermalinkService {
     }
 
     public Page<Map> searchMaps(String teamId, int page, int pageSize, MapSorterOption sortOption,
-                                double lowerDistance, double upperDistance, MapType type,
+                                String name, double lowerDistance, double upperDistance, MapType type,
                                 double lowerPositiveElevation, double upperPositiveElevation,
                                 List<String> tags, WindDirection windDirection) {
 
@@ -138,6 +138,7 @@ public class MapService extends AbstractPermalinkService {
 
         SearchMapSpecification spec = new SearchMapSpecification(
                 teamId,
+                name,
                 lowerDistance,
                 upperDistance,
                 type,

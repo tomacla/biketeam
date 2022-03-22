@@ -13,6 +13,7 @@ import java.util.Objects;
 public class SearchMapSpecification implements Specification<Map> {
 
     private final String teamId;
+    private final String name;
     private final double lowerDistance;
     private final double upperDistance;
     private final MapType type;
@@ -22,10 +23,11 @@ public class SearchMapSpecification implements Specification<Map> {
     private final WindDirection windDirection;
     private Boolean visible;
 
-    public SearchMapSpecification(String teamId, double lowerDistance, double upperDistance,
+    public SearchMapSpecification(String teamId, String name, double lowerDistance, double upperDistance,
                                   MapType type, double lowerPositiveElevation, double upperPositiveElevation,
                                   List<String> tags, WindDirection windDirection, Boolean visible) {
         this.teamId = teamId;
+        this.name = name;
         this.lowerDistance = lowerDistance;
         this.upperDistance = upperDistance;
         this.lowerPositiveElevation = lowerPositiveElevation;
@@ -38,12 +40,16 @@ public class SearchMapSpecification implements Specification<Map> {
 
     @Override
     public Predicate toPredicate(Root<Map> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
+
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(criteriaBuilder.equal(root.get("teamId"), teamId));
         predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("length"), lowerDistance));
         predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("length"), upperDistance));
         predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("positiveElevation"), lowerPositiveElevation));
         predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("positiveElevation"), upperPositiveElevation));
+        if (name != null) {
+            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+        }
         if (type != null) {
             predicates.add(criteriaBuilder.equal(root.get("type"), type));
         }

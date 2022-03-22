@@ -23,6 +23,7 @@ public class SearchMapFormTest {
                 .withSort(MapSorterOption.HILLY)
                 .withTags(List.of("toot", "taat"))
                 .withType(MapType.ROAD)
+                .withName("foo")
                 .withLowerPositiveElevation(100)
                 .withUpperPositiveElevation(200)
                 .withWindDirection(WindDirection.NORTH)
@@ -37,6 +38,7 @@ public class SearchMapFormTest {
         assertEquals(MapSorterOption.HILLY, parser.getSort());
         assertEquals(List.of("toot", "taat"), parser.getTags());
         assertEquals(MapType.ROAD, parser.getType());
+        assertEquals("foo", parser.getName());
         assertEquals(100, parser.getLowerPositiveElevation());
         assertEquals(200, parser.getUpperPositiveElevation());
         assertEquals(WindDirection.NORTH, parser.getWindDirection());
@@ -57,6 +59,7 @@ public class SearchMapFormTest {
         assertNull(parser.getSort());
         assertEquals(0, parser.getTags().size());
         assertNull(parser.getType());
+        assertNull(parser.getName());
         assertEquals(0, parser.getLowerPositiveElevation());
         assertEquals(3000, parser.getUpperPositiveElevation());
         assertNull(parser.getWindDirection());

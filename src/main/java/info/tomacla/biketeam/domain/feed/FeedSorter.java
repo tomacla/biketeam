@@ -1,9 +1,5 @@
 package info.tomacla.biketeam.domain.feed;
 
-import info.tomacla.biketeam.domain.map.Map;
-import info.tomacla.biketeam.domain.map.MapSorter;
-import info.tomacla.biketeam.domain.map.MapSorterOption;
-
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Comparator;
@@ -28,13 +24,13 @@ public class FeedSorter {
             boolean f1Passed = f1.getDate() == null || f1.getDate().isBefore(LocalDate.now(zoneId));
             boolean f2Passed = f2.getDate() == null || f2.getDate().isBefore(LocalDate.now(zoneId));
 
-            if(!f1Passed && f2Passed) {
+            if (!f1Passed && f2Passed) {
                 return -1;
             }
-            if(f1Passed && !f2Passed) {
+            if (f1Passed && !f2Passed) {
                 return 1;
             }
-            if(f1Passed && f2Passed) {
+            if (f1Passed && f2Passed) {
                 return f2.getPublishedAt().compareTo(f1.getPublishedAt());
             }
 

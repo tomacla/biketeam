@@ -19,6 +19,7 @@ public class SearchMapForm {
     private String sort = "";
     private String type = "";
     private String windDirection = "";
+    private String name = "";
     private List<String> tags = new ArrayList<>();
 
     public static SearchMapFormBuilder builder() {
@@ -77,8 +78,16 @@ public class SearchMapForm {
         return type;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public void setType(String type) {
         this.type = Objects.requireNonNullElse(type, "");
+    }
+
+    public void setName(String name) {
+        this.name = Objects.requireNonNullElse(name, "");
     }
 
     public String getSort() {
@@ -162,6 +171,13 @@ public class SearchMapForm {
             return MapType.valueOf(form.getType());
         }
 
+        public String getName() {
+            if (form.getName() == null || form.getName().isBlank()) {
+                return null;
+            }
+            return form.getName();
+        }
+
         public List<String> getTags() {
             return form.getTags();
         }
@@ -224,6 +240,11 @@ public class SearchMapForm {
             if (mapType != null) {
                 form.setType(mapType.name());
             }
+            return this;
+        }
+
+        public SearchMapFormBuilder withName(String name) {
+            form.setName(name);
             return this;
         }
 

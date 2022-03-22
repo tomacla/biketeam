@@ -15,7 +15,19 @@
             <input type="hidden" id="maps-filter-pageSize" name="pageSize" value="${formdata.pageSize}">
 
             <div class="row gy-2">
-                <div class="col-12 col-md-6">
+
+                <div class="col-12 col-md-10 order-1">
+                  <div class="input-group">
+                      <label class="input-group-text" for="maps-filter-name">Nom</label>
+                      <input autocomplete="off" type="text" value="${formdata.name}" name="name" class="form-control" id="maps-filter-name">
+                   </div>
+                </div>
+
+                <div class="col-12 col-md-2 text-center order-3 order-md-2">
+                    <button type="submit" class="btn btn-secondary">Valider</button>
+                </div>
+
+                <div class="col-12 col-md-4 order-2">
                     <div class="input-group">
                         <span class="input-group-text">Distance de</span>
                         <input onchange="setFieldValue('maps-filter-page', 0);" autocomplete="off" type="number" required step="1" min="1" value="${formdata.lowerDistance?c}" name="lowerDistance" class="form-control" id="maps-filter-distance">
@@ -24,7 +36,7 @@
                         <span class="input-group-text">km</span>
                     </div>
                 </div>
-                <div class="col-12 col-md-5">
+                <div class="col-12 col-md-4 order-2">
                     <div class="input-group">
                         <label class="input-group-text" for="maps-filter-type">Type</label>
                         <select onchange="setFieldValue('maps-filter-page', 0);" name="type" class="form-select" id="maps-filter-type">
@@ -35,7 +47,7 @@
                         </select>
                      </div>
                   </div>
-                  <div class="col-12 col-md-6">
+                  <div class="col-12 col-md-4 order-2">
                       <div class="input-group">
                           <span class="input-group-text">Dénivelé de</span>
                           <input onchange="setFieldValue('maps-filter-page', 0);" autocomplete="off" type="number" required step="1" min="0" value="${formdata.lowerPositiveElevation?c}" name="lowerPositiveElevation" class="form-control" id="maps-filter-elevation">
@@ -44,7 +56,7 @@
                           <span class="input-group-text">m</span>
                       </div>
                   </div>
-                  <div class="col-12 col-md-5">
+                  <div class="col-12 col-md-4 order-2">
                       <div class="input-group">
                           <label class="input-group-text" for="maps-filter-wind">Vent</label>
                           <select onchange="setFieldValue('maps-filter-page', 0);" name="windDirection" class="form-select" id="maps-filter-wind">
@@ -60,7 +72,7 @@
                           </select>
                        </div>
                     </div>
-                  <div class="col-12 col-md-6">
+                  <div class="col-12 col-md-4 order-2">
                     <div class="input-group">
                         <label class="input-group-text" for="maps-filter-tags" class="form-label">Tags</label>
                         <select onchange="setFieldValue('maps-filter-page', 0);" name="tags" multiple class="form-select" id="maps-filter-tags-2">
@@ -71,7 +83,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="col-12 col-md-5">
+                <div class="col-12 col-md-4 order-2">
                     <div class="input-group">
                         <label class="input-group-text" for="maps-filter-sort">Tri</label>
                         <select onchange="setFieldValue('maps-filter-page', 0);" name="sort" class="form-select" id="maps-filter-sort">
@@ -83,9 +95,7 @@
                         </select>
                    </div>
                 </div>
-                <div class="col-12 col-md-1 text-end">
-                    <button type="submit" class="btn btn-secondary btn-sm">Valider</button>
-                </div>
+
 
             </div>
 

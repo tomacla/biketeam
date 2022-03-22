@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
@@ -94,9 +93,9 @@ public class TeamService extends AbstractPermalinkService {
 
     public List<Feed> listFeed(Set<String> teamIds, ZoneId zoneId) {
         return feedRepository.findAllByTeamIdInAndPublishedAtLessThan(
-                teamIds,
-                ZonedDateTime.now(zoneId),
-                PageRequest.of(0, 10, Sort.by("publishedAt").descending())).getContent()
+                        teamIds,
+                        ZonedDateTime.now(zoneId),
+                        PageRequest.of(0, 10, Sort.by("publishedAt").descending())).getContent()
                 .stream().sorted(FeedSorter.get(zoneId)).collect(Collectors.toList());
     }
 
