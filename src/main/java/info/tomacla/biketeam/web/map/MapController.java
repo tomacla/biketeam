@@ -70,7 +70,6 @@ public class MapController extends AbstractController {
 
         addGlobalValues(principal, model, "Map " + map.getName(), team);
         model.addAttribute("map", map);
-        model.addAttribute("mapBoxAPIKey", mapBoxAPIKey);
         model.addAttribute("_embed", embed);
         if (!ObjectUtils.isEmpty(error)) {
             model.addAttribute("errors", List.of(error));

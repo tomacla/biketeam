@@ -3,6 +3,11 @@ html {
     height: 100%;
 }
 
+
 .elevation-control .tooltip {
-    opacity:1;
+    opacity:1 !important;
+}
+
+.elevation-control.elevation .background {
+    background-color: rgba(255, 255, 255, 1) !important;
 }
