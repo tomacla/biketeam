@@ -11,9 +11,9 @@ import info.tomacla.biketeam.service.file.FileService;
 import io.github.glandais.GPXDataComputer;
 import io.github.glandais.GPXPathEnhancer;
 import io.github.glandais.fit.FitFileWriter;
-import io.github.glandais.gpx.GPXFilter;
 import io.github.glandais.gpx.GPXPath;
 import io.github.glandais.gpx.Point;
+import io.github.glandais.gpx.filter.GPXFilter;
 import io.github.glandais.io.GPXFileWriter;
 import io.github.glandais.io.GPXParser;
 import io.github.glandais.map.TileMapImage;
@@ -61,44 +61,16 @@ public class GpxService {
 
     public Map parseAndStore(Team team, Path gpx, String defaultName, String permalink) {
 
-        GPXPath gpxPath = getGPXPath(gpx, defaultName);
-        gpxPathEnhancer.virtualize(gpxPath);
-        GPXFilter.filterPointsDouglasPeucker(gpxPath);
-
-        Path storedStaticMap = getStaticMap(gpxPath);
-        Path storedFit = getFit(gpxPath);
-        Path storedGpx = getGpx(gpxPath);
-
-        io.github.glandais.util.Vector windRaw = gpxDataComputer.getWind(gpxPath);
-        Vector wind = new Vector(windRaw.getX(), windRaw.getY());
-        boolean crossing = gpxDataComputer.isCrossing(gpxPath);
-
-        List<Point> points = gpxPath.getPoints();
-        io.github.glandais.gpx.Point startPoint = points.get(0);
-        io.github.glandais.gpx.Point endPoint = points.get(points.size() - 1);
-
-        info.tomacla.biketeam.common.geo.Point start = new info.tomacla.biketeam.common.geo.Point(startPoint.getLatDeg(), startPoint.getLonDeg());
-        info.tomacla.biketeam.common.geo.Point end = new info.tomacla.biketeam.common.geo.Point(endPoint.getLatDeg(), endPoint.getLonDeg());
-
         Map newMap = new Map();
         newMap.setTeamId(team.getId());
-        newMap.setName(gpxPath.getName());
-        newMap.setLength(Rounder.round2Decimals(Math.round(10.0 * gpxPath.getDist()) / 10000.0));
         newMap.setPermalink(permalink);
         newMap.setType(MapType.ROAD);
-        newMap.setPostedAt(LocalDate.now(team.getZoneId()));
-        newMap.setPositiveElevation(Rounder.round1Decimal(gpxPath.getTotalElevation()));
-        newMap.setNegativeElevation(Rounder.round1Decimal(gpxPath.getTotalElevationNegative()));
         newMap.setTags(team.getConfiguration().getDefaultSearchTags());
-        newMap.setStartPoint(start);
-        newMap.setEndPoint(end);
-        newMap.setWindDirection(WindDirection.findDirectionFromVector(wind));
-        newMap.setCrossing(crossing);
         newMap.setVisible(true);
 
-        fileService.storeFile(storedGpx, FileRepositories.GPX_FILES, team.getId(), newMap.getId() + ".gpx");
-        fileService.storeFile(storedFit, FileRepositories.FIT_FILES, team.getId(), newMap.getId() + ".fit");
-        fileService.storeFile(storedStaticMap, FileRepositories.MAP_IMAGES, team.getId(), newMap.getId() + ".png");
+        GPXPath gpxPath = prepareMap(gpx, defaultName, newMap, team);
+
+        newMap.setName(gpxPath.getName());
 
         return newMap;
 
@@ -106,7 +78,12 @@ public class GpxService {
 
     public Map parseAndReplace(Team team, Map map, Path gpx) {
 
-        GPXPath gpxPath = getGPXPath(gpx, map.getName());
+        prepareMap(gpx, map.getName(), map, team);
+        return map;
+    }
+
+    private GPXPath prepareMap(final Path gpx, final String defaultName, final Map map, final Team team) {
+        GPXPath gpxPath = getGPXPath(gpx, defaultName);
         gpxPathEnhancer.virtualize(gpxPath);
         GPXFilter.filterPointsDouglasPeucker(gpxPath);
 
@@ -137,9 +114,7 @@ public class GpxService {
         fileService.storeFile(storedGpx, FileRepositories.GPX_FILES, team.getId(), map.getId() + ".gpx");
         fileService.storeFile(storedFit, FileRepositories.FIT_FILES, team.getId(), map.getId() + ".fit");
         fileService.storeFile(storedStaticMap, FileRepositories.MAP_IMAGES, team.getId(), map.getId() + ".png");
-
-        return map;
-
+        return gpxPath;
     }
 
     public void delete(Map map) {
