@@ -32,6 +32,10 @@
 
         <p>Biketeam utilise les données uniquement pour les restituer sur l'interface web et les applications Biketeam. Biketeam ne pratique pas de profilage.</p>
 
+        <h3>Suppression des données ?</h3>
+
+        <p>Chaque utilisateur peut supprimer toutes ses données sans délai en se connectant, puis en allant dans son compte et en cliquant sur "Supprimer mon compte". Les données sont supprimées immédiatement et sans sauvegarde.</p>
+
         <h2 id="terms-of-use">Conditions de service</h2>
 
         <h3>Inscription</h3>

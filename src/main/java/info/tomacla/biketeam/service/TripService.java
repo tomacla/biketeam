@@ -153,4 +153,8 @@ public class TripService extends AbstractPermalinkService {
     public void deleteByTeam(String teamId) {
         tripRepository.findAllByTeamIdOrderByStartDateDesc(teamId).stream().map(TripIdTitleDateProjection::getId).forEach(tripRepository::deleteById);
     }
+
+    public void deleteByUser(String userId) {
+        tripRepository.deleteByUserId(userId);
+    }
 }

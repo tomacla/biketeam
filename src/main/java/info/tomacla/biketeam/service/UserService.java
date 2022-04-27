@@ -37,6 +37,18 @@ public class UserService {
     @Autowired
     private TeamService teamService;
 
+    @Autowired
+    private UserRoleService userRoleService;
+
+    @Autowired
+    private RideService rideService;
+
+    @Autowired
+    private TripService tripService;
+
+    @Autowired
+    private MessageService messageService;
+
     public Optional<User> getByStravaId(Long stravaId) {
         return userRepository.findByStravaId(stravaId);
     }
@@ -105,6 +117,23 @@ public class UserService {
 
     public List<User> listUsersWithMailActivated(Team team) {
         return userRepository.findByEmailNotNullAndRoles_Team(team);
+    }
+
+    @Transactional
+    public void delete(User user) {
+        try {
+            log.info("Request user deletion {}", user.getId());
+            // remove all access to this user
+            userRoleService.deleteByUser(user.getId());
+            rideService.deleteByUser(user.getId());
+            tripService.deleteByUser(user.getId());
+            messageService.deleteByUser(user.getId());
+            // finaly delete the user
+            userRepository.deleteById(user.getId());
+            log.info("User deleted {}", user.getId());
+        } catch (Exception e) {
+            log.error("Unable to delete user " + user.getId(), e);
+        }
     }
 
     @PostConstruct

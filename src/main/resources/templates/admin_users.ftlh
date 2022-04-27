@@ -4,6 +4,17 @@
 
     <#include "_includes_admin_aside.ftlh">
 
+    <script type="text/javascript">
+
+            function confirmDeleteUser(userId, targetUrl) {
+                var confirmedDeletion = confirm('Confirmer la suppression définitive de l\'utilisateur ' + userId + ' ?');
+                if(confirmedDeletion) {
+                    window.location=targetUrl;
+                }
+            }
+
+        </script>
+
     <div class="col-12 col-md-8">
 
         <form enctype="multipart/form-data" method="POST" action="<@common.teamUrl '' '/admin/users' />" class="row mb-0">
@@ -32,6 +43,7 @@
                             <button role="button" disabled="true" class="btn btn-sm btn-success"><i class="bi bi-shield-fill"></i></button>
                         <#else>
                             <div class="btn-group" role="group">
+                                <a href="#" onclick="confirmDeleteUser('${user.id}', '<@common.teamUrl '' '/admin/users/delete/${user.id}' />')" class="btn btn-danger btn-sm" role="button"><i class="bi bi-trash"></i></a>
                                 <#if user.admin>
                                     <a href="<@common.teamUrl '' '/admin/users/relegate/${user.id}' />" class="btn btn-success btn-sm" role="button"><i class="bi bi-shield-fill"></i></a>
                                 <#else>

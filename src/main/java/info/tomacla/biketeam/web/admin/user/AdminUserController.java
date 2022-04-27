@@ -62,5 +62,18 @@ public class AdminUserController extends AbstractController {
         return "redirect:/admin/users";
     }
 
+    @GetMapping(value = "/delete/{userId}")
+    public String deleteUser(@PathVariable("userId") String userId, Model model) {
+
+        try {
+            userService.get(userId).ifPresent(user -> userService.delete(user));
+
+        } catch (Exception e) {
+            model.addAttribute("errors", List.of(e.getMessage()));
+        }
+
+        return "redirect:/admin/users";
+    }
+
 
 }

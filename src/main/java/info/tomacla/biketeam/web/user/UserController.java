@@ -42,6 +42,22 @@ public class UserController extends AbstractController {
 
     }
 
+    @GetMapping(value = "/me/delete")
+    public String deleteMyself(Principal principal, Model model) {
+
+        Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
+        if (optionalConnectedUser.isEmpty()) {
+            return "redirect:/";
+        }
+
+        final User user = optionalConnectedUser.get();
+
+        userService.delete(user);
+
+        return "redirect:/logout";
+
+    }
+
     @PostMapping(value = "/me")
     public String updateUser(Principal principal,
                              Model model,

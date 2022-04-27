@@ -37,4 +37,9 @@ public class UserRoleService {
     public void deleteByTeam(String teamId) {
         userRoleRepository.findByTeam_Id(teamId).forEach(ur -> delete(ur.getTeam(), ur.getUser()));
     }
+
+    public void deleteByUser(String userId) {
+        userRoleRepository.deleteByUserId(userId);
+    }
+
 }

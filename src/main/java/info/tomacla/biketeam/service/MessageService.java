@@ -49,4 +49,8 @@ public class MessageService {
         getTripMessage(id).ifPresent(tripMessage -> tripMessageRepository.delete(tripMessage));
     }
 
+    public void deleteByUser(String userId) {
+        rideMessageRepository.deleteByUserId(userId);
+        tripMessageRepository.deleteByUserId(userId);
+    }
 }

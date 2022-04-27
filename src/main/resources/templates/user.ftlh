@@ -2,6 +2,17 @@
 
 <div class="row pt-2 justify-content-center">
 
+     <script type="text/javascript">
+
+            function confirmDeleteUser(targetUrl) {
+                var confirmedDeletion = confirm('Votre compte sera définitivement supprimé ainsi que toutes les données associées. Confirmez vous ?');
+                if(confirmedDeletion) {
+                    window.location=targetUrl;
+                }
+            }
+
+        </script>
+
     <div class="col-12 col-md-4 mb-4">
 
         <div class="border rounded p-2">
@@ -19,6 +30,8 @@
                 <#else>
                     <dd class="text-muted">Non renseignée</dd>
                 </#if>
+                <hr/>
+                <a href="#" onclick="confirmDeleteUser('<@common.teamUrl '' '/users/me/delete' />')" class="btn btn-danger btn-sm" role="button"><i class="bi bi-trash"></i> Supprimer mon compte</a>
                 <hr/>
                 <dt><i class="bi bi-strava"></i> Strava</dt>
                 <#if user.stravaId??>
