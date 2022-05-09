@@ -4,6 +4,8 @@
 
 See live [here](https://www.biketeam.info)
 
+[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/S6S6CLH20)
+
 ## Use sources
 
 Biketeam is a standard spring boot application so use spring boot maven plugin. You'll need a postgresql database.
@@ -78,19 +80,9 @@ contact.email=foo@bar.com
 logging.file.name=/path/to/logs/biketeam.log
 ```
 
-### With docker
+### Run with Java
 
-#### Build image
-
-`docker build -t biketeam:0.0.1 .`
-
-#### Run image
-
-`docker run -d -p 8080:8080 -v /path/to/application-custom.properties:/opt/biketeam/application-custom.properties -v /path/to/data:/opt/biketeam-data -t biketeam:0.0.1`
-
-### With java
-
-#### Install java
+#### Install Java
 
 You need Java 13 or above.
 

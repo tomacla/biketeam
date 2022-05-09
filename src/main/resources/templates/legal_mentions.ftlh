@@ -2,6 +2,8 @@
 
 <div class="row pt-2 justify-content-center">
 
+    <a class="github-fork-ribbon" href="https://github.com/tomacla/biketeam" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
+
     <aside class="col-12 col-md-3">
 
             <div class="list-group">
