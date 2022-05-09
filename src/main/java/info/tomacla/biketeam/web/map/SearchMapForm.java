@@ -15,7 +15,7 @@ public class SearchMapForm {
     private double lowerDistance = 1;
     private double upperDistance = 1000;
     private double lowerPositiveElevation = 0;
-    private double upperPositiveElevation = 3000;
+    private double upperPositiveElevation = 10000;
     private String sort = "";
     private String type = "";
     private String windDirection = "";

@@ -15,7 +15,7 @@ public class MapSorterTest {
         Map shortM = new Map();
         shortM.setId("short");
         shortM.setLength(50.0);
-        shortM.setPositiveElevation(3000.0);
+        shortM.setPositiveElevation(10000.0);
 
         Map longM = new Map();
         longM.setId("long");

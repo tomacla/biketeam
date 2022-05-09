@@ -84,7 +84,7 @@ public class MapController extends AbstractController {
                           @RequestParam(value = "lowerDistance", required = false, defaultValue = "1") double lowerDistance,
                           @RequestParam(value = "upperDistance", required = false, defaultValue = "1000") double upperDistance,
                           @RequestParam(value = "lowerPositiveElevation", required = false, defaultValue = "0") double lowerPositiveElevation,
-                          @RequestParam(value = "upperPositiveElevation", required = false, defaultValue = "3000") double upperPositiveElevation,
+                          @RequestParam(value = "upperPositiveElevation", required = false, defaultValue = "10000") double upperPositiveElevation,
                           @RequestParam(value = "sort", required = false) MapSorterOption sort,
                           @RequestParam(value = "windDirection", required = false) WindDirection windDirection,
                           @RequestParam(value = "type", required = false) MapType type,

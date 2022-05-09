@@ -61,7 +61,7 @@ public class SearchMapFormTest {
         assertNull(parser.getType());
         assertNull(parser.getName());
         assertEquals(0, parser.getLowerPositiveElevation());
-        assertEquals(3000, parser.getUpperPositiveElevation());
+        assertEquals(10000, parser.getUpperPositiveElevation());
         assertNull(parser.getWindDirection());
 
     }
