@@ -21,11 +21,10 @@ public class SearchMapSpecification implements Specification<Map> {
     private final double upperPositiveElevation;
     private final List<String> tags;
     private final WindDirection windDirection;
-    private Boolean visible;
 
     public SearchMapSpecification(String teamId, String name, double lowerDistance, double upperDistance,
                                   MapType type, double lowerPositiveElevation, double upperPositiveElevation,
-                                  List<String> tags, WindDirection windDirection, Boolean visible) {
+                                  List<String> tags, WindDirection windDirection) {
         this.teamId = teamId;
         this.name = name;
         this.lowerDistance = lowerDistance;
@@ -35,7 +34,6 @@ public class SearchMapSpecification implements Specification<Map> {
         this.tags = Objects.requireNonNullElse(tags, new ArrayList<>());
         this.windDirection = windDirection;
         this.type = type;
-        this.visible = visible;
     }
 
     @Override
@@ -58,9 +56,6 @@ public class SearchMapSpecification implements Specification<Map> {
         }
         if (windDirection != null) {
             predicates.add(criteriaBuilder.equal(root.get("windDirection"), windDirection));
-        }
-        if (visible != null) {
-            predicates.add(criteriaBuilder.equal(root.get("visible"), visible));
         }
         criteriaQuery.distinct(true);
         return criteriaBuilder.and(predicates.toArray(new Predicate[0]));

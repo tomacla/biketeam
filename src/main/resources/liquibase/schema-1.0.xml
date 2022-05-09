@@ -960,6 +960,10 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="remove-visible-map" author="tomacla">
+        <dropColumn tableName="map" columnName="visible" />
+    </changeSet>
+
 </databaseChangeLog>
 
 

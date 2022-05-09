@@ -145,8 +145,7 @@ public class MapService extends AbstractPermalinkService {
                 lowerPositiveElevation,
                 upperPositiveElevation,
                 tags,
-                windDirection,
-                true
+                windDirection
         );
 
         return mapRepository.findAll(spec, pageable);

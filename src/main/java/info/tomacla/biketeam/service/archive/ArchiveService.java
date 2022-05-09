@@ -98,7 +98,6 @@ public class ArchiveService {
         private String fileName;
         private String name;
         private MapType type;
-        private boolean visible;
         private List<String> tags;
         private String date;
 
@@ -140,14 +139,6 @@ public class ArchiveService {
 
         public void setType(MapType type) {
             this.type = type;
-        }
-
-        public boolean isVisible() {
-            return visible;
-        }
-
-        public void setVisible(boolean visible) {
-            this.visible = visible;
         }
 
         public List<String> getTags() {
@@ -211,7 +202,6 @@ public class ArchiveService {
                 newMap.setPermalink(Strings.normalizePermalink(element.getPermatitle()));
                 newMap.setType(element.getType());
                 newMap.setTags(element.getTags());
-                newMap.setVisible(element.isVisible());
                 newMap.setPostedAt(ZonedDateTime.parse(targetDate).toLocalDate());
                 mapService.save(newMap);
 

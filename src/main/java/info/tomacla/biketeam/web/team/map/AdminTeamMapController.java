@@ -58,7 +58,6 @@ public class AdminTeamMapController extends AbstractController {
         NewMapForm form = NewMapForm.builder()
                 .withId(map.getId())
                 .withName(map.getName())
-                .withVisible(map.isVisible())
                 .withTags(map.getTags())
                 .withType(map.getType())
                 .withPermalink(map.getPermalink())
@@ -95,7 +94,6 @@ public class AdminTeamMapController extends AbstractController {
 
             Map map = optionalMap.get();
             map.setName(parser.getName());
-            map.setVisible(parser.isVisible());
             map.setTags(parser.getTags());
             map.setType(parser.getType());
             map.setPermalink(parser.getPermalink());

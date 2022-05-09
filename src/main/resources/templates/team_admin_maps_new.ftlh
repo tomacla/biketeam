@@ -49,22 +49,6 @@
 
                 </div>
 
-                <div class="mb-3 row">
-                    <div class="col-6">
-                        <div class="form-check form-switch mb-3">
-                          <input id="form-map-visible" name="visible" class="form-check-input" type="checkbox" id="flexCheckDefault"<#if formdata.visible?? && formdata.visible == 'on'> checked</#if>>
-                          <label class="form-check-label" for="form-map-visible">
-                            La map est visible
-                          </label>
-                        </div>
-                    </div>
-                    <div class="col-6 text-end">
-                        <#if map.crossing>
-                            <span class="badge bg-danger"><i class="bi bi-x"></i> Ca croise !</span>
-                        </#if>
-                    </div>
-                </div>
-
                 <hr/>
 
                 <div class="alert alert-info" role="alert">Mettre un nouveau fichier GPX uniquement pour remplacer l'existant. Sinon laisser vide.</div>

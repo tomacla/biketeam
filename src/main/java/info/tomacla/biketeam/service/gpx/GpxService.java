@@ -66,7 +66,6 @@ public class GpxService {
         newMap.setPermalink(permalink);
         newMap.setType(MapType.ROAD);
         newMap.setTags(team.getConfiguration().getDefaultSearchTags());
-        newMap.setVisible(true);
 
         GPXPath gpxPath = prepareMap(gpx, defaultName, newMap, team);
 

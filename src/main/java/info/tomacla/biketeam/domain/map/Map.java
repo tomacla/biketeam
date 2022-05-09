@@ -55,7 +55,6 @@ public class Map {
     @Enumerated(EnumType.STRING)
     private WindDirection windDirection = WindDirection.NORTH;
     private boolean crossing;
-    private boolean visible;
 
     @OneToMany(mappedBy = "map", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<RideGroup> rideGroups = new ArrayList<>();
@@ -172,14 +171,6 @@ public class Map {
 
     public void setCrossing(boolean crossing) {
         this.crossing = crossing;
-    }
-
-    public boolean isVisible() {
-        return visible;
-    }
-
-    public void setVisible(boolean visible) {
-        this.visible = visible;
     }
 
     public List<RideGroup> getRideGroups() {

@@ -18,7 +18,6 @@ public class NewMapFormTest {
                 .withName("name")
                 .withTags(List.of("toot", "taat"))
                 .withType(MapType.GRAVEL)
-                .withVisible(false)
                 .get();
 
         final NewMapForm.NewMapFormParser parser = form.parser();
@@ -28,7 +27,6 @@ public class NewMapFormTest {
         assertEquals("name", parser.getName());
         assertEquals(List.of("toot", "taat"), parser.getTags());
         assertEquals(MapType.GRAVEL, parser.getType());
-        assertFalse(parser.isVisible());
 
     }
 
@@ -44,7 +42,6 @@ public class NewMapFormTest {
         assertNull(parser.getName());
         assertEquals(0, parser.getTags().size());
         assertEquals(MapType.ROAD, parser.getType());
-        assertTrue(parser.isVisible());
 
     }
 

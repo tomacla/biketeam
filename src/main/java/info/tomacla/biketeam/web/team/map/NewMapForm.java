@@ -15,7 +15,6 @@ public class NewMapForm {
     private String permalink = "";
     private String name = "";
     private String type = MapType.ROAD.name();
-    private String visible = "on";
     private List<String> tags = new ArrayList<>();
     private MultipartFile file = null;
 
@@ -53,14 +52,6 @@ public class NewMapForm {
 
     public void setType(String type) {
         this.type = Strings.requireNonBlankOrDefault(type, MapType.ROAD.name());
-    }
-
-    public String getVisible() {
-        return visible;
-    }
-
-    public void setVisible(String visible) {
-        this.visible = visible;
     }
 
     public List<String> getTags() {
@@ -110,9 +101,6 @@ public class NewMapForm {
             return Strings.requireNonBlankOrNull(form.getName());
         }
 
-        public boolean isVisible() {
-            return form.getVisible() != null && form.getVisible().equals("on");
-        }
 
         public List<String> getTags() {
             return form.getTags();
@@ -154,10 +142,6 @@ public class NewMapForm {
             return this;
         }
 
-        public NewMapFormBuilder withVisible(boolean visible) {
-            form.setVisible(visible ? "on" : null);
-            return this;
-        }
 
         public NewMapFormBuilder withTags(List<String> tags) {
             form.setTags(tags);
