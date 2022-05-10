@@ -49,7 +49,13 @@ public class FileService {
     public List<String> listSubDirectories(String directory) {
         try {
             return Files.walk(Path.of(fileRepository, directory))
-                    .filter(Files::isDirectory)
+                    .filter(f -> {
+                        try {
+                            return Files.isDirectory(f) && !Files.isHidden(f);
+                        } catch (IOException e) {
+                            return false;
+                        }
+                    })
                     .map(p -> p.getFileName().toString())
                     .collect(Collectors.toList());
         } catch (IOException e) {
