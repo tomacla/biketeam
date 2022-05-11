@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -48,7 +49,7 @@ public class FileService {
 
     public List<String> listSubDirectories(String directory) {
         try {
-            return Files.walk(Path.of(fileRepository, directory))
+            return Files.walk(Path.of(fileRepository, directory), 1)
                     .filter(f -> {
                         try {
                             return Files.isDirectory(f) && !Files.isHidden(f);
