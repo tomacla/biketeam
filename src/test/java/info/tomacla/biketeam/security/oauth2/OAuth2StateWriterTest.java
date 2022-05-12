@@ -9,7 +9,8 @@ import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class OAuth2StateWriterTest {
 

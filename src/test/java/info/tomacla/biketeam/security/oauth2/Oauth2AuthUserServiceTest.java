@@ -1,7 +1,6 @@
 package info.tomacla.biketeam.security.oauth2;
 
 import info.tomacla.biketeam.domain.user.User;
-import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;

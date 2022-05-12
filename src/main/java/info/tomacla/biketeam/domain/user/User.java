@@ -1,7 +1,6 @@
 package info.tomacla.biketeam.domain.user;
 
 import info.tomacla.biketeam.common.datatype.Strings;
-import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.userrole.UserRole;
 
@@ -42,9 +41,6 @@ public class User {
     private boolean emailPublishRides;
     @Column(name = "email_publish_publications")
     private boolean emailPublishPublications;
-
-    @ManyToMany(mappedBy = "participants", fetch = FetchType.LAZY)
-    private Set<RideGroup> rideGroups = new HashSet<>();
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<UserRole> roles = new HashSet<>();
 
@@ -126,14 +122,6 @@ public class User {
 
     public void setProfileImage(String profileImage) {
         this.profileImage = Strings.requireNonBlankOrNull(profileImage);
-    }
-
-    public Set<RideGroup> getRideGroups() {
-        return rideGroups;
-    }
-
-    public void setRideGroups(Set<RideGroup> rideGroups) {
-        this.rideGroups = Objects.requireNonNullElse(rideGroups, new HashSet<>());
     }
 
     public Set<UserRole> getRoles() {

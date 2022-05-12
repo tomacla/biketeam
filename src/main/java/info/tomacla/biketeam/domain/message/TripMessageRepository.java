@@ -14,6 +14,10 @@ public interface TripMessageRepository extends CrudRepository<TripMessage, Strin
 
     List<TripMessage> findAll();
 
+    List<TripMessage> findAllByTripId(String tripId);
+
+    List<TripMessage> findAllByUserId(String userId);
+
     @Transactional
     @Modifying
     @Query(value = "delete from trip_message where user_id = :userId", nativeQuery = true)

@@ -22,8 +22,8 @@ public class OAuth2StateHandler {
 
     public static final String SEPARATOR = ",";
 
-    private UrlService urlService;
-    private TeamService teamService;
+    private final UrlService urlService;
+    private final TeamService teamService;
 
     public OAuth2StateHandler(UrlService urlService, TeamService teamService) {
         this.urlService = urlService;
@@ -46,7 +46,7 @@ public class OAuth2StateHandler {
 
         final String customRequestUri = getCustomRequestUri(currentHttpRequest);
         String redirect = null;
-        if(customRequestUri != null) {
+        if (customRequestUri != null) {
             if (isAbsoluteUri(customRequestUri)) {
                 redirect = customRequestUri;
             } else if (!customRequestUri.equals("/login")) {
