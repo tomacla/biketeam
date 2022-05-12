@@ -1,7 +1,5 @@
 package info.tomacla.biketeam.security.login;
 
-import jdk.jshell.Snippet;
-import org.springframework.core.log.LogMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.WebAttributes;
@@ -19,7 +17,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
         System.out.println(request.getRequestURI());
 
-        if(isApi(request.getRequestURI())) {
+        if (isApi(request.getRequestURI())) {
             response.sendError(HttpStatus.FORBIDDEN.value(), "AccessDenierd");
         } else {
             request.setAttribute(WebAttributes.ACCESS_DENIED_403, accessDeniedException);

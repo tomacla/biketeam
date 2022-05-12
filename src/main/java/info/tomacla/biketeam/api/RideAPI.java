@@ -3,14 +3,12 @@ package info.tomacla.biketeam.api;
 import info.tomacla.biketeam.api.dto.RideDTO;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.team.Team;
-import info.tomacla.biketeam.domain.team.Visibility;
 import info.tomacla.biketeam.service.RideService;
 import info.tomacla.biketeam.web.ride.SearchRideForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

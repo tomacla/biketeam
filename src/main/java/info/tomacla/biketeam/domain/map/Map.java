@@ -2,8 +2,6 @@ package info.tomacla.biketeam.domain.map;
 
 import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.common.geo.Point;
-import info.tomacla.biketeam.domain.ride.RideGroup;
-import info.tomacla.biketeam.domain.trip.TripStage;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -55,11 +53,6 @@ public class Map {
     @Enumerated(EnumType.STRING)
     private WindDirection windDirection = WindDirection.NORTH;
     private boolean crossing;
-
-    @OneToMany(mappedBy = "map", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<RideGroup> rideGroups = new ArrayList<>();
-    @OneToMany(mappedBy = "map", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<TripStage> tripStages = new ArrayList<>();
 
     public String getId() {
         return id;
@@ -171,22 +164,6 @@ public class Map {
 
     public void setCrossing(boolean crossing) {
         this.crossing = crossing;
-    }
-
-    public List<RideGroup> getRideGroups() {
-        return rideGroups;
-    }
-
-    public void setRideGroups(List<RideGroup> rideGroups) {
-        this.rideGroups = Objects.requireNonNullElse(rideGroups, new ArrayList<>());
-    }
-
-    public List<TripStage> getTripStages() {
-        return tripStages;
-    }
-
-    public void setTripStages(List<TripStage> tripStages) {
-        this.tripStages = Objects.requireNonNullElse(tripStages, new ArrayList<>());
     }
 
     @Override

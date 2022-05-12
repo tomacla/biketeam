@@ -5,10 +5,8 @@ import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
 import info.tomacla.biketeam.domain.ride.Ride;
-import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.ride.RideProjection;
 import info.tomacla.biketeam.domain.ride.RideRepository;
-import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.service.broadcast.Broadcaster;
 import info.tomacla.biketeam.service.file.FileService;
 import info.tomacla.biketeam.service.permalink.AbstractPermalinkService;
@@ -154,14 +152,6 @@ public class RideService extends AbstractPermalinkService {
 
     public void deleteByTeam(String teamId) {
         rideRepository.findAllByTeamIdOrderByDateDesc(teamId).stream().map(RideProjection::getId).forEach(rideRepository::deleteById);
-    }
-
-    public void removeParticipantFromAllRides(User user) {
-        for (RideGroup rideGroup : user.getRideGroups()) {
-            rideGroup.removeParticipant(user);
-            save(rideGroup.getRide());
-        }
-        user.getRideGroups().clear();
     }
 
     public void deleteByUser(String userId) {

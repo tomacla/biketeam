@@ -3,7 +3,6 @@ package info.tomacla.biketeam.api.dto;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.Visibility;
 
-import javax.persistence.Column;
 import java.time.LocalDate;
 import java.util.List;
 
