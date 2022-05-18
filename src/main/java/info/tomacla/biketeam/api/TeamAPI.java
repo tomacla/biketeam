@@ -96,4 +96,20 @@ public class TeamAPI extends AbstractAPI {
 
     }
 
+    @GetMapping(path = "/{teamId}/faq", produces = "text/plain")
+    public ResponseEntity<String> getFaq(@PathVariable String teamId) {
+
+        final Optional<Team> optionalTeam = teamService.get(teamId);
+        if (optionalTeam.isPresent()) {
+            final Team team = optionalTeam.get();
+            if (team.getVisibility().equals(Visibility.PRIVATE) || team.getVisibility().equals(Visibility.PRIVATE_UNLISTED)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+            return ResponseEntity.ok().body(team.getConfiguration().getMarkdownPage());
+        }
+
+        return ResponseEntity.notFound().build();
+
+    }
+
 }
