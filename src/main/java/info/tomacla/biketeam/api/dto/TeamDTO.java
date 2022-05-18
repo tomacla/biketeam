@@ -3,7 +3,9 @@ package info.tomacla.biketeam.api.dto;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.Visibility;
 
+import javax.persistence.Column;
 import java.time.LocalDate;
+import java.util.List;
 
 public class TeamDTO {
 
@@ -17,6 +19,7 @@ public class TeamDTO {
     public String other;
     public TeamSocialDTO social;
     public TeamContactDTO contact;
+    public TeamConfigurationDTO configuration;
     public boolean heatmap;
 
     public static class TeamSocialDTO {
@@ -31,6 +34,17 @@ public class TeamDTO {
         public String addressStreetLine;
         public String addressPostalCode;
         public String addressCity;
+    }
+
+    public static class TeamConfigurationDTO {
+
+        public List<String> defaultSearchTags;
+        public String defaultPage;
+        public boolean feedVisible;
+        public boolean ridesVisible;
+        public boolean tripsVisible;
+        public String timezone;
+
     }
 
     public static TeamDTO valueOf(Team team) {
@@ -61,6 +75,13 @@ public class TeamDTO {
             dto.contact.addressPostalCode = team.getDescription().getAddressPostalCode();
             dto.contact.addressCity = team.getDescription().getAddressCity();
             dto.heatmap = team.getIntegration().isHeatmapDisplay() && team.getIntegration().isHeatmapConfigured();
+            dto.configuration = new TeamConfigurationDTO();
+            dto.configuration.defaultSearchTags = team.getConfiguration().getDefaultSearchTags();
+            dto.configuration.defaultPage = team.getConfiguration().getDefaultPage().name();
+            dto.configuration.feedVisible = team.getConfiguration().isFeedVisible();
+            dto.configuration.ridesVisible = team.getConfiguration().isRidesVisible();
+            dto.configuration.tripsVisible = team.getConfiguration().isTripsVisible();
+            dto.configuration.timezone = team.getConfiguration().getTimezone();
         }
 
         return dto;
