@@ -10,7 +10,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CookieHttpSessionIdResolverWithSSOTest {
+public class CustomSessionIdResolverTest {
 
     @Test
     public void test() {
@@ -20,7 +20,7 @@ public class CookieHttpSessionIdResolverWithSSOTest {
 
         UrlService urlService = Mockito.mock(UrlService.class);
 
-        final CookieHttpSessionIdResolverWithSSO c = new CookieHttpSessionIdResolverWithSSO(urlService, ssoService);
+        final CustomSessionIdResolver c = new CustomSessionIdResolver(urlService, ssoService);
 
         final MockHttpServletRequest request = new MockHttpServletRequest();
         request.setQueryString("sso=foo");
@@ -40,7 +40,7 @@ public class CookieHttpSessionIdResolverWithSSOTest {
 
         UrlService urlService = Mockito.mock(UrlService.class);
 
-        final CookieHttpSessionIdResolverWithSSO c = new CookieHttpSessionIdResolverWithSSO(urlService, ssoService);
+        final CustomSessionIdResolver c = new CustomSessionIdResolver(urlService, ssoService);
 
         final MockHttpServletRequest request = new MockHttpServletRequest();
         request.setQueryString("sso=foo");
@@ -60,7 +60,7 @@ public class CookieHttpSessionIdResolverWithSSOTest {
 
         UrlService urlService = Mockito.mock(UrlService.class);
 
-        final CookieHttpSessionIdResolverWithSSO c = new CookieHttpSessionIdResolverWithSSO(urlService, ssoService);
+        final CustomSessionIdResolver c = new CustomSessionIdResolver(urlService, ssoService);
 
         final MockHttpServletRequest request = new MockHttpServletRequest();
 

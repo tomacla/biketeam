@@ -1,77 +1,31 @@
 package info.tomacla.biketeam.security.oauth2;
 
-import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.service.url.UrlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.keygen.Base64StringKeyGenerator;
-import org.springframework.security.crypto.keygen.StringKeyGenerator;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.Optional;
 
 public class OAuth2StateWriter extends Base64StringKeyGenerator {
 
-    private final StringKeyGenerator generator = new Base64StringKeyGenerator(Base64.getUrlEncoder());
-
-    private UrlService urlService;
-    private TeamService teamService;
+    private OAuth2StateHandler stateHandler;
 
     @Autowired
     public OAuth2StateWriter(UrlService urlService, TeamService teamService) {
-        this.urlService = urlService;
-        this.teamService = teamService;
+        this.stateHandler = new OAuth2StateHandler(urlService, teamService);
     }
 
     @Override
     public String generateKey() {
-        HttpServletRequest currentHttpRequest = getCurrentHttpRequest();
-        if (currentHttpRequest != null) {
-            String key = generateKey(currentHttpRequest);
-            if (key != null) {
-                return key;
-            }
-
-        }
-        return generator.generateKey();
+        return generateKey(getCurrentHttpRequest());
     }
 
-    protected String generateKey(HttpServletRequest currentHttpRequest) {
-
-        final String customRequestUri = getCustomRequestUri(currentHttpRequest);
-        String redirect = null;
-        if (customRequestUri != null && !customRequestUri.equals("/login")) {
-            String teamId = extractTeamId(customRequestUri);
-            if (!ObjectUtils.isEmpty(teamId)) {
-                final Optional<Team> team = teamService.get(teamId);
-                if (team.isPresent()) {
-                    String resultUri = extractResulting(customRequestUri);
-                    final String teamUrl = urlService.getTeamUrl(team.get());
-                    redirect = teamUrl + resultUri;
-                } else {
-                    redirect = urlService.getUrlWithSuffix(customRequestUri);
-                }
-            }
-        }
-
-        if (!ObjectUtils.isEmpty(redirect)) {
-            return generator.generateKey()
-                    + OAuth2SuccessHandler.SEPARATOR
-                    + redirect;
-        }
-
-        return null;
-
+    public String generateKey(HttpServletRequest currentHttpRequest) {
+        return stateHandler.generateState(currentHttpRequest);
     }
 
     private HttpServletRequest getCurrentHttpRequest() {
@@ -80,37 +34,6 @@ public class OAuth2StateWriter extends Base64StringKeyGenerator {
             return ((ServletRequestAttributes) requestAttributes).getRequest();
         }
         return null;
-    }
-
-    private String getCustomRequestUri(HttpServletRequest request) {
-        UriComponents uriComponents = UriComponentsBuilder.newInstance()
-                .query(request.getQueryString())
-                .build();
-
-        MultiValueMap<String, String> queryParams = uriComponents.getQueryParams();
-        String requestUri = queryParams.getFirst("requestUri");
-        if (requestUri != null) {
-            return URLDecoder.decode(requestUri, StandardCharsets.UTF_8);
-        }
-        return null;
-    }
-
-    private String extractTeamId(String uri) {
-        int startIndex = uri.startsWith("/") ? 1 : 0;
-        final int nextSlash = uri.indexOf('/', startIndex);
-        if (nextSlash == -1) {
-            return uri.substring(startIndex);
-        }
-        return uri.substring(startIndex, nextSlash);
-    }
-
-    private String extractResulting(String uri) {
-        int firstIndex = uri.startsWith("/") ? 1 : 0;
-        int startIndex = uri.indexOf('/', firstIndex);
-        if (startIndex == -1) {
-            return "";
-        }
-        return uri.substring(startIndex);
     }
 
 }

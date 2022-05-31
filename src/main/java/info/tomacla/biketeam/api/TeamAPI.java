@@ -53,62 +53,41 @@ public class TeamAPI extends AbstractAPI {
 
         return ResponseEntity.ok()
                 .headers(responseHeaders)
-                .body(teams.getContent().stream().map(TeamDTO::valueOf).collect(Collectors.toList()));
+                .body(teams.getContent().stream().map(team -> TeamDTO.valueOf(team, false)).collect(Collectors.toList()));
 
     }
 
     @GetMapping(path = "/{teamId}", produces = "application/json")
     public ResponseEntity<TeamDTO> getTeam(@PathVariable String teamId) {
         return teamService.get(teamId)
-                .map(value -> ResponseEntity.ok().body(TeamDTO.valueOf(value)))
+                .map(value -> ResponseEntity.ok().body(TeamDTO.valueOf(value, true)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping(path = "/{teamId}/feed", produces = "application/json")
     public ResponseEntity<List<FeedDTO>> getTeamFeed(@PathVariable String teamId) {
 
-        final Optional<Team> optionalTeam = teamService.get(teamId);
-        if (optionalTeam.isPresent()) {
-            final Team team = optionalTeam.get();
-            if (team.getVisibility().equals(Visibility.PRIVATE) || team.getVisibility().equals(Visibility.PRIVATE_UNLISTED)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-            return ResponseEntity.ok().body(teamService.listFeed(team).stream().map(FeedDTO::valueOf).collect(Collectors.toList()));
-        }
+        final Team team = checkTeam(teamId);
 
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok().body(teamService.listFeed(team).stream().map(FeedDTO::valueOf).collect(Collectors.toList()));
 
     }
 
     @GetMapping(path = "/{teamId}/members", produces = "application/json")
     public ResponseEntity<List<MemberDTO>> getTeamMembers(@PathVariable String teamId) {
 
-        final Optional<Team> optionalTeam = teamService.get(teamId);
-        if (optionalTeam.isPresent()) {
-            final Team team = optionalTeam.get();
-            if (team.getVisibility().equals(Visibility.PRIVATE) || team.getVisibility().equals(Visibility.PRIVATE_UNLISTED)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-            return ResponseEntity.ok().body(team.getRoles().stream().map(ur -> MemberDTO.valueOf(ur.getUser())).collect(Collectors.toList()));
-        }
+        final Team team = checkTeam(teamId);
 
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok().body(team.getRoles().stream().map(ur -> MemberDTO.valueOf(ur.getUser())).collect(Collectors.toList()));
 
     }
 
     @GetMapping(path = "/{teamId}/faq", produces = "text/plain")
     public ResponseEntity<String> getFaq(@PathVariable String teamId) {
 
-        final Optional<Team> optionalTeam = teamService.get(teamId);
-        if (optionalTeam.isPresent()) {
-            final Team team = optionalTeam.get();
-            if (team.getVisibility().equals(Visibility.PRIVATE) || team.getVisibility().equals(Visibility.PRIVATE_UNLISTED)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-            return ResponseEntity.ok().body(team.getConfiguration().getMarkdownPage());
-        }
+        final Team team = checkTeam(teamId);
 
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok().body(team.getConfiguration().getMarkdownPage());
 
     }
 

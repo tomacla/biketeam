@@ -23,14 +23,11 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
     private static final Logger log = LoggerFactory.getLogger(Oauth2AuthUserService.class);
 
     private UserService userService;
-    private TeamService teamService;
 
     @Autowired
-    public Oauth2AuthUserService(UserService userService, TeamService teamService) {
+    public Oauth2AuthUserService(UserService userService) {
         this.userService = userService;
-        this.teamService = teamService;
     }
-
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {

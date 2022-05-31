@@ -2,7 +2,9 @@ package info.tomacla.biketeam.security.session;
 
 import info.tomacla.biketeam.service.url.UrlService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.web.authentication.rememberme.AbstractRememberMeServices;
 import org.springframework.session.web.http.CookieSerializer;
 import org.springframework.session.web.http.DefaultCookieSerializer;
 import org.springframework.session.web.http.SessionRepositoryFilter;
@@ -30,6 +32,9 @@ public class SSOTokenFilter extends OncePerRequestFilter {
     @Autowired
     private UrlService urlService;
 
+    @Value("${rememberme.validity}")
+    private int rememberMeValidity;
+
     private CookieSerializer cookieSerializer = new DefaultCookieSerializer();
 
     @PostConstruct
@@ -56,10 +61,9 @@ public class SSOTokenFilter extends OncePerRequestFilter {
 
     }
 
-    // TODO : this should be written using spring bean and configurable variables
     protected void setRememberMeCookie(String cookieValue, HttpServletResponse response) {
-        Cookie cookie = new Cookie("remember-me", cookieValue);
-        cookie.setMaxAge(1209600);
+        Cookie cookie = new Cookie(AbstractRememberMeServices.SPRING_SECURITY_REMEMBER_ME_COOKIE_KEY, cookieValue);
+        cookie.setMaxAge(rememberMeValidity);
         cookie.setPath("/");
         cookie.setDomain(urlService.getCookieDomain());
         cookie.setSecure(false);

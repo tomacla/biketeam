@@ -47,7 +47,7 @@ public class TeamDTO {
 
     }
 
-    public static TeamDTO valueOf(Team team) {
+    public static TeamDTO valueOf(Team team, boolean full) {
 
         if (team == null) {
             return null;
@@ -62,7 +62,7 @@ public class TeamDTO {
         dto.createdAt = team.getCreatedAt();
         dto.visibility = team.getVisibility();
 
-        if (team.getVisibility().equals(Visibility.PUBLIC) || team.getVisibility().equals(Visibility.PUBLIC_UNLISTED)) {
+        if (full) {
             dto.other = team.getDescription().getOther();
             dto.social = new TeamSocialDTO();
             dto.social.facebook = team.getDescription().getFacebook();
