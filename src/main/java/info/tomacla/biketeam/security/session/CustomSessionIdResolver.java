@@ -18,7 +18,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
-public class CookieHttpSessionIdResolverWithSSO implements HttpSessionIdResolver {
+public class CustomSessionIdResolver implements HttpSessionIdResolver {
+
+    private static final String HEADER_X_AUTH_TOKEN = "X-Auth-Token";
 
     private static final String WRITTEN_SESSION_ID_ATTR = CookieHttpSessionIdResolver.class.getName()
             .concat(".WRITTEN_SESSION_ID_ATTR");
@@ -28,7 +30,7 @@ public class CookieHttpSessionIdResolverWithSSO implements HttpSessionIdResolver
     private SSOService ssoService;
 
     @Autowired
-    public CookieHttpSessionIdResolverWithSSO(UrlService urlService, SSOService ssoService) {
+    public CustomSessionIdResolver(UrlService urlService, SSOService ssoService) {
         this.urlService = urlService;
         this.ssoService = ssoService;
     }
@@ -41,12 +43,8 @@ public class CookieHttpSessionIdResolverWithSSO implements HttpSessionIdResolver
     @Override
     public List<String> resolveSessionIds(HttpServletRequest request) {
 
-        UriComponents uriComponents = UriComponentsBuilder.newInstance()
-                .query(request.getQueryString())
-                .build();
-
-        MultiValueMap<String, String> queryParams = uriComponents.getQueryParams();
-        String sso = queryParams.getFirst("sso");
+        // try to resolve by sso param
+        final String sso = getSSOParam(request);
         if (sso != null) {
             String ssoToken = URLDecoder.decode(sso, StandardCharsets.UTF_8);
             final Optional<String> authTokenFromSSOToken = ssoService.getSessionIdFromSSOToken(ssoToken);
@@ -55,7 +53,15 @@ public class CookieHttpSessionIdResolverWithSSO implements HttpSessionIdResolver
             }
         }
 
+        // try to resolve by http header
+        final String xAuthHeader = getXAuthHeader(request);
+        if(xAuthHeader != null) {
+            return List.of(xAuthHeader);
+        }
+
+        // finaly try to resolve from cookie
         return this.cookieSerializer.readCookieValues(request);
+
     }
 
     @Override
@@ -72,15 +78,17 @@ public class CookieHttpSessionIdResolverWithSSO implements HttpSessionIdResolver
         this.cookieSerializer.writeCookieValue(new CookieSerializer.CookieValue(request, response, ""));
     }
 
-    /**
-     * Sets the {@link CookieSerializer} to be used.
-     *
-     * @param cookieSerializer the cookieSerializer to set. Cannot be null.
-     */
-    public void setCookieSerializer(CookieSerializer cookieSerializer) {
-        if (cookieSerializer == null) {
-            throw new IllegalArgumentException("cookieSerializer cannot be null");
-        }
-        this.cookieSerializer = cookieSerializer;
+    private String getSSOParam(HttpServletRequest request) {
+        UriComponents uriComponents = UriComponentsBuilder.newInstance()
+                .query(request.getQueryString())
+                .build();
+
+        MultiValueMap<String, String> queryParams = uriComponents.getQueryParams();
+        return queryParams.getFirst(SSOService.SSO_PARAM);
     }
+
+    private String getXAuthHeader(HttpServletRequest request) {
+        return request.getHeader(HEADER_X_AUTH_TOKEN);
+    }
+
 }

@@ -1,21 +1,28 @@
 package info.tomacla.biketeam;
 
+import info.tomacla.biketeam.security.login.CustomAccessDeniedHandler;
 import info.tomacla.biketeam.security.login.CustomLoginUrlAuthenticationEntryPoint;
+import info.tomacla.biketeam.security.oauth2.OAuth2FailureHandler;
 import info.tomacla.biketeam.security.oauth2.OAuth2StateWriter;
 import info.tomacla.biketeam.security.oauth2.OAuth2SuccessHandler;
-import info.tomacla.biketeam.security.session.CookieHttpSessionIdResolverWithSSO;
+import info.tomacla.biketeam.security.session.CustomSessionIdResolver;
 import info.tomacla.biketeam.security.session.SSOService;
 import info.tomacla.biketeam.security.session.SSOTokenFilter;
 import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.service.url.UrlService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.JdbcOAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -26,6 +33,7 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.io.File;
 import java.lang.reflect.Field;
 
 @Configuration
@@ -47,6 +55,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private ClientRegistrationRepository clientRegistrationRepository;
 
+    @Value("${rememberme.key}")
+    private String rememberMeKey;
+
+    @Value("${rememberme.validity}")
+    private int rememberMeValidity;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
@@ -58,47 +72,61 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // requests conf
         http.authorizeRequests(auth -> {
 
+            // static
             auth.antMatchers("/css/**").permitAll();
             auth.antMatchers("/js/**").permitAll();
-            auth.antMatchers("/teams").permitAll();
+            auth.antMatchers("/*/image").permitAll();
+            auth.antMatchers("/legal-mentions").permitAll();
+
+            // spring security endpoints
             auth.antMatchers("/login/**").permitAll();
             auth.antMatchers("/logout").permitAll();
-            auth.antMatchers("/legal-mentions").permitAll();
-            auth.antMatchers("/*/image").permitAll();
 
-            auth.antMatchers("/api/**").permitAll();
+            // api public endpoints
+            auth.antMatchers("/api/data/**").permitAll();
+            auth.antMatchers("/api/auth/**").permitAll();
+            auth.antMatchers("/api/teams").permitAll();
 
-            auth.antMatchers("/users/me").authenticated();
-            auth.antMatchers("/users/me/delete").authenticated();
+            // api protected endpoints
+            auth.antMatchers("/api/teams/{teamId}/**").access("@userService.authorizePublicAccess(authentication, #teamId)");
+
+            // web public endpoints
+            auth.antMatchers("/teams").permitAll();
+
+            // web protected endpoints
+            auth.antMatchers("/users/me/**").authenticated();
             auth.antMatchers("/new").authenticated();
-
             auth.antMatchers("/admin/**").hasRole("ADMIN");
             auth.antMatchers("/management/**").hasRole("ADMIN");
             auth.antMatchers("/{teamId}/admin/**").access("@userService.authorizeAdminAccess(authentication, #teamId)");
             auth.antMatchers("/{teamId}/**").access("@userService.authorizePublicAccess(authentication, #teamId)");
+
+            // other request are permitted
             auth.anyRequest().permitAll();
+
         });
 
         // handle unauthorized
         http.exceptionHandling(e -> {
             // user is not authenticated
-            e.authenticationEntryPoint(new CustomLoginUrlAuthenticationEntryPoint("/login"));
+            e.authenticationEntryPoint(new CustomLoginUrlAuthenticationEntryPoint());
             // user has not access to resource
-            e.accessDeniedPage("/?error=Acc%C3%A8s%20interdit");
+            e.accessDeniedHandler(accessDeniedHandler());
         });
 
         // remember me conf
         http.rememberMe(rm -> {
             rm.alwaysRemember(true);
             rm.userDetailsService(userDetailsService);
+            rm.key(rememberMeKey);
+            rm.tokenValiditySeconds(rememberMeValidity);
         });
 
         // oauth2 conf
         http.oauth2Login(oauth2 -> {
-            oauth2.failureUrl("/?error=Erreur%20de%20connexion");
-            oauth2.loginPage("/login");
             oauth2.authorizationEndpoint(config -> config.authorizationRequestResolver(oAuth2AuthorizationRequestResolver()));
             oauth2.successHandler(oAuth2SuccessHandler());
+            oauth2.failureHandler(oAuth2FailureHandler());
         });
 
         // logout
@@ -109,7 +137,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public OAuth2SuccessHandler oAuth2SuccessHandler() {
-        return new OAuth2SuccessHandler(ssoService);
+        return new OAuth2SuccessHandler(ssoService, urlService, teamService);
+    }
+
+    @Bean
+    public OAuth2FailureHandler oAuth2FailureHandler() {
+        return new OAuth2FailureHandler(ssoService, urlService, teamService);
+    }
+
+    @Bean
+    public CustomAccessDeniedHandler accessDeniedHandler() {
+        return new CustomAccessDeniedHandler();
     }
 
     @Bean
@@ -129,8 +167,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public CookieHttpSessionIdResolverWithSSO customCookieHttpSessionIdResolver() {
-        return new CookieHttpSessionIdResolverWithSSO(urlService, ssoService);
+    public CustomSessionIdResolver customCookieHttpSessionIdResolver() {
+        return new CustomSessionIdResolver(urlService, ssoService);
     }
 
     @Bean
@@ -151,6 +189,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 registry.addMapping("/**").allowedMethods("*");
             }
         };
+    }
+
+    @Bean
+    public AuthenticationManager getAuthenticationManager() throws Exception {
+        return super.authenticationManagerBean();
+    }
+
+    @Bean
+    public PasswordEncoder encoder() {
+        return new BCryptPasswordEncoder();
     }
 
 }
