@@ -33,9 +33,6 @@ public class RideAPI extends AbstractAPI {
                                                   @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize) {
 
         final Team team = checkTeam(teamId);
-        if (team.getVisibility().equals(Visibility.PRIVATE) || team.getVisibility().equals(Visibility.PRIVATE_UNLISTED)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
 
         SearchRideForm form = SearchRideForm.builder()
                 .withFrom(from)
@@ -66,10 +63,7 @@ public class RideAPI extends AbstractAPI {
     @GetMapping(path = "/{rideId}", produces = "application/json")
     public ResponseEntity<RideDTO> getRide(@PathVariable String teamId, @PathVariable String rideId) {
 
-        final Team team = checkTeam(teamId);
-        if (team.getVisibility().equals(Visibility.PRIVATE) || team.getVisibility().equals(Visibility.PRIVATE_UNLISTED)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+        checkTeam(teamId);
 
         return rideService.get(teamId, rideId)
                 .map(value -> ResponseEntity.ok().body(RideDTO.valueOf(value)))

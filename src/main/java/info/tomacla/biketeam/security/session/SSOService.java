@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.security.session;
 
+import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -8,6 +9,8 @@ import java.util.Optional;
 
 @Service
 public class SSOService {
+
+    public static final String SSO_PARAM = "sso";
 
     private Long expiracy = 20L;
 

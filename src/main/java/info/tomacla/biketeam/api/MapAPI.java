@@ -84,10 +84,7 @@ public class MapAPI extends AbstractAPI {
     @GetMapping(path = "/{mapId}", produces = "application/json")
     public ResponseEntity<MapDTO> getMap(@PathVariable String teamId, @PathVariable String mapId) {
 
-        final Team team = checkTeam(teamId);
-        if (team.getVisibility().equals(Visibility.PRIVATE) || team.getVisibility().equals(Visibility.PRIVATE_UNLISTED)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+        checkTeam(teamId);
 
         return mapService.get(teamId, mapId)
                 .map(value -> ResponseEntity.ok().body(MapDTO.valueOf(value)))

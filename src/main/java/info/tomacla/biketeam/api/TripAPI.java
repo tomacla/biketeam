@@ -63,10 +63,7 @@ public class TripAPI extends AbstractAPI {
     @GetMapping(path = "/{tripId}", produces = "application/json")
     public ResponseEntity<TripDTO> getTrip(@PathVariable String teamId, @PathVariable String tripId) {
 
-        final Team team = checkTeam(teamId);
-        if (team.getVisibility().equals(Visibility.PRIVATE) || team.getVisibility().equals(Visibility.PRIVATE_UNLISTED)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+        checkTeam(teamId);
 
         return tripService.get(teamId, tripId)
                 .map(value -> ResponseEntity.ok().body(TripDTO.valueOf(value)))
