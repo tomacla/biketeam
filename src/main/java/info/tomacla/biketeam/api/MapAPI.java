@@ -6,13 +6,11 @@ import info.tomacla.biketeam.domain.map.MapSorterOption;
 import info.tomacla.biketeam.domain.map.MapType;
 import info.tomacla.biketeam.domain.map.WindDirection;
 import info.tomacla.biketeam.domain.team.Team;
-import info.tomacla.biketeam.domain.team.Visibility;
 import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.web.map.SearchMapForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -89,6 +87,15 @@ public class MapAPI extends AbstractAPI {
         return mapService.get(teamId, mapId)
                 .map(value -> ResponseEntity.ok().body(MapDTO.valueOf(value)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping(path = "/tags", produces = "application/json")
+    public ResponseEntity<List<String>> getTags(@PathVariable String teamId) {
+
+        checkTeam(teamId);
+
+        return ResponseEntity.ok().body(mapService.listTags(teamId));
+
     }
 
 }
