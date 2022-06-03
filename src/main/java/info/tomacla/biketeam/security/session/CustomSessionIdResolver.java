@@ -25,9 +25,9 @@ public class CustomSessionIdResolver implements HttpSessionIdResolver {
     private static final String WRITTEN_SESSION_ID_ATTR = CookieHttpSessionIdResolver.class.getName()
             .concat(".WRITTEN_SESSION_ID_ATTR");
 
-    private CookieSerializer cookieSerializer = new DefaultCookieSerializer();
-    private UrlService urlService;
-    private SSOService ssoService;
+    private final CookieSerializer cookieSerializer = new DefaultCookieSerializer();
+    private final UrlService urlService;
+    private final SSOService ssoService;
 
     @Autowired
     public CustomSessionIdResolver(UrlService urlService, SSOService ssoService) {
@@ -55,7 +55,7 @@ public class CustomSessionIdResolver implements HttpSessionIdResolver {
 
         // try to resolve by http header
         final String xAuthHeader = getXAuthHeader(request);
-        if(xAuthHeader != null) {
+        if (xAuthHeader != null) {
             return List.of(xAuthHeader);
         }
 

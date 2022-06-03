@@ -1,6 +1,5 @@
 package info.tomacla.biketeam.security.session;
 
-import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -23,7 +22,7 @@ public class SSOService {
 
     // IMPROVE use a guava cache instead of this
     // TODO should be stored in case of load balancing
-    private Map<String, SSOToken> ssoTokens = new HashMap<>();
+    private final Map<String, SSOToken> ssoTokens = new HashMap<>();
 
     public String getSSOToken(String sessionId, String rememberMe) {
         SSOToken ssoToken = SSOToken.create(sessionId, rememberMe);

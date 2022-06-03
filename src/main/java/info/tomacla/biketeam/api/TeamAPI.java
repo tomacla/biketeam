@@ -5,17 +5,14 @@ import info.tomacla.biketeam.api.dto.MemberDTO;
 import info.tomacla.biketeam.api.dto.TeamDTO;
 import info.tomacla.biketeam.common.data.Country;
 import info.tomacla.biketeam.domain.team.Team;
-import info.tomacla.biketeam.domain.team.Visibility;
 import info.tomacla.biketeam.web.SearchTeamForm;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
