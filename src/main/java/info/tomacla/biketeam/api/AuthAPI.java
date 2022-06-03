@@ -41,7 +41,7 @@ public class AuthAPI extends AbstractAPI {
         final Optional<String> sessionId = ssoService.getSessionIdFromSSOToken(ssoToken);
         final Optional<String> rememberMe = ssoService.getRememberMeFromSSOToken(ssoToken);
 
-        return TokenDTO.valueOf(sessionId.get(), rememberMe.get());
+        return TokenDTO.valueOf(sessionId.orElse(null), rememberMe.orElse(null));
     }
 
     @PostMapping(path = "/refresh", consumes = "text/plain", produces = "application/json")
