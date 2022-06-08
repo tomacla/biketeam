@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.service.heatmap;
 
+import info.tomacla.biketeam.common.amqp.Queues;
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
@@ -9,6 +10,7 @@ import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.service.file.FileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -45,6 +47,7 @@ public class HeatmapService {
         return Optional.empty();
     }
 
+    @RabbitListener(queues = Queues.TASK_GENERATE_HEATMAPS)
     public void generateAll() {
         teamService.list().forEach(this::generateHeatmap);
     }

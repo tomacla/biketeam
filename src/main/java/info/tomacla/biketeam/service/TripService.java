@@ -1,5 +1,8 @@
 package info.tomacla.biketeam.service;
 
+import info.tomacla.biketeam.common.amqp.Exchanges;
+import info.tomacla.biketeam.common.amqp.Queues;
+import info.tomacla.biketeam.common.amqp.RoutingKeys;
 import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.FileRepositories;
@@ -7,11 +10,13 @@ import info.tomacla.biketeam.common.file.ImageDescriptor;
 import info.tomacla.biketeam.domain.trip.Trip;
 import info.tomacla.biketeam.domain.trip.TripIdTitleDateProjection;
 import info.tomacla.biketeam.domain.trip.TripRepository;
-import info.tomacla.biketeam.service.broadcast.Broadcaster;
+import info.tomacla.biketeam.service.amqp.BrokerService;
+import info.tomacla.biketeam.service.amqp.dto.TeamEntityDTO;
 import info.tomacla.biketeam.service.file.FileService;
 import info.tomacla.biketeam.service.permalink.AbstractPermalinkService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -42,7 +47,7 @@ public class TripService extends AbstractPermalinkService {
     private TeamService teamService;
 
     @Autowired
-    private Broadcaster broadcaster;
+    private BrokerService brokerService;
 
     public Optional<Trip> get(String teamId, String tripId) {
         Optional<Trip> optionalTrip = tripRepository.findById(tripId);
@@ -84,6 +89,7 @@ public class TripService extends AbstractPermalinkService {
 
     }
 
+    @RabbitListener(queues = Queues.TASK_PUBLISH_TRIPS)
     public void publishTrips() {
         teamService.list().forEach(team ->
                 tripRepository.findAllByTeamIdAndPublishedStatusAndPublishedAtLessThan(
@@ -94,7 +100,8 @@ public class TripService extends AbstractPermalinkService {
                     log.info("Publishing trip {} for team {}", trip.getId(), team.getId());
                     trip.setPublishedStatus(PublishedStatus.PUBLISHED);
                     save(trip);
-                    broadcaster.broadcast(team, trip);
+                    brokerService.sendToBroker(Exchanges.EVENT, RoutingKeys.TRIP_PUBLISHED,
+                            TeamEntityDTO.valueOf(trip.getTeamId(), trip.getId()));
                 })
         );
 

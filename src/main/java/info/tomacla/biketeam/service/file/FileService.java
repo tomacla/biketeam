@@ -1,10 +1,12 @@
 package info.tomacla.biketeam.service.file;
 
+import info.tomacla.biketeam.common.amqp.Queues;
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.FileRepositories;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -159,6 +162,7 @@ public class FileService {
         return Path.of(System.getProperty("java.io.tmpdir"), "biketeam");
     }
 
+    @RabbitListener(queues = Queues.TASK_CLEAN_TMP_FILES)
     public void cleanTmpDirectory() {
         try {
             long cutOff = System.currentTimeMillis() - (2 * 24 * 60 * 60 * 1000);
@@ -180,6 +184,23 @@ public class FileService {
         } catch (IOException e) {
             log.error("Unable to clean tmp directory", e);
         }
+    }
+
+    public void cleanTeamFiles(Set<String> existingTeamIds) {
+        FileRepositories.list().forEach(directory -> {
+            final List<String> storedTeamsIds = listSubDirectories(directory);
+            storedTeamsIds.remove(directory);
+            storedTeamsIds.forEach(teamId -> {
+                try {
+                    if (!existingTeamIds.contains(teamId)) {
+                        log.info("Delete unused directory " + directory + "/" + teamId);
+                        deleteDirectory(directory, teamId);
+                    }
+                } catch (Exception e) {
+                    log.error("Error while executing cleanDeleteTeamsDirectory", e);
+                }
+            });
+        });
     }
 
     @PostConstruct

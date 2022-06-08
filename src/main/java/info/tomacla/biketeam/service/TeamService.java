@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.service;
 
+import info.tomacla.biketeam.common.amqp.Queues;
 import info.tomacla.biketeam.common.data.Country;
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.FileRepositories;
@@ -14,6 +15,7 @@ import info.tomacla.biketeam.service.heatmap.HeatmapService;
 import info.tomacla.biketeam.service.permalink.AbstractPermalinkService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -228,6 +230,12 @@ public class TeamService extends AbstractPermalinkService {
     @Override
     public boolean permalinkExists(String permalink) {
         return get(permalink).isPresent();
+    }
+
+    @RabbitListener(queues = Queues.TASK_CLEAN_TEAM_FILES)
+    public void cleanTeamFiles() {
+        final Set<String> existingTeamIds = list().stream().map(Team::getId).collect(Collectors.toSet());
+        fileService.cleanTeamFiles(existingTeamIds);
     }
 
 }
