@@ -12,7 +12,7 @@ See [here](https://www.biketeam.info)
 
 #### Install Java
 
-Version 13 or above
+Version 17 or above
 
 #### Create a Datasource
 
