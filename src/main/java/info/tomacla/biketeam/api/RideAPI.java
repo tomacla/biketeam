@@ -3,14 +3,12 @@ package info.tomacla.biketeam.api;
 import info.tomacla.biketeam.api.dto.RideDTO;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.team.Team;
-import info.tomacla.biketeam.domain.team.Visibility;
 import info.tomacla.biketeam.service.RideService;
 import info.tomacla.biketeam.web.ride.SearchRideForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,9 +31,6 @@ public class RideAPI extends AbstractAPI {
                                                   @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize) {
 
         final Team team = checkTeam(teamId);
-        if (team.getVisibility().equals(Visibility.PRIVATE) || team.getVisibility().equals(Visibility.PRIVATE_UNLISTED)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
 
         SearchRideForm form = SearchRideForm.builder()
                 .withFrom(from)
@@ -66,10 +61,7 @@ public class RideAPI extends AbstractAPI {
     @GetMapping(path = "/{rideId}", produces = "application/json")
     public ResponseEntity<RideDTO> getRide(@PathVariable String teamId, @PathVariable String rideId) {
 
-        final Team team = checkTeam(teamId);
-        if (team.getVisibility().equals(Visibility.PRIVATE) || team.getVisibility().equals(Visibility.PRIVATE_UNLISTED)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+        checkTeam(teamId);
 
         return rideService.get(teamId, rideId)
                 .map(value -> ResponseEntity.ok().body(RideDTO.valueOf(value)))

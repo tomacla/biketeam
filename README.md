@@ -1,97 +1,123 @@
 # Biketeam
 
-## Production
+## Live
 
-See live [here](https://www.biketeam.info)
+See [here](https://www.biketeam.info)
 
 [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/S6S6CLH20)
 
-## Use sources
-
-Biketeam is a standard spring boot application so use spring boot maven plugin. You'll need a postgresql database.
-
-`mvn spring-boot:run`
-
-Or to clean and install
-
-`mvn clean install`
-
-## Run or deploy
+## Use projet
 
 ### Prerequisites
 
-#### Create an application on your strava account
+#### Install Java
 
-You'll need to declare an app in strava for authentication.
+Version 17 or above
 
-Go to [this page](https://www.strava.com/settings/api) and create you app.
+#### Install RabbitMQ
 
-Write down client-id and client-secret.
+Install a instance of RabbitMQ and create a virtual host.
 
-#### Install PostgreSQL and create a database
+#### Create a Datasource
 
-Follow instructions to install PostgreSQL and create a database and a user.
+Install a DBMS and create a database.
+Source code has only been tested with PostgreSQL.
 
-#### Create a custom configuration file
+#### Configure OAuth2
+
+To handle authentication, you'll need : 
+* [Strava](https://www.strava.com/settings/api) (mandatory)
+* [Google](https://developers.google.com/identity/sign-in/web/sign-in) (optional)
+* [Facebook](https://developers.facebook.com/docs/facebook-login/web) (optional)
+
+Declare and configure your app in these providers to get Oauth2 Client ID and Client Secret
+
+#### Get a SMTP provider
+
+You'll need to configure a SMTP for biketeam to send mail (check out [Mailjet](https://www.mailjet.com/) if you don't have one). 
+
+#### Get a Mapbox Key
+
+Go to [Mapbox](https://www.mapbox.com/) and get a developer key.
+
+### Configuration
 
 Create file for custom configuration for example `application-custom.properties`.
 
 Copy following lines and set your values.
 
 ```
-site.url=http[s]://your-domain
-## Spring Datasource and JPA config : postgresql
-## database and username must be created before startup
-spring.datasource.url=jdbc:postgresql://localhost:5432/biketeam
-spring.datasource.username=xxx
-spring.datasource.password=xxx
+site.url=http[s]://your-biketeam-host
+contact.email=from@domain.com
+
+file.repository=/path/to/biketeam/data
+archive.directory=/path/to/biketeam/archives
+
+mapbox.api-key=your-mapbox-key
+
+rememberme.key=a-random-string-to-secure-spring-security
+
+spring.datasource.url=jdbc:postgresql://[host]:[port]/[database]
+spring.datasource.username=[user]
+spring.datasource.password=[password]
 spring.datasource.driver-class-name=org.postgresql.Driver
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQL10Dialect
-## Spring security with Strava
-spring.security.oauth2.client.registration.strava.client-id=xxx
-spring.security.oauth2.client.registration.strava.client-secret=xxx
-spring.security.oauth2.client.registration.strava.redirect-uri=http[s]://your-domain/login/oauth2/code/strava
-spring.security.oauth2.client.provider.strava.token-uri=https://www.strava.com/oauth/token?client_id=xxx&client_secret=xxx
-# Spring security with Google
+
+spring.security.oauth2.client.registration.strava.client-id=xxxx
+spring.security.oauth2.client.registration.strava.client-secret=xxxx
+spring.security.oauth2.client.registration.strava.redirect-uri=http[s]://your-biketeam-host/login/oauth2/code/strava
+spring.security.oauth2.client.provider.strava.token-uri=https://www.strava.com/oauth/token?client_id=xxx&client_secret=xxxxx
+
+# optional facebook connect
+spring.security.oauth2.client.registration.facebook.client-id=xxx
+spring.security.oauth2.client.registration.facebook.client-secret=xxxx
+spring.security.oauth2.client.registration.facebook.redirect-uri=http[s]://your-biketeam-host/login/oauth2/code/facebook
+
+# optional sign in with google
 spring.security.oauth2.client.registration.google.client-id=xxx
 spring.security.oauth2.client.registration.google.client-secret=xxx
-spring.security.oauth2.client.registration.google.redirect-uri=http[s]://your-domain/login/oauth2/code/google
-# Spring security with Facebook
-spring.security.oauth2.client.registration.facebook.client-id=xxx
-spring.security.oauth2.client.registration.facebook.client-secret=xxx
-spring.security.oauth2.client.registration.facebook.redirect-uri=http[s]://your-domain/login/oauth2/code/facebook
-## User used as primary admin
+spring.security.oauth2.client.registration.google.redirect-uri=http[s]://your-biketeam-host/login/oauth2/code/google
+
+spring.mail.host=[smtp-host]
+spring.mail.port=[smtp-port]
+spring.mail.protocol=[smtp-protocol]
+spring.mail.username=[smtp-username]
+spring.mail.password=[smtp-password]
+spring.mail.properties.mail.transport.protocol=smtp
+spring.mail.properties.mail.smtps.auth=true
+spring.mail.properties.mail.smtps.ssl.protocols=TLSv1.2
+spring.mail.properties.mail.smtps.starttls.enable=true
+spring.mail.properties.mail.smtps.ssl.trust=[smtp-host]
+spring.mail.properties.mail.smtps.timeout=8000
+
+# this is the user that will be created at startup with admin permissions
 admin.strava-id=xxx
-admin.first-name=admin
-admin.last-name=admin
-## Directories (archive to import, file to store)
-archive.directory=/path/to/archives
-file.repository=./data/repository
-## Mapbox integration
-mapbox.api-key=xx
-## Facebook integration (optional and only for publication not signin)
-facebook.app-id=xx
-facebook.app-secret=xx
-## Contact email
-contact.email=foo@bar.com
-## SMTP integration (optional)
-## See Spring Mail configuration
-## LOGS
-logging.file.name=/path/to/logs/biketeam.log
+admin.first-name=name
+admin.last-name=last name
+
+rabbitmq.host=[rabbit-host]
+rabbitmq.username=[rabbit-username]
+rabbitmq.password=[rabbit-password]
+rabbitmq.vhost=[rabbit-vhost]
+rabbitmq.autostartup=true
 ```
 
-### Run with Java
+### Run
 
-#### Install Java
+Always add your configuration file to your classpath
 
-You need Java 13 or above.
+#### With Maven
 
-#### Get the jar
+Biketeam is a standard spring boot application so use spring boot maven plugin.
 
-Download the biketeam jar on github or clone the source and build source with `mvn clean install`.
+`mvn spring-boot:run`
 
-#### Start
+#### In IDE 
 
-Start with command line (change path to application-custom.properties if needed)
+Run BiketeamApplication class with main method.
 
-`/usr/bin/java -jar biketeam.jar --spring.config.location=classpath:/application.properties,./application-custom.properties`
+#### Executable jar
+
+Run `mvn clean package` then execute the biketeam.jar
+
+`biketeam.jar --spring.config.location=classpath:/application.properties,/path/to/application-custom.properties`

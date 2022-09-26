@@ -1,7 +1,6 @@
 package info.tomacla.biketeam.security.oauth2;
 
 import info.tomacla.biketeam.domain.user.User;
-import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -20,13 +19,12 @@ public class Oauth2AuthUserServiceTest {
     @Test
     public void testStravaUnknown() {
 
-        TeamService teamService = Mockito.mock(TeamService.class);
         UserService userService = Mockito.mock(UserService.class);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         Mockito.when(userService.getByStravaId(10002L)).thenReturn(Optional.empty());
 
-        final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService, teamService);
+        final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService);
 
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("id", 10002);
@@ -55,7 +53,6 @@ public class Oauth2AuthUserServiceTest {
     @Test
     public void testStravaExisting() {
 
-        TeamService teamService = Mockito.mock(TeamService.class);
         UserService userService = Mockito.mock(UserService.class);
 
         User u = new User();
@@ -64,7 +61,7 @@ public class Oauth2AuthUserServiceTest {
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         Mockito.when(userService.getByStravaId(10002L)).thenReturn(Optional.of(u));
 
-        final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService, teamService);
+        final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService);
 
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("id", 10002);
@@ -94,13 +91,12 @@ public class Oauth2AuthUserServiceTest {
     @Test
     public void testFacebookUnknown() {
 
-        TeamService teamService = Mockito.mock(TeamService.class);
         UserService userService = Mockito.mock(UserService.class);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         Mockito.when(userService.getByFacebookId("10002")).thenReturn(Optional.empty());
 
-        final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService, teamService);
+        final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService);
 
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("id", "10002");
@@ -124,7 +120,6 @@ public class Oauth2AuthUserServiceTest {
     @Test
     public void testFacebookExisting() {
 
-        TeamService teamService = Mockito.mock(TeamService.class);
         UserService userService = Mockito.mock(UserService.class);
 
         User u = new User();
@@ -133,7 +128,7 @@ public class Oauth2AuthUserServiceTest {
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         Mockito.when(userService.getByFacebookId("10002")).thenReturn(Optional.of(u));
 
-        final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService, teamService);
+        final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService);
 
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("id", "10002");
@@ -155,13 +150,12 @@ public class Oauth2AuthUserServiceTest {
     @Test
     public void testGoogleUnknown() {
 
-        TeamService teamService = Mockito.mock(TeamService.class);
         UserService userService = Mockito.mock(UserService.class);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         Mockito.when(userService.getByGoogleId("10002")).thenReturn(Optional.empty());
 
-        final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService, teamService);
+        final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService);
 
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("sub", "10002");
@@ -188,7 +182,6 @@ public class Oauth2AuthUserServiceTest {
     @Test
     public void testGoogleExisting() {
 
-        TeamService teamService = Mockito.mock(TeamService.class);
         UserService userService = Mockito.mock(UserService.class);
 
         User u = new User();
@@ -197,7 +190,7 @@ public class Oauth2AuthUserServiceTest {
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         Mockito.when(userService.getByGoogleId("10002")).thenReturn(Optional.of(u));
 
-        final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService, teamService);
+        final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService);
 
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("sub", "10002");

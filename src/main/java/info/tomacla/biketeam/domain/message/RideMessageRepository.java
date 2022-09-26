@@ -14,6 +14,10 @@ public interface RideMessageRepository extends CrudRepository<RideMessage, Strin
 
     List<RideMessage> findAll();
 
+    List<RideMessage> findAllByRideId(String rideId);
+
+    List<RideMessage> findAllByUserId(String userId);
+
     @Transactional
     @Modifying
     @Query(value = "delete from ride_message where user_id = :userId", nativeQuery = true)

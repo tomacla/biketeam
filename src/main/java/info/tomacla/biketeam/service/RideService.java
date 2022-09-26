@@ -1,19 +1,22 @@
 package info.tomacla.biketeam.service;
 
+import info.tomacla.biketeam.common.amqp.Exchanges;
+import info.tomacla.biketeam.common.amqp.Queues;
+import info.tomacla.biketeam.common.amqp.RoutingKeys;
 import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
 import info.tomacla.biketeam.domain.ride.Ride;
-import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.ride.RideProjection;
 import info.tomacla.biketeam.domain.ride.RideRepository;
-import info.tomacla.biketeam.domain.user.User;
-import info.tomacla.biketeam.service.broadcast.Broadcaster;
+import info.tomacla.biketeam.service.amqp.BrokerService;
+import info.tomacla.biketeam.service.amqp.dto.TeamEntityDTO;
 import info.tomacla.biketeam.service.file.FileService;
 import info.tomacla.biketeam.service.permalink.AbstractPermalinkService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -44,7 +47,7 @@ public class RideService extends AbstractPermalinkService {
     private TeamService teamService;
 
     @Autowired
-    private Broadcaster broadcaster;
+    private BrokerService brokerService;
 
     public Optional<ImageDescriptor> getImage(String teamId, String rideId) {
 
@@ -70,6 +73,7 @@ public class RideService extends AbstractPermalinkService {
 
     }
 
+    @RabbitListener(queues = Queues.TASK_PUBLISH_RIDES)
     public void publishRides() {
         teamService.list().forEach(team ->
                 rideRepository.findAllByTeamIdAndPublishedStatusAndPublishedAtLessThan(
@@ -80,7 +84,8 @@ public class RideService extends AbstractPermalinkService {
                     log.info("Publishing ride {} for team {}", ride.getId(), team.getId());
                     ride.setPublishedStatus(PublishedStatus.PUBLISHED);
                     save(ride);
-                    broadcaster.broadcast(team, ride);
+                    brokerService.sendToBroker(Exchanges.EVENT, RoutingKeys.RIDE_PUBLISHED,
+                            TeamEntityDTO.valueOf(ride.getTeamId(), ride.getId()));
                 })
         );
 
@@ -154,14 +159,6 @@ public class RideService extends AbstractPermalinkService {
 
     public void deleteByTeam(String teamId) {
         rideRepository.findAllByTeamIdOrderByDateDesc(teamId).stream().map(RideProjection::getId).forEach(rideRepository::deleteById);
-    }
-
-    public void removeParticipantFromAllRides(User user) {
-        for (RideGroup rideGroup : user.getRideGroups()) {
-            rideGroup.removeParticipant(user);
-            save(rideGroup.getRide());
-        }
-        user.getRideGroups().clear();
     }
 
     public void deleteByUser(String userId) {

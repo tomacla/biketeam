@@ -2,7 +2,6 @@ package info.tomacla.biketeam.api;
 
 import info.tomacla.biketeam.api.dto.TripDTO;
 import info.tomacla.biketeam.domain.team.Team;
-import info.tomacla.biketeam.domain.team.Visibility;
 import info.tomacla.biketeam.domain.trip.Trip;
 import info.tomacla.biketeam.service.TripService;
 import info.tomacla.biketeam.web.trip.SearchTripForm;
@@ -10,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -63,10 +61,7 @@ public class TripAPI extends AbstractAPI {
     @GetMapping(path = "/{tripId}", produces = "application/json")
     public ResponseEntity<TripDTO> getTrip(@PathVariable String teamId, @PathVariable String tripId) {
 
-        final Team team = checkTeam(teamId);
-        if (team.getVisibility().equals(Visibility.PRIVATE) || team.getVisibility().equals(Visibility.PRIVATE_UNLISTED)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+        checkTeam(teamId);
 
         return tripService.get(teamId, tripId)
                 .map(value -> ResponseEntity.ok().body(TripDTO.valueOf(value)))

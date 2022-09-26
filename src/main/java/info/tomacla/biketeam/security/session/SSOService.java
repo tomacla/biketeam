@@ -9,6 +9,8 @@ import java.util.Optional;
 @Service
 public class SSOService {
 
+    public static final String SSO_PARAM = "sso";
+
     private Long expiracy = 20L;
 
     public SSOService() {
@@ -20,7 +22,7 @@ public class SSOService {
 
     // IMPROVE use a guava cache instead of this
     // TODO should be stored in case of load balancing
-    private Map<String, SSOToken> ssoTokens = new HashMap<>();
+    private final Map<String, SSOToken> ssoTokens = new HashMap<>();
 
     public String getSSOToken(String sessionId, String rememberMe) {
         SSOToken ssoToken = SSOToken.create(sessionId, rememberMe);

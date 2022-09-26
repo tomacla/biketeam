@@ -1,6 +1,8 @@
 package info.tomacla.biketeam.security.oauth2;
 
 import info.tomacla.biketeam.security.session.SSOService;
+import info.tomacla.biketeam.service.TeamService;
+import info.tomacla.biketeam.service.url.UrlService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.mock.web.MockCookie;
@@ -15,7 +17,9 @@ public class OAuth2SuccessHandlerTest {
     public void testWithoutState() {
 
         final SSOService ssoService = Mockito.mock(SSOService.class);
-        OAuth2SuccessHandler h = new OAuth2SuccessHandler(ssoService);
+        final UrlService urlService = Mockito.mock(UrlService.class);
+        final TeamService teamService = Mockito.mock(TeamService.class);
+        OAuth2SuccessHandler h = new OAuth2SuccessHandler(ssoService, urlService, teamService);
 
         final MockHttpServletRequest request = new MockHttpServletRequest();
 
@@ -27,7 +31,9 @@ public class OAuth2SuccessHandlerTest {
     public void testWithFalseState() {
 
         final SSOService ssoService = Mockito.mock(SSOService.class);
-        OAuth2SuccessHandler h = new OAuth2SuccessHandler(ssoService);
+        final UrlService urlService = Mockito.mock(UrlService.class);
+        final TeamService teamService = Mockito.mock(TeamService.class);
+        OAuth2SuccessHandler h = new OAuth2SuccessHandler(ssoService, urlService, teamService);
 
         final MockHttpServletRequest request = new MockHttpServletRequest();
         request.setQueryString("state=toto");
@@ -42,9 +48,11 @@ public class OAuth2SuccessHandlerTest {
         final MockHttpSession session = new MockHttpSession();
 
         final SSOService ssoService = Mockito.mock(SSOService.class);
+        final UrlService urlService = Mockito.mock(UrlService.class);
+        final TeamService teamService = Mockito.mock(TeamService.class);
         Mockito.when(ssoService.getSSOToken(session.getId(), null)).thenReturn("SSO1");
 
-        OAuth2SuccessHandler h = new OAuth2SuccessHandler(ssoService);
+        OAuth2SuccessHandler h = new OAuth2SuccessHandler(ssoService, urlService, teamService);
 
         final MockHttpServletRequest request = new MockHttpServletRequest();
         request.setQueryString("state=xxxx,https://www.target.com/foo");
@@ -60,9 +68,11 @@ public class OAuth2SuccessHandlerTest {
         final MockHttpSession session = new MockHttpSession();
 
         final SSOService ssoService = Mockito.mock(SSOService.class);
+        final UrlService urlService = Mockito.mock(UrlService.class);
+        final TeamService teamService = Mockito.mock(TeamService.class);
         Mockito.when(ssoService.getSSOToken(session.getId(), null)).thenReturn("SSO1");
 
-        OAuth2SuccessHandler h = new OAuth2SuccessHandler(ssoService);
+        OAuth2SuccessHandler h = new OAuth2SuccessHandler(ssoService, urlService, teamService);
 
         final MockHttpServletRequest request = new MockHttpServletRequest();
         request.setQueryString("state=xxxx,https://www.target.com/foo?test=test");
@@ -78,9 +88,11 @@ public class OAuth2SuccessHandlerTest {
         final MockHttpSession session = new MockHttpSession();
 
         final SSOService ssoService = Mockito.mock(SSOService.class);
+        final UrlService urlService = Mockito.mock(UrlService.class);
+        final TeamService teamService = Mockito.mock(TeamService.class);
         Mockito.when(ssoService.getSSOToken(session.getId(), "rm")).thenReturn("SSO1");
 
-        OAuth2SuccessHandler h = new OAuth2SuccessHandler(ssoService);
+        OAuth2SuccessHandler h = new OAuth2SuccessHandler(ssoService, urlService, teamService);
 
 
         final MockHttpServletRequest request = new MockHttpServletRequest();
@@ -96,7 +108,9 @@ public class OAuth2SuccessHandlerTest {
     public void testWithStateNotLogged() {
 
         final SSOService ssoService = Mockito.mock(SSOService.class);
-        OAuth2SuccessHandler h = new OAuth2SuccessHandler(ssoService);
+        final UrlService urlService = Mockito.mock(UrlService.class);
+        final TeamService teamService = Mockito.mock(TeamService.class);
+        OAuth2SuccessHandler h = new OAuth2SuccessHandler(ssoService, urlService, teamService);
         final MockHttpSession session = new MockHttpSession();
 
         final MockHttpServletRequest request = new MockHttpServletRequest();
