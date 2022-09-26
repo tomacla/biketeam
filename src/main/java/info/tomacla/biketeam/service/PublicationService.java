@@ -1,5 +1,8 @@
 package info.tomacla.biketeam.service;
 
+import info.tomacla.biketeam.common.amqp.Exchanges;
+import info.tomacla.biketeam.common.amqp.Queues;
+import info.tomacla.biketeam.common.amqp.RoutingKeys;
 import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.FileRepositories;
@@ -7,10 +10,12 @@ import info.tomacla.biketeam.common.file.ImageDescriptor;
 import info.tomacla.biketeam.domain.publication.Publication;
 import info.tomacla.biketeam.domain.publication.PublicationProjection;
 import info.tomacla.biketeam.domain.publication.PublicationRepository;
-import info.tomacla.biketeam.service.broadcast.Broadcaster;
+import info.tomacla.biketeam.service.amqp.BrokerService;
+import info.tomacla.biketeam.service.amqp.dto.TeamEntityDTO;
 import info.tomacla.biketeam.service.file.FileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +41,7 @@ public class PublicationService {
     private FileService fileService;
 
     @Autowired
-    private Broadcaster broadcaster;
+    private BrokerService brokerService;
 
     @Transactional
     public void save(Publication publication) {
@@ -98,6 +103,7 @@ public class PublicationService {
         }
     }
 
+    @RabbitListener(queues = Queues.TASK_PUBLISH_PUBLICATIONS)
     public void publishPublications() {
         teamService.list().forEach(team ->
                 publicationRepository.findAllByTeamIdAndPublishedStatusAndPublishedAtLessThan(
@@ -108,7 +114,8 @@ public class PublicationService {
                     log.info("Publishing publication {}", pub.getId());
                     pub.setPublishedStatus(PublishedStatus.PUBLISHED);
                     publicationRepository.save(pub);
-                    broadcaster.broadcast(team, pub);
+                    brokerService.sendToBroker(Exchanges.EVENT, RoutingKeys.PUBLICATION_PUBLISHED,
+                            TeamEntityDTO.valueOf(pub.getTeamId(), pub.getId()));
                 })
         );
     }

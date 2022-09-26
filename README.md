@@ -14,6 +14,10 @@ See [here](https://www.biketeam.info)
 
 Version 17 or above
 
+#### Install RabbitMQ
+
+Install a instance of RabbitMQ and create a virtual host.
+
 #### Create a Datasource
 
 Install a DBMS and create a database.
@@ -90,6 +94,12 @@ spring.mail.properties.mail.smtps.timeout=8000
 admin.strava-id=xxx
 admin.first-name=name
 admin.last-name=last name
+
+rabbitmq.host=[rabbit-host]
+rabbitmq.username=[rabbit-username]
+rabbitmq.password=[rabbit-password]
+rabbitmq.vhost=[rabbit-vhost]
+rabbitmq.autostartup=true
 ```
 
 ### Run
