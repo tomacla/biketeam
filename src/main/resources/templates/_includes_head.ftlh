@@ -28,7 +28,7 @@
         <meta name="description" content="Un site pour les groupes de vélo">
     </#if>
 
-    <title>${_pagetitle} - Biketeam</title>
+    <title>${_pagetitle}</title>
 
     <link rel="stylesheet" href="<@common.teamUrl '' '/css/main.css' />" >
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
