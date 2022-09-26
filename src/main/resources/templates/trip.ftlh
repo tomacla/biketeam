@@ -64,7 +64,7 @@
                     <h6>${stage.date.format(_date_formatter)}</h6>
                     <#if (stage.map)??>
                         <div class="row justify-content-center">
-                            <div class="col-12 col-md-6">
+                            <div class="col-12">
                             <div class="w-100 shadow rounded border d-flex flex-column justify-content-center">
                                 <#if stage.map??>
                                     <ul class="list-inline mx-auto my-1">
