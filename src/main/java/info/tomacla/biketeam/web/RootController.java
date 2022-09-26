@@ -6,6 +6,7 @@ import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.userrole.Role;
 import info.tomacla.biketeam.domain.userrole.UserRole;
+import info.tomacla.biketeam.security.Authorities;
 import info.tomacla.biketeam.service.*;
 import info.tomacla.biketeam.service.facebook.FacebookService;
 import info.tomacla.biketeam.web.team.NewTeamForm;
@@ -131,6 +132,8 @@ public class RootController extends AbstractController {
             teamService.save(newTeam, true);
 
             userRoleService.save(new UserRole(newTeam, targetAdmin, Role.ADMIN));
+
+            addAuthorityToCurrentSession(Authorities.teamAdmin(newTeam.getId()));
 
             return "redirect:/" + newTeam.getId();
 
