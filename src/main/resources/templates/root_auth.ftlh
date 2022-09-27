@@ -12,8 +12,8 @@
 
            <div class="text-center my-4">
                <div class="btn-group mx-auto" role="group">
-                   <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/new' />">Créer un groupe</a>
-                   <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/teams' />">Explorer les groupes</a>
+                   <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/new' />"><i class="bi bi-plus-circle"></i> Créer un groupe</a>
+                   <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/teams' />"><i class="bi bi-search"></i> Explorer les groupes</a>
                </div>
            </div>
 
