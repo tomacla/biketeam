@@ -66,8 +66,10 @@
     <#assign colors=["#566B13", "#4682B4", "#732C7B", "#FF0", "#F00", "#FF005E", "#3366CC"]>
        <#assign themes=["lime-theme", "steelblue-theme", "purple-theme", "yellow-theme", "red-theme", "magenta-theme", "lightblue-theme"]>
        <#assign stageMaps = []>
+       <#assign mapCenter = [0.0,0.0]>
        <#list trip.sortedStages as stage>
           <#if stage.map??>
+            <#assign mapCenter = [stage.map.startPoint.lat, stage.map.startPoint.lng]>
             <#assign mapId = stage.map.id>
               <#if stageMaps?seq_contains(mapId)>
               <#else>
@@ -90,7 +92,7 @@
                         <th>Date</th>
                         <th class="d-none d-md-table-cell">KM</th>
                         <th class="d-none d-md-table-cell">D+</th>
-                        <th><th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -99,11 +101,11 @@
                             <td><#if stage.map??><span style="height: 10px; width: 10px; background-color: ${colors[stageMaps?seq_index_of(stage.map.id)%7]}; border-radius: 50%; display: inline-block;"></span></#if></td>
                             <td>${stage.name}</td>
                             <td>${stage.date.format(_date_formatter)}</td>
-                            <td class="d-none d-md-table-cell"><#if stage.map??>${stage.map.length}</#if></td>
-                            <td class="d-none d-md-table-cell"><#if stage.map??>${stage.map.positiveElevation}</#if></td>
+                            <td class="d-none d-md-table-cell"><#if stage.map??>${stage.map.length?floor} km</#if></td>
+                            <td class="d-none d-md-table-cell"><#if stage.map??>${stage.map.positiveElevation?floor} m</#if></td>
                             <td>
                                 <#if stage.map??>
-                                    <a class="link-dark" download="${trip.title}-${stage.name}.gpx" href="<@common.teamUrl team.id '/maps/${stage.map.id}/gpx' />"><i class="bi bi-download"></i></a>
+                                    <a class="link-dark me-2" download="${trip.title}-${stage.name}.gpx" href="<@common.teamUrl team.id '/maps/${stage.map.id}/gpx' />"><i class="bi bi-download"></i></a>
                                     <a class="link-dark" href="<@common.teamUrl team.id '/maps/${stage.map.permalink!stage.map.id}' />"><i class="bi bi-map"></i></a>
                                 </#if>
                             </td>
@@ -122,18 +124,19 @@
 
     </div>
 
+    <#if stageMaps?size != 0>
+
     <script type="text/javascript">
 
             var layers = {
-                "Cyclo OSM": L.tileLayer('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', {
-                    minZoom: 1,
-                    maxZoom: 17,
-                    attribution: '<a href="https://github.com/cyclosm/cyclosm-cartocss-style/releases" title="CyclOSM - Open Bicycle render">CyclOSM</a> | Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                })
+                 "main" : L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
+                    maxZoom: 20,
+                    attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+                 })
             };
 
             function initMap(mapContainerId) {
-                var targetMap = L.map(mapContainerId, { zoomControl: false, layers: [layers['Cyclo OSM']] }).setView([51.505, -0.09], 13);
+                var targetMap = L.map(mapContainerId, { zoomControl: false, layers: [layers['main']] }).setView([${mapCenter[0]?c}, ${mapCenter[1]?c}], 12);
                 L.control.zoom({position: 'bottomright'}).addTo(targetMap);
                 return targetMap;
             }
@@ -149,6 +152,7 @@
                    imperial: false,
                    reverseCoords: false,
                    acceleration: false,
+                    autofitBounds: false,
                    slope: false,
                    speed: false,
                    time: false,
@@ -178,6 +182,8 @@
             </#list>
 
         </script>
+
+        </#if>
 
 </div>
 

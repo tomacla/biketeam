@@ -21,11 +21,7 @@
             <p class="wrap-content">${ride.description}</p>
 
                <#if ride.imaged>
-                 <div class="row justify-content-center">
-                   <div class="col-12 col-md-6">
-                     <img src="<@common.teamUrl team.id '/rides/${ride.id}/image' />" class="d-block shadow rounded w-100 h-auto mx-auto" alt="${ride.id} image">
-                   </div>
-                 </div>
+                 <img src="<@common.teamUrl team.id '/rides/${ride.id}/image' />" class="d-block shadow rounded w-100 h-auto mx-auto" alt="${ride.id} image">
              </#if>
 
 
@@ -38,8 +34,16 @@
    <#assign colors=["#566B13", "#4682B4", "#732C7B", "#FF0", "#F00", "#FF005E", "#3366CC"]>
    <#assign themes=["lime-theme", "steelblue-theme", "purple-theme", "yellow-theme", "red-theme", "magenta-theme", "lightblue-theme"]>
    <#assign groupMaps = []>
+   <#assign mapCenter = [0.0,0.0]>
+   <#assign meetingPoint = []>
+   <#assign meetingLocation = ''>
    <#list ride.sortedGroups as group>
+      <#assign meetingLocation = group.meetingLocation>
+      <#if (group.meetingPoint)??>
+            <#assign meetingPoint = [group.meetingPoint.lat, group.meetingPoint.lng]>
+      </#if>
       <#if group.map??>
+        <#assign mapCenter = [group.map.startPoint.lat, group.map.startPoint.lng]>
         <#assign mapId = group.map.id>
           <#if groupMaps?seq_contains(mapId)>
           <#else>
@@ -52,6 +56,11 @@
 
         <div class="border rounded p-2">
             <div class="table-responsive-sm">
+
+                <#if meetingLocation != ''>
+                    <p>Lieu de rendez vous : <#if meetingPoint?size != 0><a class="link-dark" target="_blank" href="https://www.google.com/maps/search/?api=1&query=${meetingPoint[0]?c},${meetingPoint[1]?c}"></#if>${meetingLocation}<#if meetingPoint?size != 0></a></#if></p>
+                </#if>
+
                 <table class="table table-sm table-striped">
                     <thead>
                         <tr>
@@ -61,7 +70,7 @@
                             <th class="d-none d-md-table-cell">Allure</th>
                             <th class="d-none d-md-table-cell">KM</th>
                             <th class="d-none d-md-table-cell">D+</th>
-                            <th><th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -71,11 +80,11 @@
                                 <td>${group.meetingTime}</td>
                                 <td>${group.name}</td>
                                 <td class="d-none d-md-table-cell">${group.lowerSpeed}/${group.upperSpeed} km/h</td>
-                                <td class="d-none d-md-table-cell"><#if group.map??>${group.map.length}</#if></td>
-                                <td class="d-none d-md-table-cell"><#if group.map??>${group.map.positiveElevation}</#if></td>
+                                <td class="d-none d-md-table-cell"><#if group.map??>${group.map.length?floor} km</#if></td>
+                                <td class="d-none d-md-table-cell"><#if group.map??>${group.map.positiveElevation?floor} m</#if></td>
                                 <td>
                                     <#if group.map??>
-                                        <a class="link-dark" download="${ride.title}-${group.name}.gpx" href="<@common.teamUrl team.id '/maps/${group.map.id}/gpx' />"><i class="bi bi-download"></i></a>
+                                        <a class="link-dark me-2" download="${ride.title}-${group.name}.gpx" href="<@common.teamUrl team.id '/maps/${group.map.id}/gpx' />"><i class="bi bi-download"></i></a>
                                         <a class="link-dark" href="<@common.teamUrl team.id '/maps/${group.map.permalink!group.map.id}' />"><i class="bi bi-map"></i></a>
                                     </#if>
                                 </td>
@@ -96,19 +105,19 @@
 </div>
 
 
+<#if groupMaps?size != 0>
 
  <script type="text/javascript">
 
         var layers = {
-            "Cyclo OSM": L.tileLayer('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', {
-                minZoom: 1,
-                maxZoom: 17,
-                attribution: '<a href="https://github.com/cyclosm/cyclosm-cartocss-style/releases" title="CyclOSM - Open Bicycle render">CyclOSM</a> | Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            })
+            "main" : L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
+                     	maxZoom: 20,
+                     	attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+                     })
         };
 
         function initMap(mapContainerId) {
-            var targetMap = L.map(mapContainerId, { zoomControl: false, layers: [layers['Cyclo OSM']] }).setView([51.505, -0.09], 13);
+            var targetMap = L.map(mapContainerId, { zoomControl: false, layers: [layers['main']] }).setView([${mapCenter[0]?c}, ${mapCenter[1]?c}], 12);
             L.control.zoom({position: 'bottomright'}).addTo(targetMap);
             return targetMap;
         }
@@ -123,6 +132,7 @@
                markerIcon:null,
                followMarker: false,
                imperial: false,
+               autofitBounds: false,
                reverseCoords: false,
                acceleration: false,
                slope: false,
@@ -184,5 +194,7 @@
         </#list>
 
     </script>
+
+</#if>
 
 <#include "_includes_tail.ftlh">
