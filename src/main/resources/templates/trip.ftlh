@@ -2,37 +2,31 @@
 
 <div class="row pt-2 justify-content-center">
 
+    <#include "trip_nav.ftlh">
+
     <div class="col-12 col-md-4 mb-4">
 
         <div class="border rounded p-2">
+
             <div class="d-flex flex-row justify-content-between">
                 <h4>${trip.title}</h4>
-                <div>
-                    <#if _team_admin>
-                        <a href="<@common.teamUrl team.id '/admin/trips/${trip.id}' />" class="btn btn-sm btn-secondary"><i class="bi-pencil bi"></i> Editer</a>
-                    </#if>
-                </div>
             </div>
             <#if trip.publishedStatus != 'PUBLISHED'>
                 <div class="p-1 alert alert-warning" role="alert">Ce trip n'est pas publié.<br/> <span class="small text-muted">Publication le ${trip.publishedAt.format(_date_formatter)} à ${trip.publishedAt.format(_time_formatter)} (UTC)</span></div>
             </#if>
-            <h5 class="text-muted">Du ${trip.startDate.format(_date_formatter)} au ${trip.endDate.format(_date_formatter)}</h5>
+
+            <h5 class="text-muted">${trip.startDate.format(_date_formatter)} <i class="bi bi-arrow-right-short"></i> ${trip.endDate.format(_date_formatter)}</h5>
+
+            <hr/>
+
             <ul class="list-unstyled">
                 <li>Allure : ${trip.lowerSpeed}/${trip.upperSpeed} km/h</li>
                 <li>Lieu de rendez vous : <#if (trip.meetingPoint)??><a class="link-dark" target="_blank" href="https://www.google.com/maps/search/?api=1&query=${trip.meetingPoint.lat?c},${trip.meetingPoint.lng?c}"></#if>${trip.meetingLocation}<#if (trip.meetingPoint)??></a></#if></li>
                 <li>Heure de départ : ${trip.meetingTime}</li>
             </ul>
-            <#if trip.imaged>
-              <img src="<@common.teamUrl team.id '/trips/${trip.id}/image' />" class="d-block shadow rounded w-100 h-auto mx-auto" alt="${trip.id} image">
-            </#if>
-            <p class="mt-4 wrap-content">${trip.description}</p>
-        </div>
 
-    </div>
+            <hr/>
 
-    <div class="col-12 col-md-5">
-
-        <div class="mb-3 py-1 px-2 rounded border">
             <div class="d-flex flex-row align-items-start justify-content-between">
                 <div class="d-block pe-2">
                     <#if _authenticated>
@@ -55,82 +49,144 @@
                     </#list>
                 </div>
             </div>
+
+            <hr/>
+
+            <p class="mt-4 wrap-content">${trip.description}</p>
+
+            <#if trip.imaged>
+              <img src="<@common.teamUrl team.id '/trips/${trip.id}/image' />" class="d-block shadow rounded w-100 h-auto mx-auto" alt="${trip.id} image">
+            </#if>
+
+
         </div>
-
-        <#list trip.sortedStages as stage>
-            <div class="card mb-2">
-                <div class="card-body">
-                    <h5 class="card-title">${stage.name}</h5>
-                    <h6>${stage.date.format(_date_formatter)}</h6>
-                    <#if (stage.map)??>
-                        <div class="row justify-content-center">
-                            <div class="col-12">
-                            <div class="w-100 shadow rounded border d-flex flex-column justify-content-center">
-                                <#if stage.map??>
-                                    <ul class="list-inline mx-auto my-1">
-                                        <li class="list-inline-item"><i class="bi bi-arrow-left-right"></i> ${stage.map.length}km</li>
-                                        <li class="list-inline-item"><i class="bi bi-arrow-up"></i> ${stage.map.positiveElevation}m</li>
-                                        <li class="list-inline-item"><i class="bi bi-arrow-down"></i> ${stage.map.negativeElevation}m</li>
-                                    </ul>
-                                </#if>
-                                <a href="<@common.teamUrl team.id '/maps/${stage.map.permalink!stage.map.id}' />"><img src="<@common.teamUrl team.id '/maps/${stage.map.id}/image' />" class="d-block w-100 h-auto" alt="${stage.map.id} image"></a>
-                                <div class="btn-group" role="group">
-                                    <a download="${trip.title}-${stage.name}.gpx" href="<@common.teamUrl team.id '/maps/${stage.map.id}/gpx' />" class="btn btn-light" role="button"><i class="bi bi-download"></i> GPX</a>
-                                    <a download="${trip.title}-${stage.name}.fit" href="<@common.teamUrl team.id '/maps/${stage.map.id}/fit' />" class="btn btn-light" role="button"><i class="bi bi-download"></i> FIT</a>
-                                    <a href="<@common.teamUrl team.id '/maps/${stage.map.permalink!stage.map.id}' />" class="btn btn-light" role="button"><i class="bi bi-map"></i> Voir</a>
-                                </div>
-                            </div>
-                         </div>
-                        </div>
-                    <#else>
-                        <p class="fst-italic">La map n'a pas été ajoutée.</p>
-                    </#if>
-                </div>
-
-            </div>
-        </#list>
 
     </div>
 
-    <div class="col-12 col-md-3">
+    <#assign colors=["#566B13", "#4682B4", "#732C7B", "#FF0", "#F00", "#FF005E", "#3366CC"]>
+       <#assign themes=["lime-theme", "steelblue-theme", "purple-theme", "yellow-theme", "red-theme", "magenta-theme", "lightblue-theme"]>
+       <#assign stageMaps = []>
+       <#assign mapCenter = [0.0,0.0]>
+       <#list trip.sortedStages as stage>
+          <#if stage.map??>
+            <#assign mapCenter = [stage.map.startPoint.lat, stage.map.startPoint.lng]>
+            <#assign mapId = stage.map.id>
+              <#if stageMaps?seq_contains(mapId)>
+              <#else>
+                <#assign stageMaps = stageMaps + [mapId]>
+              </#if>
+          </#if>
+       </#list>
 
-            <#if trip.messages?size != 0>
-                <div class="bg-light border rounded p-2 mb-4 overflow-auto scroll-down" style="max-height: 60vh;">
+    <div class="col-12 col-md-8 mb-4">
 
-                    <#list trip.sortedMessages as message>
-                        <div class="<#if _user?? && _user.id == message.user.id>bg-light border-success<#else>bg-white</#if> small border rounded mb-1 p-1">
-                            <p class="p-1 m-0">${message.content}</p>
-                            <div class="d-flex justify-content-between align-items-end border-top pt-1">
-                                <span class="text-muted">${message.publishedAt.format(_date_formatter)}<#if _team_admin || (_user?? && _user.id == message.user.id)> <a class="link-danger" href="<@common.teamUrl team.id '/trips/' + trip.id + '/remove-message/' + message.id />"><i class="bi bi-trash"></i></a></#if></span>
-                                <#if message.user.profileImage??>
-                                    <div style="width:30px; height:30px;" data-bs-toggle="tooltip" data-bs-placement="top" title="${message.user.identity}" class="d-inline-block"><img class="w-100 h-100 d-block rounded" src="${message.user.profileImage}" alt="${message.user.identity}"></div>
-                                <#else>
-                                    <div style="width:30px; height:30px; background:grey;" data-bs-toggle="tooltip" data-bs-placement="top" title="${message.user.identity}" class="d-inline-block rounded"></div>
+        <div class="border rounded p-2">
+
+
+            <div class="table-responsive-sm">
+            <table class="table table-sm table-striped">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Etape</th>
+                        <th>Date</th>
+                        <th class="d-none d-md-table-cell">KM</th>
+                        <th class="d-none d-md-table-cell">D+</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <#list trip.sortedStages as stage>
+                        <tr>
+                            <td><#if stage.map??><span style="height: 10px; width: 10px; background-color: ${colors[stageMaps?seq_index_of(stage.map.id)%7]}; border-radius: 50%; display: inline-block;"></span></#if></td>
+                            <td>${stage.name}</td>
+                            <td>${stage.date.format(_date_formatter)}</td>
+                            <td class="d-none d-md-table-cell"><#if stage.map??>${stage.map.length?floor} km</#if></td>
+                            <td class="d-none d-md-table-cell"><#if stage.map??>${stage.map.positiveElevation?floor} m</#if></td>
+                            <td>
+                                <#if stage.map??>
+                                    <a class="link-dark me-2" download="${trip.title}-${stage.name}.gpx" href="<@common.teamUrl team.id '/maps/${stage.map.id}/gpx' />"><i class="bi bi-download"></i></a>
+                                    <a class="link-dark" href="<@common.teamUrl team.id '/maps/${stage.map.permalink!stage.map.id}' />"><i class="bi bi-map"></i></a>
                                 </#if>
-                            </div>
-                        </div>
+                            </td>
+                        </tr>
                     </#list>
+                </tbody>
+                </table>
+          </div>
 
-                </div>
-            </#if>
+          <div style="width:100%; height:500px;" id="map-wrapper"></div>
+          <div class="d-none" id="chart-wrapper"></div>
 
-            <#if _authenticated>
-                <form action="<@common.teamUrl team.id '/trips/' + trip.id + '/add-message' />" method="POST" class="border rounded p-2">
 
-                    <div class="mb-3">
-                        <label for="trip-message-new" class="form-label">Nouveau message</label>
-                        <textarea id="trip-message-new" class="form-control" name="content"></textarea>
-                    </div>
 
-                    <button class="btn btn-secondary btn-sm" type="submit">Poster</input>
+        </div>
 
-                </form>
-                <#else>
-                <p class="small text-muted">Connectez vous pour poster un message.</p>
+    </div>
 
-           </#if>
+    <#if stageMaps?size != 0>
 
-     </div>
+    <script type="text/javascript">
+
+            var layers = {
+                 "main" :  L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.{ext}', {
+                          	attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                          	subdomains: 'abcd',
+                          	minZoom: 0,
+                          	maxZoom: 20,
+                          	ext: 'png'
+                          })
+            };
+
+            function initMap(mapContainerId) {
+                var targetMap = L.map(mapContainerId, { zoomControl: false, layers: [layers['main']] }).setView([${mapCenter[0]?c}, ${mapCenter[1]?c}], 12);
+                L.control.zoom({position: 'bottomright'}).addTo(targetMap);
+                return targetMap;
+            }
+
+            function initGpx(targetMap, gpxUrl, theme) {
+
+               var elevation_options = {
+                   theme: theme,
+                   detached: true,
+                   elevationDiv: "#chart-wrapper",
+                   markerIcon:null,
+                   followMarker: false,
+                   imperial: false,
+                   reverseCoords: false,
+                   acceleration: false,
+                    autofitBounds: false,
+                   slope: false,
+                   speed: false,
+                   time: false,
+                   summary: false,
+                   altitude: false,
+                   distanceMarkers: false,
+                   downloadLink: false,
+                   ruler: false,
+                   legend: false,
+                   marker:false
+                 };
+
+                 var controlElevation = L.control.elevation(elevation_options).addTo(targetMap);
+
+                 controlElevation.load(gpxUrl);
+
+                 return controlElevation;
+
+            }
+
+            var targetMap = initMap('map-wrapper');
+
+            <#list trip.sortedStages as stage>
+                <#if stage.map??>
+                    initGpx(targetMap, '<@common.teamUrl team.id '/maps/${stage.map.id}/gpx' />', '${themes[stageMaps?seq_index_of(stage.map.id)%7]}');
+                </#if>
+            </#list>
+
+        </script>
+
+        </#if>
 
 </div>
 

@@ -10,15 +10,14 @@ import info.tomacla.biketeam.service.UserService;
 import info.tomacla.biketeam.service.url.UrlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.RememberMeAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.ui.Model;
 
 import java.security.Principal;
 import java.time.ZoneId;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class AbstractController {
@@ -136,6 +135,20 @@ public abstract class AbstractController {
             return "redirect:" + suffix;
         }
         return "redirect:/" + team.getId() + suffix;
+    }
+
+    protected void addAuthorityToCurrentSession(GrantedAuthority authority) {
+        OAuth2AuthenticationToken auth = (OAuth2AuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        List<GrantedAuthority> updatedAuthorities = new ArrayList<>(auth.getAuthorities());
+        updatedAuthorities.add(authority);
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new OAuth2AuthenticationToken(
+                        auth.getPrincipal(),
+                        updatedAuthorities,
+                        auth.getAuthorizedClientRegistrationId())
+        );
+
     }
 
 }

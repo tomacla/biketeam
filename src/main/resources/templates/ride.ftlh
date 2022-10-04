@@ -2,136 +2,202 @@
 
 <div class="row pt-2 justify-content-center">
 
+    <#include "ride_nav.ftlh">
+
     <div class="col-12 col-md-4 mb-4">
 
         <div class="border rounded p-2">
+
             <div class="d-flex flex-row justify-content-between">
                 <h4>${ride.title}</h4>
-                <div>
-                    <#if _team_admin>
-                        <a href="<@common.teamUrl team.id '/admin/rides/${ride.id}' />" class="btn btn-sm btn-secondary"><i class="bi-pencil bi"></i> Editer</a>
-                    </#if>
-                </div>
             </div>
             <#if ride.publishedStatus != 'PUBLISHED'>
                 <div class="p-1 alert alert-warning" role="alert">Ce ride n'est pas publié.<br/> <span class="small text-muted">Publication le ${ride.publishedAt.format(_date_formatter)} à ${ride.publishedAt.format(_time_formatter)} (UTC)</span></div>
             </#if>
             <h5 class="text-muted">${ride.date.format(_date_formatter)}</h5>
-            <#if ride.imaged>
-              <img src="<@common.teamUrl team.id '/rides/${ride.id}/image' />" class="d-block shadow rounded w-100 h-auto mx-auto" alt="${ride.id} image">
-            </#if>
-            <p class="mt-4 wrap-content">${ride.description}</p>
+
+            <hr/>
+
+            <p class="wrap-content">${ride.description}</p>
+
+               <#if ride.imaged>
+                 <img src="<@common.teamUrl team.id '/rides/${ride.id}/image' />" class="d-block shadow rounded w-100 h-auto mx-auto" alt="${ride.id} image">
+             </#if>
+
+
+
         </div>
 
     </div>
 
-    <div class="col-12 col-md-5 mb-4">
 
-        <#list ride.sortedGroups as group>
-            <div class="card mb-2">
-                <div class="card-body">
-                    <h5 class="card-title">${group.name}</h5>
-                    <h6 class="card-subtitle mb-2 text-muted">Heure de départ : ${group.meetingTime}</h6>
-                    <ul class="list-unstyled">
-                        <li>Allure : ${group.lowerSpeed}/${group.upperSpeed} km/h</li>
-                        <li>Lieu de rendez vous : <#if (group.meetingPoint)??><a class="link-dark" target="_blank" href="https://www.google.com/maps/search/?api=1&query=${group.meetingPoint.lat?c},${group.meetingPoint.lng?c}"></#if>${group.meetingLocation}<#if (group.meetingPoint)??></a></#if></li>
-                    </ul>
-                    <#if (group.map)??>
-                        <div class="row justify-content-center">
-                            <div class="col-12">
-                            <div class="w-100 shadow rounded border d-flex flex-column justify-content-center">
-                                <#if group.map??>
-                                    <ul class="list-inline mx-auto my-1">
-                                        <li class="list-inline-item"><i class="bi bi-arrow-left-right"></i> ${group.map.length}km</li>
-                                        <li class="list-inline-item"><i class="bi bi-arrow-up"></i> ${group.map.positiveElevation}m</li>
-                                        <li class="list-inline-item"><i class="bi bi-arrow-down"></i> ${group.map.negativeElevation}m</li>
-                                    </ul>
-                                </#if>
-                                <a href="<@common.teamUrl team.id '/maps/${group.map.permalink!group.map.id}' />"><img src="<@common.teamUrl team.id '/maps/${group.map.id}/image' />" class="d-block w-100 h-auto" alt="${group.map.id} image"></a>
-                                <div class="btn-group" role="group">
-                                    <a download="${ride.title}-${group.name}.gpx" href="<@common.teamUrl team.id '/maps/${group.map.id}/gpx' />" class="btn btn-light" role="button"><i class="bi bi-download"></i> GPX</a>
-                                    <a download="${ride.title}-${group.name}.fit" href="<@common.teamUrl team.id '/maps/${group.map.id}/fit' />" class="btn btn-light" role="button"><i class="bi bi-download"></i> FIT</a>
-                                    <a href="<@common.teamUrl team.id '/maps/${group.map.permalink!group.map.id}' />" class="btn btn-light" role="button"><i class="bi bi-map"></i> Voir</a>
-                                </div>
-                            </div>
-                         </div>
-                        </div>
-                    <#else>
-                        <p class="fst-italic">La map n'a pas été ajoutée.</p>
-                    </#if>
-                </div>
+   <#assign colors=["#566B13", "#4682B4", "#732C7B", "#FF0", "#F00", "#FF005E", "#3366CC"]>
+   <#assign themes=["lime-theme", "steelblue-theme", "purple-theme", "yellow-theme", "red-theme", "magenta-theme", "lightblue-theme"]>
+   <#assign groupMaps = []>
+   <#assign mapCenter = [0.0,0.0]>
+   <#assign meetingPoint = []>
+   <#assign meetingLocation = ''>
+   <#list ride.sortedGroups as group>
+      <#assign meetingLocation = group.meetingLocation>
+      <#if (group.meetingPoint)??>
+            <#assign meetingPoint = [group.meetingPoint.lat, group.meetingPoint.lng]>
+      </#if>
+      <#if group.map??>
+        <#assign mapCenter = [group.map.startPoint.lat, group.map.startPoint.lng]>
+        <#assign mapId = group.map.id>
+          <#if groupMaps?seq_contains(mapId)>
+          <#else>
+            <#assign groupMaps = groupMaps + [mapId]>
+          </#if>
+      </#if>
+   </#list>
 
-                    <div class="card-footer">
-                        <div class="d-flex flex-row align-items-start justify-content-between">
-                            <div class="d-block pe-2">
-                                <#if _authenticated>
-                                    <#if group.hasParticipant(_user.id)>
-                                        <a href="<@common.teamUrl team.id '/rides/${ride.permalink!ride.id}/remove-participant/${group.id}' />" class="text-nowrap d-block btn btn-sm btn-success"><i class="bi-bicycle bi"></i> J'y vais</a>
-                                    <#else>
-                                        <a tabindex="-1" href="<@common.teamUrl team.id '/rides/${ride.permalink!ride.id}/add-participant/${group.id}' />" class="text-nowrap d-block btn btn-sm btn-outline-success <#if ride.isParticipantInAnotherGroup(group.id, _user.id)>disabled</#if>"><i class="bi-bicycle bi"></i> J'y vais</a>
-                                     </#if>
-                                <#else>
-                                        <a href="<@common.teamUrl '' '/login?requestUri=/${team.id}/rides/${ride.permalink!ride.id}/add-participant/${group.id}' />" class="text-nowrap d-block btn btn-sm btn-outline-success"><i class="bi-bicycle bi"></i> J'y vais</a>
-                                </#if>
-                            </div>
-                            <div class="p-0 m-0 flex-wrap">
-                                <#list group.sortedParticipants as participant>
-                                    <#if participant.profileImage??>
-                                        <div style="width:30px; height:30px;" data-bs-toggle="tooltip" data-bs-placement="top" title="${participant.identity}" class="d-inline-block"><img class="w-100 h-100 d-block rounded" src="${participant.profileImage}" alt="${participant.identity}"></div>
-                                    <#else>
-                                        <div style="width:30px; height:30px; background:grey;" data-bs-toggle="tooltip" data-bs-placement="top" title="${participant.identity}" class="d-inline-block rounded"></div>
+    <div class="col-12 col-md-8 mb-4">
+
+        <div class="border rounded p-2">
+            <div class="table-responsive-sm">
+
+                <#if meetingLocation != ''>
+                    <p>Lieu de rendez vous : <#if meetingPoint?size != 0><a class="link-dark" target="_blank" href="https://www.google.com/maps/search/?api=1&query=${meetingPoint[0]?c},${meetingPoint[1]?c}"></#if>${meetingLocation}<#if meetingPoint?size != 0></a></#if></p>
+                </#if>
+
+                <table class="table table-sm table-striped">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Départ</th>
+                            <th>Groupe</th>
+                            <th class="d-none d-md-table-cell">Allure</th>
+                            <th class="d-none d-md-table-cell">KM</th>
+                            <th class="d-none d-md-table-cell">D+</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <#list ride.sortedGroups as group>
+                            <tr>
+                                <td><#if group.map??><span style="height: 10px; width: 10px; background-color: ${colors[groupMaps?seq_index_of(group.map.id)%7]}; border-radius: 50%; display: inline-block;"></span></#if></td>
+                                <td>${group.meetingTime}</td>
+                                <td>${group.name}</td>
+                                <td class="d-none d-md-table-cell">${group.lowerSpeed}/${group.upperSpeed} km/h</td>
+                                <td class="d-none d-md-table-cell"><#if group.map??>${group.map.length?floor} km</#if></td>
+                                <td class="d-none d-md-table-cell"><#if group.map??>${group.map.positiveElevation?floor} m</#if></td>
+                                <td>
+                                    <#if group.map??>
+                                        <a class="link-dark me-2" download="${ride.title}-${group.name}.gpx" href="<@common.teamUrl team.id '/maps/${group.map.id}/gpx' />"><i class="bi bi-download"></i></a>
+                                        <a class="link-dark" href="<@common.teamUrl team.id '/maps/${group.map.permalink!group.map.id}' />"><i class="bi bi-map"></i></a>
                                     </#if>
-                                </#list>
-                            </div>
-                        </div>
-                    </div>
-            </div>
-        </#list>
+                                </td>
+                            </tr>
+                        </#list>
+                    </tbody>
+                    </table>
+              </div>
+
+              <div style="width:100%; height:500px;" id="map-wrapper"></div>
+              <div class="d-none" id="chart-wrapper"></div>
+
+        </div>
 
     </div>
 
-     <div class="col-12 col-md-3">
-
-        <#if ride.messages?size != 0>
-            <div class="bg-light border rounded p-2 mb-4 overflow-auto scroll-down" style="max-height: 60vh;">
-
-                <#list ride.sortedMessages as message>
-                    <div class="<#if _user?? && _user.id == message.user.id>bg-light border-success<#else>bg-white</#if> small border rounded mb-1 p-1">
-                        <p class="p-1 m-0">${message.content}</p>
-                        <div class="d-flex justify-content-between align-items-end border-top pt-1">
-                            <span class="text-muted">${message.publishedAt.format(_date_formatter)}<#if _team_admin || (_user?? && _user.id == message.user.id)> <a class="link-danger" href="<@common.teamUrl team.id '/rides/' + ride.id + '/remove-message/' + message.id />"><i class="bi bi-trash"></i></a></#if></span>
-                            <#if message.user.profileImage??>
-                                <div style="width:30px; height:30px;" data-bs-toggle="tooltip" data-bs-placement="top" title="${message.user.identity}" class="d-inline-block"><img class="w-100 h-100 d-block rounded" src="${message.user.profileImage}" alt="${message.user.identity}"></div>
-                            <#else>
-                                <div style="width:30px; height:30px; background:grey;" data-bs-toggle="tooltip" data-bs-placement="top" title="${message.user.identity}" class="d-inline-block rounded"></div>
-                            </#if>
-                        </div>
-                    </div>
-                </#list>
-
-            </div>
-        </#if>
-
-        <#if _authenticated>
-            <form action="<@common.teamUrl team.id '/rides/' + ride.id + '/add-message' />" method="POST" class="border rounded p-2">
-
-                <div class="mb-3">
-                    <label for="ride-message-new" class="form-label">Nouveau message</label>
-                    <textarea id="ride-message-new" class="form-control" name="content"></textarea>
-                </div>
-
-                <button class="btn btn-secondary btn-sm" type="submit">Poster</input>
-
-            </form>
-            <#else>
-            <p class="small text-muted">Connectez vous pour poster un message.</p>
-
-       </#if>
-
- </div>
-
-
 
 </div>
+
+
+<#if groupMaps?size != 0>
+
+ <script type="text/javascript">
+
+        var layers = {
+            "main" :  L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.{ext}', {
+                     	attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                     	subdomains: 'abcd',
+                     	minZoom: 0,
+                     	maxZoom: 20,
+                     	ext: 'png'
+                     })
+        };
+
+        function initMap(mapContainerId) {
+            var targetMap = L.map(mapContainerId, { zoomControl: false, layers: [layers['main']] }).setView([${mapCenter[0]?c}, ${mapCenter[1]?c}], 12);
+            L.control.zoom({position: 'bottomright'}).addTo(targetMap);
+            return targetMap;
+        }
+
+        var startendloaded = false;
+        function initGpx(targetMap, gpxUrl, theme) {
+
+           var elevation_options = {
+               theme: theme,
+               detached: true,
+               elevationDiv: "#chart-wrapper",
+               markerIcon:null,
+               followMarker: false,
+               imperial: false,
+               autofitBounds: false,
+               reverseCoords: false,
+               acceleration: false,
+               slope: false,
+               speed: false,
+               time: false,
+               summary: false,
+               altitude: false,
+               distanceMarkers: false,
+               downloadLink: false,
+               ruler: false,
+               legend: false,
+               marker:false
+             };
+
+             var controlElevation = L.control.elevation(elevation_options).addTo(targetMap);
+
+                if(!startendloaded) {
+                    startendloaded = true;
+
+                    controlElevation.on('eledata_loaded', (data) => {
+
+
+                    var startPoint = data.data[0].geometry.coordinates[0];
+                    var endpoint = data.data[0].geometry.coordinates[data.data[0].geometry.coordinates.length - 1];
+
+                    L.marker([startPoint[1], startPoint[0]], {clickable: false, icon : L.icon({
+                        iconUrl: '<@common.teamUrl '' '/css/pin-icon-start.png' />',
+                        iconSize: [33, 45],
+                        iconAnchor: [16, 45],
+                        shadowUrl: '<@common.teamUrl '' '/css/pin-shadow.png' />',
+                        shadowSize: [50, 50],
+                        shadowAnchor: [25, 50]
+                    })}).addTo(targetMap);
+                    L.marker([endpoint[1], endpoint[0]], {clickable: false, icon : L.icon({
+                       iconUrl: '<@common.teamUrl '' '/css/pin-icon-end.png' />',
+                       iconSize: [33, 45],
+                       iconAnchor: [16, 45],
+                       shadowUrl: '<@common.teamUrl '' '/css/pin-shadow.png' />',
+                       shadowSize: [50, 50],
+                       shadowAnchor: [25, 50]
+                   })}).addTo(targetMap);
+
+                 });
+
+             }
+
+             controlElevation.load(gpxUrl);
+
+             return controlElevation;
+
+        }
+
+        var targetMap = initMap('map-wrapper');
+
+        <#list ride.sortedGroups as group>
+            <#if group.map??>
+                initGpx(targetMap, '<@common.teamUrl team.id '/maps/${group.map.id}/gpx' />', '${themes[groupMaps?seq_index_of(group.map.id)%7]}');
+            </#if>
+        </#list>
+
+    </script>
+
+</#if>
 
 <#include "_includes_tail.ftlh">
