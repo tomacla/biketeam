@@ -28,7 +28,6 @@ public class OAuth2UserDetailsTest {
         u.setStravaUserName("stravaUserName");
         u.setCity("city");
         u.setStravaId(10002L);
-        u.setProfileImage("profile");
         u.setAdmin(true);
         u.setLastName("lastname");
         u.setFirstName("firstname");
@@ -44,7 +43,6 @@ public class OAuth2UserDetailsTest {
         assertEquals(finalUser.getAttributes().get("facebookId"), "facebookId");
         assertEquals(finalUser.getAttributes().get("stravaUserName"), "stravaUserName");
         assertEquals(finalUser.getAttributes().get("city"), "city");
-        assertEquals(finalUser.getAttributes().get("profileImage"), "profile");
         assertEquals(finalUser.getAttributes().get("admin"), true);
         assertEquals(finalUser.getAttributes().get("lastName"), "lastname");
         assertEquals(finalUser.getAttributes().get("firstName"), "firstname");

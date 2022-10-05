@@ -79,7 +79,6 @@ public class OAuth2UserDetails implements Serializable, UserDetails, OAuth2User 
         Map<String, Object> attrs = new HashMap<>();
         attrs.put("id", u.getId());
         attrs.put("admin", u.isAdmin());
-        attrs.put("profileImage", u.getProfileImage());
         attrs.put("city", u.getCity());
         attrs.put("lastName", u.getLastName());
         attrs.put("firstName", u.getFirstName());

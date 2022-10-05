@@ -70,6 +70,7 @@
                             <th class="d-none d-md-table-cell">Allure</th>
                             <th class="d-none d-md-table-cell">KM</th>
                             <th class="d-none d-md-table-cell">D+</th>
+                            <th><span class="d-none d-md-inline">Participants</span></th>
                             <th></th>
                         </tr>
                     </thead>
@@ -83,10 +84,35 @@
                                 <td class="d-none d-md-table-cell"><#if group.map??>${group.map.length?floor} km</#if></td>
                                 <td class="d-none d-md-table-cell"><#if group.map??>${group.map.positiveElevation?floor} m</#if></td>
                                 <td>
-                                    <#if group.map??>
-                                        <a class="link-dark me-2" download="${ride.title}-${group.name}.gpx" href="<@common.teamUrl team.id '/maps/${group.map.id}/gpx' />"><i class="bi bi-download"></i></a>
-                                        <a class="link-dark" href="<@common.teamUrl team.id '/maps/${group.map.permalink!group.map.id}' />"><i class="bi bi-map"></i></a>
-                                    </#if>
+                                    <div class="d-flex flex-row align-items-start justify-content-start">
+                                        <div class="d-none d-md-flex profile-images me-2">
+                                            <#if group.sortedParticipants?size gt 0>
+                                                <#list group.sortedParticipants?chunk(3)[0] as participant>
+                                                        <div class="profile-images-item" style="width:24px; height:24px;" data-bs-toggle="tooltip" data-bs-placement="top" title="${participant.identity}" class="d-inline-block"><img class="w-100 h-100 d-block" src="<@common.teamUrl '' '/users/${participant.id}/image' />" alt="${participant.identity}"></div>
+                                                </#list>
+                                            </#if>
+                                        </div>
+                                        <div>
+                                            <#if group.sortedParticipants?size gt 0><span class="text-muted small fst-italic">${group.sortedParticipants?size} rider<#if group.sortedParticipants?size gt 1>s</#if></span></#if>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <#if _authenticated>
+                                            <#if group.hasParticipant(_user.id)>
+                                                <a class="btn btn-sm btn-success py-0 px-2" href="<@common.teamUrl team.id '/rides/${ride.permalink!ride.id}/remove-participant/${group.id}' />" ><i class="bi bi-person-check"></i></a>
+                                            <#else>
+                                                <a class="btn btn-sm btn-outline-success py-0 px-2 <#if ride.isParticipantInAnotherGroup(group.id, _user.id)>disabled</#if>" href="<@common.teamUrl team.id '/rides/${ride.permalink!ride.id}/add-participant/${group.id}' />"><i class="bi bi-person"></i></a>
+                                             </#if>
+                                        <#else>
+                                                <a class="btn btn-sm btn-outline-success py-0 px-2" href="<@common.teamUrl '' '/login?requestUri=/${team.id}/rides/${ride.permalink!ride.id}/add-participant/${group.id}' />"><i class="bi bi-person"></i></a>
+                                        </#if>
+                                        <#if group.map??>
+                                            <a class="btn btn-sm btn-outline-secondary py-0 px-2" download="${ride.title}-${group.name}.gpx" href="<@common.teamUrl team.id '/maps/${group.map.id}/gpx' />"><i class="bi bi-download"></i></a>
+                                            <a class="btn btn-sm btn-outline-secondary py-0 px-2" href="<@common.teamUrl team.id '/maps/${group.map.permalink!group.map.id}' />"><i class="bi bi-map"></i></a>
+                                        </#if>
+                                    </div>
                                 </td>
                             </tr>
                         </#list>

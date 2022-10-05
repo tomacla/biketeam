@@ -127,7 +127,7 @@ public class TeamController extends AbstractController {
 
     @ResponseBody
     @RequestMapping(value = "/image", method = RequestMethod.GET)
-    public ResponseEntity<byte[]> getRideImage(@PathVariable("teamId") String teamId) {
+    public ResponseEntity<byte[]> getTeamImage(@PathVariable("teamId") String teamId) {
         final Optional<ImageDescriptor> image = teamService.getImage(teamId);
         if (image.isPresent()) {
             try {

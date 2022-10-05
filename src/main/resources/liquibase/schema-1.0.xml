@@ -964,6 +964,10 @@
         <dropColumn tableName="map" columnName="visible" />
     </changeSet>
 
+    <changeSet id="remove-profile-image" author="tomacla">
+        <dropColumn tableName="user_account" columnName="profile_image" />
+    </changeSet>
+
 </databaseChangeLog>
 
 

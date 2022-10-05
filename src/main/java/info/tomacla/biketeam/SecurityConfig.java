@@ -91,6 +91,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             // web public endpoints
             auth.antMatchers("/teams").permitAll();
             auth.antMatchers("/autocomplete/**").permitAll();
+            auth.antMatchers("/users/*/image").permitAll();
 
             // web protected endpoints
             auth.antMatchers("/users/me/**").authenticated();
