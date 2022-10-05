@@ -36,6 +36,15 @@ public class FileService {
         this.fileRepository = fileRepository;
     }
 
+    public Optional<FileExtension> fileExists(String directory, String fileNameWithoutExtension, List<FileExtension> extensions) {
+        for (FileExtension extension : extensions) {
+            if (fileExists(directory, fileNameWithoutExtension + extension.getExtension())) {
+                return Optional.of(extension);
+            }
+        }
+        return Optional.empty();
+    }
+
     public Optional<FileExtension> fileExists(String directory, String teamId, String fileNameWithoutExtension, List<FileExtension> extensions) {
         for (FileExtension extension : extensions) {
             if (fileExists(directory, teamId, fileNameWithoutExtension + extension.getExtension())) {
@@ -47,6 +56,10 @@ public class FileService {
 
     public boolean fileExists(String directory, String teamId, String fileName) {
         return Files.exists(Path.of(fileRepository, directory, teamId, fileName));
+    }
+
+    public boolean fileExists(String directory, String fileName) {
+        return Files.exists(Path.of(fileRepository, directory, fileName));
     }
 
     public List<String> listSubDirectories(String directory) {
@@ -96,6 +109,16 @@ public class FileService {
         }
     }
 
+    public Path getFile(String directory, String fileName) {
+        try {
+            Files.createDirectories(Path.of(fileRepository, directory));
+            return Path.of(fileRepository, directory, fileName);
+        } catch (IOException e) {
+            log.error("Unable to get file : " + fileName, e);
+            throw new RuntimeException("Unable to get file : " + fileName, e);
+        }
+    }
+
     public void deleteFile(String directory, String teamId, String fileName) {
         try {
             Files.deleteIfExists(Path.of(fileRepository, directory, teamId, fileName));
@@ -105,19 +128,20 @@ public class FileService {
         }
     }
 
-    public void moveFile(String directory, String teamId, String oldFileName, String newFileName) {
-        try {
-            Files.move(Path.of(fileRepository, directory, teamId, oldFileName), Path.of(fileRepository, directory, teamId, newFileName));
-        } catch (IOException e) {
-            log.error("Unable to move file : " + oldFileName, e);
-            throw new RuntimeException("Unable to move file : " + oldFileName, e);
-        }
-    }
-
     public void storeFile(Path file, String directory, String teamId, String fileName) {
         try {
             Files.createDirectories(Path.of(fileRepository, directory, teamId));
             Files.copy(file, Path.of(fileRepository, directory, teamId, fileName), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            log.error("Unable to store file : " + fileName, e);
+            throw new RuntimeException("Unable to store file : " + file.toString(), e);
+        }
+    }
+
+    public void storeFile(Path file, String directory, String fileName) {
+        try {
+            Files.createDirectories(Path.of(fileRepository, directory));
+            Files.copy(file, Path.of(fileRepository, directory, fileName), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             log.error("Unable to store file : " + fileName, e);
             throw new RuntimeException("Unable to store file : " + file.toString(), e);
@@ -206,7 +230,7 @@ public class FileService {
     @PostConstruct
     public void init() throws Exception {
 
-        log.info("Initializing appliation directories");
+        log.info("Initializing application directories");
 
         Files.createDirectories(Path.of(fileRepository));
         for (String subDirectory : FileRepositories.list()) {

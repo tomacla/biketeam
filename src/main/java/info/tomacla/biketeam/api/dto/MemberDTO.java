@@ -5,7 +5,7 @@ import info.tomacla.biketeam.domain.user.User;
 public class MemberDTO {
 
     public String identity;
-    public String profileImage;
+    public String id;
 
     public static MemberDTO valueOf(User user) {
 
@@ -15,7 +15,7 @@ public class MemberDTO {
 
         MemberDTO dto = new MemberDTO();
         dto.identity = user.getIdentity();
-        dto.profileImage = user.getProfileImage();
+        dto.id = user.getId();
         return dto;
     }
 

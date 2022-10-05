@@ -19,9 +19,7 @@
 
             <h5>${(user.firstName)!'inconnu'} ${(user.lastName)!'inconnu'}</h5>
             <div class="mb-3">
-                <#if user.profileImage??>
-                    <img class="rounded" src="${user.profileImage}" alt="profile">
-                </#if>
+               <img class="rounded" src="<@common.teamUrl '' '/users/${user.id}/image' />" alt="profile">
             </div>
             <dl class="mb-3">
                 <dt>Ville</dt>

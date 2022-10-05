@@ -12,6 +12,8 @@ public interface FileRepositories {
     String FIT_FILES = "fit";
     String MISC_IMAGES = "misc";
 
+    String USER_IMAGES = "user-images";
+
     static List<String> list() {
         return List.of(RIDE_IMAGES,
                 PUBLICATION_IMAGES,
@@ -19,7 +21,8 @@ public interface FileRepositories {
                 MAP_IMAGES,
                 GPX_FILES,
                 FIT_FILES,
-                MISC_IMAGES);
+                MISC_IMAGES,
+                USER_IMAGES);
     }
 
 

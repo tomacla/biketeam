@@ -27,7 +27,7 @@
                 </li>
                 <#list roles as role>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div><#if role.user.profileImage??><img src="${role.user.profileImage}" alt="User photo" width="30" height="30" class="rounded"> </#if>${role.user.firstName!'inconnu'} ${role.user.lastName!'inconnu'}<span class="text-muted"><#if role.user.stravaId??> - <a class="link-dark" href="https://www.strava.com/athletes/${role.user.stravaId?c}" target="_blank">${(role.user.stravaId?c)}</a></#if></span><#if role.role == 'ADMIN'> <i class="bi bi-shield-fill"></i></#if></div>
+                        <div><img src="<@common.teamUrl '' '/users/${role.user.id}/image' />" alt="User photo" width="30" height="30" class="rounded"> ${role.user.firstName!'inconnu'} ${role.user.lastName!'inconnu'}<span class="text-muted"><#if role.user.stravaId??> - <a class="link-dark" href="https://www.strava.com/athletes/${role.user.stravaId?c}" target="_blank">${(role.user.stravaId?c)}</a></#if></span><#if role.role == 'ADMIN'> <i class="bi bi-shield-fill"></i></#if></div>
                         <#if role.user.id != _user.id>
                             <div class="btn-group" role="group">
                                 <#if role.role == 'ADMIN'>
