@@ -31,8 +31,6 @@ public class User {
     private String lastName = "Inconnu";
     @Column(name = "city")
     private String city;
-    @Column(name = "profile_image", length = 500)
-    private String profileImage;
     @Column(name = "email")
     private String email;
     @Column(name = "email_publish_trips")
@@ -114,14 +112,6 @@ public class User {
 
     public void setCity(String city) {
         this.city = Strings.requireNonBlankOrNull(city);
-    }
-
-    public String getProfileImage() {
-        return profileImage;
-    }
-
-    public void setProfileImage(String profileImage) {
-        this.profileImage = Strings.requireNonBlankOrNull(profileImage);
     }
 
     public Set<UserRole> getRoles() {

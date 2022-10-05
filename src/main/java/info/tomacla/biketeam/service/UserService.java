@@ -1,19 +1,29 @@
 package info.tomacla.biketeam.service;
 
+import info.tomacla.biketeam.common.amqp.Queues;
+import info.tomacla.biketeam.common.file.FileExtension;
+import info.tomacla.biketeam.common.file.FileRepositories;
+import info.tomacla.biketeam.common.file.ImageDescriptor;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.Visibility;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.user.UserRepository;
 import info.tomacla.biketeam.security.Authorities;
+import info.tomacla.biketeam.service.amqp.dto.UserProfileImageDTO;
+import info.tomacla.biketeam.service.file.FileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,6 +58,9 @@ public class UserService {
 
     @Autowired
     private MessageService messageService;
+
+    @Autowired
+    private FileService fileService;
 
     public Optional<User> getByStravaId(Long stravaId) {
         return userRepository.findByStravaId(stravaId);
@@ -117,6 +130,41 @@ public class UserService {
 
     public List<User> listUsersWithMailActivated(Team team) {
         return userRepository.findByEmailNotNullAndRoles_Team(team);
+    }
+
+    public Optional<ImageDescriptor> getImage(String userId) {
+
+        Optional<FileExtension> fileExtensionExists = fileService.fileExists(FileRepositories.USER_IMAGES, userId, FileExtension.byPriority());
+
+        if (fileExtensionExists.isPresent()) {
+
+            final FileExtension extension = fileExtensionExists.get();
+            final Path path = fileService.getFile(FileRepositories.USER_IMAGES, userId + extension.getExtension());
+
+            return Optional.of(ImageDescriptor.of(extension, path));
+
+        }
+
+        return Optional.empty();
+
+    }
+
+    @RabbitListener(queues = Queues.TASK_DOWNLOAD_PROFILE_IMAGE)
+    public void downloadUserImage(UserProfileImageDTO dto) {
+        try {
+
+            Optional<FileExtension> fileExtension = FileExtension.findByFileName(dto.profileImage);
+            if (fileExtension.isPresent()) {
+                RestTemplate rest = new RestTemplate();
+                byte[] imageBytes = rest.getForObject(dto.profileImage, byte[].class);
+                Path targetTmpFile = fileService.getTempFile("profile", fileExtension.get().getExtension());
+                Files.write(targetTmpFile, imageBytes);
+                fileService.storeFile(targetTmpFile, FileRepositories.USER_IMAGES, dto.id + fileExtension.get().getExtension());
+            }
+
+        } catch (Exception e) {
+            log.error("Unable to download user image " + dto.profileImage);
+        }
     }
 
     @Transactional

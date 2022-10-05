@@ -86,34 +86,6 @@ public class RideController extends AbstractController {
         return "ride";
     }
 
-    @GetMapping(value = "/{rideId}/groups")
-    public String getRideGroups(@PathVariable("teamId") String teamId,
-                                @PathVariable("rideId") String rideId,
-                                @ModelAttribute("error") String error,
-                                Principal principal,
-                                Model model) {
-
-        final Team team = checkTeam(teamId);
-
-        Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
-        if (optionalRide.isEmpty()) {
-            return viewHandler.redirect(team, "/rides");
-        }
-
-        Ride ride = optionalRide.get();
-
-        if (!ride.getPublishedStatus().equals(PublishedStatus.PUBLISHED) && !isAdmin(principal, team)) {
-            return viewHandler.redirect(team, "/rides");
-        }
-
-        addGlobalValues(principal, model, "Ride " + ride.getTitle(), team);
-        model.addAttribute("ride", ride);
-        if (!ObjectUtils.isEmpty(error)) {
-            model.addAttribute("errors", List.of(error));
-        }
-        return "ride_groups";
-    }
-
     @GetMapping(value = "/{rideId}/messages")
     public String getRideMessages(@PathVariable("teamId") String teamId,
                                   @PathVariable("rideId") String rideId,
@@ -218,11 +190,11 @@ public class RideController extends AbstractController {
 
             }
 
-            return viewHandler.redirectView(team, "/rides/" + rideId + "/groups");
+            return viewHandler.redirectView(team, "/rides/" + rideId);
 
         } catch (Exception e) {
             attributes.addFlashAttribute("error", e.getMessage());
-            return viewHandler.redirectView(team, "/rides/" + rideId + "/groups");
+            return viewHandler.redirectView(team, "/rides/" + rideId);
         }
     }
 
@@ -254,11 +226,11 @@ public class RideController extends AbstractController {
 
             }
 
-            return viewHandler.redirectView(team, "/rides/" + rideId + "/groups");
+            return viewHandler.redirectView(team, "/rides/" + rideId);
 
         } catch (Exception e) {
             attributes.addFlashAttribute("error", e.getMessage());
-            return viewHandler.redirectView(team, "/rides/" + rideId + "/groups");
+            return viewHandler.redirectView(team, "/rides/" + rideId);
         }
     }
 

@@ -1,8 +1,13 @@
 package info.tomacla.biketeam.security.oauth2;
 
+import info.tomacla.biketeam.common.amqp.Exchanges;
+import info.tomacla.biketeam.common.amqp.RoutingKeys;
+import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.security.OAuth2UserDetails;
 import info.tomacla.biketeam.service.UserService;
+import info.tomacla.biketeam.service.amqp.BrokerService;
+import info.tomacla.biketeam.service.amqp.dto.UserProfileImageDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +27,12 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
     private static final Logger log = LoggerFactory.getLogger(Oauth2AuthUserService.class);
 
     private final UserService userService;
+    private final BrokerService brokerService;
 
     @Autowired
-    public Oauth2AuthUserService(UserService userService) {
+    public Oauth2AuthUserService(UserService userService, BrokerService brokerService) {
         this.userService = userService;
+        this.brokerService = brokerService;
     }
 
     @Override
@@ -36,18 +43,16 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
     }
 
     protected OAuth2User loadUser(DefaultOAuth2User user, String registrationId) {
-        switch (registrationId) {
-            case "facebook":
-                return handleFacebookProvider(user);
-            case "google":
-                return handleGoogleProvider(user);
-            case "strava":
-                return handleStravaProvider(user);
-        }
-        return user;
+        return switch (registrationId) {
+            case "facebook" -> handleFacebookProvider(user);
+            case "google" -> handleGoogleProvider(user);
+            case "strava" -> handleStravaProvider(user);
+            default -> user;
+        };
     }
 
     private OAuth2UserDetails handleStravaProvider(DefaultOAuth2User user) {
+
         Map<String, Object> attributes = user.getAttributes();
         Long stravaId = Long.valueOf((Integer) attributes.get("id"));
 
@@ -55,6 +60,7 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
 
         Optional<User> optionalUser = userService.getByStravaId(stravaId);
         User u;
+        String profileImage = (String) attributes.get("profile_medium");
         if (optionalUser.isEmpty()) {
 
             log.debug("Register new user with strava id {}", stravaId);
@@ -65,7 +71,6 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
             u.setStravaId(stravaId);
             u.setStravaUserName((String) attributes.get("username"));
             u.setCity((String) attributes.get("city"));
-            u.setProfileImage((String) attributes.get("profile_medium"));
 
         } else {
 
@@ -76,11 +81,14 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
             u.setFirstName((String) attributes.get("firstname"));
             u.setLastName((String) attributes.get("lastname"));
             u.setCity((String) attributes.get("city"));
-            u.setProfileImage((String) attributes.get("profile_medium"));
 
         }
 
         userService.save(u);
+        if (!Strings.isBlank(profileImage)) {
+            brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_DOWNLOAD_PROFILE_IMAGE,
+                    UserProfileImageDTO.valueOf(u.getId(), profileImage));
+        }
 
         return OAuth2UserDetails.create(u);
     }
@@ -98,6 +106,7 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
         }
 
         User u;
+        String profileImage = (String) attributes.get("picture");
         if (optionalUser.isEmpty()) {
 
             log.debug("Register new user with google id {}", googleId);
@@ -105,7 +114,6 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
             u = new User();
             u.setFirstName((String) attributes.get("given_name"));
             u.setLastName((String) attributes.get("family_name"));
-            u.setProfileImage((String) attributes.get("picture"));
             u.setGoogleId(googleId);
 
             if (attributes.get("email") != null) {
@@ -124,6 +132,10 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
         }
 
         userService.save(u);
+        if (!Strings.isBlank(profileImage)) {
+            brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_DOWNLOAD_PROFILE_IMAGE,
+                    UserProfileImageDTO.valueOf(u.getId(), profileImage));
+        }
 
         return OAuth2UserDetails.create(u);
     }

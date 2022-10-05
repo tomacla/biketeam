@@ -38,7 +38,7 @@
                 </li>
                 <#list users as user>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div><#if user.profileImage??><img src="${user.profileImage}" alt="User photo" width="30" height="30" class="rounded"> </#if>${user.firstName!'inconnu'} ${user.lastName!'inconnu'}<span class="text-muted"><#if user.stravaId??> - <a class="link-dark" href="https://www.strava.com/athletes/${user.stravaId?c}" target="_blank">${(user.stravaId?c)}</a></#if></span><#if user.admin> <i class="bi bi-shield-fill"></i></#if></div>
+                        <div><img src="<@common.teamUrl '' '/users/${user.id}/image' />" alt="User photo" width="30" height="30" class="rounded"> ${user.firstName!'inconnu'} ${user.lastName!'inconnu'}<span class="text-muted"><#if user.stravaId??> - <a class="link-dark" href="https://www.strava.com/athletes/${user.stravaId?c}" target="_blank">${(user.stravaId?c)}</a></#if></span><#if user.admin> <i class="bi bi-shield-fill"></i></#if></div>
                         <#if user.id == _user.id>
                             <button role="button" disabled="true" class="btn btn-sm btn-success"><i class="bi bi-shield-fill"></i></button>
                         <#else>

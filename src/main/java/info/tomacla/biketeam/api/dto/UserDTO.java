@@ -10,7 +10,6 @@ public class UserDTO {
     public String firstName;
     public String lastName;
     public String city;
-    public String profileImage;
     public String email;
     public UserEmailPreferencesDTO emailPreferences;
 
@@ -27,7 +26,6 @@ public class UserDTO {
         dto.firstName = user.getFirstName();
         dto.lastName = user.getLastName();
         dto.city = user.getCity();
-        dto.profileImage = user.getProfileImage();
         dto.email = user.getEmail();
         dto.emailPreferences = new UserEmailPreferencesDTO();
         dto.emailPreferences.trips = user.isEmailPublishTrips();

@@ -11,3 +11,29 @@ html {
 .elevation-control.elevation .background {
     background-color: rgba(255, 255, 255, 1) !important;
 }
+
+.profile-images {
+    align-items:center;
+    display:flex;
+}
+
+.profile-images-item img {
+    border:1px solid white;
+    border-radius: 12px;
+}
+
+.profile-images-item:nth-child(n+2) {
+    margin-left: -12px;
+}
+
+.profile-images-item:nth-child(3) {
+    z-index:1;
+}
+
+.profile-images-item:nth-child(2) {
+    z-index:2;
+}
+
+.profile-images-item:nth-child(1) {
+    z-index:3;
+}

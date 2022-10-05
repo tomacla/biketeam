@@ -1,7 +1,10 @@
 package info.tomacla.biketeam.security.oauth2;
 
+import info.tomacla.biketeam.common.amqp.Exchanges;
+import info.tomacla.biketeam.common.amqp.RoutingKeys;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.service.UserService;
+import info.tomacla.biketeam.service.amqp.BrokerService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -20,11 +23,12 @@ public class Oauth2AuthUserServiceTest {
     public void testStravaUnknown() {
 
         UserService userService = Mockito.mock(UserService.class);
+        BrokerService brokerService = Mockito.mock(BrokerService.class);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         Mockito.when(userService.getByStravaId(10002L)).thenReturn(Optional.empty());
 
-        final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService);
+        final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService, brokerService);
 
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("id", 10002);
@@ -46,7 +50,9 @@ public class Oauth2AuthUserServiceTest {
         assertEquals("bar", savedUser.getLastName());
         assertEquals("foobar", savedUser.getStravaUserName());
         assertEquals("paris", savedUser.getCity());
-        assertEquals("https://profile", savedUser.getProfileImage());
+
+        Mockito.verify(brokerService).sendToBroker(Mockito.eq(Exchanges.TASK), Mockito.eq(RoutingKeys.TASK_DOWNLOAD_PROFILE_IMAGE),
+                Mockito.any());
 
     }
 
@@ -54,6 +60,7 @@ public class Oauth2AuthUserServiceTest {
     public void testStravaExisting() {
 
         UserService userService = Mockito.mock(UserService.class);
+        BrokerService brokerService = Mockito.mock(BrokerService.class);
 
         User u = new User();
         u.setStravaId(10002L);
@@ -61,7 +68,7 @@ public class Oauth2AuthUserServiceTest {
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         Mockito.when(userService.getByStravaId(10002L)).thenReturn(Optional.of(u));
 
-        final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService);
+        final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService, brokerService);
 
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("id", 10002);
@@ -84,7 +91,9 @@ public class Oauth2AuthUserServiceTest {
         assertEquals("bar", savedUser.getLastName());
         assertEquals("foobar", savedUser.getStravaUserName());
         assertEquals("paris", savedUser.getCity());
-        assertEquals("https://profile", savedUser.getProfileImage());
+
+        Mockito.verify(brokerService).sendToBroker(Mockito.eq(Exchanges.TASK), Mockito.eq(RoutingKeys.TASK_DOWNLOAD_PROFILE_IMAGE),
+                Mockito.any());
 
     }
 
@@ -92,11 +101,12 @@ public class Oauth2AuthUserServiceTest {
     public void testFacebookUnknown() {
 
         UserService userService = Mockito.mock(UserService.class);
+        BrokerService brokerService = Mockito.mock(BrokerService.class);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         Mockito.when(userService.getByFacebookId("10002")).thenReturn(Optional.empty());
 
-        final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService);
+        final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService, brokerService);
 
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("id", "10002");
@@ -121,6 +131,7 @@ public class Oauth2AuthUserServiceTest {
     public void testFacebookExisting() {
 
         UserService userService = Mockito.mock(UserService.class);
+        BrokerService brokerService = Mockito.mock(BrokerService.class);
 
         User u = new User();
         u.setFacebookId("10002");
@@ -128,7 +139,7 @@ public class Oauth2AuthUserServiceTest {
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         Mockito.when(userService.getByFacebookId("10002")).thenReturn(Optional.of(u));
 
-        final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService);
+        final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService, brokerService);
 
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("id", "10002");
@@ -151,11 +162,12 @@ public class Oauth2AuthUserServiceTest {
     public void testGoogleUnknown() {
 
         UserService userService = Mockito.mock(UserService.class);
+        BrokerService brokerService = Mockito.mock(BrokerService.class);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         Mockito.when(userService.getByGoogleId("10002")).thenReturn(Optional.empty());
 
-        final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService);
+        final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService, brokerService);
 
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("sub", "10002");
@@ -175,7 +187,9 @@ public class Oauth2AuthUserServiceTest {
         assertEquals("foo", savedUser.getFirstName());
         assertEquals("bar", savedUser.getLastName());
         assertEquals("foo@bar.com", savedUser.getEmail());
-        assertEquals("picture", savedUser.getProfileImage());
+
+        Mockito.verify(brokerService).sendToBroker(Mockito.eq(Exchanges.TASK), Mockito.eq(RoutingKeys.TASK_DOWNLOAD_PROFILE_IMAGE),
+                Mockito.any());
 
     }
 
@@ -183,6 +197,7 @@ public class Oauth2AuthUserServiceTest {
     public void testGoogleExisting() {
 
         UserService userService = Mockito.mock(UserService.class);
+        BrokerService brokerService = Mockito.mock(BrokerService.class);
 
         User u = new User();
         u.setFacebookId("10002");
@@ -190,7 +205,7 @@ public class Oauth2AuthUserServiceTest {
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         Mockito.when(userService.getByGoogleId("10002")).thenReturn(Optional.of(u));
 
-        final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService);
+        final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService, brokerService);
 
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("sub", "10002");
@@ -208,6 +223,9 @@ public class Oauth2AuthUserServiceTest {
         final User savedUser = userCaptor.getValue();
         assertEquals("10002", savedUser.getGoogleId());
         assertEquals("foo@bar.com", savedUser.getEmail());
+
+        Mockito.verify(brokerService).sendToBroker(Mockito.eq(Exchanges.TASK), Mockito.eq(RoutingKeys.TASK_DOWNLOAD_PROFILE_IMAGE),
+                Mockito.any());
 
     }
 
