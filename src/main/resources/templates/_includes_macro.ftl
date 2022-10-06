@@ -10,6 +10,30 @@
   </div>
 </#macro>
 
+<#macro displayPlace header place>
+  <div class="card">
+    <h6 class="card-header">${header} - ${place.name}</h6>
+    <div class="card-body py-2 px-2">
+      <#if place.point??>
+        <div id="mapPlace${place.id}" style="width:100%; height:150px"></div>
+        <script type="text/javascript">initPlaceMap('mapPlace${place.id}', ${place.point.lat?c}, ${place.point.lng?c})</script>
+      <#else>
+        <p class="card-text small fst-italic">${place.address}</p>
+      </#if>
+    </div>
+        <div class="card-body p-1">
+          <#if place.point??>
+            <a class="small link-dark me-2" target="_blank" href="https://www.google.com/maps/search/?api=1&query=${place.point.lat?c},${place.point.lng?c}">Itinéraire</a>
+          <#else>
+            <a class="small link-dark me-2" target="_blank" href="https://www.google.com/maps/search/?api=1&query=${place.address?url('UTF-8')}">Itinéraire</a>
+          </#if>
+          <#if place.link??>
+          <a class="small link-dark" href="${place.link}" target="_blank" class="card-link">Site web</a>
+          </#if>
+        </div>
+  </div>
+</#macro>
+
 <#macro displayFeed withTeam>
     <div class="row g-4">
         <#if feed?size != 0>

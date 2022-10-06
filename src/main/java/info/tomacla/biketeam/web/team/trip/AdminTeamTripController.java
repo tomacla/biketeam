@@ -1,9 +1,11 @@
 package info.tomacla.biketeam.web.team.trip;
 
 import info.tomacla.biketeam.common.data.PublishedStatus;
+import info.tomacla.biketeam.domain.place.PlaceSorterOption;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.trip.Trip;
 import info.tomacla.biketeam.service.MapService;
+import info.tomacla.biketeam.service.PlaceService;
 import info.tomacla.biketeam.service.TripService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,9 @@ public class AdminTeamTripController extends AbstractController {
 
     @Autowired
     private MapService mapService;
+
+    @Autowired
+    private PlaceService placeService;
 
     @GetMapping
     public String getTrips(@PathVariable("teamId") String teamId,
@@ -59,6 +64,8 @@ public class AdminTeamTripController extends AbstractController {
 
         addGlobalValues(principal, model, "Administration - Nouveau trip", team);
         model.addAttribute("formdata", form);
+        model.addAttribute("startPlaces", placeService.listPlacesWithAppearances(teamId, PlaceSorterOption.TRIP_START));
+        model.addAttribute("endPlaces", placeService.listPlacesWithAppearances(teamId, PlaceSorterOption.TRIP_END));
         model.addAttribute("imaged", false);
         model.addAttribute("published", false);
         if (!ObjectUtils.isEmpty(error)) {
@@ -95,14 +102,16 @@ public class AdminTeamTripController extends AbstractController {
                 .withTitle(trip.getTitle())
                 .withLowerSpeed(trip.getLowerSpeed())
                 .withUpperSpeed(trip.getUpperSpeed())
-                .withMeetingLocation(trip.getMeetingLocation())
-                .withMeetingPoint(trip.getMeetingPoint())
                 .withMeetingTime(trip.getMeetingTime())
                 .withStages(trip.getSortedStages())
+                .withStartPlace(trip.getStartPlace())
+                .withEndPlace(trip.getEndPlace())
                 .get();
 
         addGlobalValues(principal, model, "Administration - Modifier le trip", team);
         model.addAttribute("formdata", form);
+        model.addAttribute("startPlaces", placeService.listPlacesWithAppearances(teamId, PlaceSorterOption.TRIP_START));
+        model.addAttribute("endPlaces", placeService.listPlacesWithAppearances(teamId, PlaceSorterOption.TRIP_END));
         model.addAttribute("imaged", trip.isImaged());
         model.addAttribute("published", trip.getPublishedStatus().equals(PublishedStatus.PUBLISHED));
         if (!ObjectUtils.isEmpty(error)) {
@@ -146,8 +155,6 @@ public class AdminTeamTripController extends AbstractController {
                 target.setType(parser.getType());
                 target.setLowerSpeed(parser.getLowerSpeed());
                 target.setUpperSpeed(parser.getUpperSpeed());
-                target.setMeetingPoint(parser.getMeetingPoint());
-                target.setMeetingLocation(parser.getMeetingLocation());
                 target.setMeetingTime(parser.getMeetingTime());
                 target.setPermalink(parser.getPermalink());
 
@@ -165,14 +172,15 @@ public class AdminTeamTripController extends AbstractController {
                 target.setTitle(parser.getTitle());
                 target.setDescription(parser.getDescription());
                 target.setImaged(parser.getFile().isPresent());
-                target.setMeetingLocation(parser.getMeetingLocation());
                 target.setMeetingTime(parser.getMeetingTime());
-                target.setMeetingPoint(parser.getMeetingPoint());
                 target.setPermalink(parser.getPermalink());
 
                 // new group so just add all groups
                 parser.getStages(team.getId(), mapService).forEach(target::addStage);
             }
+
+            target.setStartPlace(parser.getStartPlace(teamId, placeService));
+            target.setEndPlace(parser.getEndPlace(teamId, placeService));
 
             if (parser.getFile().isPresent()) {
                 target.setImaged(true);

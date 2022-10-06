@@ -2,7 +2,6 @@ package info.tomacla.biketeam.web.team.ride;
 
 import info.tomacla.biketeam.common.datatype.Dates;
 import info.tomacla.biketeam.common.datatype.Strings;
-import info.tomacla.biketeam.common.geo.Point;
 
 import java.time.LocalTime;
 
@@ -14,9 +13,6 @@ public class NewRideGroupForm {
     private double upperSpeed = 30;
     private String mapId = "";
     private String mapName = "";
-    private String meetingLocation = "";
-    private double meetingPointLat = 0.0;
-    private double meetingPointLng = 0.0;
     private String meetingTime = "12:00";
 
     public static NewRideGroupFormBuilder builder() {
@@ -71,30 +67,6 @@ public class NewRideGroupForm {
         this.mapName = Strings.requireNonBlankOrDefault(mapName, "");
     }
 
-    public String getMeetingLocation() {
-        return meetingLocation;
-    }
-
-    public void setMeetingLocation(String meetingLocation) {
-        this.meetingLocation = Strings.requireNonBlankOrDefault(meetingLocation, "");
-    }
-
-    public double getMeetingPointLat() {
-        return meetingPointLat;
-    }
-
-    public void setMeetingPointLat(double meetingPointLat) {
-        this.meetingPointLat = meetingPointLat;
-    }
-
-    public double getMeetingPointLng() {
-        return meetingPointLng;
-    }
-
-    public void setMeetingPointLng(double meetingPointLng) {
-        this.meetingPointLng = meetingPointLng;
-    }
-
     public String getMeetingTime() {
         return meetingTime;
     }
@@ -129,17 +101,6 @@ public class NewRideGroupForm {
 
         public double getUpperSpeed() {
             return form.getUpperSpeed();
-        }
-
-        public String getMeetingLocation() {
-            return Strings.requireNonBlankOrNull(form.getMeetingLocation());
-        }
-
-        public Point getMeetingPoint() {
-            if (form.getMeetingPointLat() != 0.0 && form.getMeetingPointLng() != 0.0) {
-                return new Point(form.getMeetingPointLat(), form.getMeetingPointLng());
-            }
-            return null;
         }
 
         public LocalTime getMeetingTime() {
@@ -177,19 +138,6 @@ public class NewRideGroupForm {
 
         public NewRideGroupFormBuilder withUpperSpeed(double upperSpeed) {
             form.setUpperSpeed(upperSpeed);
-            return this;
-        }
-
-        public NewRideGroupFormBuilder withMeetingLocation(String meetingLocation) {
-            form.setMeetingLocation(meetingLocation);
-            return this;
-        }
-
-        public NewRideGroupFormBuilder withMeetingPoint(Point meetingPoint) {
-            if (meetingPoint != null) {
-                form.setMeetingPointLat(meetingPoint.getLat());
-                form.setMeetingPointLng(meetingPoint.getLng());
-            }
             return this;
         }
 

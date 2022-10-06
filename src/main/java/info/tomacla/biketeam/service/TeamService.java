@@ -69,6 +69,9 @@ public class TeamService extends AbstractPermalinkService {
     @Autowired
     private UserRoleService userRoleService;
 
+    @Autowired
+    private PlaceService placeService;
+
     public Optional<Team> get(String teamId) {
         return teamRepository.findById(teamId.toLowerCase());
     }
@@ -217,6 +220,7 @@ public class TeamService extends AbstractPermalinkService {
             publicationService.deleteByTeam(team.getId());
             tripService.deleteByTeam(team.getId());
             mapService.deleteByTeam(team.getId());
+            placeService.deleteByTeam(team.getId());
             // remove all access to this team
             userRoleService.deleteByTeam(team.getId());
             // finaly delete the team

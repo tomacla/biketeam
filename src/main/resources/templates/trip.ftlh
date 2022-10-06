@@ -4,6 +4,44 @@
 
     <#include "trip_nav.ftlh">
 
+    <#if trip.startPlace?? || trip.endPlace??>
+            <div class="modal" tabindex="-1" id="placemodal">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+
+                      <#if trip.startPlace?? && trip.endPlace?? && trip.startPlace.id == trip.endPlace.id>
+                            <@common.displayPlace "Départ/Arrivée" trip.startPlace />
+                      <#else>
+
+                        <div class="row">
+
+                        <#if trip.startPlace??>
+                        <div class="col-12 col-md-6">
+                            <@common.displayPlace "Départ" trip.startPlace />
+                        </div>
+                        </#if>
+
+                        <#if trip.endPlace??>
+                        <div class="col-12 col-md-6">
+                        <@common.displayPlace "Arrivée" trip.endPlace />
+                        </div>
+                        </#if>
+
+                        </div>
+
+
+                       </#if>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+        </#if>
+
     <div class="col-12 col-md-4 mb-4">
 
         <div class="border rounded p-2">
@@ -21,8 +59,13 @@
 
             <ul class="list-unstyled">
                 <li>Allure : ${trip.lowerSpeed}/${trip.upperSpeed} km/h</li>
-                <li>Lieu de rendez vous : <#if (trip.meetingPoint)??><a class="link-dark" target="_blank" href="https://www.google.com/maps/search/?api=1&query=${trip.meetingPoint.lat?c},${trip.meetingPoint.lng?c}"></#if>${trip.meetingLocation}<#if (trip.meetingPoint)??></a></#if></li>
                 <li>Heure de départ : ${trip.meetingTime}</li>
+                <#if trip.startPlace??>
+                    <li>Départ : <a href="#" class="link-dark" data-bs-toggle="modal" data-bs-target="#placemodal">${trip.startPlace.name}</a></li>
+                </#if>
+                <#if trip.endPlace??>
+                    <li>Arrivée : <a href="#" class="link-dark" data-bs-toggle="modal" data-bs-target="#placemodal">${trip.endPlace.name}</a></li>
+                </#if>
             </ul>
 
             <hr/>
@@ -63,9 +106,14 @@
        <#assign themes=["lime-theme", "steelblue-theme", "purple-theme", "yellow-theme", "red-theme", "magenta-theme", "lightblue-theme"]>
        <#assign stageMaps = []>
        <#assign mapCenter = [0.0,0.0]>
+       <#if trip.startPlace?? && trip.startPlace.point??>
+            <#assign mapCenter = [trip.startPlace.point.lat,trip.startPlace.point.lng]>
+       </#if>
        <#list trip.sortedStages as stage>
           <#if stage.map??>
-            <#assign mapCenter = [stage.map.startPoint.lat, stage.map.startPoint.lng]>
+            <#if mapCenter[0] == 0.0>
+                <#assign mapCenter = [stage.map.startPoint.lat, stage.map.startPoint.lng]>
+            </#if>
             <#assign mapId = stage.map.id>
               <#if stageMaps?seq_contains(mapId)>
               <#else>
@@ -79,7 +127,7 @@
         <div class="border rounded p-2">
 
 
-            <div class="table-responsive-sm">
+            <div class="table-responsive-sm mb-4">
             <table class="table table-sm table-striped">
                 <thead>
                     <tr>
@@ -179,6 +227,17 @@
                     initGpx(targetMap, '<@common.teamUrl team.id '/maps/${stage.map.id}/gpx' />', '${themes[stageMaps?seq_index_of(stage.map.id)%7]}');
                 </#if>
             </#list>
+
+            <#if trip.startPlace?? || trip.endPlace??>
+                const myModalEl = document.getElementById('placemodal')
+                myModalEl.addEventListener('show.bs.modal', event => {
+                    leafletModalMaps.forEach(map => {
+                     setTimeout(function() {
+                            map.invalidateSize();
+                        }, 10);
+                    });
+                })
+            </#if>
 
         </script>
 

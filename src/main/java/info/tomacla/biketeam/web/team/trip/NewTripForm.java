@@ -2,11 +2,12 @@ package info.tomacla.biketeam.web.team.trip;
 
 import info.tomacla.biketeam.common.datatype.Dates;
 import info.tomacla.biketeam.common.datatype.Strings;
-import info.tomacla.biketeam.common.geo.Point;
 import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.map.MapType;
+import info.tomacla.biketeam.domain.place.Place;
 import info.tomacla.biketeam.domain.trip.TripStage;
 import info.tomacla.biketeam.service.MapService;
+import info.tomacla.biketeam.service.PlaceService;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.*;
@@ -30,10 +31,10 @@ public class NewTripForm {
     private String description = "";
     private double lowerSpeed = 28;
     private double upperSpeed = 30;
-    private String meetingLocation = "";
-    private double meetingPointLat = 0.0;
-    private double meetingPointLng = 0.0;
     private String meetingTime = "08:00";
+
+    private String startPlaceId = "";
+    private String endPlaceId = "";
     private MultipartFile file;
     private List<NewTripStageForm> stages = new ArrayList<>();
 
@@ -106,6 +107,24 @@ public class NewTripForm {
         this.publishedAtTime = Strings.requireNonBlankOrDefault(publishedAtTime, "12:00");
     }
 
+    public String getStartPlaceId() {
+        return startPlaceId;
+    }
+
+    public void setStartPlaceId(String startPlaceId) {
+        this.startPlaceId = Strings.requireNonBlankOrDefault(startPlaceId, "");
+        ;
+    }
+
+    public String getEndPlaceId() {
+        return endPlaceId;
+    }
+
+    public void setEndPlaceId(String endPlaceId) {
+        this.endPlaceId = Strings.requireNonBlankOrDefault(endPlaceId, "");
+        ;
+    }
+
     public String getTitle() {
         return title;
     }
@@ -136,30 +155,6 @@ public class NewTripForm {
 
     public void setUpperSpeed(double upperSpeed) {
         this.upperSpeed = upperSpeed;
-    }
-
-    public String getMeetingLocation() {
-        return meetingLocation;
-    }
-
-    public void setMeetingLocation(String meetingLocation) {
-        this.meetingLocation = Strings.requireNonBlankOrDefault(meetingLocation, "");
-    }
-
-    public double getMeetingPointLat() {
-        return meetingPointLat;
-    }
-
-    public void setMeetingPointLat(double meetingPointLat) {
-        this.meetingPointLat = meetingPointLat;
-    }
-
-    public double getMeetingPointLng() {
-        return meetingPointLng;
-    }
-
-    public void setMeetingPointLng(double meetingPointLng) {
-        this.meetingPointLng = meetingPointLng;
     }
 
     public String getMeetingTime() {
@@ -242,19 +237,22 @@ public class NewTripForm {
             return form.getUpperSpeed();
         }
 
-        public String getMeetingLocation() {
-            return Strings.requireNonBlankOrNull(form.getMeetingLocation());
+        public LocalTime getMeetingTime() {
+            return LocalTime.parse(form.getMeetingTime());
         }
 
-        public Point getMeetingPoint() {
-            if (form.getMeetingPointLat() != 0.0 && form.getMeetingPointLng() != 0.0) {
-                return new Point(form.getMeetingPointLat(), form.getMeetingPointLng());
+        public Place getStartPlace(String teamId, PlaceService placeService) {
+            if (!form.getStartPlaceId().equals("")) {
+                return placeService.get(teamId, form.getStartPlaceId()).orElse(null);
             }
             return null;
         }
 
-        public LocalTime getMeetingTime() {
-            return LocalTime.parse(form.getMeetingTime());
+        public Place getEndPlace(String teamId, PlaceService placeService) {
+            if (!form.getEndPlaceId().equals("")) {
+                return placeService.get(teamId, form.getEndPlaceId()).orElse(null);
+            }
+            return null;
         }
 
         public Optional<MultipartFile> getFile() {
@@ -334,6 +332,20 @@ public class NewTripForm {
             return this;
         }
 
+        public NewTripForm.NewTripFormBuilder withStartPlace(Place startPlace) {
+            if (startPlace != null) {
+                form.setStartPlaceId(startPlace.getId());
+            }
+            return this;
+        }
+
+        public NewTripForm.NewTripFormBuilder withEndPlace(Place endPlace) {
+            if (endPlace != null) {
+                form.setEndPlaceId(endPlace.getId());
+            }
+            return this;
+        }
+
         public NewTripFormBuilder withPublishedAt(ZonedDateTime publishedAt, ZoneId timezone) {
             form.setPublishedAtDate(Dates.formatZonedDateInTimezone(publishedAt, timezone));
             form.setPublishedAtTime(Dates.formatZonedTimeInTimezone(publishedAt, timezone));
@@ -347,19 +359,6 @@ public class NewTripForm {
 
         public NewTripFormBuilder withUpperSpeed(double upperSpeed) {
             form.setUpperSpeed(upperSpeed);
-            return this;
-        }
-
-        public NewTripFormBuilder withMeetingLocation(String meetingLocation) {
-            form.setMeetingLocation(meetingLocation);
-            return this;
-        }
-
-        public NewTripFormBuilder withMeetingPoint(Point meetingPoint) {
-            if (meetingPoint != null) {
-                form.setMeetingPointLat(meetingPoint.getLat());
-                form.setMeetingPointLng(meetingPoint.getLng());
-            }
             return this;
         }
 

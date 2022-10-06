@@ -968,6 +968,121 @@
         <dropColumn tableName="user_account" columnName="profile_image" />
     </changeSet>
 
+    <changeSet id="add-start-end-place" author="tomacla">
+
+        <createTable tableName="place">
+
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="team_id" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address" type="VARCHAR(900)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="link" type="VARCHAR(500)" />
+            <column name="point_lat" type="DOUBLE"/>
+            <column name="point_lng" type="DOUBLE"/>
+
+        </createTable>
+
+        <addPrimaryKey tableName="place" columnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="place"
+                                 baseColumnNames="team_id"
+                                 constraintName="fk_place_team_id"
+                                 referencedTableName="team"
+                                 referencedColumnNames="id"/>
+
+        <sql>
+            insert into place
+            select distinct on (rg.ride_id) rg.ride_id || 'r', r.team_id, rg.meeting_location, rg.meeting_location, NULL, rg.meeting_point_lat, rg.meeting_point_lng
+            from ride_group rg, ride r where r.id = rg.ride_id and meeting_location is not null order by rg.ride_id
+        </sql>
+
+        <sql>
+            insert into place
+            select t.id || 't', t.team_id, t.meeting_location, t.meeting_location, NULL, t.meeting_point_lat, t.meeting_point_lng
+            from trip t where meeting_location is not null;
+        </sql>
+
+        <sql>
+            insert into place
+            select distinct on (rg.ride_template_id) rg.ride_template_id || 'rt', r.team_id, rg.meeting_location, rg.meeting_location, NULL, rg.meeting_point_lat, rg.meeting_point_lng
+            from ride_group_template rg, ride_template r where r.id = rg.ride_template_id and meeting_location is not null order by rg.ride_template_id
+        </sql>
+
+        <dropColumn tableName="ride_group" columnName="meeting_location" />
+        <dropColumn tableName="ride_group" columnName="meeting_point_lat" />
+        <dropColumn tableName="ride_group" columnName="meeting_point_lng" />
+        <dropColumn tableName="trip" columnName="meeting_location" />
+        <dropColumn tableName="trip" columnName="meeting_point_lat" />
+        <dropColumn tableName="trip" columnName="meeting_point_lng" />
+        <dropColumn tableName="ride_group_template" columnName="meeting_location" />
+        <dropColumn tableName="ride_group_template" columnName="meeting_point_lat" />
+        <dropColumn tableName="ride_group_template" columnName="meeting_point_lng" />
+
+        <addColumn tableName="ride">
+            <column name="start_place_id" type="VARCHAR(255)" />
+            <column name="end_place_id" type="VARCHAR(255)" />
+        </addColumn>
+
+        <addColumn tableName="trip">
+            <column name="start_place_id" type="VARCHAR(255)" />
+            <column name="end_place_id" type="VARCHAR(255)" />
+        </addColumn>
+
+        <addColumn tableName="ride_template">
+            <column name="start_place_id" type="VARCHAR(255)" />
+            <column name="end_place_id" type="VARCHAR(255)" />
+        </addColumn>
+
+        <addForeignKeyConstraint baseTableName="ride"
+                                 baseColumnNames="start_place_id"
+                                 constraintName="fk_ride_start_place_id"
+                                 referencedTableName="place"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="ride"
+                                 baseColumnNames="end_place_id"
+                                 constraintName="fk_ride_end_place_id"
+                                 referencedTableName="place"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="trip"
+                                 baseColumnNames="start_place_id"
+                                 constraintName="fk_trip_start_place_id"
+                                 referencedTableName="place"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="trip"
+                                 baseColumnNames="end_place_id"
+                                 constraintName="fk_trip_end_place_id"
+                                 referencedTableName="place"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="ride_template"
+                                 baseColumnNames="start_place_id"
+                                 constraintName="fk_ride_template_start_place_id"
+                                 referencedTableName="place"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="ride_template"
+                                 baseColumnNames="end_place_id"
+                                 constraintName="fk_ride_template_end_place_id"
+                                 referencedTableName="place"
+                                 referencedColumnNames="id"/>
+
+        <sql>update ride set start_place_id = id || 'r' where id || 'r' in (select id from place)</sql>
+        <sql>update trip set start_place_id = id || 't' where id || 't' in (select id from place)</sql>
+        <sql>update ride_template set start_place_id = id || 'rt' where id || 'rt' in (select id from place)</sql>
+
+    </changeSet>
+
 </databaseChangeLog>
 
 

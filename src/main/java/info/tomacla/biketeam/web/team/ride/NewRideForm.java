@@ -3,11 +3,13 @@ package info.tomacla.biketeam.web.team.ride;
 import info.tomacla.biketeam.common.datatype.Dates;
 import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.domain.map.Map;
+import info.tomacla.biketeam.domain.place.Place;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.ride.RideType;
 import info.tomacla.biketeam.domain.template.RideGroupTemplate;
 import info.tomacla.biketeam.domain.template.RideTemplate;
 import info.tomacla.biketeam.service.MapService;
+import info.tomacla.biketeam.service.PlaceService;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
@@ -30,6 +32,8 @@ public class NewRideForm {
     private String title = "";
     private String description = "";
     private String templateId = "";
+    private String startPlaceId = "";
+    private String endPlaceId = "";
     private MultipartFile file = null;
     private List<NewRideGroupForm> groups = new ArrayList<>();
 
@@ -58,8 +62,6 @@ public class NewRideForm {
                     .withName(g.getName())
                     .withLowerSpeed(g.getLowerSpeed())
                     .withUpperSpeed(g.getUpperSpeed())
-                    .withMeetingLocation(g.getMeetingLocation())
-                    .withMeetingPoint(g.getMeetingPoint())
                     .withMeetingTime(g.getMeetingTime())
                     .get());
         }
@@ -145,6 +147,24 @@ public class NewRideForm {
         this.templateId = Strings.requireNonBlankOrDefault(templateId, "");
     }
 
+    public String getStartPlaceId() {
+        return startPlaceId;
+    }
+
+    public void setStartPlaceId(String startPlaceId) {
+        this.startPlaceId = Strings.requireNonBlankOrDefault(startPlaceId, "");
+        ;
+    }
+
+    public String getEndPlaceId() {
+        return endPlaceId;
+    }
+
+    public void setEndPlaceId(String endPlaceId) {
+        this.endPlaceId = Strings.requireNonBlankOrDefault(endPlaceId, "");
+        ;
+    }
+
     public MultipartFile getFile() {
         return file;
     }
@@ -209,6 +229,21 @@ public class NewRideForm {
             return Strings.requireNonBlankOrNull(form.getTemplateId());
         }
 
+        public Place getStartPlace(String teamId, PlaceService placeService) {
+            if (!form.getStartPlaceId().equals("")) {
+                return placeService.get(teamId, form.getStartPlaceId()).orElse(null);
+            }
+            return null;
+        }
+
+        public Place getEndPlace(String teamId, PlaceService placeService) {
+            if (!form.getEndPlaceId().equals("")) {
+                return placeService.get(teamId, form.getEndPlaceId()).orElse(null);
+            }
+            return null;
+        }
+
+
         public Optional<MultipartFile> getFile() {
             if (form.fileSet()) {
                 return Optional.of(form.getFile());
@@ -228,9 +263,7 @@ public class NewRideForm {
                 gg.setLowerSpeed(parser.getLowerSpeed());
                 gg.setUpperSpeed(parser.getUpperSpeed());
                 gg.setMap(map);
-                gg.setMeetingLocation(parser.getMeetingLocation());
                 gg.setMeetingTime(parser.getMeetingTime());
-                gg.setMeetingPoint(parser.getMeetingPoint());
 
                 if (parser.getId() != null) {
                     gg.setId(parser.getId());
@@ -257,6 +290,8 @@ public class NewRideForm {
             this.form = new NewRideForm(template);
             withPublishedAt(defaultDate, timezone);
             withDate(defaultDate.toLocalDate());
+            withStartPlace(template.getStartPlace());
+            withEndPlace(template.getEndPlace());
         }
 
         public NewRideFormBuilder withId(String id) {
@@ -289,6 +324,20 @@ public class NewRideForm {
             return this;
         }
 
+        public NewRideFormBuilder withStartPlace(Place startPlace) {
+            if (startPlace != null) {
+                form.setStartPlaceId(startPlace.getId());
+            }
+            return this;
+        }
+
+        public NewRideFormBuilder withEndPlace(Place endPlace) {
+            if (endPlace != null) {
+                form.setEndPlaceId(endPlace.getId());
+            }
+            return this;
+        }
+
         public NewRideFormBuilder withPublishedAt(ZonedDateTime publishedAt, ZoneId timezone) {
             form.setPublishedAtDate(Dates.formatZonedDateInTimezone(publishedAt, timezone));
             form.setPublishedAtTime(Dates.formatZonedTimeInTimezone(publishedAt, timezone));
@@ -313,9 +362,7 @@ public class NewRideForm {
                             .withMapName(mapName)
                             .withLowerSpeed(g.getLowerSpeed())
                             .withUpperSpeed(g.getUpperSpeed())
-                            .withMeetingLocation(g.getMeetingLocation())
                             .withMeetingTime(g.getMeetingTime())
-                            .withMeetingPoint(g.getMeetingPoint())
                             .get();
                 }).collect(Collectors.toList()));
             }

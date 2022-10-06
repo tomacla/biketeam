@@ -2,6 +2,7 @@ package info.tomacla.biketeam.domain.template;
 
 import info.tomacla.biketeam.common.datatype.Lists;
 import info.tomacla.biketeam.common.datatype.Strings;
+import info.tomacla.biketeam.domain.place.Place;
 import info.tomacla.biketeam.domain.ride.RideType;
 
 import javax.persistence.*;
@@ -25,6 +26,14 @@ public class RideTemplate {
     private Set<RideGroupTemplate> groups = new HashSet<>();
     @Column
     private Integer increment;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "start_place_id")
+    private Place startPlace;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "end_place_id")
+    private Place endPlace;
 
     public String getId() {
         return id;
@@ -76,6 +85,22 @@ public class RideTemplate {
         } else {
             this.increment = increment;
         }
+    }
+
+    public Place getStartPlace() {
+        return startPlace;
+    }
+
+    public void setStartPlace(Place startPlace) {
+        this.startPlace = startPlace;
+    }
+
+    public Place getEndPlace() {
+        return endPlace;
+    }
+
+    public void setEndPlace(Place endPlace) {
+        this.endPlace = endPlace;
     }
 
     public Set<RideGroupTemplate> getGroups() {

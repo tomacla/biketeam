@@ -4,6 +4,7 @@ import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.datatype.Lists;
 import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.domain.message.RideMessage;
+import info.tomacla.biketeam.domain.place.Place;
 import org.springframework.util.ObjectUtils;
 
 import javax.persistence.*;
@@ -34,6 +35,15 @@ public class Ride {
     @Column(length = 8000)
     private String description;
     private boolean imaged;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "start_place_id")
+    private Place startPlace;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "end_place_id")
+    private Place endPlace;
+
     @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<RideGroup> groups = new HashSet<>();
     @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
@@ -119,6 +129,22 @@ public class Ride {
         this.imaged = imaged;
     }
 
+    public Place getStartPlace() {
+        return startPlace;
+    }
+
+    public void setStartPlace(Place startPlace) {
+        this.startPlace = startPlace;
+    }
+
+    public Place getEndPlace() {
+        return endPlace;
+    }
+
+    public void setEndPlace(Place endPlace) {
+        this.endPlace = endPlace;
+    }
+
     public Set<RideGroup> getGroups() {
         return groups;
     }
@@ -160,7 +186,6 @@ public class Ride {
         final List<RideGroup> existingGroups = updatedGroups.stream().filter(g -> existingGroupsId.contains(g.getId())).collect(Collectors.toList());
         existingGroups.forEach(g ->
                 this.groups.stream().filter(gg -> g.getId().equals(gg.getId())).findFirst().ifPresent(target -> {
-                    target.setMeetingLocation(g.getMeetingLocation());
                     target.setMeetingTime(g.getMeetingTime());
                     target.setName(g.getName());
                     target.setUpperSpeed(g.getUpperSpeed());

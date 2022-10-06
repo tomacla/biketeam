@@ -20,9 +20,7 @@ public class TripDTO {
     public LocalDate endDate;
     public double lowerSpeed;
     public double upperSpeed;
-    public String meetingLocation;
     public LocalTime meetingTime;
-    public PointDTO meetingPoint;
     public MapType type;
     public PublishedStatus publishedStatus;
     public ZonedDateTime publishedAt;
@@ -72,9 +70,7 @@ public class TripDTO {
         dto.endDate = trip.getEndDate();
         dto.lowerSpeed = trip.getLowerSpeed();
         dto.upperSpeed = trip.getUpperSpeed();
-        dto.meetingLocation = trip.getMeetingLocation();
         dto.meetingTime = trip.getMeetingTime();
-        dto.meetingPoint = PointDTO.valueOf(trip.getMeetingPoint());
         dto.type = trip.getType();
         dto.publishedStatus = trip.getPublishedStatus();
         dto.publishedAt = trip.getPublishedAt();
