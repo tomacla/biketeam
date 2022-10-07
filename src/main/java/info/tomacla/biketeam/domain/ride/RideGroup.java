@@ -1,7 +1,6 @@
 package info.tomacla.biketeam.domain.ride;
 
 import info.tomacla.biketeam.common.datatype.Strings;
-import info.tomacla.biketeam.common.geo.Point;
 import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.user.User;
 
@@ -27,16 +26,10 @@ public class RideGroup {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "map_id")
     private Map map;
-    @Column(name = "meeting_location")
-    private String meetingLocation;
+
     @Column(name = "meeting_time")
     private LocalTime meetingTime;
-    @AttributeOverrides({
-            @AttributeOverride(name = "lat", column = @Column(name = "meeting_point_lat")),
-            @AttributeOverride(name = "lng", column = @Column(name = "meeting_point_lng"))
-    })
-    @Embedded
-    private Point meetingPoint;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "ride_group_participant",
@@ -92,13 +85,6 @@ public class RideGroup {
         this.map = map;
     }
 
-    public String getMeetingLocation() {
-        return meetingLocation;
-    }
-
-    public void setMeetingLocation(String meetingLocation) {
-        this.meetingLocation = Strings.requireNonBlankOrNull(meetingLocation);
-    }
 
     public LocalTime getMeetingTime() {
         return meetingTime;
@@ -108,13 +94,6 @@ public class RideGroup {
         this.meetingTime = Objects.requireNonNull(meetingTime, "meetingTime is null");
     }
 
-    public Point getMeetingPoint() {
-        return meetingPoint;
-    }
-
-    public void setMeetingPoint(Point meetingPoint) {
-        this.meetingPoint = meetingPoint;
-    }
 
     public boolean hasParticipant(String userId) {
         return this.getParticipants().stream().map(User::getId).anyMatch(uid -> uid.equals(userId));

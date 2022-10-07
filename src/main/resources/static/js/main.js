@@ -66,6 +66,23 @@ document.addEventListener("DOMContentLoaded", function() {
 
 });
 
+var leafletModalMaps = [];
+function initPlaceMap(mapContainerId, lat, lng) {
+    var layer = L.tileLayer('https://wxs.ign.fr/{apikey}/geoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE={style}&TILEMATRIXSET=PM&FORMAT={format}&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}', {
+            attribution: 'Geoportail',
+            bounds: [[-75, -180], [81, 180]],
+            minZoom: 2,
+            maxZoom: 18,
+            apikey: 'cartes',
+            format: 'image/png',
+            style: 'normal'
+        });
+    var targetMap = L.map(mapContainerId, { zoomControl: false, layers: [layer] }).setView([lat, lng], 17);
+    L.marker([lat, lng], {clickable: false}).addTo(targetMap);
+    leafletModalMaps.push(targetMap);
+    return targetMap;
+}
+
 function scrollToBottom(element) {
     element.scrollTop = element.scrollHeight;
 }

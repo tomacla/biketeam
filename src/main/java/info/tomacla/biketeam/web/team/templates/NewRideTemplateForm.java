@@ -1,8 +1,10 @@
 package info.tomacla.biketeam.web.team.templates;
 
 import info.tomacla.biketeam.common.datatype.Strings;
+import info.tomacla.biketeam.domain.place.Place;
 import info.tomacla.biketeam.domain.ride.RideType;
 import info.tomacla.biketeam.domain.template.RideGroupTemplate;
+import info.tomacla.biketeam.service.PlaceService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +18,12 @@ public class NewRideTemplateForm {
     private String name = "";
     private String type = RideType.REGULAR.name();
     private String description = "";
+
+    private String startPlaceId = "";
+    private String endPlaceId = "";
     private List<NewRideGroupTemplateForm> groups = new ArrayList<>();
+
+
     private String increment = "";
 
     public NewRideTemplateForm() {
@@ -65,6 +72,24 @@ public class NewRideTemplateForm {
         this.description = Strings.requireNonBlankOrDefault(description, "");
     }
 
+    public String getStartPlaceId() {
+        return startPlaceId;
+    }
+
+    public void setStartPlaceId(String startPlaceId) {
+        this.startPlaceId = Strings.requireNonBlankOrDefault(startPlaceId, "");
+        ;
+    }
+
+    public String getEndPlaceId() {
+        return endPlaceId;
+    }
+
+    public void setEndPlaceId(String endPlaceId) {
+        this.endPlaceId = Strings.requireNonBlankOrDefault(endPlaceId, "");
+        ;
+    }
+
     public String getIncrement() {
         return increment;
     }
@@ -109,6 +134,20 @@ public class NewRideTemplateForm {
             return Strings.requireNonBlankOrNull(form.getDescription());
         }
 
+        public Place getStartPlace(String teamId, PlaceService placeService) {
+            if (!form.getStartPlaceId().equals("")) {
+                return placeService.get(teamId, form.getStartPlaceId()).orElse(null);
+            }
+            return null;
+        }
+
+        public Place getEndPlace(String teamId, PlaceService placeService) {
+            if (!form.getEndPlaceId().equals("")) {
+                return placeService.get(teamId, form.getEndPlaceId()).orElse(null);
+            }
+            return null;
+        }
+
         public Integer getIncrement() {
             if (Strings.isBlank(form.getIncrement())) {
                 return null;
@@ -124,9 +163,7 @@ public class NewRideTemplateForm {
                 gt.setName(parser.getName());
                 gt.setLowerSpeed(parser.getLowerSpeed());
                 gt.setUpperSpeed(parser.getUpperSpeed());
-                gt.setMeetingLocation(parser.getMeetingLocation());
                 gt.setMeetingTime(parser.getMeetingTime());
-                gt.setMeetingPoint(parser.getMeetingPoint());
 
                 if (parser.getId() != null) {
                     gt.setId(parser.getId());
@@ -167,6 +204,20 @@ public class NewRideTemplateForm {
             return this;
         }
 
+        public NewRideTemplateForm.NewRideTemplateFormBuilder withStartPlace(Place startPlace) {
+            if (startPlace != null) {
+                form.setStartPlaceId(startPlace.getId());
+            }
+            return this;
+        }
+
+        public NewRideTemplateForm.NewRideTemplateFormBuilder withEndPlace(Place endPlace) {
+            if (endPlace != null) {
+                form.setEndPlaceId(endPlace.getId());
+            }
+            return this;
+        }
+
         public NewRideTemplateFormBuilder withIncrement(Integer increment) {
             form.setIncrement(increment != null ? increment.toString() : null);
             return this;
@@ -179,9 +230,7 @@ public class NewRideTemplateForm {
                         .withName(g.getName())
                         .withLowerSpeed(g.getLowerSpeed())
                         .withUpperSpeed(g.getUpperSpeed())
-                        .withMeetingLocation(g.getMeetingLocation())
                         .withMeetingTime(g.getMeetingTime())
-                        .withMeetingPoint(g.getMeetingPoint())
                         .get()).collect(Collectors.toList()));
             }
             return this;

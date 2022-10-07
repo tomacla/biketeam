@@ -3,9 +3,9 @@ package info.tomacla.biketeam.domain.trip;
 import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.datatype.Lists;
 import info.tomacla.biketeam.common.datatype.Strings;
-import info.tomacla.biketeam.common.geo.Point;
 import info.tomacla.biketeam.domain.map.MapType;
 import info.tomacla.biketeam.domain.message.TripMessage;
+import info.tomacla.biketeam.domain.place.Place;
 import info.tomacla.biketeam.domain.user.User;
 import org.springframework.util.ObjectUtils;
 
@@ -33,16 +33,8 @@ public class Trip {
     private double lowerSpeed;
     @Column(name = "upper_speed")
     private double upperSpeed;
-    @Column(name = "meeting_location")
-    private String meetingLocation;
     @Column(name = "meeting_time")
     private LocalTime meetingTime;
-    @AttributeOverrides({
-            @AttributeOverride(name = "lat", column = @Column(name = "meeting_point_lat")),
-            @AttributeOverride(name = "lng", column = @Column(name = "meeting_point_lng"))
-    })
-    @Embedded
-    private Point meetingPoint;
     @Enumerated(EnumType.STRING)
     private MapType type = MapType.ROAD;
     @Enumerated(EnumType.STRING)
@@ -54,6 +46,13 @@ public class Trip {
     @Column(length = 8000)
     private String description;
     private boolean imaged;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "start_place_id")
+    private Place startPlace;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "end_place_id")
+    private Place endPlace;
     @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @OrderBy("id ASC")
     private Set<TripStage> stages = new HashSet<>();
@@ -154,6 +153,22 @@ public class Trip {
         this.imaged = imaged;
     }
 
+    public Place getStartPlace() {
+        return startPlace;
+    }
+
+    public void setStartPlace(Place startPlace) {
+        this.startPlace = startPlace;
+    }
+
+    public Place getEndPlace() {
+        return endPlace;
+    }
+
+    public void setEndPlace(Place endPlace) {
+        this.endPlace = endPlace;
+    }
+
     public double getLowerSpeed() {
         return lowerSpeed;
     }
@@ -170,28 +185,12 @@ public class Trip {
         this.upperSpeed = upperSpeed;
     }
 
-    public String getMeetingLocation() {
-        return meetingLocation;
-    }
-
-    public void setMeetingLocation(String meetingLocation) {
-        this.meetingLocation = Strings.requireNonBlankOrNull(meetingLocation);
-    }
-
     public LocalTime getMeetingTime() {
         return meetingTime;
     }
 
     public void setMeetingTime(LocalTime meetingTime) {
         this.meetingTime = Objects.requireNonNull(meetingTime);
-    }
-
-    public Point getMeetingPoint() {
-        return meetingPoint;
-    }
-
-    public void setMeetingPoint(Point meetingPoint) {
-        this.meetingPoint = meetingPoint;
     }
 
     public Set<TripStage> getStages() {

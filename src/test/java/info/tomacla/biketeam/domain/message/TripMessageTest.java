@@ -67,7 +67,6 @@ public class TripMessageTest extends AbstractDBTest {
         trip.setStartDate(LocalDate.now());
         trip.setEndDate(LocalDate.now().plus(1, ChronoUnit.DAYS));
         trip.setDescription("description");
-        trip.setMeetingLocation("test");
         trip.setMeetingTime(LocalTime.MIDNIGHT);
         trip.setPublishedAt(ZonedDateTime.now());
         trip.setPublishedStatus(PublishedStatus.PUBLISHED);

@@ -2,10 +2,13 @@ package info.tomacla.biketeam.api;
 
 import info.tomacla.biketeam.api.dto.FeedDTO;
 import info.tomacla.biketeam.api.dto.MemberDTO;
+import info.tomacla.biketeam.api.dto.PlaceDTO;
 import info.tomacla.biketeam.api.dto.TeamDTO;
 import info.tomacla.biketeam.common.data.Country;
 import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.service.PlaceService;
 import info.tomacla.biketeam.web.SearchTeamForm;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +21,9 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/teams")
 public class TeamAPI extends AbstractAPI {
+
+    @Autowired
+    private PlaceService placeService;
 
     @GetMapping(produces = "application/json")
     public ResponseEntity<List<TeamDTO>> getTeams(@RequestParam(value = "name", required = false) String name,
@@ -85,6 +91,15 @@ public class TeamAPI extends AbstractAPI {
         final Team team = checkTeam(teamId);
 
         return ResponseEntity.ok().body(team.getConfiguration().getMarkdownPage());
+
+    }
+
+    @GetMapping(path = "/{teamId}/places", produces = "application/json")
+    public ResponseEntity<List<PlaceDTO>> getTeamPlaces(@PathVariable String teamId) {
+
+        final Team team = checkTeam(teamId);
+
+        return ResponseEntity.ok().body(placeService.listPlaces(teamId).stream().map(p -> PlaceDTO.valueOf(p)).collect(Collectors.toList()));
 
     }
 
