@@ -112,6 +112,7 @@
                             <div style="width:30px; height:30px;" class="me-2"><img class="w-100 h-100 d-block rounded" src="<@common.teamUrl '' '/users/${participant.id}/image' />" alt="${participant.identity}"></div> <span class="small text-muted">${participant.identity}</span>
                         </div>
                     </#list>
+                 </div>
 
             </div>
           </div>
