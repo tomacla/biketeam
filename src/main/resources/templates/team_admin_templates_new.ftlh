@@ -87,6 +87,28 @@
                     </div>
                 </div>
 
+                <div class="row">
+                    <div class="col-6 mb-3">
+                      <label for="form-ride-startplace" class="form-label">Départ</label>
+                      <select required name="startPlaceId" class="form-select" id="form-ride-startplace">
+                          <option value="---"<#if formdata.startPlaceId == ''> selected</#if>>---</option>
+                          <#list places as place>
+                              <option value="${place.id}"<#if formdata.startPlaceId == place.id> selected</#if>>${place.name}</option>
+                          </#list>
+                        </select>
+                    </div>
+
+                    <div class="col-6 mb-3">
+                      <label for="form-ride-endplace" class="form-label">Arrivée</label>
+                      <select required name="endPlaceId" class="form-select" id="form-ride-endplace">
+                        <option value="---"<#if formdata.endPlaceId == ''> selected</#if>>---</option>
+                        <#list places as place>
+                            <option value="${place.id}"<#if formdata.endPlaceId == place.id> selected</#if>>${place.name}</option>
+                        </#list>
+                      </select>
+                    </div>
+                </div>
+
                 <div class="mb-3">
                   <label for="form-ride-description" class="form-label">Description</label>
                   <textarea required name="description" class="form-control" id="form-ride-description" rows="5">${formdata.description}</textarea>
@@ -125,12 +147,6 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="mb-3 col-8">
-                                    <label for="form-ride-group-meetinglocation-${group?index}" class="form-label">Lieu de rendez vous</label>
-                                    <input type="text" autocomplete="off" required value="${group.meetingLocation}" name="groups[${group?index}].meetingLocation" id="form-ride-group-meetinglocation-${group?index}" placeholder="Place des fêtes" class="form-input-geocode form-control">
-                                    <input type="hidden" value="${group.meetingPointLat?c}" name="groups[${group?index}].meetingPointLat" id="form-ride-group-meetinglocation-${group?index}-lat">
-                                    <input type="hidden" value="${group.meetingPointLng?c}" name="groups[${group?index}].meetingPointLng" id="form-ride-group-meetinglocation-${group?index}-lng">
-                                </div>
                                 <div class="mb-3 col-4 align-self-end text-end">
                                     <button id="form-ride-group-delete-${group?index}" onclick="removeGroup(this);" type="button" class="btn btn-sm btn-secondary"><i class="bi bi-trash"></i> Supprimer</button>
                                 </div>

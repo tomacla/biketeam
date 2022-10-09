@@ -2,6 +2,7 @@ package info.tomacla.biketeam.web.team.templates;
 
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.template.RideTemplate;
+import info.tomacla.biketeam.service.PlaceService;
 import info.tomacla.biketeam.service.RideTemplateService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,9 @@ public class AdminTeamRideTemplateController extends AbstractController {
     @Autowired
     private RideTemplateService rideTemplateService;
 
+    @Autowired
+    private PlaceService placeService;
+
 
     @GetMapping
     public String getTemplates(@PathVariable("teamId") String teamId,
@@ -33,6 +37,7 @@ public class AdminTeamRideTemplateController extends AbstractController {
 
         addGlobalValues(principal, model, "Administration - Templates", team);
         model.addAttribute("templates", rideTemplateService.listTemplates(team.getId()));
+        model.addAttribute("places", placeService.listPlaces(teamId));
         if (!ObjectUtils.isEmpty(error)) {
             model.addAttribute("errors", List.of(error));
         }
@@ -51,6 +56,7 @@ public class AdminTeamRideTemplateController extends AbstractController {
 
         addGlobalValues(principal, model, "Administration - Nouveau template", team);
         model.addAttribute("formdata", form);
+        model.addAttribute("places", placeService.listPlaces(teamId));
         if (!ObjectUtils.isEmpty(error)) {
             model.addAttribute("errors", List.of(error));
         }
@@ -80,11 +86,14 @@ public class AdminTeamRideTemplateController extends AbstractController {
                 .withIncrement(rideTemplate.getIncrement())
                 .withType(rideTemplate.getType())
                 .withGroups(rideTemplate.getSortedGroups())
+                .withStartPlace(rideTemplate.getStartPlace())
+                .withEndPlace(rideTemplate.getEndPlace())
                 .get();
 
 
         addGlobalValues(principal, model, "Administration - Modifier le template", team);
         model.addAttribute("formdata", form);
+        model.addAttribute("places", placeService.listPlaces(teamId));
         if (!ObjectUtils.isEmpty(error)) {
             model.addAttribute("errors", List.of(error));
         }
@@ -126,6 +135,8 @@ public class AdminTeamRideTemplateController extends AbstractController {
             }
 
             target.setIncrement(parser.getIncrement());
+            target.setStartPlace(parser.getStartPlace(teamId, placeService));
+            target.setEndPlace(parser.getEndPlace(teamId, placeService));
 
             target.clearGroups();
             parser.getGroups().forEach(target::addGroup);

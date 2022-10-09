@@ -18,8 +18,6 @@ public class NewRideGroupFormTest {
                 .withName("group")
                 .withLowerSpeed(10)
                 .withUpperSpeed(50)
-                .withMeetingLocation("nantes")
-                .withMeetingPoint(new Point(5.0, 10.0))
                 .withMeetingTime(LocalTime.parse("16:30"))
                 .withMapId("mapid")
                 .withMapName("mapname")
@@ -31,8 +29,6 @@ public class NewRideGroupFormTest {
         assertEquals("group", parser.getName());
         assertEquals(10, parser.getLowerSpeed());
         assertEquals(50, parser.getUpperSpeed());
-        assertEquals("nantes", parser.getMeetingLocation());
-        assertEquals(new Point(5.0, 10.0), parser.getMeetingPoint());
         assertEquals(LocalTime.parse("16:30"), parser.getMeetingTime());
         assertEquals("mapid", parser.getMapId());
 
@@ -49,8 +45,6 @@ public class NewRideGroupFormTest {
         assertNull(parser.getName());
         assertEquals(28, parser.getLowerSpeed());
         assertEquals(30, parser.getUpperSpeed());
-        assertNull(parser.getMeetingLocation());
-        assertNull(parser.getMeetingPoint());
         assertEquals(LocalTime.parse("12:00"), parser.getMeetingTime());
         assertNull(parser.getMapId());
 

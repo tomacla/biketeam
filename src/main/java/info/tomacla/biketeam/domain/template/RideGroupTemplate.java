@@ -1,7 +1,6 @@
 package info.tomacla.biketeam.domain.template;
 
 import info.tomacla.biketeam.common.datatype.Strings;
-import info.tomacla.biketeam.common.geo.Point;
 
 import javax.persistence.*;
 import java.time.LocalTime;
@@ -22,16 +21,8 @@ public class RideGroupTemplate {
     private double lowerSpeed;
     @Column(name = "upper_speed")
     private double upperSpeed;
-    @Column(name = "meeting_location")
-    private String meetingLocation;
     @Column(name = "meeting_time")
     private LocalTime meetingTime;
-    @AttributeOverrides({
-            @AttributeOverride(name = "lat", column = @Column(name = "meeting_point_lat")),
-            @AttributeOverride(name = "lng", column = @Column(name = "meeting_point_lng"))
-    })
-    @Embedded
-    private Point meetingPoint;
 
     public String getId() {
         return id;
@@ -73,13 +64,6 @@ public class RideGroupTemplate {
         this.upperSpeed = upperSpeed;
     }
 
-    public String getMeetingLocation() {
-        return meetingLocation;
-    }
-
-    public void setMeetingLocation(String meetingLocation) {
-        this.meetingLocation = Strings.requireNonBlankOrNull(meetingLocation);
-    }
 
     public LocalTime getMeetingTime() {
         return meetingTime;
@@ -87,14 +71,6 @@ public class RideGroupTemplate {
 
     public void setMeetingTime(LocalTime meetingTime) {
         this.meetingTime = Objects.requireNonNull(meetingTime, "meetingTime is null");
-    }
-
-    public Point getMeetingPoint() {
-        return meetingPoint;
-    }
-
-    public void setMeetingPoint(Point meetingPoint) {
-        this.meetingPoint = meetingPoint;
     }
 
     @Override

@@ -77,7 +77,7 @@ public class MailService implements BroadcastService {
                 sb.append("<p>").append(group.getName()).append(" - ");
                 sb.append(Math.round(group.getLowerSpeed())).append("/").append(Math.round(group.getUpperSpeed())).append(" km/h").append("<br/>");
                 sb.append("Départ ").append(Dates.formatTime(group.getMeetingTime())).append(" - ");
-                sb.append(group.getMeetingLocation()).append("<br/>");
+                // FIXME add meeting location
                 if (group.getMap() != null) {
                     sb.append("Map : ").append(getHtmlLink(urlService.getMapUrl(team, group.getMap()))).append("<br/>");
                 }
@@ -118,7 +118,7 @@ public class MailService implements BroadcastService {
             sb.append("<p>").append(trip.getDescription()).append("</p>");
             sb.append("<p>").append(Math.round(trip.getLowerSpeed())).append("/").append(Math.round(trip.getUpperSpeed())).append(" km/h").append("<br/>");
             sb.append("Départ ").append(Dates.formatTime(trip.getMeetingTime())).append(" - ");
-            sb.append(trip.getMeetingLocation()).append("<br/>");
+            // FIXME add meeting location
             sb.append("</p>");
             sb.append("<br/>");
             trip.getSortedStages().forEach(stage -> {

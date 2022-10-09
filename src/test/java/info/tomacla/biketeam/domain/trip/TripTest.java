@@ -60,7 +60,6 @@ public class TripTest extends AbstractDBTest {
         trip.setDescription("description");
         trip.setPublishedAt(publishedAt);
         trip.setPublishedStatus(status);
-        trip.setMeetingLocation("nantes");
         trip.setMeetingTime(LocalTime.MIDNIGHT);
         tripRepository.save(trip);
     }

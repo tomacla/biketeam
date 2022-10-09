@@ -1,10 +1,12 @@
 package info.tomacla.biketeam.web.team.ride;
 
 import info.tomacla.biketeam.common.data.PublishedStatus;
+import info.tomacla.biketeam.domain.place.PlaceSorterOption;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.template.RideTemplate;
 import info.tomacla.biketeam.service.MapService;
+import info.tomacla.biketeam.service.PlaceService;
 import info.tomacla.biketeam.service.RideService;
 import info.tomacla.biketeam.service.RideTemplateService;
 import info.tomacla.biketeam.web.AbstractController;
@@ -32,6 +34,9 @@ public class AdminTeamRideController extends AbstractController {
 
     @Autowired
     private MapService mapService;
+
+    @Autowired
+    private PlaceService placeService;
 
     @Autowired
     private RideTemplateService rideTemplateService;
@@ -82,6 +87,8 @@ public class AdminTeamRideController extends AbstractController {
 
         addGlobalValues(principal, model, "Administration - Nouveau ride", team);
         model.addAttribute("formdata", form);
+        model.addAttribute("startPlaces", placeService.listPlacesWithAppearances(teamId, PlaceSorterOption.RIDE_START));
+        model.addAttribute("endPlaces", placeService.listPlacesWithAppearances(teamId, PlaceSorterOption.RIDE_END));
         model.addAttribute("imaged", false);
         model.addAttribute("published", false);
         if (!ObjectUtils.isEmpty(error)) {
@@ -116,10 +123,14 @@ public class AdminTeamRideController extends AbstractController {
                 .withPublishedAt(ride.getPublishedAt(), team.getZoneId())
                 .withTitle(ride.getTitle())
                 .withGroups(ride.getSortedGroups())
+                .withStartPlace(ride.getStartPlace())
+                .withEndPlace(ride.getEndPlace())
                 .get();
 
         addGlobalValues(principal, model, "Administration - Modifier le ride", team);
         model.addAttribute("formdata", form);
+        model.addAttribute("startPlaces", placeService.listPlacesWithAppearances(teamId, PlaceSorterOption.RIDE_START));
+        model.addAttribute("endPlaces", placeService.listPlacesWithAppearances(teamId, PlaceSorterOption.RIDE_END));
         model.addAttribute("imaged", ride.isImaged());
         model.addAttribute("published", ride.getPublishedStatus().equals(PublishedStatus.PUBLISHED));
         if (!ObjectUtils.isEmpty(error)) {
@@ -176,12 +187,16 @@ public class AdminTeamRideController extends AbstractController {
                 target.setDescription(parser.getDescription());
                 target.setImaged(parser.getFile().isPresent());
 
+
                 if (parser.getTemplateId() != null) {
                     rideTemplateService.increment(team.getId(), parser.getTemplateId());
                 }
                 // new group so just add all groups
                 parser.getGroups(team.getId(), mapService).forEach(target::addGroup);
             }
+
+            target.setStartPlace(parser.getStartPlace(teamId, placeService));
+            target.setEndPlace(parser.getEndPlace(teamId, placeService));
 
             if (parser.getFile().isPresent()) {
                 target.setImaged(true);
@@ -192,7 +207,6 @@ public class AdminTeamRideController extends AbstractController {
             rideService.save(target);
 
             return viewHandler.redirectView(team, "/admin/rides");
-
 
         } catch (Exception e) {
             attributes.addFlashAttribute("error", e.getMessage());

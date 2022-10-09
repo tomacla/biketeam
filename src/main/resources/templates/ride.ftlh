@@ -4,6 +4,44 @@
 
     <#include "ride_nav.ftlh">
 
+    <#if ride.startPlace?? || ride.endPlace??>
+        <div class="modal" tabindex="-1" id="placemodal">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+
+                  <#if ride.startPlace?? && ride.endPlace?? && ride.startPlace.id == ride.endPlace.id>
+                        <@common.displayPlace "Départ/Arrivée" ride.startPlace />
+                  <#else>
+
+                    <div class="row">
+
+                    <#if ride.startPlace??>
+                    <div class="col-12 col-md-6">
+                        <@common.displayPlace "Départ" ride.startPlace />
+                    </div>
+                    </#if>
+
+                    <#if ride.endPlace??>
+                    <div class="col-12 col-md-6">
+                    <@common.displayPlace "Arrivée" ride.endPlace />
+                    </div>
+                    </#if>
+
+                    </div>
+
+
+                   </#if>
+
+              </div>
+            </div>
+          </div>
+        </div>
+    </#if>
+
     <div class="col-12 col-md-4 mb-4">
 
         <div class="border rounded p-2">
@@ -16,6 +54,17 @@
             </#if>
             <h5 class="text-muted">${ride.date.format(_date_formatter)}</h5>
 
+            <#if ride.startPlace?? || ride.endPlace??>
+            <ul class="list-unstyled">
+                <#if ride.startPlace??>
+                    <li>Départ : <a href="#" class="link-dark" data-bs-toggle="modal" data-bs-target="#placemodal">${ride.startPlace.name}</a></li>
+                </#if>
+                <#if ride.endPlace??>
+                    <li>Arrivée : <a href="#" class="link-dark" data-bs-toggle="modal" data-bs-target="#placemodal">${ride.endPlace.name}</a></li>
+                </#if>
+            </ul>
+            </#if>
+
             <hr/>
 
             <p class="wrap-content">${ride.description}</p>
@@ -23,8 +72,6 @@
                <#if ride.imaged>
                  <img src="<@common.teamUrl team.id '/rides/${ride.id}/image' />" class="d-block shadow rounded w-100 h-auto mx-auto" alt="${ride.id} image">
              </#if>
-
-
 
         </div>
 
@@ -35,31 +82,53 @@
    <#assign themes=["lime-theme", "steelblue-theme", "purple-theme", "yellow-theme", "red-theme", "magenta-theme", "lightblue-theme"]>
    <#assign groupMaps = []>
    <#assign mapCenter = [0.0,0.0]>
-   <#assign meetingPoint = []>
-   <#assign meetingLocation = ''>
+   <#if ride.startPlace?? && ride.startPlace.point??>
+       <#assign mapCenter = [ride.startPlace.point.lat,ride.startPlace.point.lng]>
+  </#if>
    <#list ride.sortedGroups as group>
-      <#assign meetingLocation = group.meetingLocation>
-      <#if (group.meetingPoint)??>
-            <#assign meetingPoint = [group.meetingPoint.lat, group.meetingPoint.lng]>
-      </#if>
       <#if group.map??>
-        <#assign mapCenter = [group.map.startPoint.lat, group.map.startPoint.lng]>
-        <#assign mapId = group.map.id>
+          <#if mapCenter[0] == 0.0>
+            <#assign mapCenter = [group.map.startPoint.lat, group.map.startPoint.lng]>
+          </#if>
+          <#assign mapId = group.map.id>
           <#if groupMaps?seq_contains(mapId)>
           <#else>
             <#assign groupMaps = groupMaps + [mapId]>
           </#if>
       </#if>
+
+      <div class="modal" tabindex="-1" id="groupmodal-${group.id}">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+                <h5>Participants</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                 <div class="d-flex flex-wrap justify-content-center">
+                    <#list group.sortedParticipants as participant>
+                        <div class="d-flex align-items-center border rounded pe-2 me-2 mb-2">
+                            <div style="width:30px; height:30px;" class="me-2"><img class="w-100 h-100 d-block rounded" src="<@common.teamUrl '' '/users/${participant.id}/image' />" alt="${participant.identity}"></div> <span class="small text-muted">${participant.identity}</span>
+                        </div>
+                    </#list>
+                 </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
    </#list>
 
     <div class="col-12 col-md-8 mb-4">
 
         <div class="border rounded p-2">
-            <div class="table-responsive-sm">
 
-                <#if meetingLocation != ''>
-                    <p>Lieu de rendez vous : <#if meetingPoint?size != 0><a class="link-dark" target="_blank" href="https://www.google.com/maps/search/?api=1&query=${meetingPoint[0]?c},${meetingPoint[1]?c}"></#if>${meetingLocation}<#if meetingPoint?size != 0></a></#if></p>
-                </#if>
+
+
+
+            <div class="table-responsive-sm mb-4">
 
                 <table class="table table-sm table-striped">
                     <thead>
@@ -93,7 +162,7 @@
                                             </#if>
                                         </div>
                                         <div>
-                                            <#if group.sortedParticipants?size gt 0><span class="text-muted small fst-italic">${group.sortedParticipants?size} rider<#if group.sortedParticipants?size gt 1>s</#if></span></#if>
+                                            <#if group.sortedParticipants?size gt 0><a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#groupmodal-${group.id}"><span class="text-muted small fst-italic">${group.sortedParticipants?size} rider<#if group.sortedParticipants?size gt 1>s</#if></span></a></#if>
                                         </div>
                                     </div>
                                 </td>
@@ -221,6 +290,18 @@
                 initGpx(targetMap, '<@common.teamUrl team.id '/maps/${group.map.id}/gpx' />', '${themes[groupMaps?seq_index_of(group.map.id)%7]}');
             </#if>
         </#list>
+
+
+        <#if ride.startPlace?? || ride.endPlace??>
+            const myModalEl = document.getElementById('placemodal')
+            myModalEl.addEventListener('show.bs.modal', event => {
+                leafletModalMaps.forEach(map => {
+                 setTimeout(function() {
+                        map.invalidateSize();
+                    }, 10);
+                });
+            })
+        </#if>
 
     </script>
 

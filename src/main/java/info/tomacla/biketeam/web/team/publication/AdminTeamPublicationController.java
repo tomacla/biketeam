@@ -79,6 +79,7 @@ public class AdminTeamPublicationController extends AbstractController {
         if (!ObjectUtils.isEmpty(error)) {
             model.addAttribute("errors", List.of(error));
         }
+
         return "team_admin_publications_new";
     }
 
