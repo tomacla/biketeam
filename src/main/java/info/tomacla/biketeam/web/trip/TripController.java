@@ -85,34 +85,6 @@ public class TripController extends AbstractController {
         return "trip";
     }
 
-    @GetMapping(value = "/{tripId}/stages")
-    public String getTripStages(@PathVariable("teamId") String teamId,
-                                @PathVariable("tripId") String tripId,
-                                @ModelAttribute("error") String error,
-                                Principal principal,
-                                Model model) {
-
-        final Team team = checkTeam(teamId);
-
-        Optional<Trip> optionalTrip = tripService.get(team.getId(), tripId);
-        if (optionalTrip.isEmpty()) {
-            return viewHandler.redirect(team, "/trips");
-        }
-
-        Trip trip = optionalTrip.get();
-
-        if (!trip.getPublishedStatus().equals(PublishedStatus.PUBLISHED) && !isAdmin(principal, team)) {
-            return viewHandler.redirect(team, "/trips");
-        }
-
-        addGlobalValues(principal, model, "Trip " + trip.getTitle(), team);
-        model.addAttribute("trip", trip);
-        if (!ObjectUtils.isEmpty(error)) {
-            model.addAttribute("errors", List.of(error));
-        }
-        return "trip_stages";
-    }
-
     @GetMapping(value = "/{tripId}/messages")
     public String getTripMessages(@PathVariable("teamId") String teamId,
                                   @PathVariable("tripId") String tripId,

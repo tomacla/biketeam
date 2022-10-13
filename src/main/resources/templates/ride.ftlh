@@ -97,6 +97,7 @@
           </#if>
       </#if>
 
+    <#if group.sortedParticipants?size gt 0>
       <div class="modal" tabindex="-1" id="groupmodal-${group.id}">
         <div class="modal-dialog">
           <div class="modal-content">
@@ -118,6 +119,7 @@
           </div>
         </div>
       </div>
+      </#if>
 
    </#list>
 
@@ -157,12 +159,14 @@
                                         <div class="d-none d-md-flex profile-images me-2">
                                             <#if group.sortedParticipants?size gt 0>
                                                 <#list group.sortedParticipants?chunk(3)[0] as participant>
-                                                        <div class="profile-images-item" style="width:24px; height:24px;" data-bs-toggle="tooltip" data-bs-placement="top" title="${participant.identity}" class="d-inline-block"><img class="w-100 h-100 d-block" src="<@common.teamUrl '' '/users/${participant.id}/image' />" alt="${participant.identity}"></div>
+                                                        <div class="profile-images-item" style="width:24px; height:24px;" class="d-inline-block"><img class="w-100 h-100 d-block" src="<@common.teamUrl '' '/users/${participant.id}/image' />" alt="${participant.identity}"></div>
                                                 </#list>
                                             </#if>
                                         </div>
                                         <div>
-                                            <#if group.sortedParticipants?size gt 0><a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#groupmodal-${group.id}"><span class="text-muted small fst-italic">${group.sortedParticipants?size} rider<#if group.sortedParticipants?size gt 1>s</#if></span></a></#if>
+                                            <#if group.sortedParticipants?size gt 3>
+                                                <a href="#" class="text-decoration-none link-secondary" data-bs-toggle="modal" data-bs-target="#groupmodal-${group.id}"><span class="text-muted small fst-italic">+${group.sortedParticipants?size - 3}</span></a>
+                                            </#if>
                                         </div>
                                     </div>
                                 </td>
