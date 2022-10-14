@@ -9,7 +9,9 @@ import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.service.UserService;
 import info.tomacla.biketeam.service.url.UrlService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.RememberMeAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -27,6 +29,9 @@ public abstract class AbstractController {
 
     @Autowired
     protected UserService userService;
+
+    @Value("${rememberme.key}")
+    private String rememberMeKey;
 
     @Autowired
     private UrlService urlService;
@@ -138,16 +143,33 @@ public abstract class AbstractController {
     }
 
     protected void addAuthorityToCurrentSession(GrantedAuthority authority) {
-        OAuth2AuthenticationToken auth = (OAuth2AuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        List<GrantedAuthority> updatedAuthorities = new ArrayList<>(auth.getAuthorities());
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        List<GrantedAuthority> updatedAuthorities = new ArrayList<>(authentication.getAuthorities());
         updatedAuthorities.add(authority);
 
-        SecurityContextHolder.getContext().setAuthentication(
-                new OAuth2AuthenticationToken(
-                        auth.getPrincipal(),
-                        updatedAuthorities,
-                        auth.getAuthorizedClientRegistrationId())
-        );
+        if (authentication instanceof OAuth2AuthenticationToken) {
+
+            OAuth2AuthenticationToken oauth2Auth = (OAuth2AuthenticationToken) authentication;
+            SecurityContextHolder.getContext().setAuthentication(
+                    new OAuth2AuthenticationToken(
+                            oauth2Auth.getPrincipal(),
+                            updatedAuthorities,
+                            oauth2Auth.getAuthorizedClientRegistrationId())
+            );
+
+        } else if (authentication instanceof RememberMeAuthenticationToken) {
+
+            RememberMeAuthenticationToken rmAuth = (RememberMeAuthenticationToken) authentication;
+            SecurityContextHolder.getContext().setAuthentication(
+                    new RememberMeAuthenticationToken(
+                            rememberMeKey,
+                            rmAuth.getPrincipal(),
+                            updatedAuthorities)
+            );
+
+        }
 
     }
 
