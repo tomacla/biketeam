@@ -159,7 +159,7 @@
                                         <div class="d-none d-md-flex profile-images me-2">
                                             <#if group.sortedParticipants?size gt 0>
                                                 <#list group.sortedParticipants?chunk(3)[0] as participant>
-                                                        <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#groupmodal-${group.id}"><div class="profile-images-item" style="width:24px; height:24px;" class="d-inline-block"><img class="w-100 h-100 d-block" src="<@common.teamUrl '' '/users/${participant.id}/image' />" alt="${participant.identity}"></div></a>
+                                                        <div class="profile-images-item" style="width:24px; height:24px;" class="d-inline-block"><a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#groupmodal-${group.id}"><img class="w-100 h-100 d-block" src="<@common.teamUrl '' '/users/${participant.id}/image' />" alt="${participant.identity}"></a></div>
                                                 </#list>
                                             </#if>
                                         </div>
