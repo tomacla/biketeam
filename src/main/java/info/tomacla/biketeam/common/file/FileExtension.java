@@ -44,6 +44,20 @@ public enum FileExtension {
         return Optional.empty();
     }
 
+    public static Optional<FileExtension> findByMimeType(String mimetype) {
+
+        if (Strings.isBlank(mimetype)) {
+            return Optional.empty();
+        }
+
+        for (FileExtension fileExtension : byPriority()) {
+            if(fileExtension.getMediaType().equals(mimetype)) {
+                return Optional.of(fileExtension);
+            }
+        }
+        return Optional.empty();
+    }
+
     public String getExtension() {
         return extension;
     }

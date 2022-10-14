@@ -135,7 +135,11 @@ public class User {
     }
 
     public void setEmail(String email) {
-        this.email = Strings.requireEmailOrNull(email);
+        if(Strings.isEmail(email)) {
+            this.email = email.toLowerCase();
+        } else {
+            this.email = null;
+        }
     }
 
     public boolean isEmailPublishTrips() {
