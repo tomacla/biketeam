@@ -10,8 +10,8 @@ public interface FileRepositories {
     String MAP_IMAGES = "map-images";
     String GPX_FILES = "gpx";
     String FIT_FILES = "fit";
+    String GEOJSON_FILES = "geojson";
     String MISC_IMAGES = "misc";
-
     String USER_IMAGES = "user-images";
 
     static List<String> list() {
@@ -21,6 +21,7 @@ public interface FileRepositories {
                 MAP_IMAGES,
                 GPX_FILES,
                 FIT_FILES,
+                GEOJSON_FILES,
                 MISC_IMAGES,
                 USER_IMAGES);
     }

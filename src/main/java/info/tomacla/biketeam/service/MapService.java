@@ -163,6 +163,17 @@ public class MapService extends AbstractPermalinkService {
         return Optional.empty();
     }
 
+    public Optional<Path> getGeoJsonFile(String teamId, String mapId) {
+        final Optional<Map> optionalMap = get(teamId, mapId);
+        if (optionalMap.isPresent()) {
+            String geoJsonName = optionalMap.get().getId() + ".json";
+            if (fileService.fileExists(FileRepositories.GEOJSON_FILES, teamId, geoJsonName)) {
+                return Optional.of(fileService.getFile(FileRepositories.GEOJSON_FILES, teamId, geoJsonName));
+            }
+        }
+        return Optional.empty();
+    }
+
     public Optional<Path> getGpxFile(String teamId, String mapId) {
         final Optional<Map> optionalMap = get(teamId, mapId);
         if (optionalMap.isPresent()) {
