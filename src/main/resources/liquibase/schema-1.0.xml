@@ -1083,6 +1083,16 @@
 
     </changeSet>
 
+    <changeSet id="add-team-type" author="tomacla">
+
+        <addColumn tableName="team">
+            <column name="type" type="VARCHAR(30)" />
+        </addColumn>
+
+        <sql>update team set type = 'BIKE'</sql>
+
+    </changeSet>
+
 </databaseChangeLog>
 
 
