@@ -36,6 +36,17 @@ public class AdminUserController extends AbstractController {
 
     }
 
+    @PostMapping(value = "/merge")
+    public String mergeUsers(Principal principal, Model model,
+                             @RequestParam("sourceId") String sourceId,
+                             @RequestParam("targetId") String targetId) {
+
+        userService.merge(sourceId, targetId);
+
+        return "redirect:/admin/users";
+
+    }
+
     @GetMapping(value = "/promote/{userId}")
     public String promoteUser(@PathVariable("userId") String userId,
                               Model model) {

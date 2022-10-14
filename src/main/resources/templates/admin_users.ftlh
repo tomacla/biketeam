@@ -28,6 +28,27 @@
                 <input type="submit" class="btn btn-secondary" value="Nouvel utilisateur">
             </div>
         </form>
+
+        <hr/>
+
+        <form enctype="multipart/form-data" method="POST" action="<@common.teamUrl '' '/admin/users/merge' />" class="row mb-0">
+            <div class="col-auto p-2">
+              <label for="form-user-sourceId" class="form-label">Source ID</label>
+            </div>
+            <div class="col-auto">
+                <input autocomplete="off" required name="sourceId" class="form-control" type="text" id="form-user-sourceId">
+            </div>
+            <div class="col-auto p-2">
+              <label for="form-user-targetId" class="form-label">Target ID</label>
+            </div>
+            <div class="col-auto">
+                <input autocomplete="off" required name="targetId" class="form-control" type="text" id="form-user-targetId">
+            </div>
+            <div class="col-auto">
+                <input type="submit" class="btn btn-secondary" value="Fusionner">
+            </div>
+        </form>
+
         <hr/>
 
         <#if users?size gt 0>

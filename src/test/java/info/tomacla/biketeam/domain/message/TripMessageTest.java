@@ -76,7 +76,7 @@ public class TripMessageTest extends AbstractDBTest {
 
     private User createUser() {
         User u = new User();
-        u.setEmail("ride@messenger.com");
+        u.setEmail("ride2@messenger.com");
         userRepository.save(u);
         return u;
     }
