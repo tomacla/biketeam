@@ -228,8 +228,13 @@ public class RootController extends AbstractController {
     @ResponseBody
     @RequestMapping(value = "/robots.txt", method = RequestMethod.GET)
     public String robotsTxt() {
-        return "User-agent: *\n" +
-                "Disallow: /";
+
+        String robotsTxt = """
+                User-agent: *
+                Disallow: /admin
+                """;
+
+        return robotsTxt;
     }
 
     @RequestMapping(value = "/legal-mentions", method = RequestMethod.GET)
