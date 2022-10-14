@@ -15,6 +15,7 @@ public class FileExtensionTest {
         assertEquals(FileExtension.JPEG, FileExtension.findByFileName("foobar.JPEG").get());
         assertEquals(FileExtension.JPEG, FileExtension.findByFileName("foobar.png.JpeG").get());
         assertFalse(FileExtension.findByFileName("foobar.java").isPresent());
+        assertEquals(FileExtension.PNG, FileExtension.findByMimeType("image/png").get());
     }
 
 }

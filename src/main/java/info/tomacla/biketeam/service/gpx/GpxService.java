@@ -83,8 +83,11 @@ public class GpxService {
 
     private GPXPath prepareMap(final Path gpx, final String defaultName, final Map map, final Team team) {
         GPXPath gpxPath = getGPXPath(gpx, defaultName);
-        gpxPathEnhancer.virtualize(gpxPath);
-        GPXFilter.filterPointsDouglasPeucker(gpxPath);
+
+        if(team.getType().isSimplifyGpx()) {
+            gpxPathEnhancer.virtualize(gpxPath);
+            GPXFilter.filterPointsDouglasPeucker(gpxPath);
+        }
 
         Path storedStaticMap = getStaticMap(gpxPath);
         Path storedFit = getFit(gpxPath);

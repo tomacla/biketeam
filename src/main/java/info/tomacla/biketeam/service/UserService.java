@@ -1,6 +1,7 @@
 package info.tomacla.biketeam.service;
 
 import info.tomacla.biketeam.common.amqp.Queues;
+import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
@@ -8,6 +9,8 @@ import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.Visibility;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.user.UserRepository;
+import info.tomacla.biketeam.domain.userrole.Role;
+import info.tomacla.biketeam.domain.userrole.UserRole;
 import info.tomacla.biketeam.security.Authorities;
 import info.tomacla.biketeam.service.amqp.dto.UserProfileImageDTO;
 import info.tomacla.biketeam.service.file.FileService;
@@ -168,6 +171,77 @@ public class UserService {
     }
 
     @Transactional
+    public void merge(String sourceId, String targetId) {
+
+        Optional<User> optionalSource = get(sourceId);
+        Optional<User> optionalTarget = get(targetId);
+
+        if (optionalSource.isEmpty() || optionalTarget.isEmpty()) {
+            throw new IllegalArgumentException("Unknown ids for merge");
+        }
+
+        try {
+            User source = optionalSource.get();
+            User target = optionalTarget.get();
+
+            if (!Strings.isBlank(source.getFirstName()) && Strings.isBlank(target.getFirstName())) {
+                target.setFirstName(source.getFirstName());
+            }
+            if (!Strings.isBlank(source.getLastName()) && Strings.isBlank(target.getLastName())) {
+                target.setLastName(source.getLastName());
+            }
+            if (source.getStravaId() != null && target.getStravaId() == null) {
+                target.setStravaId(source.getStravaId());
+                target.setStravaUserName(source.getStravaUserName());
+                source.setStravaId(null);
+            }
+            if (!Strings.isBlank(source.getCity()) && Strings.isBlank(target.getCity())) {
+                target.setCity(source.getCity());
+            }
+            if (!Strings.isBlank(source.getEmail()) && Strings.isBlank(target.getEmail())) {
+                target.setEmail(source.getEmail());
+                source.setEmail(null);
+            }
+            if (!Strings.isBlank(source.getGoogleId()) && Strings.isBlank(target.getGoogleId())) {
+                target.setGoogleId(source.getGoogleId());
+                source.setGoogleId(null);
+            }
+            if (!Strings.isBlank(source.getFacebookId()) && Strings.isBlank(target.getFacebookId())) {
+                target.setFacebookId(source.getFacebookId());
+                source.setFacebookId(null);
+            }
+
+            target.setAdmin(source.isAdmin() || target.isAdmin());
+            target.setEmailPublishTrips(source.isEmailPublishTrips() || target.isEmailPublishTrips());
+            target.setEmailPublishPublications(source.isEmailPublishPublications() || target.isEmailPublishPublications());
+            target.setEmailPublishRides(source.isEmailPublishRides() || target.isEmailPublishRides());
+
+            for (UserRole role : source.getRoles()) {
+                if (role.getTeam().isMember(target)) {
+                    if (role.getRole().equals(Role.ADMIN) && !role.getTeam().isAdmin(target)) {
+                        UserRole targetRole = userRoleService.get(role.getTeam(), target).get();
+                        targetRole.setRole(Role.ADMIN);
+                        userRoleService.save(targetRole);
+                    }
+                } else {
+                    userRoleService.save(new UserRole(role.getTeam(), target, role.getRole()));
+                }
+            }
+
+            source.getRoles().clear();
+
+            this.delete(source);
+            this.save(target);
+
+            // TODO copy participations in trips and rides
+
+        } catch (Exception e) {
+
+        }
+
+    }
+
+    @Transactional
     public void delete(User user) {
         try {
             log.info("Request user deletion {}", user.getId());
@@ -200,6 +274,5 @@ public class UserService {
         }
 
     }
-
 
 }

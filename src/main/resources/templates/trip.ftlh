@@ -42,6 +42,30 @@
             </div>
         </#if>
 
+     <#if trip.sortedParticipants?size gt 0>
+       <div class="modal" tabindex="-1" id="participantsmodal">
+         <div class="modal-dialog">
+           <div class="modal-content">
+             <div class="modal-header">
+                 <h5>Participants</h5>
+                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+             </div>
+             <div class="modal-body">
+
+                  <div class="d-flex flex-wrap justify-content-center">
+                     <#list trip.sortedParticipants as participant>
+                         <div class="d-flex align-items-center border rounded pe-2 me-2 mb-2">
+                             <div style="width:30px; height:30px;" class="me-2"><img class="w-100 h-100 d-block rounded" src="<@common.teamUrl '' '/users/${participant.id}/image' />" alt="${participant.identity}"></div> <span class="small text-muted">${participant.identity}</span>
+                         </div>
+                     </#list>
+                  </div>
+
+             </div>
+           </div>
+         </div>
+       </div>
+       </#if>
+
     <div class="col-12 col-md-4 mb-4">
 
         <div class="border rounded p-2">
@@ -68,26 +92,41 @@
                 </#if>
             </ul>
 
-            <hr/>
-
-            <div class="d-flex flex-row align-items-start justify-content-between">
-                <div class="d-block pe-2">
-                    <#if _authenticated>
-                        <#if trip.hasParticipant(_user.id)>
-                            <a href="<@common.teamUrl team.id '/trips/${trip.permalink!trip.id}/remove-participant' />" class="text-nowrap d-block btn btn-sm btn-success"><i class="bi-bicycle bi"></i> J'y vais</a>
-                        <#else>
-                            <a tabindex="-1" href="<@common.teamUrl team.id '/trips/${trip.permalink!trip.id}/add-participant' />" class="text-nowrap d-block btn btn-sm btn-outline-success"><i class="bi-bicycle bi"></i> J'y vais</a>
-                         </#if>
-                    <#else>
-                            <a href="<@common.teamUrl '' '/login?requestUri=/${team.id}/trips/${trip.permalink!trip.id}/add-participant' />" class="text-nowrap d-block btn btn-sm btn-outline-success"><i class="bi-bicycle bi"></i> J'y vais</a>
-                    </#if>
-                </div>
-                <div class="p-0 m-0 flex-wrap">
-                    <#list trip.sortedParticipants as participant>
-                            <div style="width:30px; height:30px;" data-bs-toggle="tooltip" data-bs-placement="top" title="${participant.identity}" class="d-inline-block"><img class="w-100 h-100 d-block rounded" src="<@common.teamUrl '' '/users/${participant.id}/image' />" alt="${participant.identity}"></div>
-                    </#list>
+            <div class="d-flex flex-row align-items-center justify-content-between">
+                <div>Participants :</div>
+                <div>
+                    <div class="d-flex flex-row align-items-center justify-content-between">
+                        <div class="d-flex flex-row align-items-start justify-content-start">
+                            <div class="d-none d-md-flex profile-images me-2">
+                                <#if trip.sortedParticipants?size gt 0>
+                                    <#list trip.sortedParticipants?chunk(6)[0] as participant>
+                                            <div class="profile-images-item" style="width:24px; height:24px;" class="d-inline-block"><img class="w-100 h-100 d-block" src="<@common.teamUrl '' '/users/${participant.id}/image' />" alt="${participant.identity}"></div>
+                                    </#list>
+                                </#if>
+                            </div>
+                            <div>
+                                <#if trip.sortedParticipants?size gt 6>
+                                    <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#participantsmodal"><span class="text-muted small fst-italic">+${trip.sortedParticipants?size - 6}</span></a>
+                                <#elseif trip.sortedParticipants?size == 0>
+                                    <span class="text-muted small fst-italic">Aucun participant</span>
+                                </#if>
+                            </div>
+                        </div>
+                        <div class="d-block ms-2">
+                            <#if _authenticated>
+                                <#if trip.hasParticipant(_user.id)>
+                                    <a href="<@common.teamUrl team.id '/trips/${trip.permalink!trip.id}/remove-participant' />" class="py-0 px-2 d-block btn btn-sm btn-success"><i class="bi-person-check bi"></i></a>
+                                <#else>
+                                    <a href="<@common.teamUrl team.id '/trips/${trip.permalink!trip.id}/add-participant' />" class="py-0 px-2 d-block btn btn-sm btn-outline-success"><i class="bi-person-plus bi"></i></a>
+                                 </#if>
+                            <#else>
+                                    <a href="<@common.teamUrl '' '/login?requestUri=/${team.id}/trips/${trip.permalink!trip.id}/add-participant' />" class="py-0 px-2 d-block btn btn-sm btn-outline-success"><i class="bi-person-plus bi"></i></a>
+                            </#if>
+                        </div>
+                    </div>
                 </div>
             </div>
+
 
             <hr/>
 
@@ -96,7 +135,6 @@
             <#if trip.imaged>
               <img src="<@common.teamUrl team.id '/trips/${trip.id}/image' />" class="d-block shadow rounded w-100 h-auto mx-auto" alt="${trip.id} image">
             </#if>
-
 
         </div>
 

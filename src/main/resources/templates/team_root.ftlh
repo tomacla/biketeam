@@ -39,13 +39,6 @@
              </#if>
         </section>
 
-        <section class="border p-2 mb-3 rounded">
-            <h5>Membres (${users?size})</h5>
-            <#list users as user>
-                    <div style="width:30px; height:30px;" data-bs-toggle="tooltip" data-bs-placement="top" title="${user.identity}" class="d-inline-block"><img class="w-100 h-100 d-block rounded" src="<@common.teamUrl '' '/users/${user.id}/image' />" alt="${user.identity}"></div>
-            </#list>
-        </section>
-
         <#if hasHeatmap>
             <section class="border p-2 mb-3 rounded">
                 <h5>Heatmap</h5>

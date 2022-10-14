@@ -134,7 +134,7 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
         userService.save(u);
         if (!Strings.isBlank(profileImage)) {
             brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_DOWNLOAD_PROFILE_IMAGE,
-                    UserProfileImageDTO.valueOf(u.getId(), profileImage));
+                    UserProfileImageDTO.valueOf(u.getId(), profileImage + "?.jpg"));
         }
 
         return OAuth2UserDetails.create(u);
