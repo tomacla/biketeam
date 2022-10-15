@@ -97,7 +97,7 @@
                 <div>
                     <div class="d-flex flex-row align-items-center justify-content-between">
                         <div class="d-flex flex-row align-items-start justify-content-start">
-                            <div class="d-none d-md-flex profile-images me-2">
+                            <div class="d-flex profile-images me-2">
                                 <#if trip.sortedParticipants?size gt 0>
                                     <#list trip.sortedParticipants?chunk(6)[0] as participant>
                                             <div class="profile-images-item" style="width:24px; height:24px;" class="d-inline-block"><a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#participantsmodal"><img class="w-100 h-100 d-block" src="<@common.teamUrl '' '/users/${participant.id}/image' />" alt="${participant.identity}"></a></div>
@@ -141,7 +141,6 @@
     </div>
 
     <#assign colors=["#566B13", "#4682B4", "#732C7B", "#FF0", "#F00", "#FF005E", "#3366CC"]>
-       <#assign themes=["lime-theme", "steelblue-theme", "purple-theme", "yellow-theme", "red-theme", "magenta-theme", "lightblue-theme"]>
        <#assign stageMaps = []>
        <#assign mapCenter = [0.0,0.0]>
        <#if trip.startPlace?? && trip.startPlace.point??>
@@ -179,7 +178,7 @@
                 </thead>
                 <tbody>
                     <#list trip.sortedStages as stage>
-                        <tr>
+                        <tr <#if stage.map??> onmouseover="highlightMap(${stageMaps?seq_index_of(stage.map.id)})" onmouseout="restoreMap(${stageMaps?seq_index_of(stage.map.id)})"</#if>>
                             <td><#if stage.map??><span style="height: 10px; width: 10px; background-color: ${colors[stageMaps?seq_index_of(stage.map.id)%7]}; border-radius: 50%; display: inline-block;"></span></#if></td>
                             <td>${stage.name}</td>
                             <td>${stage.date.format(_date_formatter)}</td>
@@ -226,44 +225,85 @@
                 return targetMap;
             }
 
-            function initGpx(targetMap, gpxUrl, theme) {
+            function highlightMap(mapIndex) {
+                const layer = geoJsonLayers.find(function(l) {
+                    return l.mapIndex === mapIndex;
+                });
+                if(layer) {
+                    layer.layer.setStyle({
+                    "weight": 8,
+                     "opacity": 1
+                    });
+                    layer.layer.bringToFront();
+                }
+            }
 
-               var elevation_options = {
-                   theme: theme,
-                   detached: true,
-                   elevationDiv: "#chart-wrapper",
-                   markerIcon:null,
-                   followMarker: false,
-                   imperial: false,
-                   reverseCoords: false,
-                   acceleration: false,
-                    autofitBounds: false,
-                   slope: false,
-                   speed: false,
-                   time: false,
-                   summary: false,
-                   altitude: false,
-                   distanceMarkers: false,
-                   downloadLink: false,
-                   ruler: false,
-                   legend: false,
-                   marker:false
-                 };
-
-                 var controlElevation = L.control.elevation(elevation_options).addTo(targetMap);
-
-                 controlElevation.load(gpxUrl);
-
-                 return controlElevation;
-
+            function restoreMap(mapIndex) {
+                const layer = geoJsonLayers.find(function(l) {
+                    return l.mapIndex === mapIndex;
+                });
+                if(layer) {
+                    layer.layer.setStyle({
+                    "weight": 5,
+                     "opacity": 0.8
+                    });
+                }
             }
 
             var targetMap = initMap('map-wrapper');
+             var geoJsonLayers = [];
 
-            <#list trip.sortedStages as stage>
-                <#if stage.map??>
-                    initGpx(targetMap, '<@common.teamUrl team.id '/maps/${stage.map.id}/gpx' />', '${themes[stageMaps?seq_index_of(stage.map.id)%7]}');
-                </#if>
+            <#list stageMaps as map>
+
+                loadGeoJsonContent('<@common.teamUrl team.id '/maps/${map}/geojson' />', function(geojsonFeature) {
+                    var layer = L.geoJSON(geojsonFeature,
+                        {
+                          "color": '${colors[map?index%7]}',
+                          "weight": 5,
+                          "opacity": 0.8
+                        });
+
+                    layer.addTo(targetMap);
+
+                    geoJsonLayers.push({
+                        layer: layer,
+                        mapIndex: ${map?index}
+                    });
+
+                    <#if map?is_first>
+
+                            var firstPoint = geojsonFeature.geometry.coordinates[0];
+
+                         L.marker([firstPoint[1], firstPoint[0]], {clickable: false, icon : L.icon({
+                             iconUrl: '<@common.teamUrl '' '/css/pin-icon-start.png' />',
+                             iconSize: [33, 45],
+                             iconAnchor: [16, 45],
+                             shadowUrl: '<@common.teamUrl '' '/css/pin-shadow.png' />',
+                             shadowSize: [50, 50],
+                             shadowAnchor: [25, 50]
+                         })}).addTo(targetMap);
+
+                    </#if>
+
+                    <#if map?is_last>
+
+                            var lastPoint = geojsonFeature.geometry.coordinates[geojsonFeature.geometry.coordinates.length - 1];
+
+                         L.marker([lastPoint[1], lastPoint[0]], {clickable: false, icon : L.icon({
+                            iconUrl: '<@common.teamUrl '' '/css/pin-icon-end.png' />',
+                            iconSize: [33, 45],
+                            iconAnchor: [16, 45],
+                            shadowUrl: '<@common.teamUrl '' '/css/pin-shadow.png' />',
+                            shadowSize: [50, 50],
+                            shadowAnchor: [25, 50]
+                        })}).addTo(targetMap);
+
+
+                    </#if>
+
+                });
+
+
             </#list>
 
             <#if trip.startPlace?? || trip.endPlace??>
