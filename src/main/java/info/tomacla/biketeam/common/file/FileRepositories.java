@@ -9,8 +9,6 @@ public interface FileRepositories {
     String TRIP_IMAGES = "trip-images";
     String MAP_IMAGES = "map-images";
     String GPX_FILES = "gpx";
-    String FIT_FILES = "fit";
-    String GEOJSON_FILES = "geojson";
     String MISC_IMAGES = "misc";
     String USER_IMAGES = "user-images";
 
@@ -20,8 +18,6 @@ public interface FileRepositories {
                 TRIP_IMAGES,
                 MAP_IMAGES,
                 GPX_FILES,
-                FIT_FILES,
-                GEOJSON_FILES,
                 MISC_IMAGES,
                 USER_IMAGES);
     }

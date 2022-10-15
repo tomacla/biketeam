@@ -30,10 +30,11 @@ public class GeoJsonFileWriter {
 
         List<Point> points = gpxPath.getPoints();
         for (int i = 0; i < points.size(); i++) {
+
             sb.append("[")
-                    .append(points.get(i).getLon())
+                    .append(points.get(i).getLonDeg())
                     .append(", ")
-                    .append(points.get(i).getLat())
+                    .append(points.get(i).getLatDeg())
                     .append("]");
 
             if (i != points.size() - 1) {

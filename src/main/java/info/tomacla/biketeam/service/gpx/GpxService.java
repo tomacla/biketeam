@@ -93,9 +93,7 @@ public class GpxService {
         }
 
         Path storedStaticMap = getStaticMap(gpxPath);
-        Path storedFit = getFit(gpxPath);
         Path storedGpx = getGpx(gpxPath);
-        Path storedGeoJson = getGeoJson(gpxPath);
 
         io.github.glandais.util.Vector windRaw = gpxDataComputer.getWind(gpxPath);
         Vector wind = new Vector(windRaw.getX(), windRaw.getY());
@@ -118,47 +116,59 @@ public class GpxService {
         map.setCrossing(crossing);
 
         fileService.storeFile(storedGpx, FileRepositories.GPX_FILES, team.getId(), map.getId() + ".gpx");
-        fileService.storeFile(storedFit, FileRepositories.FIT_FILES, team.getId(), map.getId() + ".fit");
-        fileService.storeFile(storedGeoJson, FileRepositories.GEOJSON_FILES, team.getId(), map.getId() + ".json");
         fileService.storeFile(storedStaticMap, FileRepositories.MAP_IMAGES, team.getId(), map.getId() + ".png");
         return gpxPath;
     }
 
     public void delete(Map map) {
         fileService.deleteFile(FileRepositories.GPX_FILES, map.getTeamId(), map.getId() + ".gpx");
-        fileService.deleteFile(FileRepositories.GEOJSON_FILES, map.getTeamId(), map.getId() + ".json");
-        fileService.deleteFile(FileRepositories.FIT_FILES, map.getTeamId(), map.getId() + ".fit");
         fileService.deleteFile(FileRepositories.MAP_IMAGES, map.getTeamId(), map.getId() + ".png");
     }
 
     public void refresh(Map map) {
-        this.refresh(map, true, true, true, true);
+        this.refresh(map, true, true);
     }
 
-    public void refresh(Map map, boolean gpx, boolean fit, boolean geoJson, boolean image) {
+    public void refresh(Map map, boolean gpx, boolean image) {
 
         GPXPath gpxPath = getGPXPath(fileService.getFile(FileRepositories.GPX_FILES, map.getTeamId(), map.getId() + ".gpx"), map.getName());
 
-        if(gpx) {
+        if (gpx) {
             Path storedGpx = getGpx(gpxPath);
             fileService.storeFile(storedGpx, FileRepositories.GPX_FILES, map.getTeamId(), map.getId() + ".gpx");
         }
 
-        if(fit) {
-            Path storedFit = getFit(gpxPath);
-            fileService.storeFile(storedFit, FileRepositories.FIT_FILES, map.getTeamId(), map.getId() + ".fit");
-        }
-
-        if(geoJson) {
-            Path storedGeoJson = getGeoJson(gpxPath);
-            fileService.storeFile(storedGeoJson, FileRepositories.GEOJSON_FILES, map.getTeamId(), map.getId() + ".json");
-        }
-
-        if(image) {
+        if (image) {
             Path storedStaticMap = getStaticMap(gpxPath);
             fileService.storeFile(storedStaticMap, FileRepositories.MAP_IMAGES, map.getTeamId(), map.getId() + ".png");
         }
 
+    }
+
+    public Path getAsFit(Path gpx) {
+        try {
+            Path fit = fileService.getTempFile("gpxsimplified", ".fit");
+            fitFileWriter.writeFitFile(getGPXPath(gpx), fit.toFile());
+            return fit;
+        } catch (Exception e) {
+            log.error("Error while creating FIT", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Path getAsGeoJson(Path gpx) {
+        try {
+            Path geojson = fileService.getTempFile("gpxsimplified", ".json");
+            geoJsonFileWriter.writeGeoJsonFile(getGPXPath(gpx), geojson.toFile());
+            return geojson;
+        } catch (Exception e) {
+            log.error("Error while creating GEOJSON", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private GPXPath getGPXPath(Path path) {
+        return getGPXPath(path, null);
     }
 
     private GPXPath getGPXPath(Path path, String defaultName) {
@@ -183,17 +193,6 @@ public class GpxService {
         return gpxPath;
     }
 
-    private Path getFit(GPXPath gpxPath) {
-        try {
-            Path fit = fileService.getTempFile("gpxsimplified", ".fit");
-            fitFileWriter.writeFitFile(gpxPath, fit.toFile());
-            return fit;
-        } catch (Exception e) {
-            log.error("Error while creating FIT", e);
-            throw new RuntimeException(e);
-        }
-    }
-
     private Path getGpx(GPXPath gpxPath) {
         try {
             Path gpx = fileService.getTempFile("gpxsimplified", ".gpx");
@@ -201,17 +200,6 @@ public class GpxService {
             return gpx;
         } catch (Exception e) {
             log.error("Error while creating FIT", e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    private Path getGeoJson(GPXPath gpxPath) {
-        try {
-            Path geoJson = fileService.getTempFile("gpxsimplified", ".json");
-            geoJsonFileWriter.writeGeoJsonFile(gpxPath, geoJson.toFile());
-            return geoJson;
-        } catch (Exception e) {
-            log.error("Error while creating GeoJSON", e);
             throw new RuntimeException(e);
         }
     }
