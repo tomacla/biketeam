@@ -28,6 +28,7 @@ import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -163,6 +164,27 @@ public class GpxService {
             return geojson;
         } catch (Exception e) {
             log.error("Error while creating GEOJSON", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<java.util.Map<String, Object>> getElevationProfile(Path gpx) {
+        try {
+            GPXPath gpxPath = getGPXPath(gpx);
+            List<java.util.Map<String, Object>> result = new ArrayList<>();
+            for (int i = 0; i < gpxPath.getPoints().size(); i++) {
+                Point point = gpxPath.getPoints().get(i);
+                result.add(
+                        java.util.Map.of("index", i,
+                                "x", point.getDist(),
+                                "y", point.getEle(),
+                                "lat", point.getLatDeg(),
+                                "lng", point.getLonDeg())
+                );
+            }
+            return result;
+        } catch (Exception e) {
+            log.error("Error while calculating GEOJSON", e);
             throw new RuntimeException(e);
         }
     }

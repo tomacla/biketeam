@@ -270,6 +270,29 @@ public class MapController extends AbstractController {
     }
 
     @ResponseBody
+    @RequestMapping(value = "/{mapId}/elevation-profile", method = RequestMethod.GET, produces = "application/json")
+    public ResponseEntity<List<java.util.Map<String, Object>>> getElevationProfile(@PathVariable("teamId") String teamId, @PathVariable("mapId") String mapId) {
+        Optional<List<java.util.Map<String, Object>>> elevationProfile = mapService.getElevationProfile(teamId, mapId);
+        final Optional<Map> map = mapService.get(teamId, mapId);
+        if (map.isPresent()) {
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Content-Type", "application/json");
+            headers.setContentDisposition(ContentDisposition.builder("inline")
+                    .filename(Optional.ofNullable(map.get().getPermalink()).orElse(map.get().getId()) + ".json")
+                    .build());
+
+            return new ResponseEntity<>(
+                    elevationProfile.get(),
+                    headers,
+                    HttpStatus.OK
+            );
+
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to calculation elevation profile : " + mapId);
+    }
+
+    @ResponseBody
     @RequestMapping(value = "/{mapId}/image", method = RequestMethod.GET, produces = "image/png")
     public ResponseEntity<byte[]> getMapImage(@PathVariable("teamId") String teamId,
                                               @PathVariable("mapId") String mapId,
