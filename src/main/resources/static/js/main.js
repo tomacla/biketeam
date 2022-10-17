@@ -187,7 +187,7 @@ function initMapAutoComplete(input) {
 
 }
 
-function loadGeoJsonContent(url, callback) {
+function loadJsonContent(url, callback) {
 
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() {

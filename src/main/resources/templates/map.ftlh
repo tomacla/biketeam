@@ -38,11 +38,106 @@
     <div class="col-12">
         <div style="width:100%; height:<#if !_embed>500px<#else>31vh</#if>;" id="map-wrapper"></div>
     </div>
-    <div id="chart-wrapper" style="height:20%" class="col-12 p-0 m-0"></div>
+
+
+    <div class="col-12 mt-2 p-1" style="width:100%; height:300px;">
+        <canvas class="w-100 h-100" id="chart-wrapper"></canvas>
+   </div>
 
 </div>
 
     <script type="text/javascript">
+
+        var mouseHoverMarker = L.marker([0.0, 0.0], {clickable: false, icon : L.divIcon({className: 'mapHoverIcon'})});
+        var currentChartData = null;
+
+        var chartCorsairPlugin = {
+           id: 'corsair',
+           afterInit: (chart) => {
+             chart.corsair = {
+               x: 0,
+               y: 0
+             }
+           },
+           afterEvent: (chart, evt) => {
+             const {
+               chartArea: {
+                 top,
+                 bottom,
+                 left,
+                 right
+               }
+             } = chart;
+             const {
+               event: {
+                 x,
+                 y
+               }
+             } = evt;
+             if (x < left || x > right || y < top || y > bottom) {
+               chart.corsair = {
+                 x,
+                 y,
+                 draw: false
+               }
+               chart.draw();
+               return;
+             }
+
+             chart.corsair = {
+               x,
+               y,
+               draw: true
+             }
+
+             chart.draw();
+
+             const points = chart.getElementsAtEventForMode(evt.event, 'nearest', { intersect: false, axis : 'x' }, false);
+             if(currentChartData !== null && points.length > 0) {
+
+                 var targetPoint = currentChartData[points[0].index];
+                 if(evt.event.type === 'mousemove') {
+                    mouseHoverMarker.setLatLng(new L.LatLng(targetPoint.lat, targetPoint.lng));
+                    targetMap.addLayer(mouseHoverMarker);
+                 } else {
+                    targetMap.removeLayer(mouseHoverMarker);
+                 }
+
+             }
+
+           },
+           afterDatasetsDraw: (chart, _, opts) => {
+             const {
+               ctx,
+               chartArea: {
+                 top,
+                 bottom,
+                 left,
+                 right
+               }
+             } = chart;
+             const {
+               x,
+               y,
+               draw
+             } = chart.corsair;
+
+             if (!draw) {
+               return;
+             }
+
+             ctx.lineWidth = opts.width || 0;
+             ctx.setLineDash(opts.dash || []);
+             ctx.strokeStyle = opts.color || 'black'
+
+             ctx.save();
+             ctx.beginPath();
+             ctx.moveTo(x, bottom);
+             ctx.lineTo(x, top);
+             ctx.stroke();
+             ctx.restore();
+           }
+         }
 
         var layers = {
             "Cyclo OSM": L.tileLayer('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', {
@@ -75,23 +170,90 @@
 
         function toggleTrack() {
             if(trackDisplayed) {
-                elevation._layers.eachLayer(function (l) {
-                    return l.remove();
-                  });
-                  trackDisplayed = false;
-                  document.getElementById('toggle-track-button').innerHTML = '<i class="bi bi-eye-fill"></i> Afficher';
+
+              targetMap.removeLayer(geoJsonLayer);
+
+              trackDisplayed = false;
+              document.getElementById('toggle-track-button').innerHTML = '<i class="bi bi-eye-fill"></i> Afficher';
+
             } else {
-                elevation._layers.eachLayer(function (l) {
-                     return l.addTo(targetMap);
-                  });
-                  trackDisplayed = true;
-                  document.getElementById('toggle-track-button').innerHTML = '<i class="bi bi-eye-slash-fill"></i> Masquer';
+
+                targetMap.addLayer(geoJsonLayer);
+
+              trackDisplayed = true;
+              document.getElementById('toggle-track-button').innerHTML = '<i class="bi bi-eye-slash-fill"></i> Masquer';
             }
+        }
+
+        var elevationChart = null;
+        function initChart(elevationProfile, color) {
+
+            const labels = elevationProfile.map(function(e) {
+                return Math.round(e.x / 1000);
+            });
+
+            const data = {
+              labels: labels,
+              datasets: [{
+                fill: true,
+                label: 'Elevation',
+                backgroundColor: color,
+                borderColor: 'rgb(0, 0, 0)',
+                borderWidth: 1,
+                pointRadius: 0,
+                pointHoverBackgroundColor: '#000000',
+                pointHoverBorderColor: '#000000',
+                pointHoverBorderWidth: 1,
+                pointHoverRadius: 3,
+                data: elevationProfile.map(function(e) {
+                      return e.y;
+                  }),
+              }]
+            };
+
+            const config = {
+              type: 'line',
+              data: data,
+              options: {
+                responsive: true,
+                  plugins: {
+                      legend: {
+                          display: false
+                      },
+                      tooltip: {
+                        enabled: false
+                      }
+                  },
+                  layout: {
+                      padding: 5
+                  },
+                  scales: {
+                      y: {
+                        title: {
+                          display: true,
+                          text: 'Dénivelé (m)'
+                        }
+                      },
+                      x: {
+                          title: {
+                            display: true,
+                            text: 'Distance (km)'
+                          }
+                        }
+                    }
+              },
+                plugins: [chartCorsairPlugin]
+            };
+
+            elevationChart = new Chart(
+                document.getElementById('chart-wrapper'),
+                config
+              );
         }
 
         function initMap(mapContainerId) {
 
-            var targetMap = L.map(mapContainerId, { zoomControl: false, layers: [layers['Cyclo OSM']] }).setView([51.505, -0.09], 13);
+            var targetMap = L.map(mapContainerId, { zoomControl: false, layers: [layers['IGN Plan']] }).setView([51.505, -0.09], 11);
             L.control.layers(layers, null, {position: 'bottomleft'}).addTo(targetMap);
             L.control.zoom({position: 'bottomright'}).addTo(targetMap);
 
@@ -99,61 +261,39 @@
 
         }
 
-        function initGpx(targetMap, gpxUrl) {
-
-           var elevation_options = {
-               theme: "red-theme",
-               detached: true,
-               elevationDiv: "#chart-wrapper",
-               followMarker: true,
-               imperial: false,
-               reverseCoords: false,
-               acceleration: false,
-               slope: false,
-               speed: false,
-               time: false,
-               summary: false,
-               downloadLink: false,
-               ruler: false,
-               legend: false
-             };
-
-             var controlElevation = L.control.elevation(elevation_options).addTo(targetMap);
-
-             controlElevation.on('eledata_loaded', (data) => {
-
-                var startPoint = data.data[0].geometry.coordinates[0];
-                var endpoint = data.data[0].geometry.coordinates[data.data[0].geometry.coordinates.length - 1];
-
-                L.marker([startPoint[1], startPoint[0]], {clickable: false, icon : L.icon({
-                    iconUrl: '<@common.teamUrl '' '/css/pin-icon-start.png' />',
-                    iconSize: [33, 45],
-                    iconAnchor: [16, 45],
-                    shadowUrl: '<@common.teamUrl '' '/css/pin-shadow.png' />',
-                    shadowSize: [50, 50],
-                    shadowAnchor: [25, 50]
-                })}).addTo(targetMap);
-                L.marker([endpoint[1], endpoint[0]], {clickable: false, icon : L.icon({
-                   iconUrl: '<@common.teamUrl '' '/css/pin-icon-end.png' />',
-                   iconSize: [33, 45],
-                   iconAnchor: [16, 45],
-                   shadowUrl: '<@common.teamUrl '' '/css/pin-shadow.png' />',
-                   shadowSize: [50, 50],
-                   shadowAnchor: [25, 50]
-               })}).addTo(targetMap);
-
-             });
-
-             controlElevation.load(gpxUrl);
-
-             return controlElevation;
-
-        }
-
-        var gpxUrl = '<@common.teamUrl team.id '/maps/${map.id}/gpx' />';
         var targetMap = initMap('map-wrapper');
-        var elevation = initGpx(targetMap, gpxUrl);
+        var geoJsonLayer = null;
         var trackDisplayed = true;
+
+        loadJsonContent('<@common.teamUrl team.id '/maps/${map.id}/geojson' />', function(geojsonFeature) {
+
+            var layer = L.geoJSON(geojsonFeature,
+                {
+                  interactive:false,
+                  color: '#ff0000',
+                  weight: 5,
+                  opacity: 0.8
+                });
+
+            layer.addTo(targetMap);
+
+            loadJsonContent('<@common.teamUrl team.id '/maps/${map.id}/elevation-profile' />', function(elevationProfile) {
+                geoJsonLayer = layer;
+                initChart(elevationProfile, '#ff0000');
+                currentChartData = elevationProfile;
+            });
+
+
+            var firstPoint = geojsonFeature.geometry.coordinates[0];
+            var lastPoint = geojsonFeature.geometry.coordinates[geojsonFeature.geometry.coordinates.length - 1];
+
+             targetMap.panTo(new L.LatLng(firstPoint[1], firstPoint[0]));
+             L.marker([firstPoint[1], firstPoint[0]], {clickable: false, icon : L.divIcon({className: 'mapStartIcon'})}).addTo(targetMap);
+
+             L.marker([lastPoint[1], lastPoint[0]], {clickable: false, icon : L.divIcon({className: 'mapEndIcon'})}).addTo(targetMap);
+
+
+        });
 
 
     </script>
