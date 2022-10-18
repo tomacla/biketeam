@@ -9,9 +9,7 @@ public interface FileRepositories {
     String TRIP_IMAGES = "trip-images";
     String MAP_IMAGES = "map-images";
     String GPX_FILES = "gpx";
-    String FIT_FILES = "fit";
     String MISC_IMAGES = "misc";
-
     String USER_IMAGES = "user-images";
 
     static List<String> list() {
@@ -20,7 +18,6 @@ public interface FileRepositories {
                 TRIP_IMAGES,
                 MAP_IMAGES,
                 GPX_FILES,
-                FIT_FILES,
                 MISC_IMAGES,
                 USER_IMAGES);
     }

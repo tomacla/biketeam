@@ -38,122 +38,64 @@
     <div class="col-12">
         <div style="width:100%; height:<#if !_embed>500px<#else>31vh</#if>;" id="map-wrapper"></div>
     </div>
-    <div id="chart-wrapper" style="height:20%" class="col-12 p-0 m-0"></div>
+
+    <div class="col-12 mt-2 p-1 w-100" style="height:290px;">
+        <canvas class="w-100" style="height:290px;" id="chart-wrapper"></canvas>
+    </div>
 
 </div>
 
     <script type="text/javascript">
 
-        var layers = {
-            "Cyclo OSM": L.tileLayer('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', {
-                minZoom: 1,
-                maxZoom: 17,
-                attribution: '<a href="https://github.com/cyclosm/cyclosm-cartocss-style/releases" title="CyclOSM - Open Bicycle render">CyclOSM</a> | Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }),
-            "ESRI Satellite": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-                attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-            }),
-            "IGN Satellite": L.tileLayer('https://wxs.ign.fr/{apikey}/geoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE={style}&TILEMATRIXSET=PM&FORMAT={format}&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}', {
-                attribution: '<a target="_blank" href="https://www.geoportail.gouv.fr/">Geoportail France</a>',
-                bounds: [[-75, -180], [81, 180]],
-                minZoom: 2,
-                maxZoom: 19,
-                apikey: 'ortho',
-                format: 'image/jpeg',
-                style: 'normal'
-            }),
-            "IGN Plan": L.tileLayer('https://wxs.ign.fr/{apikey}/geoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE={style}&TILEMATRIXSET=PM&FORMAT={format}&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}', {
-                attribution: '<a target="_blank" href="https://www.geoportail.gouv.fr/">Geoportail France</a>',
-                bounds: [[-75, -180], [81, 180]],
-                minZoom: 2,
-                maxZoom: 18,
-                apikey: 'cartes',
-                format: 'image/png',
-                style: 'normal'
-            })
-        };
 
+        var trackDisplayed = true;
         function toggleTrack() {
             if(trackDisplayed) {
-                elevation._layers.eachLayer(function (l) {
-                    return l.remove();
-                  });
-                  trackDisplayed = false;
-                  document.getElementById('toggle-track-button').innerHTML = '<i class="bi bi-eye-fill"></i> Afficher';
+
+              targetMap.removeLayer(geoJsonLayer);
+
+              trackDisplayed = false;
+              document.getElementById('toggle-track-button').innerHTML = '<i class="bi bi-eye-fill"></i> Afficher';
+
             } else {
-                elevation._layers.eachLayer(function (l) {
-                     return l.addTo(targetMap);
-                  });
-                  trackDisplayed = true;
-                  document.getElementById('toggle-track-button').innerHTML = '<i class="bi bi-eye-slash-fill"></i> Masquer';
+
+                targetMap.addLayer(geoJsonLayer);
+
+              trackDisplayed = true;
+              document.getElementById('toggle-track-button').innerHTML = '<i class="bi bi-eye-slash-fill"></i> Masquer';
             }
         }
 
-        function initMap(mapContainerId) {
+        var targetMap = initMap('map-wrapper', 51.505, -0.09, 11, 'Cyclo OSM', true, true);
 
-            var targetMap = L.map(mapContainerId, { zoomControl: false, layers: [layers['Cyclo OSM']] }).setView([51.505, -0.09], 13);
-            L.control.layers(layers, null, {position: 'bottomleft'}).addTo(targetMap);
-            L.control.zoom({position: 'bottomright'}).addTo(targetMap);
+        var geoJsonLayer = null;
+        loadJsonContent('<@common.teamUrl team.id '/maps/${map.id}/geojson' />', function(geojsonFeature) {
 
-            return targetMap;
+            var layer = L.geoJSON(geojsonFeature,
+                {
+                  interactive:false,
+                  color: '#ff0000',
+                  weight: 5,
+                  opacity: 0.8
+                });
 
-        }
+            layer.addTo(targetMap);
 
-        function initGpx(targetMap, gpxUrl) {
+            loadJsonContent('<@common.teamUrl team.id '/maps/${map.id}/elevation-profile' />', function(elevationProfile) {
+                geoJsonLayer = layer;
+                initChart(targetMap, 'chart-wrapper', elevationProfile, '#ff0000', null);
+            });
 
-           var elevation_options = {
-               theme: "red-theme",
-               detached: true,
-               elevationDiv: "#chart-wrapper",
-               followMarker: true,
-               imperial: false,
-               reverseCoords: false,
-               acceleration: false,
-               slope: false,
-               speed: false,
-               time: false,
-               summary: false,
-               downloadLink: false,
-               ruler: false,
-               legend: false
-             };
+            var firstPoint = geojsonFeature.geometry.coordinates[0];
+            var lastPoint = geojsonFeature.geometry.coordinates[geojsonFeature.geometry.coordinates.length - 1];
 
-             var controlElevation = L.control.elevation(elevation_options).addTo(targetMap);
+             targetMap.panTo(new L.LatLng(firstPoint[1], firstPoint[0]));
+             L.marker([firstPoint[1], firstPoint[0]], {clickable: false, icon : L.divIcon({className: 'mapStartIcon'})}).addTo(targetMap);
 
-             controlElevation.on('eledata_loaded', (data) => {
+             L.marker([lastPoint[1], lastPoint[0]], {clickable: false, icon : L.divIcon({className: 'mapEndIcon'})}).addTo(targetMap);
 
-                var startPoint = data.data[0].geometry.coordinates[0];
-                var endpoint = data.data[0].geometry.coordinates[data.data[0].geometry.coordinates.length - 1];
 
-                L.marker([startPoint[1], startPoint[0]], {clickable: false, icon : L.icon({
-                    iconUrl: '<@common.teamUrl '' '/css/pin-icon-start.png' />',
-                    iconSize: [33, 45],
-                    iconAnchor: [16, 45],
-                    shadowUrl: '<@common.teamUrl '' '/css/pin-shadow.png' />',
-                    shadowSize: [50, 50],
-                    shadowAnchor: [25, 50]
-                })}).addTo(targetMap);
-                L.marker([endpoint[1], endpoint[0]], {clickable: false, icon : L.icon({
-                   iconUrl: '<@common.teamUrl '' '/css/pin-icon-end.png' />',
-                   iconSize: [33, 45],
-                   iconAnchor: [16, 45],
-                   shadowUrl: '<@common.teamUrl '' '/css/pin-shadow.png' />',
-                   shadowSize: [50, 50],
-                   shadowAnchor: [25, 50]
-               })}).addTo(targetMap);
-
-             });
-
-             controlElevation.load(gpxUrl);
-
-             return controlElevation;
-
-        }
-
-        var gpxUrl = '<@common.teamUrl team.id '/maps/${map.id}/gpx' />';
-        var targetMap = initMap('map-wrapper');
-        var elevation = initGpx(targetMap, gpxUrl);
-        var trackDisplayed = true;
+        });
 
 
     </script>

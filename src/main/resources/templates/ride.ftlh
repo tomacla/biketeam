@@ -79,7 +79,6 @@
 
 
    <#assign colors=["#566B13", "#4682B4", "#732C7B", "#FF0", "#F00", "#FF005E", "#3366CC"]>
-   <#assign themes=["lime-theme", "steelblue-theme", "purple-theme", "yellow-theme", "red-theme", "magenta-theme", "lightblue-theme"]>
    <#assign groupMaps = []>
    <#assign mapCenter = [0.0,0.0]>
    <#if ride.startPlace?? && ride.startPlace.point??>
@@ -147,7 +146,7 @@
                     </thead>
                     <tbody>
                         <#list ride.sortedGroups as group>
-                            <tr>
+                            <tr<#if group.map??> onmouseover="highlightMap(${groupMaps?seq_index_of(group.map.id)})" </#if>>
                                 <td><#if group.map??><span style="height: 10px; width: 10px; background-color: ${colors[groupMaps?seq_index_of(group.map.id)%7]}; border-radius: 50%; display: inline-block;"></span></#if></td>
                                 <td>${group.meetingTime}</td>
                                 <td>${group.name}</td>
@@ -156,7 +155,7 @@
                                 <td class="d-none d-md-table-cell"><#if group.map??>${group.map.positiveElevation?floor} m</#if></td>
                                 <td>
                                     <div class="d-flex flex-row align-items-start justify-content-start">
-                                        <div class="d-none d-md-flex profile-images me-2">
+                                        <div class="d-flex profile-images me-2">
                                             <#if group.sortedParticipants?size gt 0>
                                                 <#list group.sortedParticipants?chunk(3)[0] as participant>
                                                         <div class="profile-images-item" style="width:24px; height:24px;" class="d-inline-block"><a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#groupmodal-${group.id}"><img class="w-100 h-100 d-block" src="<@common.teamUrl '' '/users/${participant.id}/image' />" alt="${participant.identity}"></a></div>
@@ -193,8 +192,13 @@
                     </table>
               </div>
 
-              <div style="width:100%; height:500px;" id="map-wrapper"></div>
-              <div class="d-none" id="chart-wrapper"></div>
+              <div class="position-relative w-100" style="z-index:1; height:500px;" id="map-wrapper">
+                    <div class="w-100 w-sm-100 w-md-40 position-absolute bg-white top end-0" style="z-index:2000; height:150px;">
+                          <canvas class="w-100" style="height:150px;" id="chart-wrapper"></canvas>
+                     </div>
+              </div>
+
+
 
         </div>
 
@@ -208,91 +212,81 @@
 
  <script type="text/javascript">
 
-        var layers = {
-            "main" :  L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.{ext}', {
-                     	attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                     	subdomains: 'abcd',
-                     	minZoom: 0,
-                     	maxZoom: 20,
-                     	ext: 'png'
-                     })
-        };
+        var targetMap = initMap('map-wrapper', ${mapCenter[0]?c} + 0.02, ${mapCenter[1]?c}, 11, "Stamen", false, false);
 
-        function initMap(mapContainerId) {
-            var targetMap = L.map(mapContainerId, { zoomControl: false, layers: [layers['main']] }).setView([${mapCenter[0]?c}, ${mapCenter[1]?c}], 12);
-            L.control.zoom({position: 'bottomright'}).addTo(targetMap);
-            return targetMap;
+        var geoJsonLayers = [];
+
+        function highlightMap(mapIndex) {
+            restoreMap();
+            const layer = geoJsonLayers.find(function(l) {
+                return l.mapIndex === mapIndex;
+            });
+            if(layer) {
+                layer.layer.setStyle({
+                 weight: 8,
+                 opacity: 1
+                });
+                layer.layer.bringToFront();
+
+                updateChart(layer.elevationProfile, layer.color);
+            }
         }
 
-        var startendloaded = false;
-        function initGpx(targetMap, gpxUrl, theme) {
-
-           var elevation_options = {
-               theme: theme,
-               detached: true,
-               elevationDiv: "#chart-wrapper",
-               markerIcon:null,
-               followMarker: false,
-               imperial: false,
-               autofitBounds: false,
-               reverseCoords: false,
-               acceleration: false,
-               slope: false,
-               speed: false,
-               time: false,
-               summary: false,
-               altitude: false,
-               distanceMarkers: false,
-               downloadLink: false,
-               ruler: false,
-               legend: false,
-               marker:false
-             };
-
-             var controlElevation = L.control.elevation(elevation_options).addTo(targetMap);
-
-                if(!startendloaded) {
-                    startendloaded = true;
-
-                    controlElevation.on('eledata_loaded', (data) => {
-
-
-                    var startPoint = data.data[0].geometry.coordinates[0];
-                    var endpoint = data.data[0].geometry.coordinates[data.data[0].geometry.coordinates.length - 1];
-
-                    L.marker([startPoint[1], startPoint[0]], {clickable: false, icon : L.icon({
-                        iconUrl: '<@common.teamUrl '' '/css/pin-icon-start.png' />',
-                        iconSize: [33, 45],
-                        iconAnchor: [16, 45],
-                        shadowUrl: '<@common.teamUrl '' '/css/pin-shadow.png' />',
-                        shadowSize: [50, 50],
-                        shadowAnchor: [25, 50]
-                    })}).addTo(targetMap);
-                    L.marker([endpoint[1], endpoint[0]], {clickable: false, icon : L.icon({
-                       iconUrl: '<@common.teamUrl '' '/css/pin-icon-end.png' />',
-                       iconSize: [33, 45],
-                       iconAnchor: [16, 45],
-                       shadowUrl: '<@common.teamUrl '' '/css/pin-shadow.png' />',
-                       shadowSize: [50, 50],
-                       shadowAnchor: [25, 50]
-                   })}).addTo(targetMap);
-
-                 });
-
-             }
-
-             controlElevation.load(gpxUrl);
-
-             return controlElevation;
-
+        function restoreMap() {
+            geoJsonLayers.forEach(function(layer) {
+                layer.layer.setStyle({
+                  weight: 5,
+                  opacity: 0.8
+                });
+            });
         }
 
-        var targetMap = initMap('map-wrapper');
+        <#list groupMaps as map>
 
-        <#list ride.sortedGroups as group>
-            <#if group.map??>
-                initGpx(targetMap, '<@common.teamUrl team.id '/maps/${group.map.id}/gpx' />', '${themes[groupMaps?seq_index_of(group.map.id)%7]}');
-            </#if>
+            loadJsonContent('<@common.teamUrl team.id '/maps/${map}/geojson' />', function(geojsonFeature) {
+                var layer = L.geoJSON(geojsonFeature,
+                    {
+                      interactive:true,
+                      color: '${colors[map?index%7]}',
+                      weight: 5,
+                      opacity: 0.8
+                    }).on('click', function(e) {
+                        highlightMap(${map?index});
+                    });
+
+                layer.addTo(targetMap);
+
+                loadJsonContent('<@common.teamUrl team.id '/maps/${map}/elevation-profile' />', function(elevationProfile) {
+
+                    geoJsonLayers.push({
+                        layer: layer,
+                        mapIndex: ${map?index},
+                        color: '${colors[map?index%7]}',
+                        elevationProfile: elevationProfile
+                    });
+
+                    <#if map?is_first>
+                        if(elevationChart === null) {
+                            initChart(targetMap, 'chart-wrapper', elevationProfile, '${colors[map?index%7]}', function() {
+                                highlightMap(${map?index});
+                            });
+                        }
+                    </#if>
+
+                });
+
+                <#if map?is_first>
+
+                    var firstPoint = geojsonFeature.geometry.coordinates[0];
+                    var lastPoint = geojsonFeature.geometry.coordinates[geojsonFeature.geometry.coordinates.length - 1];
+
+                     L.marker([firstPoint[1], firstPoint[0]], {clickable: false, icon : L.divIcon({className: 'mapStartIcon'})}).addTo(targetMap);
+                     L.marker([lastPoint[1], lastPoint[0]], {clickable: false, icon : L.divIcon({className: 'mapEndIcon'})}).addTo(targetMap);
+
+                </#if>
+
+            });
+
         </#list>
 
 

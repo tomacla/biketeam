@@ -155,9 +155,31 @@ public class MapService extends AbstractPermalinkService {
     public Optional<Path> getFitFile(String teamId, String mapId) {
         final Optional<Map> optionalMap = get(teamId, mapId);
         if (optionalMap.isPresent()) {
-            String fitName = optionalMap.get().getId() + ".fit";
-            if (fileService.fileExists(FileRepositories.FIT_FILES, teamId, fitName)) {
-                return Optional.of(fileService.getFile(FileRepositories.FIT_FILES, teamId, fitName));
+            String gpxName = optionalMap.get().getId() + ".gpx";
+            if (fileService.fileExists(FileRepositories.GPX_FILES, teamId, gpxName)) {
+                return Optional.of(gpxService.getAsFit(fileService.getFile(FileRepositories.GPX_FILES, teamId, gpxName)));
+            }
+        }
+        return Optional.empty();
+    }
+
+    public Optional<Path> getGeoJsonFile(String teamId, String mapId) {
+        final Optional<Map> optionalMap = get(teamId, mapId);
+        if (optionalMap.isPresent()) {
+            String gpxName = optionalMap.get().getId() + ".gpx";
+            if (fileService.fileExists(FileRepositories.GPX_FILES, teamId, gpxName)) {
+                return Optional.of(gpxService.getAsGeoJson(fileService.getFile(FileRepositories.GPX_FILES, teamId, gpxName)));
+            }
+        }
+        return Optional.empty();
+    }
+
+    public Optional<List<java.util.Map<String, Object>>> getElevationProfile(String teamId, String mapId) {
+        final Optional<Map> optionalMap = get(teamId, mapId);
+        if (optionalMap.isPresent()) {
+            String gpxName = optionalMap.get().getId() + ".gpx";
+            if (fileService.fileExists(FileRepositories.GPX_FILES, teamId, gpxName)) {
+                return Optional.of(gpxService.getElevationProfile(fileService.getFile(FileRepositories.GPX_FILES, teamId, gpxName)));
             }
         }
         return Optional.empty();
