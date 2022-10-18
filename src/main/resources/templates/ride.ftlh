@@ -146,7 +146,7 @@
                     </thead>
                     <tbody>
                         <#list ride.sortedGroups as group>
-                            <tr<#if group.map??> onmouseover="highlightMap(${groupMaps?seq_index_of(group.map.id)})" onmouseout="restoreMap(${groupMaps?seq_index_of(group.map.id)})"</#if>>
+                            <tr<#if group.map??> onmouseover="highlightMap(${groupMaps?seq_index_of(group.map.id)})" </#if>>
                                 <td><#if group.map??><span style="height: 10px; width: 10px; background-color: ${colors[groupMaps?seq_index_of(group.map.id)%7]}; border-radius: 50%; display: inline-block;"></span></#if></td>
                                 <td>${group.meetingTime}</td>
                                 <td>${group.name}</td>
@@ -192,11 +192,13 @@
                     </table>
               </div>
 
-              <div style="width:100%; height:500px;" id="map-wrapper"></div>
+              <div class="position-relative w-100" style="z-index:1; height:500px;" id="map-wrapper">
+                    <div class="w-100 w-sm-100 w-md-40 position-absolute bg-white top end-0" style="z-index:2000; height:150px;">
+                          <canvas class="w-100" style="height:150px;" id="chart-wrapper"></canvas>
+                     </div>
+              </div>
 
-                <div class="mt-2 p-1" style="width:100%; height:280px;">
-                    <canvas class="w-100 h-100" id="chart-wrapper"></canvas>
-               </div>
+
 
         </div>
 
@@ -210,114 +212,12 @@
 
  <script type="text/javascript">
 
-        var mouseHoverMarker = L.marker([0.0, 0.0], {clickable: false, icon : L.divIcon({className: 'mapHoverIcon'})});
-        var currentChartData = null;
+        var targetMap = initMap('map-wrapper', ${mapCenter[0]?c} + 0.02, ${mapCenter[1]?c}, 11, "Stamen", false, false);
 
-        var chartCorsairPlugin = {
-               id: 'corsair',
-               afterInit: (chart) => {
-                 chart.corsair = {
-                   x: 0,
-                   y: 0
-                 }
-               },
-               afterEvent: (chart, evt) => {
-                 const {
-                   chartArea: {
-                     top,
-                     bottom,
-                     left,
-                     right
-                   }
-                 } = chart;
-                 const {
-                   event: {
-                     x,
-                     y
-                   }
-                 } = evt;
-                 if (x < left || x > right || y < top || y > bottom) {
-                   chart.corsair = {
-                     x,
-                     y,
-                     draw: false
-                   }
-                   chart.draw();
-                   return;
-                 }
-
-                 chart.corsair = {
-                   x,
-                   y,
-                   draw: true
-                 }
-
-                 chart.draw();
-
-                 const points = chart.getElementsAtEventForMode(evt.event, 'nearest', { intersect: false, axis : 'x' }, false);
-                 if(currentChartData !== null && points.length > 0) {
-
-                     var targetPoint = currentChartData[points[0].index];
-                     if(evt.event.type === 'mousemove') {
-                        mouseHoverMarker.setLatLng(new L.LatLng(targetPoint.lat, targetPoint.lng));
-                        targetMap.addLayer(mouseHoverMarker);
-                     } else {
-                        targetMap.removeLayer(mouseHoverMarker);
-                     }
-
-                 }
-
-               },
-               afterDatasetsDraw: (chart, _, opts) => {
-                 const {
-                   ctx,
-                   chartArea: {
-                     top,
-                     bottom,
-                     left,
-                     right
-                   }
-                 } = chart;
-                 const {
-                   x,
-                   y,
-                   draw
-                 } = chart.corsair;
-
-                 if (!draw) {
-                   return;
-                 }
-
-                 ctx.lineWidth = opts.width || 0;
-                 ctx.setLineDash(opts.dash || []);
-                 ctx.strokeStyle = opts.color || 'black'
-
-                 ctx.save();
-                 ctx.beginPath();
-                 ctx.moveTo(x, bottom);
-                 ctx.lineTo(x, top);
-                 ctx.stroke();
-                 ctx.restore();
-               }
-             }
-
-        var layers = {
-            "main" :  L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.{ext}', {
-                     	attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                     	subdomains: 'abcd',
-                     	minZoom: 0,
-                     	maxZoom: 20,
-                     	ext: 'png'
-                     })
-        };
-
-        function initMap(mapContainerId) {
-            var targetMap = L.map(mapContainerId, { zoomControl: false, layers: [layers['main']] }).setView([${mapCenter[0]?c}, ${mapCenter[1]?c}], 11);
-            L.control.zoom({position: 'bottomright'}).addTo(targetMap);
-            return targetMap;
-        }
+        var geoJsonLayers = [];
 
         function highlightMap(mapIndex) {
+            restoreMap();
             const layer = geoJsonLayers.find(function(l) {
                 return l.mapIndex === mapIndex;
             });
@@ -328,130 +228,51 @@
                 });
                 layer.layer.bringToFront();
 
-                currentChartData = layer.elevationProfile;
-                if(elevationChart == null) {
-                    initChart(layer.elevationProfile, layer.color);
-                } else {
-                    updateChart(layer.elevationProfile, layer.color);
-                }
-
+                updateChart(layer.elevationProfile, layer.color);
             }
         }
 
-        function restoreMap(mapIndex) {
-            const layer = geoJsonLayers.find(function(l) {
-                return l.mapIndex === mapIndex;
-            });
-            if(layer) {
+        function restoreMap() {
+            geoJsonLayers.forEach(function(layer) {
                 layer.layer.setStyle({
                   weight: 5,
                   opacity: 0.8
                 });
-            }
-
-        }
-
-        var elevationChart = null;
-        function initChart(elevationProfile, color) {
-
-            const labels = elevationProfile.map(function(e) {
-                return Math.round(e.x / 1000);
             });
-
-            const data = {
-              labels: labels,
-              datasets: [{
-                fill: true,
-                label: 'Elevation',
-                backgroundColor: color,
-                borderColor: 'rgb(0, 0, 0)',
-                borderWidth: 1,
-                pointRadius: 0,
-                pointHoverBackgroundColor: '#000000',
-                pointHoverBorderColor: '#000000',
-                pointHoverBorderWidth: 1,
-                pointHoverRadius: 3,
-                data: elevationProfile.map(function(e) {
-                      return e.y;
-                  }),
-              }]
-            };
-
-            const config = {
-              type: 'line',
-              data: data,
-              options: {
-                responsive: true,
-                  plugins: {
-                      legend: {
-                          display: false
-                      },
-                      tooltip: {
-                        enabled: false
-                      }
-                  },
-                  layout: {
-                      padding: 5
-                  },
-                  scales: {
-                      y: {
-                        title: {
-                          display: true,
-                          text: 'Dénivelé (m)'
-                        }
-                      },
-                      x: {
-                          title: {
-                            display: true,
-                            text: 'Distance (km)'
-                          }
-                        }
-                    }
-              },
-                plugins: [chartCorsairPlugin]
-            };
-
-            elevationChart = new Chart(
-                document.getElementById('chart-wrapper'),
-                config
-              );
         }
-
-        function updateChart(elevationProfile, color) {
-
-            elevationChart.data.labels = elevationProfile.map(function(e) {
-                                                    return Math.round(e.x / 1000);
-                                                });
-            elevationChart.data.datasets[0].data = elevationProfile.map(function(e) {
-                                                                         return e.y;
-                                                                     });
-             elevationChart.data.datasets[0].backgroundColor = color;
-            elevationChart.update();
-        }
-
-        var targetMap = initMap('map-wrapper');
-        var geoJsonLayers = [];
 
         <#list groupMaps as map>
 
             loadJsonContent('<@common.teamUrl team.id '/maps/${map}/geojson' />', function(geojsonFeature) {
                 var layer = L.geoJSON(geojsonFeature,
                     {
-                      interactive:false,
+                      interactive:true,
                       color: '${colors[map?index%7]}',
                       weight: 5,
                       opacity: 0.8
+                    }).on('click', function(e) {
+                        highlightMap(${map?index});
                     });
 
                 layer.addTo(targetMap);
 
                 loadJsonContent('<@common.teamUrl team.id '/maps/${map}/elevation-profile' />', function(elevationProfile) {
+
                     geoJsonLayers.push({
                         layer: layer,
                         mapIndex: ${map?index},
                         color: '${colors[map?index%7]}',
                         elevationProfile: elevationProfile
                     });
+
+                    <#if map?is_first>
+                        if(elevationChart === null) {
+                            initChart(targetMap, 'chart-wrapper', elevationProfile, '${colors[map?index%7]}', function() {
+                                highlightMap(${map?index});
+                            });
+                        }
+                    </#if>
+
                 });
 
                 <#if map?is_first>
@@ -460,7 +281,6 @@
                     var lastPoint = geojsonFeature.geometry.coordinates[geojsonFeature.geometry.coordinates.length - 1];
 
                      L.marker([firstPoint[1], firstPoint[0]], {clickable: false, icon : L.divIcon({className: 'mapStartIcon'})}).addTo(targetMap);
-
                      L.marker([lastPoint[1], lastPoint[0]], {clickable: false, icon : L.divIcon({className: 'mapEndIcon'})}).addTo(targetMap);
 
                 </#if>
