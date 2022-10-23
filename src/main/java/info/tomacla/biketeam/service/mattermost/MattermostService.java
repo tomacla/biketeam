@@ -2,8 +2,8 @@ package info.tomacla.biketeam.service.mattermost;
 
 import info.tomacla.biketeam.common.datatype.Dates;
 import info.tomacla.biketeam.domain.message.Message;
-import info.tomacla.biketeam.domain.message.RideMessage;
-import info.tomacla.biketeam.domain.message.TripMessage;
+import info.tomacla.biketeam.domain.message.MessageHolder;
+import info.tomacla.biketeam.domain.message.MessageTargetType;
 import info.tomacla.biketeam.domain.publication.Publication;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
@@ -95,7 +95,7 @@ public class MattermostService implements BroadcastService {
 
     }
 
-    public void notify(Team team, Message message) {
+    public void notify(Team team, Message message, MessageHolder messageHolder) {
 
         if (team.getIntegration().getMattermostMessageChannelID() == null) {
             return;
@@ -106,10 +106,12 @@ public class MattermostService implements BroadcastService {
         StringBuilder sb = new StringBuilder();
         sb.append("Nouveau message").append("\n");
         sb.append(message.getContent()).append("\n");
-        if (message instanceof TripMessage) {
-            sb.append("Pour répondre : ").append(urlService.getTripUrl(team, ((TripMessage) message).getTrip()));
-        } else if (message instanceof RideMessage) {
-            sb.append("Pour répondre : ").append(urlService.getRideUrl(team, ((RideMessage) message).getRide()));
+        if (message.getType().equals(MessageTargetType.TRIP)) {
+            sb.append("Pour répondre : ").append(urlService.getTripUrl(team, (Trip)messageHolder));
+        } else if (message.getType().equals(MessageTargetType.RIDE)) {
+            sb.append("Pour répondre : ").append(urlService.getRideUrl(team, (Ride)messageHolder));
+        } else {
+            sb.append("Pour répondre : ").append(urlService.getTeamUrl(team));
         }
 
         final String content = sb.toString();

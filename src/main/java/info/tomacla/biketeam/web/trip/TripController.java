@@ -3,7 +3,7 @@ package info.tomacla.biketeam.web.trip;
 import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
-import info.tomacla.biketeam.domain.message.TripMessage;
+import info.tomacla.biketeam.domain.message.Message;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.trip.Trip;
 import info.tomacla.biketeam.domain.user.User;
@@ -79,6 +79,7 @@ public class TripController extends AbstractController {
 
         addGlobalValues(principal, model, "Trip " + trip.getTitle(), team);
         model.addAttribute("trip", trip);
+        model.addAttribute("messages", messageService.listByTarget(trip));
         if (!ObjectUtils.isEmpty(error)) {
             model.addAttribute("errors", List.of(error));
         }
@@ -107,6 +108,7 @@ public class TripController extends AbstractController {
 
         addGlobalValues(principal, model, "Trip " + trip.getTitle(), team);
         model.addAttribute("trip", trip);
+        model.addAttribute("messages", messageService.listByTarget(trip));
         if (!ObjectUtils.isEmpty(error)) {
             model.addAttribute("errors", List.of(error));
         }
@@ -230,6 +232,8 @@ public class TripController extends AbstractController {
     public RedirectView addMessage(@PathVariable("teamId") String teamId,
                                    @PathVariable("tripId") String tripId,
                                    @RequestParam("content") String content,
+                                   @RequestParam("replyToId") String replyToId,
+                                   @RequestParam("originId") String originId,
                                    RedirectAttributes attributes,
                                    Principal principal,
                                    Model model) {
@@ -246,18 +250,37 @@ public class TripController extends AbstractController {
             Trip trip = optionalTrip.get();
             Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
 
-            if (optionalConnectedUser.isPresent()) {
+            Message message;
+            if(!ObjectUtils.isEmpty(originId)) {
+                Optional<Message> optionalMessage = messageService.getMessage(originId);
+                if(optionalMessage.isEmpty()) {
+                    return viewHandler.redirectView(team, "/trips/" + tripId + "/messages");
+                }
+
+                message = optionalMessage.get();
+
+            } else {
+
+                if (optionalConnectedUser.isEmpty()) {
+                    return viewHandler.redirectView(team, "/trips/" + tripId + "/messages");
+                }
 
                 User connectedUser = optionalConnectedUser.get();
-
-                TripMessage tripMessage = new TripMessage();
-                tripMessage.setTrip(trip);
-                tripMessage.setUser(connectedUser);
-                tripMessage.setContent(content);
-
-                messageService.save(team, tripMessage);
+                message = new Message();
+                message.setTarget(trip);
+                message.setUser(connectedUser);
+                if(replyToId != null) {
+                    Optional<Message> optionalReplyMessage = messageService.getMessage(replyToId);
+                    if(optionalReplyMessage.isPresent() && optionalReplyMessage.get().getTargetId().equals(trip.getId())) {
+                        message.setReplyToId(replyToId);
+                    }
+                }
 
             }
+
+            message.setContent(content);
+
+            messageService.save(team, trip, message);
 
             return viewHandler.redirectView(team, "/trips/" + tripId + "/messages");
 
@@ -286,16 +309,16 @@ public class TripController extends AbstractController {
 
             Trip trip = optionalTrip.get();
             Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
-            final Optional<TripMessage> optionalMessage = messageService.getTripMessage(messageId);
+            final Optional<Message> optionalMessage = messageService.getMessage(messageId);
 
             if (optionalConnectedUser.isPresent() && optionalMessage.isPresent()) {
 
-                User connectedUser = optionalConnectedUser.get();
-                final TripMessage message = optionalMessage.get();
 
-                if (message.getTrip().equals(trip) && (message.getUser().equals(connectedUser) || team.isAdmin(connectedUser))) {
-                    trip.removeMessage(messageId);
-                    messageService.deleteTripMessage(messageId);
+                User connectedUser = optionalConnectedUser.get();
+                final Message message = optionalMessage.get();
+
+                if (message.getTargetId().equals(trip.getId()) && (message.getUser().equals(connectedUser) || team.isAdmin(connectedUser))) {
+                    messageService.delete(messageId);
                 }
 
             }

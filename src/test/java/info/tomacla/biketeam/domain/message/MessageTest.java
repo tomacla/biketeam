@@ -2,10 +2,11 @@ package info.tomacla.biketeam.domain.message;
 
 import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.domain.AbstractDBTest;
+import info.tomacla.biketeam.domain.ride.Ride;
+import info.tomacla.biketeam.domain.ride.RideRepository;
+import info.tomacla.biketeam.domain.ride.RideType;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.TeamRepository;
-import info.tomacla.biketeam.domain.trip.Trip;
-import info.tomacla.biketeam.domain.trip.TripRepository;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.user.UserRepository;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,7 +17,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -24,13 +24,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class TripMessageTest extends AbstractDBTest {
+public class MessageTest extends AbstractDBTest {
 
     @Autowired
-    private TripMessageRepository tripMessageRepository;
+    private MessageRepository messageRepository;
 
     @Autowired
-    private TripRepository tripRepository;
+    private RideRepository rideRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -41,42 +41,41 @@ public class TripMessageTest extends AbstractDBTest {
     @Test
     public void test() {
 
-        final Trip trip = createTrip();
+        final Ride ride = createRide();
         final User user = createUser();
 
-        TripMessage m = new TripMessage();
-        m.setTrip(trip);
+        Message m = new Message();
+        m.setTarget(ride);
         m.setPublishedAt(ZonedDateTime.now().minus(1, ChronoUnit.DAYS));
         m.setContent("test content");
         m.setUser(user);
 
-        assertEquals(0, tripMessageRepository.findAllByTripId(trip.getId()).size());
-        assertEquals(0, tripMessageRepository.findAllByUserId(user.getId()).size());
+        assertEquals(0, messageRepository.findAllByTargetIdAndTypeOrderByPublishedAtAsc(ride.getId(), MessageTargetType.RIDE).size());
+        assertEquals(0, messageRepository.findAllByUserId(user.getId()).size());
 
-        tripMessageRepository.save(m);
+        messageRepository.save(m);
 
-        assertEquals(1, tripMessageRepository.findAllByTripId(trip.getId()).size());
-        assertEquals(1, tripMessageRepository.findAllByUserId(user.getId()).size());
+        assertEquals(1, messageRepository.findAllByTargetIdAndTypeOrderByPublishedAtAsc(ride.getId(), MessageTargetType.RIDE).size());
+        assertEquals(1, messageRepository.findAllByUserId(user.getId()).size());
 
     }
 
-    private Trip createTrip() {
-        Trip trip = new Trip();
-        trip.setTeamId("tripmessagetest-team");
-        trip.setTitle("test-ride");
-        trip.setStartDate(LocalDate.now());
-        trip.setEndDate(LocalDate.now().plus(1, ChronoUnit.DAYS));
-        trip.setDescription("description");
-        trip.setMeetingTime(LocalTime.MIDNIGHT);
-        trip.setPublishedAt(ZonedDateTime.now());
-        trip.setPublishedStatus(PublishedStatus.PUBLISHED);
-        tripRepository.save(trip);
-        return trip;
+    private Ride createRide() {
+        Ride ride = new Ride();
+        ride.setTeamId("ridemessagetest-team");
+        ride.setTitle("test-ride");
+        ride.setDate(LocalDate.now());
+        ride.setDescription("description");
+        ride.setType(RideType.REGULAR);
+        ride.setPublishedAt(ZonedDateTime.now());
+        ride.setPublishedStatus(PublishedStatus.PUBLISHED);
+        rideRepository.save(ride);
+        return ride;
     }
 
     private User createUser() {
         User u = new User();
-        u.setEmail("ride2@messenger.com");
+        u.setEmail("ride@messenger.com");
         userRepository.save(u);
         return u;
     }
@@ -84,7 +83,7 @@ public class TripMessageTest extends AbstractDBTest {
     @BeforeAll
     public void createTeam() {
         final Team team = new Team();
-        team.setId("tripmessagetest-team");
+        team.setId("ridemessagetest-team");
         team.setCity("City");
         team.getDescription().setDescription("Description");
         team.setName("Test");
