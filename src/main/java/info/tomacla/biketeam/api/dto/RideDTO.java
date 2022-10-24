@@ -24,7 +24,6 @@ public class RideDTO {
     public String description;
     public boolean imaged;
     public List<RideGroupDTO> groups;
-    public List<MessageDTO> messages;
 
     public static class RideGroupDTO {
 
@@ -74,7 +73,6 @@ public class RideDTO {
         dto.title = ride.getTitle();
         dto.description = ride.getDescription();
         dto.imaged = ride.isImaged();
-        dto.messages = ride.getMessages().stream().map(MessageDTO::valueOf).collect(Collectors.toList());
         dto.groups = ride.getGroups().stream().map(RideGroupDTO::valueOf).collect(Collectors.toList());
         return dto;
 

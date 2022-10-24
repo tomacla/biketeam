@@ -22,10 +22,16 @@
               <label for="form-user-stravaid" class="form-label">Strava ID</label>
             </div>
             <div class="col-auto">
-                <input autocomplete="off" required name="stravaId" class="form-control" type="text" id="form-user-stravaid">
+                <input autocomplete="off" name="stravaId" class="form-control" type="text" id="form-user-stravaid">
+            </div>
+            <div class="col-auto p-2">
+                <label for="form-user-email" class="form-label">ou Email</label>
             </div>
             <div class="col-auto">
-                <input type="submit" class="btn btn-secondary" value="Nouvel utilisateur">
+                <input autocomplete="off" name="email" class="form-control" type="email" id="form-user-email">
+            </div>
+            <div class="col-auto">
+                <input type="submit" class="btn btn-secondary" value="Ajouter">
             </div>
         </form>
 
@@ -58,8 +64,8 @@
                     <div>Administrateur</div>
                 </li>
                 <#list users as user>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div><img src="<@common.teamUrl '' '/users/${user.id}/image' />" alt="User photo" width="30" height="30" class="rounded"> ${user.firstName!'inconnu'} ${user.lastName!'inconnu'}<span class="text-muted"><#if user.stravaId??> - <a class="link-dark" href="https://www.strava.com/athletes/${user.stravaId?c}" target="_blank">${(user.stravaId?c)}</a></#if></span><#if user.admin> <i class="bi bi-shield-fill"></i></#if></div>
+                    <li class="small list-group-item d-flex justify-content-between align-items-center">
+                        <div><img src="<@common.teamUrl '' '/users/${user.id}/image' />" alt="User photo" width="25" height="25" class="rounded"> ${user.firstName!'inconnu'} ${user.lastName!'inconnu'}<#if user.stravaId??><span class="text-muted"> - <a class="link-dark" href="https://www.strava.com/athletes/${user.stravaId?c}" target="_blank">${(user.stravaId?c)}</a></span></#if><#if user.email??><span class="text-muted"> - ${user.email}</span></#if><#if user.admin> <i class="bi bi-shield-fill"></i></#if><small> - ${user.id}</small></div>
                         <#if user.id == _user.id>
                             <button role="button" disabled="true" class="btn btn-sm btn-success"><i class="bi bi-shield-fill"></i></button>
                         <#else>

@@ -3,7 +3,7 @@ package info.tomacla.biketeam.web.ride;
 import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
-import info.tomacla.biketeam.domain.message.RideMessage;
+import info.tomacla.biketeam.domain.message.Message;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.team.Team;
@@ -80,6 +80,7 @@ public class RideController extends AbstractController {
 
         addGlobalValues(principal, model, "Ride " + ride.getTitle(), team);
         model.addAttribute("ride", ride);
+        model.addAttribute("messages", messageService.listByTarget(ride));
         if (!ObjectUtils.isEmpty(error)) {
             model.addAttribute("errors", List.of(error));
         }
@@ -108,6 +109,7 @@ public class RideController extends AbstractController {
 
         addGlobalValues(principal, model, "Ride " + ride.getTitle(), team);
         model.addAttribute("ride", ride);
+        model.addAttribute("messages", messageService.listByTarget(ride));
         if (!ObjectUtils.isEmpty(error)) {
             model.addAttribute("errors", List.of(error));
         }
@@ -238,6 +240,8 @@ public class RideController extends AbstractController {
     public RedirectView addMessage(@PathVariable("teamId") String teamId,
                                    @PathVariable("rideId") String rideId,
                                    @RequestParam("content") String content,
+                                   @RequestParam("replyToId") String replyToId,
+                                   @RequestParam("originId") String originId,
                                    RedirectAttributes attributes,
                                    Principal principal,
                                    Model model) {
@@ -254,18 +258,37 @@ public class RideController extends AbstractController {
             Ride ride = optionalRide.get();
             Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
 
-            if (optionalConnectedUser.isPresent()) {
+            Message message;
+            if (!ObjectUtils.isEmpty(originId)) {
+                Optional<Message> optionalMessage = messageService.getMessage(originId);
+                if (optionalMessage.isEmpty()) {
+                    return viewHandler.redirectView(team, "/rides/" + rideId + "/messages");
+                }
+
+                message = optionalMessage.get();
+
+            } else {
+
+                if (optionalConnectedUser.isEmpty()) {
+                    return viewHandler.redirectView(team, "/rides/" + rideId + "/messages");
+                }
 
                 User connectedUser = optionalConnectedUser.get();
-
-                RideMessage rideMessage = new RideMessage();
-                rideMessage.setRide(ride);
-                rideMessage.setUser(connectedUser);
-                rideMessage.setContent(content);
-
-                messageService.save(team, rideMessage);
+                message = new Message();
+                message.setTarget(ride);
+                message.setUser(connectedUser);
+                if (replyToId != null) {
+                    Optional<Message> optionalReplyMessage = messageService.getMessage(replyToId);
+                    if (optionalReplyMessage.isPresent() && optionalReplyMessage.get().getTargetId().equals(ride.getId())) {
+                        message.setReplyToId(replyToId);
+                    }
+                }
 
             }
+
+            message.setContent(content);
+
+            messageService.save(team, ride, message);
 
             return viewHandler.redirectView(team, "/rides/" + rideId + "/messages");
 
@@ -294,16 +317,15 @@ public class RideController extends AbstractController {
 
             Ride ride = optionalRide.get();
             Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
-            final Optional<RideMessage> optionalMessage = messageService.getRideMessage(messageId);
+            final Optional<Message> optionalMessage = messageService.getMessage(messageId);
 
             if (optionalConnectedUser.isPresent() && optionalMessage.isPresent()) {
 
                 User connectedUser = optionalConnectedUser.get();
-                final RideMessage message = optionalMessage.get();
+                final Message message = optionalMessage.get();
 
-                if (message.getRide().equals(ride) && (message.getUser().equals(connectedUser) || team.isAdmin(connectedUser))) {
-                    ride.removeMessage(messageId);
-                    messageService.deleteRideMessage(messageId);
+                if (message.getTargetId().equals(ride.getId()) && (message.getUser().equals(connectedUser) || team.isAdmin(connectedUser))) {
+                    messageService.delete(messageId);
                 }
 
             }

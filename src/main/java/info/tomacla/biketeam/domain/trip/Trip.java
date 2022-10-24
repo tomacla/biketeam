@@ -4,7 +4,8 @@ import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.datatype.Lists;
 import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.domain.map.MapType;
-import info.tomacla.biketeam.domain.message.TripMessage;
+import info.tomacla.biketeam.domain.message.MessageHolder;
+import info.tomacla.biketeam.domain.message.MessageTargetType;
 import info.tomacla.biketeam.domain.place.Place;
 import info.tomacla.biketeam.domain.user.User;
 import org.springframework.util.ObjectUtils;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "trip")
-public class Trip {
+public class Trip implements MessageHolder {
 
     @Id
     private String id = UUID.randomUUID().toString();
@@ -62,8 +63,6 @@ public class Trip {
             joinColumns = @JoinColumn(name = "trip_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> participants = new HashSet<>();
-    @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private Set<TripMessage> messages = new HashSet<>();
 
     public String getId() {
         return id;
@@ -274,22 +273,9 @@ public class Trip {
         this.participants = Objects.requireNonNullElse(participants, new HashSet<>());
     }
 
-    public Set<TripMessage> getMessages() {
-        return messages;
-    }
-
-    public void setMessages(Set<TripMessage> messages) {
-        this.messages = Objects.requireNonNullElse(messages, new HashSet<>());
-    }
-
-    public List<TripMessage> getSortedMessages() {
-        return messages.stream()
-                .sorted(Comparator.comparing(TripMessage::getPublishedAt))
-                .collect(Collectors.toList());
-    }
-
-    public void removeMessage(String messageId) {
-        this.messages.removeIf(message -> message.getId().equals(messageId));
+    @Override
+    public MessageTargetType getMessageType() {
+        return MessageTargetType.TRIP;
     }
 
     @Override

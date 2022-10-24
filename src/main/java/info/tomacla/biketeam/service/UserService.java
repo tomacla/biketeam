@@ -78,7 +78,7 @@ public class UserService {
     }
 
     public Optional<User> getByEmail(String email) {
-        return userRepository.findByEmail(email);
+        return userRepository.findByEmail(email.toLowerCase());
     }
 
     @Transactional
@@ -91,7 +91,7 @@ public class UserService {
     }
 
     public List<User> listUsers() {
-        return userRepository.findAllByOrderByIdAsc();
+        return userRepository.findAllByOrderByAdminDescLastNameAscFirstNameAsc();
     }
 
     public void promote(String userId) {

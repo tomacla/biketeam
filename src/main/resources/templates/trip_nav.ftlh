@@ -6,7 +6,7 @@
       </li>
       <li class="nav-item">
         <a href="<@common.teamUrl team.id '/trips/${trip.id}/messages' />" class="me-1 nav-link text-dark border <#if springMacroRequestContext.requestUri?ends_with('/messages')> bg-secondary text-white</#if>"><i class="bi bi-chat-left-text"></i><span class="d-none d-md-inline"> Messages</span>
-         <span class="badge bg-info text-white d-none d-md-inline">${trip.sortedMessages?size}</span>
+         <span class="badge bg-info text-white d-none d-md-inline">${messages?size}</span>
         </a>
       </li>
       <#if _team_admin>

@@ -31,19 +31,8 @@ public class RabbitMQConfig {
                                                                                        @Qualifier("jsonMessageConverter") MessageConverter messageConverter) {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
-        factory.setConcurrentConsumers(Runtime.getRuntime().availableProcessors() * 2);
-        factory.setMessageConverter(messageConverter);
-        factory.setAutoStartup(env.getProperty("rabbitmq.autostartup", Boolean.class));
-        return factory;
-    }
-
-    @Bean
-    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(ConnectionFactory connectionFactory,
-                                                                               @Qualifier("jsonMessageConverter") MessageConverter messageConverter) {
-        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
-        factory.setConnectionFactory(connectionFactory);
         factory.setConcurrentConsumers(1);
-        factory.setMaxConcurrentConsumers(1);
+        factory.setMaxConcurrentConsumers(Runtime.getRuntime().availableProcessors() * 2);
         factory.setMessageConverter(messageConverter);
         factory.setAutoStartup(env.getProperty("rabbitmq.autostartup", Boolean.class));
         return factory;

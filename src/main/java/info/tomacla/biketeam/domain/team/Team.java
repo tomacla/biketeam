@@ -2,6 +2,8 @@ package info.tomacla.biketeam.domain.team;
 
 import info.tomacla.biketeam.common.data.Country;
 import info.tomacla.biketeam.common.datatype.Strings;
+import info.tomacla.biketeam.domain.message.MessageHolder;
+import info.tomacla.biketeam.domain.message.MessageTargetType;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.userrole.Role;
 import info.tomacla.biketeam.domain.userrole.UserRole;
@@ -17,7 +19,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "team")
-public class Team {
+public class Team implements MessageHolder {
 
     @Id
     private String id = UUID.randomUUID().toString();
@@ -153,6 +155,16 @@ public class Team {
 
     public void removeUser(User user) {
         this.roles.remove(user);
+    }
+
+    @Override
+    public MessageTargetType getMessageType() {
+        return MessageTargetType.TEAM;
+    }
+
+    @Override
+    public String getTeamId() {
+        return getId();
     }
 
     @Override

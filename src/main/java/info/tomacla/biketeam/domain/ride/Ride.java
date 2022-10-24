@@ -3,7 +3,8 @@ package info.tomacla.biketeam.domain.ride;
 import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.datatype.Lists;
 import info.tomacla.biketeam.common.datatype.Strings;
-import info.tomacla.biketeam.domain.message.RideMessage;
+import info.tomacla.biketeam.domain.message.MessageHolder;
+import info.tomacla.biketeam.domain.message.MessageTargetType;
 import info.tomacla.biketeam.domain.place.Place;
 import org.springframework.util.ObjectUtils;
 
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "ride")
-public class Ride {
+public class Ride implements MessageHolder {
 
     @Id
     private String id = UUID.randomUUID().toString();
@@ -46,8 +47,6 @@ public class Ride {
 
     @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<RideGroup> groups = new HashSet<>();
-    @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private Set<RideMessage> messages = new HashSet<>();
 
     public String getId() {
         return id;
@@ -214,24 +213,6 @@ public class Ride {
         return false;
     }
 
-    public Set<RideMessage> getMessages() {
-        return messages;
-    }
-
-    public void setMessages(Set<RideMessage> messages) {
-        this.messages = Objects.requireNonNullElse(messages, new HashSet<>());
-    }
-
-    public List<RideMessage> getSortedMessages() {
-        return messages.stream()
-                .sorted(Comparator.comparing(RideMessage::getPublishedAt))
-                .collect(Collectors.toList());
-    }
-
-    public void removeMessage(String messageId) {
-        this.messages.removeIf(message -> message.getId().equals(messageId));
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -245,5 +226,10 @@ public class Ride {
         return Objects.hash(id);
     }
 
+
+    @Override
+    public MessageTargetType getMessageType() {
+        return MessageTargetType.RIDE;
+    }
 
 }
