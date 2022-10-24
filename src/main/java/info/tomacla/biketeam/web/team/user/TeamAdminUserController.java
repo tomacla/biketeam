@@ -15,8 +15,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.security.Principal;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = "/{teamId}/admin/users")
@@ -31,7 +33,17 @@ public class TeamAdminUserController extends AbstractController {
                            Principal principal, Model model) {
         final Team team = checkTeam(teamId);
         addGlobalValues(principal, model, "Administration - Utilisateurs", team);
-        model.addAttribute("roles", team.getRoles());
+        model.addAttribute("roles", team.getRoles()
+                .stream()
+                .sorted((r1, r2) -> {
+                    if(r1.getRole().equals(Role.ADMIN) && !r2.getRole().equals(Role.ADMIN)) {
+                        return -1;
+                    }
+                    if(!r1.getRole().equals(Role.ADMIN) && r2.getRole().equals(Role.ADMIN)) {
+                        return 1;
+                    }
+                    return r1.getUser().getIdentity().compareTo(r2.getUser().getIdentity());
+                }).collect(Collectors.toList()));
         if (!ObjectUtils.isEmpty(error)) {
             model.addAttribute("errors", List.of(error));
         }
@@ -40,26 +52,42 @@ public class TeamAdminUserController extends AbstractController {
 
     @PostMapping
     public RedirectView addUser(@PathVariable("teamId") String teamId,
-                                @RequestParam("stravaId") Long stravaId,
+                                @RequestParam(value = "stravaId", required = false) Long stravaId,
+                                @RequestParam(value = "email", required = false) String email,
                                 RedirectAttributes attributes,
                                 Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
 
         try {
-            final Optional<User> optionalUser = userService.getByStravaId(stravaId);
-            User target;
-            if (optionalUser.isEmpty()) {
-                target = new User();
-                target.setStravaId(stravaId);
-            } else {
-                target = optionalUser.get();
+
+            User target = null;
+
+            if(stravaId != null) {
+                final Optional<User> optionalUser = userService.getByStravaId(stravaId);
+
+                if (optionalUser.isEmpty()) {
+                    target = new User();
+                    target.setStravaId(stravaId);
+                } else {
+                    target = optionalUser.get();
+                }
+
+            } else if(!ObjectUtils.isEmpty(email)) {
+                final Optional<User> optionalUser = userService.getByEmail(email.toLowerCase());
+                if (optionalUser.isEmpty()) {
+                    target = new User();
+                    target.setEmail(email);
+                } else {
+                    target = optionalUser.get();
+                }
             }
 
-            userService.save(target);
-
-            if (!team.isMember(target)) {
-                userRoleService.save(new UserRole(team, target, Role.MEMBER));
+            if(target != null) {
+                userService.save(target);
+                if (!team.isMember(target)) {
+                    userRoleService.save(new UserRole(team, target, Role.MEMBER));
+                }
             }
 
             return viewHandler.redirectView(team, "/admin/users");
