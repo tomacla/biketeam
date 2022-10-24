@@ -9,7 +9,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 public class TestDBContainer {
 
-    public static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer("postgres:12.10")
+    public static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer("postgres:14.5")
             .withDatabaseName("biketeam-tu")
             .withUsername("biketeam")
             .withPassword("biketeam");

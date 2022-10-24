@@ -21,7 +21,7 @@ Install a instance of RabbitMQ and create a virtual host.
 #### Create a Datasource
 
 Install a DBMS and create a database.
-Source code has only been tested with PostgreSQL.
+Source code has only been tested with PostgreSQL 14.
 
 #### Configure OAuth2
 
