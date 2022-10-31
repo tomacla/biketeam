@@ -29,7 +29,6 @@ public class TripDTO {
     public boolean imaged;
 
     public List<TripStageDTO> stages;
-    public List<MessageDTO> messages;
     public List<MemberDTO> participants;
 
     public static class TripStageDTO {
@@ -79,7 +78,6 @@ public class TripDTO {
         dto.imaged = trip.isImaged();
 
         dto.stages = trip.getStages().stream().map(TripStageDTO::valueOf).collect(Collectors.toList());
-        dto.messages = trip.getMessages().stream().map(MessageDTO::valueOf).collect(Collectors.toList());
         dto.participants = trip.getParticipants().stream().map(MemberDTO::valueOf).collect(Collectors.toList());
 
         return dto;
