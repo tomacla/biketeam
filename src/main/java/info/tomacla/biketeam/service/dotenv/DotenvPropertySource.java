@@ -20,7 +20,7 @@ public class DotenvPropertySource extends PropertySource<Dotenv> {
     }
 
     public DotenvPropertySource(String name) {
-        super(name, Dotenv.configure().load());
+        super(name, Dotenv.configure().ignoreIfMissing().load());
     }
 
     @Override
