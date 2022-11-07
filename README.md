@@ -16,7 +16,7 @@ Version 17 or above
 
 #### Start components
 
-`docker-compose up -d`
+`docker compose up -d`
 
 #### Configure OAuth2
 
@@ -65,6 +65,6 @@ Run `mvn clean package` then execute the biketeam.jar
 
 Run `mvn clean package -Pdocker` then execute
 
-`docker-compose -f docker-compose.yml -f docker-compose.biketeam.yml up -d`
+`docker compose -f docker-compose.yml -f docker-compose.biketeam.yml up -d`
 
 `/opt/biketeam` MUST exist.
