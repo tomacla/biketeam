@@ -43,6 +43,8 @@ Copy .env.template to .env and replace first lines values, including REMEMBERME_
 
 ### Run
 
+To enable logging in a file, use `--logging.file.name=/path/to/log/file` as a command line argument.
+
 #### With Maven
 
 Biketeam is a standard spring boot application so use spring boot maven plugin.
