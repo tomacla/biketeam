@@ -1,6 +1,5 @@
 package info.tomacla.biketeam.web.team.templates;
 
-import info.tomacla.biketeam.common.geo.Point;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalTime;

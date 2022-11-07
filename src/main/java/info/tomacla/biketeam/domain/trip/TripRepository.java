@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface TripRepository extends PagingAndSortingRepository<Trip, String> {
@@ -22,7 +23,7 @@ public interface TripRepository extends PagingAndSortingRepository<Trip, String>
 
     List<Trip> findAllByTeamIdAndPublishedStatusAndPublishedAtLessThan(String teamId, PublishedStatus publishedStatus, ZonedDateTime now);
 
-    Page<Trip> findByTeamIdAndStartDateBetweenAndPublishedStatus(String teamId, LocalDate from, LocalDate to, PublishedStatus publishedStatus, Pageable pageable);
+    Page<Trip> findAllByTeamIdInAndStartDateBetweenAndPublishedStatus(Set<String> teamIds, LocalDate from, LocalDate to, PublishedStatus publishedStatus, Pageable pageable);
 
     // do not filter by published at (ADMIN)
     List<TripIdTitleDateProjection> findAllByTeamIdOrderByStartDateDesc(String teamId);

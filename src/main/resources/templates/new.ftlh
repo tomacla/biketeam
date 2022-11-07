@@ -22,16 +22,16 @@
                 <textarea required autocomplete="off" name="description" rows="3" class="form-control" id="new-team-description">${formdata.description}</textarea>
                 <div id="new-team-description-help" class="form-text">Le groupe, en quelques mots</div>
             </div>
-            <div class="mb-3 row">
-                <div class="col-12 col-md-4">
+            <div class="row">
+                <div class="col-12 col-md-4 mb-3 ">
                     <label for="new-team-country" class="form-label">Pays</label>
                     <@common.countrySelect formdata.country 'country' 'new-team-country' true />
                 </div>
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-4 mb-3">
                     <label for="new-team-city" class="form-label">Ville</label>
                     <input autocomplete="off" required type="text" class="form-control" id="new-team-city" placeholder="Paris" value="${formdata.city}" name="city">
                 </div>
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-4 mb-3">
                     <label for="new-team-timezone" class="form-label">Timezone</label>
                     <select required name="timezone" class="form-select" id="form-configuration-timezone">
                     <#list timezones as timezone>

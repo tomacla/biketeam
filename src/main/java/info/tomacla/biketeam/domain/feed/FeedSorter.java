@@ -6,20 +6,20 @@ import java.util.Comparator;
 
 public class FeedSorter {
 
-    public static Comparator<Feed> get(ZoneId zoneId) {
+    public static Comparator<FeedEntity> get(ZoneId zoneId) {
         return new FeedSorter.FeedComparator(zoneId);
     }
 
-    public static class FeedComparator implements Comparator<Feed> {
+    public static class FeedComparator implements Comparator<FeedEntity> {
 
-        private ZoneId zoneId;
+        private final ZoneId zoneId;
 
         public FeedComparator(ZoneId zoneId) {
             this.zoneId = zoneId;
         }
 
         @Override
-        public int compare(Feed f1, Feed f2) {
+        public int compare(FeedEntity f1, FeedEntity f2) {
 
             boolean f1Passed = f1.getDate() == null || f1.getDate().isBefore(LocalDate.now(zoneId));
             boolean f2Passed = f2.getDate() == null || f2.getDate().isBefore(LocalDate.now(zoneId));

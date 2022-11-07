@@ -31,6 +31,7 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class TripService extends AbstractPermalinkService {
@@ -48,6 +49,12 @@ public class TripService extends AbstractPermalinkService {
 
     @Autowired
     private BrokerService brokerService;
+
+    @Autowired
+    private MessageService messageService;
+
+    @Autowired
+    private ReactionService reactionService;
 
     public Optional<Trip> get(String teamId, String tripId) {
         Optional<Trip> optionalTrip = tripRepository.findById(tripId);
@@ -121,17 +128,19 @@ public class TripService extends AbstractPermalinkService {
         log.info("Request trip deletion {}", tripId);
         final Optional<Trip> optionalTrip = get(teamId, tripId);
         if (optionalTrip.isPresent()) {
+            messageService.deleteByTarget(tripId);
+            reactionService.deleteByTarget(tripId);
             final Trip trip = optionalTrip.get();
             deleteImage(trip.getTeamId(), trip.getId());
             tripRepository.delete(trip);
         }
     }
 
-    public Page<Trip> searchTrips(String teamId, int page, int pageSize,
+    public Page<Trip> searchTrips(Set<String> teamIds, int page, int pageSize,
                                   LocalDate from, LocalDate to) {
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by("startDate").descending());
-        return tripRepository.findByTeamIdAndStartDateBetweenAndPublishedStatus(
-                teamId,
+        return tripRepository.findAllByTeamIdInAndStartDateBetweenAndPublishedStatus(
+                teamIds,
                 from,
                 to,
                 PublishedStatus.PUBLISHED,

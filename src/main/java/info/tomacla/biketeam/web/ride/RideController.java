@@ -17,8 +17,6 @@ import info.tomacla.biketeam.service.UserRoleService;
 import info.tomacla.biketeam.service.file.ThumbnailService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -35,7 +33,6 @@ import org.springframework.web.servlet.view.RedirectView;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.security.Principal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,13 +66,13 @@ public class RideController extends AbstractController {
 
         Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
         if (optionalRide.isEmpty()) {
-            return viewHandler.redirect(team, "/rides");
+            return viewHandler.redirect(team, "/");
         }
 
         Ride ride = optionalRide.get();
 
         if (!ride.getPublishedStatus().equals(PublishedStatus.PUBLISHED) && !isAdmin(principal, team)) {
-            return viewHandler.redirect(team, "/rides");
+            return viewHandler.redirect(team, "/");
         }
 
         addGlobalValues(principal, model, "Ride " + ride.getTitle(), team);
@@ -85,6 +82,17 @@ public class RideController extends AbstractController {
             model.addAttribute("errors", List.of(error));
         }
         return "ride";
+    }
+
+    @GetMapping
+    public RedirectView getRides(@PathVariable("teamId") String teamId,
+                                 Principal principal,
+                                 Model model) {
+
+        final Team team = checkTeam(teamId);
+
+        return viewHandler.redirectView(team, "/");
+
     }
 
     @GetMapping(value = "/{rideId}/messages")
@@ -98,13 +106,13 @@ public class RideController extends AbstractController {
 
         Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
         if (optionalRide.isEmpty()) {
-            return viewHandler.redirect(team, "/rides");
+            return viewHandler.redirect(team, "/");
         }
 
         Ride ride = optionalRide.get();
 
         if (!ride.getPublishedStatus().equals(PublishedStatus.PUBLISHED) && !isAdmin(principal, team)) {
-            return viewHandler.redirect(team, "/rides");
+            return viewHandler.redirect(team, "/");
         }
 
         addGlobalValues(principal, model, "Ride " + ride.getTitle(), team);
@@ -115,46 +123,6 @@ public class RideController extends AbstractController {
         }
 
         return "ride_messages";
-    }
-
-    @GetMapping
-    public String getRides(@PathVariable("teamId") String teamId,
-                           @RequestParam(value = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-                           @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
-                           @RequestParam(value = "page", defaultValue = "0", required = false) int page,
-                           @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
-                           @ModelAttribute("error") String error,
-                           Principal principal,
-                           Model model) {
-
-        final Team team = checkTeam(teamId);
-
-        SearchRideForm form = SearchRideForm.builder()
-                .withFrom(from)
-                .withTo(to)
-                .withPage(page)
-                .withPageSize(pageSize)
-                .get();
-
-        final SearchRideForm.SearchRideFormParser parser = form.parser();
-
-        Page<Ride> rides = rideService.searchRides(
-                team.getId(),
-                parser.getPage(),
-                parser.getPageSize(),
-                parser.getFrom(),
-                parser.getTo()
-        );
-
-        addGlobalValues(principal, model, "Rides", team);
-        model.addAttribute("rides", rides.getContent());
-        model.addAttribute("pages", rides.getTotalPages());
-        model.addAttribute("formdata", form);
-        if (!ObjectUtils.isEmpty(error)) {
-            model.addAttribute("errors", List.of(error));
-        }
-        return "rides";
-
     }
 
     @GetMapping(value = "/{rideId}/add-participant/{groupId}")
@@ -169,7 +137,7 @@ public class RideController extends AbstractController {
         try {
             Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
             if (optionalRide.isEmpty()) {
-                return viewHandler.redirectView(team, "/rides");
+                return viewHandler.redirectView(team, "/");
             }
 
             Ride ride = optionalRide.get();
@@ -212,7 +180,7 @@ public class RideController extends AbstractController {
         try {
             Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
             if (optionalRide.isEmpty()) {
-                return viewHandler.redirectView(team, "/rides");
+                return viewHandler.redirectView(team, "/");
             }
 
             Ride ride = optionalRide.get();
@@ -252,7 +220,7 @@ public class RideController extends AbstractController {
 
             Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
             if (optionalRide.isEmpty()) {
-                return viewHandler.redirectView(team, "/rides");
+                return viewHandler.redirectView(team, "/");
             }
 
             Ride ride = optionalRide.get();
@@ -312,7 +280,7 @@ public class RideController extends AbstractController {
 
             Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
             if (optionalRide.isEmpty()) {
-                return viewHandler.redirectView(team, "/rides");
+                return viewHandler.redirectView(team, "/");
             }
 
             Ride ride = optionalRide.get();

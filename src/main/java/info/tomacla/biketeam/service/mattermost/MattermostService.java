@@ -107,9 +107,9 @@ public class MattermostService implements BroadcastService {
         sb.append("Nouveau message").append("\n");
         sb.append(message.getContent()).append("\n");
         if (message.getType().equals(MessageTargetType.TRIP)) {
-            sb.append("Pour répondre : ").append(urlService.getTripUrl(team, (Trip)messageHolder));
+            sb.append("Pour répondre : ").append(urlService.getTripUrl(team, (Trip) messageHolder));
         } else if (message.getType().equals(MessageTargetType.RIDE)) {
-            sb.append("Pour répondre : ").append(urlService.getRideUrl(team, (Ride)messageHolder));
+            sb.append("Pour répondre : ").append(urlService.getRideUrl(team, (Ride) messageHolder));
         } else {
             sb.append("Pour répondre : ").append(urlService.getTeamUrl(team));
         }

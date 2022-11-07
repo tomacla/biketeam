@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -42,7 +43,7 @@ public class RideAPI extends AbstractAPI {
         final SearchRideForm.SearchRideFormParser parser = form.parser();
 
         Page<Ride> rides = rideService.searchRides(
-                team.getId(),
+                Set.of(team.getId()),
                 parser.getPage(),
                 parser.getPageSize(),
                 parser.getFrom(),

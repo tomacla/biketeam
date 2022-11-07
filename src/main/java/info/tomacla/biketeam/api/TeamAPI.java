@@ -1,11 +1,12 @@
 package info.tomacla.biketeam.api;
 
-import info.tomacla.biketeam.api.dto.FeedDTO;
-import info.tomacla.biketeam.api.dto.MemberDTO;
-import info.tomacla.biketeam.api.dto.PlaceDTO;
-import info.tomacla.biketeam.api.dto.TeamDTO;
+import info.tomacla.biketeam.api.dto.*;
 import info.tomacla.biketeam.common.data.Country;
+import info.tomacla.biketeam.domain.feed.FeedOptions;
+import info.tomacla.biketeam.domain.publication.Publication;
+import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.domain.trip.Trip;
 import info.tomacla.biketeam.service.PlaceService;
 import info.tomacla.biketeam.web.SearchTeamForm;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,11 +69,20 @@ public class TeamAPI extends AbstractAPI {
     }
 
     @GetMapping(path = "/{teamId}/feed", produces = "application/json")
-    public ResponseEntity<List<FeedDTO>> getTeamFeed(@PathVariable String teamId) {
+    public ResponseEntity<List<Object>> getTeamFeed(@PathVariable String teamId) {
 
         final Team team = checkTeam(teamId);
 
-        return ResponseEntity.ok().body(teamService.listFeed(team).stream().map(FeedDTO::valueOf).collect(Collectors.toList()));
+        return ResponseEntity.ok().body(teamService.listFeed(team, new FeedOptions()).stream().map(f -> {
+            if (f instanceof Publication) {
+                return PartialPublicationDTO.valueOf((Publication) f);
+            } else if (f instanceof Ride) {
+                return PartialRideDTO.valueOf((Ride) f);
+            } else if (f instanceof Trip) {
+                return PartialTripDTO.valueOf((Trip) f);
+            }
+            return null;
+        }).filter(f -> f != null).collect(Collectors.toList()));
 
     }
 

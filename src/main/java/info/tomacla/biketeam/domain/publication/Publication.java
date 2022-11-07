@@ -2,8 +2,13 @@ package info.tomacla.biketeam.domain.publication;
 
 import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.datatype.Strings;
+import info.tomacla.biketeam.domain.feed.FeedEntity;
+import info.tomacla.biketeam.domain.feed.FeedType;
+import info.tomacla.biketeam.domain.reaction.ReactionHolder;
+import info.tomacla.biketeam.domain.reaction.ReactionTargetType;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Objects;
@@ -11,7 +16,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "publication")
-public class Publication {
+public class Publication implements ReactionHolder, FeedEntity {
 
     @Id
     private String id = UUID.randomUUID().toString();
@@ -81,6 +86,21 @@ public class Publication {
 
     public void setImaged(boolean imaged) {
         this.imaged = imaged;
+    }
+
+    @Override
+    public ReactionTargetType getReactionType() {
+        return ReactionTargetType.PUBLICATION;
+    }
+
+    @Override
+    public LocalDate getDate() {
+        return getPublishedAt().toLocalDate();
+    }
+
+    @Override
+    public FeedType getFeedType() {
+        return FeedType.PUBLICATION;
     }
 
     @Override
