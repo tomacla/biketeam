@@ -31,6 +31,7 @@
 
 	<properties>
 		<java.version>17</java.version>
+		<spring-dotenv.version>2.5.4</spring-dotenv.version>
 		<restfb.version>3.22.0</restfb.version>
 		<gpx2web.version>1.1.3</gpx2web.version>
 		<zip4j.version>2.10.0</zip4j.version>
@@ -38,6 +39,8 @@
 		<postgresql.version>42.5.0</postgresql.version>
 		<thumbnailator.version>0.4.14</thumbnailator.version>
 		<testcontainers.version>1.17.1</testcontainers.version>
+
+		<spring-boot.build-image.imageName>github.com/tomacla/biketeam:latest</spring-boot.build-image.imageName>
 	</properties>
 
 	<dependencies>
@@ -73,6 +76,12 @@
 		<dependency>
 			<groupId>org.springframework.amqp</groupId>
 			<artifactId>spring-rabbit</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>me.paulschwarz</groupId>
+			<artifactId>spring-dotenv</artifactId>
+			<version>${spring-dotenv.version}</version>
 		</dependency>
 
 		<dependency>
@@ -181,11 +190,6 @@
 								</goals>
 							</execution>
 						</executions>
-						<configuration>
-							<image>
-								<name>biketeam:latest</name>
-							</image>
-						</configuration>
 					</plugin>
 				</plugins>
 			</build>
