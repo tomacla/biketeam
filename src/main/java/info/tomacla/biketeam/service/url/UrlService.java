@@ -57,6 +57,9 @@ public class UrlService {
     public String getCookieDomain() {
         String tmp = siteUrl.replace("https://", "");
         tmp = tmp.replace("http://", "");
+        if (tmp.contains(":")) {
+            tmp = tmp.substring(0, tmp.indexOf(':'));
+        }
         return tmp;
     }
 }

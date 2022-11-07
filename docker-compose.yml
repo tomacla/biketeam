@@ -1,0 +1,47 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:14.5
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/main/docker/postgres/initdb.d:/docker-entrypoint-initdb.d
+    ports:
+      - "127.0.0.1:5432:5432"
+    networks:
+      biketeam:
+        aliases:
+          - postgres.localhost
+  rabbitmq:
+    image: rabbitmq:3.11.2
+    environment:
+      RABBITMQ_DEFAULT_USER: "biketeam"
+      RABBITMQ_DEFAULT_PASS: "biketeam"
+      RABBITMQ_DEFAULT_VHOST: "biketeam"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    ports:
+      - "127.0.0.1:5672:5672"
+    networks:
+      biketeam:
+        aliases:
+          - rabbitmq.localhost
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    ports:
+      - "127.0.0.1:8025:8025"
+      - "1025:1025"
+    networks:
+      biketeam:
+        aliases:
+          - mailhog.localhost
+
+networks:
+  biketeam:
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
+  biketeam_data:
