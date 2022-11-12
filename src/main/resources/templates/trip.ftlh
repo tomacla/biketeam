@@ -82,7 +82,6 @@
             <hr/>
 
             <ul class="list-unstyled">
-                <li>Allure : ${trip.lowerSpeed}/${trip.upperSpeed} km/h</li>
                 <li>Heure de départ : ${trip.meetingTime}</li>
                 <#if trip.startPlace??>
                     <li>Départ : <a href="#" class="link-dark" data-bs-toggle="modal" data-bs-target="#placemodal">${trip.startPlace.name}</a></li>

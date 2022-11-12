@@ -48,15 +48,9 @@
                     <div><input autocomplete="off" type="date" name="to" value="${formdata.to}" required class="form-control form-control-sm" id="feed-filter-to"></div>
                 </div>
                 <div class="d-flex flex-row mb-2 justify-content-center">
-                    <#if team.configuration.ridesVisible || team.configuration.tripsVisible>
-                        <div class="me-1"><button onclick="toggleVisibleButton('publications')" id="input-visible-publications-button" type="button" class="btn btn-sm <#if formdata.includePublications>btn-outline-success<#else>btn-outline-secondary</#if>"><i class="bi bi-newspaper"></i> Publications</button></div>
-                        <#if team.configuration.ridesVisible>
-                            <div class="me-1"><button onclick="toggleVisibleButton('rides')" id="input-visible-rides-button" type="button" class="btn btn-sm <#if formdata.includeRides>btn-outline-success<#else>btn-outline-secondary</#if>"><i class="bi bi-bicycle"></i> Rides</button></div>
-                        </#if>
-                        <#if team.configuration.tripsVisible>
-                            <div class="me-1"><button onclick="toggleVisibleButton('trips')" id="input-visible-trips-button" type="button" class="btn btn-sm <#if formdata.includeTrips>btn-outline-success<#else>btn-outline-secondary</#if>"><i class="bi bi-signpost-2"></i> Trips</button></div>
-                         </#if>
-                    </#if>
+                        <div class="me-1"><button tabindex="-1" role="button" aria-disabled="true" onclick="toggleVisibleButton('publications')" id="input-visible-publications-button" type="button" class="btn btn-sm <#if formdata.includePublications>btn-success<#else>btn-outline-success</#if>"><i class="bi bi-newspaper"></i> Publications</button></div>
+                        <div class="me-1"><button tabindex="-1" role="button" aria-disabled="true" onclick="toggleVisibleButton('rides')" id="input-visible-rides-button" type="button" class="btn btn-sm <#if formdata.includeRides>btn-success<#else>btn-outline-success</#if>"><i class="bi bi-bicycle"></i> Rides</button></div>
+                          <div class="me-1"><button tabindex="-1" role="button" aria-disabled="true" onclick="toggleVisibleButton('trips')" id="input-visible-trips-button" type="button" class="btn btn-sm <#if formdata.includeTrips>btn-success<#else>btn-outline-success</#if>"><i class="bi bi-signpost-2"></i> Trips</button></div>
                 </div>
                 <div class="d-flex flex-row justify-content-center">
                     <button type="submit" class="btn btn-secondary btn-sm"><i class="bi bi-search"></i> Rechercher</button>
@@ -70,7 +64,7 @@
         </form>
 
         <#if hasHeatmap>
-            <section class="border p-2 mb-3 rounded">
+            <section class="border d-none d-md-block p-2 mb-3 rounded">
                 <h5>Heatmap</h5>
                 <a href="<@common.teamUrl team.id '/heatmap' />" target="_blank"><img src="<@common.teamUrl team.id '/heatmap?width=500' />" class="d-block w-100 my-auto" alt="Heatmap"></a>
             </section>
@@ -95,12 +89,12 @@
 
             if(field.value === 'true') {
                 field.value = "false";
-                button.classList.remove('btn-outline-success');
-                button.classList.add('btn-outline-secondary');
+                button.classList.remove('btn-success');
+                button.classList.add('btn-outline-success');
             } else {
                 field.value = "true";
-                button.classList.remove('btn-outline-secondary');
-                button.classList.add('btn-outline-success');
+                button.classList.remove('btn-outline-success');
+                button.classList.add('btn-success');
             }
 
 

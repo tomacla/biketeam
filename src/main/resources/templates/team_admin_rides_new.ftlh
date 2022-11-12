@@ -167,27 +167,20 @@
                     <div class="form-ride-group border border-dark rounded p-2 m-2">
                         <input type="hidden" data-empty-on-copy="true" name="groups[${group?index}].id" id="form-ride-group-id-${group?index}" value="${group.id}">
                         <div class="row">
-                            <div class="mb-3 col-6">
+                            <div class="mb-3 col-4">
                                 <label for="form-ride-group-name-${group?index}" class="form-label">Nom</label>
                                 <input type="text" autocomplete="off" required value="${group.name}" name="groups[${group?index}].name" id="form-ride-group-name-${group?index}" placeholder="G1 rapide" class="form-control">
                             </div>
-                            <div class="mb-3 col-6">
+                            <div class="mb-3 col-4">
                                 <label for="form-ride-group-time-${group?index}" class="form-label">Heure de départ</label>
                                 <input type="time" autocomplete="off" required value="${group.meetingTime}" name="groups[${group?index}].meetingTime" id="form-ride-group-time-${group?index}" class="form-control">
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="mb-3 col-6">
-                                <label for="form-ride-group-lowerspeed-${group?index}" class="form-label">Vitesse basse</label>
+                            <div class="mb-3 col-4">
+                                <label for="form-ride-group-averageSpeed-${group?index}" class="form-label">Allure</label>
                                 <div class="input-group">
-                                    <input type="number" autocomplete="off" required value="${group.lowerSpeed}" name="groups[${group?index}].lowerSpeed" id="form-ride-group-lowerspeed-${group?index}" placeholder="30.0" class="form-control">
+                                    <input type="number" autocomplete="off" required value="${group.averageSpeed}" name="groups[${group?index}].averageSpeed" id="form-ride-group-averageSpeed-${group?index}" placeholder="30.0" class="form-control">
                                     <span class="input-group-text">km/h</span>
                                 </div>
-                            </div>
-                            <div class="mb-3 col-6">
-                                <label for="form-ride-group-upperspeed-${group?index}" class="form-label">Vitesse haute</label>
-                                <div class="input-group"><input type="number" autocomplete="off" required value="${group.upperSpeed}" name="groups[${group?index}].upperSpeed" id="form-ride-group-upperspeed-${group?index}" placeholder="30.0" class="form-control">
-                                <span class="input-group-text">km/h</span>
                             </div>
                         </div>
                         <div class="row">
@@ -209,7 +202,7 @@
                                 <button id="form-ride-group-delete-${group?index}" onclick="removeGroup(this);" type="button" class="btn btn-sm btn-secondary"><i class="bi bi-trash"></i> Supprimer</button>
                             </div>
                        </div>
-                    </div>
+
                   </div>
                 </#list>
 

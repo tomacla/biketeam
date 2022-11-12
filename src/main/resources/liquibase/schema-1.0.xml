@@ -1184,6 +1184,20 @@
         <sql>update team_configuration set default_page = 'FEED' where default_page != 'MAPS'</sql>
     </changeSet>
 
+    <changeSet id="simplify-structure" author="tomacla">
+
+        <dropColumn tableName="team_configuration" columnName="rides_visible" />
+        <dropColumn tableName="team_configuration" columnName="trips_visible" />
+        <dropColumn tableName="team_configuration" columnName="default_page" />
+        <dropColumn tableName="trip" columnName="lower_speed" />
+        <dropColumn tableName="trip" columnName="upper_speed" />
+        <dropColumn tableName="ride_group" columnName="lower_speed" />
+        <renameColumn tableName="ride_group" oldColumnName="upper_speed" newColumnName="average_speed"  />
+        <dropColumn tableName="ride_group_template" columnName="lower_speed" />
+        <renameColumn tableName="ride_group_template" oldColumnName="upper_speed" newColumnName="average_speed"  />
+
+    </changeSet>
+
 </databaseChangeLog>
 
 

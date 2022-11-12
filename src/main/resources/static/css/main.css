@@ -15,10 +15,6 @@ html {
     padding: 0px 5px;
 }
 
-.navbar-no-expand .nav-link {
-    font-size: 1.25rem;
-}
-
 .navbar-no-expand .navbar-nav.order-2 {
     justify-content:space-evenly;
     width:100%;
@@ -28,10 +24,6 @@ html {
 
     .navbar-no-expand .nav-item {
         padding: 0px 8px;
-    }
-
-    .navbar-no-expand .nav-link {
-        font-size: 1rem;
     }
 
     .navbar-no-expand .navbar-nav.order-2 {

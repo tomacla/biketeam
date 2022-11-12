@@ -150,7 +150,7 @@
                                 <td><#if group.map??><span style="height: 10px; width: 10px; background-color: ${colors[groupMaps?seq_index_of(group.map.id)%7]}; border-radius: 50%; display: inline-block;"></span></#if></td>
                                 <td>${group.meetingTime}</td>
                                 <td>${group.name}</td>
-                                <td class="d-none d-md-table-cell">${group.lowerSpeed}/${group.upperSpeed} km/h</td>
+                                <td class="d-none d-md-table-cell">${group.averageSpeed} km/h</td>
                                 <td class="d-none d-md-table-cell"><#if group.map??>${group.map.length?floor} km</#if></td>
                                 <td class="d-none d-md-table-cell"><#if group.map??>${group.map.positiveElevation?floor} m</#if></td>
                                 <td>

@@ -34,10 +34,6 @@ public class Trip implements MessageHolder, ReactionHolder, FeedEntity {
     private LocalDate startDate;
     @Column(name = "end_date")
     private LocalDate endDate;
-    @Column(name = "lower_speed")
-    private double lowerSpeed;
-    @Column(name = "upper_speed")
-    private double upperSpeed;
     @Column(name = "meeting_time")
     private LocalTime meetingTime;
     @Enumerated(EnumType.STRING)
@@ -170,22 +166,6 @@ public class Trip implements MessageHolder, ReactionHolder, FeedEntity {
 
     public void setEndPlace(Place endPlace) {
         this.endPlace = endPlace;
-    }
-
-    public double getLowerSpeed() {
-        return lowerSpeed;
-    }
-
-    public void setLowerSpeed(double lowerSpeed) {
-        this.lowerSpeed = lowerSpeed;
-    }
-
-    public double getUpperSpeed() {
-        return upperSpeed;
-    }
-
-    public void setUpperSpeed(double upperSpeed) {
-        this.upperSpeed = upperSpeed;
     }
 
     public LocalTime getMeetingTime() {

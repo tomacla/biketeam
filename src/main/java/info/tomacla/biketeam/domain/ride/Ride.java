@@ -191,8 +191,7 @@ public class Ride implements MessageHolder, ReactionHolder, FeedEntity {
                 this.groups.stream().filter(gg -> g.getId().equals(gg.getId())).findFirst().ifPresent(target -> {
                     target.setMeetingTime(g.getMeetingTime());
                     target.setName(g.getName());
-                    target.setUpperSpeed(g.getUpperSpeed());
-                    target.setLowerSpeed(g.getLowerSpeed());
+                    target.setAverageSpeed(g.getAverageSpeed());
                     target.setMap(g.getMap());
                 })
         );
