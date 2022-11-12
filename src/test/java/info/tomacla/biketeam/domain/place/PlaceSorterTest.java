@@ -1,8 +1,5 @@
 package info.tomacla.biketeam.domain.place;
 
-import info.tomacla.biketeam.domain.map.Map;
-import info.tomacla.biketeam.domain.map.MapSorter;
-import info.tomacla.biketeam.domain.map.MapSorterOption;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -25,10 +22,10 @@ public class PlaceSorterTest {
         Mockito.when(p1.getTripEndPlaceAppearances()).thenReturn(6);
         Mockito.when(p1.getRideStartPlaceAppearances()).thenReturn(0);
         Mockito.when(p1.getRideEndPlaceAppearances()).thenReturn(0);
-        Mockito.when(p1.getLastTripStartPlaceAppearance()).thenReturn(LocalDate.of(2022,1,5));
-        Mockito.when(p1.getLastTripEndPlaceAppearance()).thenReturn(LocalDate.of(2021,2,5));
-        Mockito.when(p1.getLastRideStartPlaceAppearance()).thenReturn(LocalDate.of(2022,3,5));
-        Mockito.when(p1.getLastRideEndPlaceAppearance()).thenReturn(LocalDate.of(2021,4,5));
+        Mockito.when(p1.getLastTripStartPlaceAppearance()).thenReturn(LocalDate.of(2022, 1, 5));
+        Mockito.when(p1.getLastTripEndPlaceAppearance()).thenReturn(LocalDate.of(2021, 2, 5));
+        Mockito.when(p1.getLastRideStartPlaceAppearance()).thenReturn(LocalDate.of(2022, 3, 5));
+        Mockito.when(p1.getLastRideEndPlaceAppearance()).thenReturn(LocalDate.of(2021, 4, 5));
 
         PlaceAppearanceProjection p2 = Mockito.mock(PlaceAppearanceProjection.class);
         Mockito.when(p2.getName()).thenReturn("Place 2");
@@ -38,10 +35,10 @@ public class PlaceSorterTest {
         Mockito.when(p2.getTripEndPlaceAppearances()).thenReturn(0);
         Mockito.when(p2.getRideStartPlaceAppearances()).thenReturn(3);
         Mockito.when(p2.getRideEndPlaceAppearances()).thenReturn(8);
-        Mockito.when(p2.getLastTripStartPlaceAppearance()).thenReturn(LocalDate.of(2022,1,5));
-        Mockito.when(p2.getLastTripEndPlaceAppearance()).thenReturn(LocalDate.of(2021,2,5));
-        Mockito.when(p2.getLastRideStartPlaceAppearance()).thenReturn(LocalDate.of(2022,3,5));
-        Mockito.when(p2.getLastRideEndPlaceAppearance()).thenReturn(LocalDate.of(2021,4,5));
+        Mockito.when(p2.getLastTripStartPlaceAppearance()).thenReturn(LocalDate.of(2022, 1, 5));
+        Mockito.when(p2.getLastTripEndPlaceAppearance()).thenReturn(LocalDate.of(2021, 2, 5));
+        Mockito.when(p2.getLastRideStartPlaceAppearance()).thenReturn(LocalDate.of(2022, 3, 5));
+        Mockito.when(p2.getLastRideEndPlaceAppearance()).thenReturn(LocalDate.of(2021, 4, 5));
 
         PlaceAppearanceProjection p3 = Mockito.mock(PlaceAppearanceProjection.class);
         Mockito.when(p3.getName()).thenReturn("Place 3");
@@ -64,10 +61,10 @@ public class PlaceSorterTest {
         Mockito.when(p4.getTripEndPlaceAppearances()).thenReturn(4);
         Mockito.when(p4.getRideStartPlaceAppearances()).thenReturn(6);
         Mockito.when(p4.getRideEndPlaceAppearances()).thenReturn(0);
-        Mockito.when(p4.getLastTripStartPlaceAppearance()).thenReturn(LocalDate.of(2021,1,5));
-        Mockito.when(p4.getLastTripEndPlaceAppearance()).thenReturn(LocalDate.of(2021,2,5));
-        Mockito.when(p4.getLastRideStartPlaceAppearance()).thenReturn(LocalDate.of(2020,3,5));
-        Mockito.when(p4.getLastRideEndPlaceAppearance()).thenReturn(LocalDate.of(2021,4,5));
+        Mockito.when(p4.getLastTripStartPlaceAppearance()).thenReturn(LocalDate.of(2021, 1, 5));
+        Mockito.when(p4.getLastTripEndPlaceAppearance()).thenReturn(LocalDate.of(2021, 2, 5));
+        Mockito.when(p4.getLastRideStartPlaceAppearance()).thenReturn(LocalDate.of(2020, 3, 5));
+        Mockito.when(p4.getLastRideEndPlaceAppearance()).thenReturn(LocalDate.of(2021, 4, 5));
 
         PlaceAppearanceProjection p5 = Mockito.mock(PlaceAppearanceProjection.class);
         Mockito.when(p5.getName()).thenReturn("Place 5");
@@ -77,10 +74,10 @@ public class PlaceSorterTest {
         Mockito.when(p5.getTripEndPlaceAppearances()).thenReturn(2);
         Mockito.when(p5.getRideStartPlaceAppearances()).thenReturn(8);
         Mockito.when(p5.getRideEndPlaceAppearances()).thenReturn(9);
-        Mockito.when(p5.getLastTripStartPlaceAppearance()).thenReturn(LocalDate.of(2021,1,5));
-        Mockito.when(p5.getLastTripEndPlaceAppearance()).thenReturn(LocalDate.of(2022,2,5));
-        Mockito.when(p5.getLastRideStartPlaceAppearance()).thenReturn(LocalDate.of(2021,3,5));
-        Mockito.when(p5.getLastRideEndPlaceAppearance()).thenReturn(LocalDate.of(2022,4,5));
+        Mockito.when(p5.getLastTripStartPlaceAppearance()).thenReturn(LocalDate.of(2021, 1, 5));
+        Mockito.when(p5.getLastTripEndPlaceAppearance()).thenReturn(LocalDate.of(2022, 2, 5));
+        Mockito.when(p5.getLastRideStartPlaceAppearance()).thenReturn(LocalDate.of(2021, 3, 5));
+        Mockito.when(p5.getLastRideEndPlaceAppearance()).thenReturn(LocalDate.of(2022, 4, 5));
 
 
         List<PlaceAppearanceProjection> places = Arrays.asList(p1, p2, p3, p4, p5);

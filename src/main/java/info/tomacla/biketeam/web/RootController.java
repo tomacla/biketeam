@@ -1,7 +1,8 @@
 package info.tomacla.biketeam.web;
 
 import info.tomacla.biketeam.common.data.Country;
-import info.tomacla.biketeam.domain.feed.Feed;
+import info.tomacla.biketeam.domain.feed.FeedEntity;
+import info.tomacla.biketeam.domain.feed.FeedOptions;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.userrole.Role;
@@ -50,7 +51,8 @@ public class RootController extends AbstractController {
     @GetMapping
     public String getRoot(@RequestParam(required = false, name = "error") String error,
                           @ModelAttribute(name = "error") String modelError,
-                          Principal principal, Model model) {
+                          Principal principal,
+                          Model model) {
 
         List<String> errors = new ArrayList<>();
         if (!ObjectUtils.isEmpty(error)) {
@@ -70,7 +72,7 @@ public class RootController extends AbstractController {
             final List<Team> teams = teamService.getUserTeams(user.getId());
 
             // TODO should be user time zone and not UTC
-            final List<Feed> feeds = teamService.listFeed(teams.stream().map(Team::getId).collect(Collectors.toSet()), ZoneOffset.UTC);
+            final List<FeedEntity> feeds = teamService.listFeed(teams.stream().map(Team::getId).collect(Collectors.toSet()), ZoneOffset.UTC, new FeedOptions());
 
             addGlobalValues(principal, model, "Biketeam", null);
             if (error != null) {

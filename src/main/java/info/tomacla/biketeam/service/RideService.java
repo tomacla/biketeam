@@ -31,6 +31,7 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class RideService extends AbstractPermalinkService {
@@ -48,6 +49,12 @@ public class RideService extends AbstractPermalinkService {
 
     @Autowired
     private BrokerService brokerService;
+
+    @Autowired
+    private MessageService messageService;
+
+    @Autowired
+    private ReactionService reactionService;
 
     public Optional<ImageDescriptor> getImage(String teamId, String rideId) {
 
@@ -122,16 +129,18 @@ public class RideService extends AbstractPermalinkService {
         final Optional<Ride> optionalRide = get(teamId, rideId);
         if (optionalRide.isPresent()) {
             final Ride ride = optionalRide.get();
+            messageService.deleteByTarget(rideId);
+            reactionService.deleteByTarget(rideId);
             deleteImage(ride.getTeamId(), ride.getId());
             rideRepository.delete(ride);
         }
     }
 
-    public Page<Ride> searchRides(String teamId, int page, int pageSize,
+    public Page<Ride> searchRides(Set<String> teamIds, int page, int pageSize,
                                   LocalDate from, LocalDate to) {
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by("date").descending());
-        return rideRepository.findByTeamIdAndDateBetweenAndPublishedStatus(
-                teamId,
+        return rideRepository.findAllByTeamIdInAndDateBetweenAndPublishedStatus(
+                teamIds,
                 from,
                 to,
                 PublishedStatus.PUBLISHED,
@@ -162,7 +171,7 @@ public class RideService extends AbstractPermalinkService {
     }
 
     public void deleteByUser(String userId) {
-
         rideRepository.deleteByUserId(userId);
     }
+
 }

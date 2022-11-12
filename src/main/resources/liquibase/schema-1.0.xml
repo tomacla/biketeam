@@ -1136,6 +1136,54 @@
 
     </changeSet>
 
+    <changeSet id="add-element-reaction" author="tomacla">
+
+
+        <createTable tableName="reaction">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="team_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="VARCHAR(5)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="reaction" columnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="reaction"
+                                 baseColumnNames="team_id"
+                                 constraintName="fk_reaction_team_id"
+                                 referencedTableName="team"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="reaction"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_reaction_user_id"
+                                 referencedTableName="user_account"
+                                 referencedColumnNames="id"/>
+
+    </changeSet>
+
+    <changeSet id="remove-feed-view" author="tomacla">
+        <dropView viewName="feed" />
+    </changeSet>
+
+    <changeSet id="change-default-page" author="tomacla">
+        <sql>update team_configuration set default_page = 'FEED' where default_page != 'MAPS'</sql>
+    </changeSet>
+
 </databaseChangeLog>
 
 

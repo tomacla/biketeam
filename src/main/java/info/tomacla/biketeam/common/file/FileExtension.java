@@ -51,7 +51,7 @@ public enum FileExtension {
         }
 
         for (FileExtension fileExtension : byPriority()) {
-            if(fileExtension.getMediaType().equals(mimetype)) {
+            if (fileExtension.getMediaType().equals(mimetype)) {
                 return Optional.of(fileExtension);
             }
         }

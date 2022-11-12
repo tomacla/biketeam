@@ -16,8 +16,6 @@ import info.tomacla.biketeam.service.UserRoleService;
 import info.tomacla.biketeam.service.file.ThumbnailService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -34,7 +32,6 @@ import org.springframework.web.servlet.view.RedirectView;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.security.Principal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -117,43 +114,13 @@ public class TripController extends AbstractController {
 
 
     @GetMapping
-    public String getTrips(@PathVariable("teamId") String teamId,
-                           @RequestParam(value = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-                           @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
-                           @RequestParam(value = "page", defaultValue = "0", required = false) int page,
-                           @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
-                           @ModelAttribute("error") String error,
-                           Principal principal,
-                           Model model) {
+    public RedirectView getTrips(@PathVariable("teamId") String teamId,
+                                 Principal principal,
+                                 Model model) {
 
         final Team team = checkTeam(teamId);
 
-        SearchTripForm form = SearchTripForm.builder()
-                .withFrom(from)
-                .withTo(to)
-                .withPage(page)
-                .withPageSize(pageSize)
-                .get();
-
-        final SearchTripForm.SearchTripFormParser parser = form.parser();
-
-        Page<Trip> trips = tripService.searchTrips(
-                team.getId(),
-                parser.getPage(),
-                parser.getPageSize(),
-                parser.getFrom(),
-                parser.getTo()
-        );
-
-        addGlobalValues(principal, model, "Trips", team);
-        model.addAttribute("trips", trips.getContent());
-        model.addAttribute("pages", trips.getTotalPages());
-        model.addAttribute("formdata", form);
-        if (!ObjectUtils.isEmpty(error)) {
-            model.addAttribute("errors", List.of(error));
-        }
-
-        return "trips";
+        return viewHandler.redirectView(team, "/");
 
     }
 
@@ -251,9 +218,9 @@ public class TripController extends AbstractController {
             Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
 
             Message message;
-            if(!ObjectUtils.isEmpty(originId)) {
+            if (!ObjectUtils.isEmpty(originId)) {
                 Optional<Message> optionalMessage = messageService.getMessage(originId);
-                if(optionalMessage.isEmpty()) {
+                if (optionalMessage.isEmpty()) {
                     return viewHandler.redirectView(team, "/trips/" + tripId + "/messages");
                 }
 
@@ -269,9 +236,9 @@ public class TripController extends AbstractController {
                 message = new Message();
                 message.setTarget(trip);
                 message.setUser(connectedUser);
-                if(replyToId != null) {
+                if (replyToId != null) {
                     Optional<Message> optionalReplyMessage = messageService.getMessage(replyToId);
-                    if(optionalReplyMessage.isPresent() && optionalReplyMessage.get().getTargetId().equals(trip.getId())) {
+                    if (optionalReplyMessage.isPresent() && optionalReplyMessage.get().getTargetId().equals(trip.getId())) {
                         message.setReplyToId(replyToId);
                     }
                 }

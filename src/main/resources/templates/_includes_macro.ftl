@@ -38,73 +38,139 @@
     <div class="row g-4">
         <#if feed?size != 0>
             <#list feed as feedItem>
-                  <div class="col-12">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h6 class="m-0 p-0">
-                                <#if withTeam>
-                                    <a class="link-dark text-decoration-none" href="<@common.teamUrl feedItem.teamId '' />"><img src="<@common.teamUrl feedItem.teamId '/image' />" height="18" alt="Team image"> ${feedItem.teamName}</a>
-                                </#if>
-                            </h6>
-                            <div class="text-end small text-muted">
-                                <#if feedItem.type == 'RIDE'>
-                                    <span class="d-none d-md-inline">Ride </span><i class="bi bi-bicycle"></i>
-                                <#elseif feedItem.type == 'TRIP'>
-                                    <span class="d-none d-md-inline">Trip </span><i class="bi bi-signpost-2"></i>
-                                <#elseif feedItem.type == 'PUBLICATION'>
-                                    <span class="d-none d-md-inline">Publication </span><i class="bi bi-newspaper"></i>
-                                </#if>
-                                ${feedItem.publishedAt.format(_date_formatter)}
-                            </div>
-                        </div>
-                        <div class="card-body">
-                        <#if feedItem.type == 'RIDE'>
-                            <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl feedItem.teamId '/rides/'+ feedItem.permalink!feedItem.id />">${feedItem.title}</a> - ${feedItem.date.format(_date_formatter)}</h5>
-                        <#elseif feedItem.type == 'TRIP'>
-                            <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl feedItem.teamId '/trips/'+ feedItem.permalink!feedItem.id />">${feedItem.title}</a> - ${feedItem.date.format(_date_formatter)}</h5>
-                        <#else>
-                            <h5 class="card-title">${feedItem.title}</h5>
-                        </#if>
-                        <#if feedItem.badges?? && feedItem.badges?size gt 0>
-                            <p><#list feedItem.badges as badge><span class="badge bg-secondary">${badge}</span><#if badge_has_next> </#if></#list></p>
-                        </#if>
-                          <p class="card-text wrap-content">${feedItem.content}</p>
-                          <#if feedItem.imaged>
-                              <div class="row justify-content-center">
-                                <div class="col-12 col-md-6">
-                                  <#if feedItem.type == 'RIDE'>
-                                    <a href="<@common.teamUrl feedItem.teamId '/rides/'+ feedItem.permalink!feedItem.id />"><img src="<@common.teamUrl feedItem.teamId '/rides/${feedItem.id}/image?width=500' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${feedItem.title} image"></a>
-                                  <#elseif feedItem.type == 'TRIP'>
-                                    <a href="<@common.teamUrl feedItem.teamId '/trips/'+ feedItem.permalink!feedItem.id />"><img src="<@common.teamUrl feedItem.teamId '/trips/${feedItem.id}/image?width=500' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${feedItem.title} image"></a>
-                                  <#elseif feedItem.type == 'PUBLICATION'>
-                                    <img src="<@common.teamUrl feedItem.teamId '/publications/${feedItem.id}/image?width=500' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${feedItem.title} image">
-                                  </#if>
-                                </div>
-                              </div>
-                          </#if>
-                        </div>
-                        <#if feedItem.type == 'RIDE'>
-                            <div class="card-footer text-center">
-                                <a href="<@common.teamUrl feedItem.teamId '/rides/'+ feedItem.permalink!feedItem.id />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye-fill"></i> Voir</a>
-                            </div>
-                        <#elseif feedItem.type == 'TRIP'>
-                            <div class="card-footer text-center">
-                                <a href="<@common.teamUrl feedItem.teamId '/trips/'+ feedItem.permalink!feedItem.id />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye-fill"></i> Voir</a>
-                            </div>
-                        </#if>
-                    </div>
-                  </div>
+                <#if feedItem.feedType == 'RIDE'>
+                    <@common.displayRide feedItem withTeam />
+                <#elseif feedItem.feedType == 'TRIP'>
+                    <@common.displayTrip feedItem withTeam />
+                <#elseif feedItem.feedType == 'PUBLICATION'>
+                    <@common.displayPublication feedItem withTeam />
+                </#if>
             </#list>
         <#else>
             <div class="alert alert-warning" role="alert">
                 <#if withTeam>
                     Vous n'avez pas d'actualité récente.
                 <#else>
-                    Ce groupe n'a pas d'actualité récente.
+                    Ce groupe n'a pas d'actualité correspondant aux filtres sélectionnés.
                 </#if>
              </div>
         </#if>
     </div>
+</#macro>
+
+<#macro displayPublication publication withTeam>
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header p-1">
+                <div class="d-flex flex-row justify-content-start align-items-start p-0">
+                    <div>
+                        <a class="link-dark text-decoration-none" href="<@common.teamUrl publication.teamId '' />"><img src="<@common.teamUrl publication.teamId '/image' />" height="50" alt="Team image"></a>
+                    </div>
+                    <div class="ms-3 d-flex flex-column align-items-start">
+                        <div><#if withTeam><a class="link-dark" href="<@common.teamUrl publication.teamId '' />"><#list userTeams?filter(t -> t.id == publication.teamId) as itemTeam>${itemTeam.name}</#list></a> - </#if>${publication.title}</div>
+                        <div class="small text-muted"><i class="bi bi-newspaper"></i> ${publication.publishedAt.format(_date_formatter)}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+              <p class="card-text wrap-content">${publication.content}</p>
+              <#if publication.imaged>
+                  <div class="row justify-content-center">
+                    <div class="col-12 col-md-6">
+                      <img src="<@common.teamUrl publication.teamId '/publications/${publication.id}/image?width=500' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${publication.title} image">
+                    </div>
+                  </div>
+              </#if>
+            </div>
+        </div>
+      </div>
+</#macro>
+
+<#macro displayRide ride withTeam>
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header p-1">
+                <div class="d-flex flex-row justify-content-start align-items-start p-0">
+                    <div>
+                        <a class="link-dark text-decoration-none" href="<@common.teamUrl ride.teamId '' />"><img src="<@common.teamUrl ride.teamId '/image' />" height="50" alt="Team image"></a>
+                    </div>
+                    <div class="ms-3 d-flex flex-column align-items-start">
+                        <div><#if withTeam><a class="link-dark" href="<@common.teamUrl ride.teamId '' />"><#list userTeams?filter(t -> t.id == ride.teamId) as itemTeam>${itemTeam.name}</#list></a> - </#if><a class="link-dark" href="<@common.teamUrl ride.teamId '/rides/'+ ride.permalink!ride.id />">${ride.title}</a></div>
+                        <div class="small text-muted"><i class="bi bi-bicycle"></i> ${ride.publishedAt.format(_date_formatter)}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body border-bottom">
+            <h5 class="card-title">${ride.date.format(_date_formatter)}</h5>
+            <ul class="list-unstyled m-0">
+                <li >${ride.groups?size} groupe<#if ride.groups?size gt 1>s</#if></li>
+                <#if ride.sortedGroups?first.meetingTime != ride.sortedGroups?last.meetingTime>
+                    <li>Départ de ${ride.sortedGroups?first.meetingTime} à ${ride.sortedGroups?last.meetingTime}<#if ride.startPlace??> - ${ride.startPlace.name}</#if></li>
+                <#else>
+                    <li>Départ à ${ride.sortedGroups?first.meetingTime}<#if ride.startPlace??> - ${ride.startPlace.name}</#if></li>
+                </#if>
+                  <#if ride.endPlace??>
+                    <li>Arrivée : ${ride.endPlace.name}</li>
+                  </#if>
+             </ul>
+            </div>
+            <div class="card-body">
+               <p class="card-text wrap-content small">${ride.description}</p>
+              <#if ride.imaged>
+                  <div class="row justify-content-center">
+                    <div class="col-12 col-md-6">
+                      <a href="<@common.teamUrl ride.teamId '/rides/'+ ride.permalink!ride.id />"><img src="<@common.teamUrl ride.teamId '/rides/${ride.id}/image?width=500' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${ride.title} image"></a>
+                    </div>
+                  </div>
+              </#if>
+            </div>
+            <div class="card-footer text-center">
+                <a href="<@common.teamUrl ride.teamId '/rides/'+ ride.permalink!ride.id />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye-fill"></i> Détails</a>
+            </div>
+        </div>
+      </div>
+</#macro>
+
+<#macro displayTrip trip withTeam>
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header p-1">
+            <div class="d-flex flex-row justify-content-start align-items-start p-0">
+                <div>
+                    <a class="link-dark text-decoration-none" href="<@common.teamUrl trip.teamId '' />"><img src="<@common.teamUrl trip.teamId '/image' />" height="50" alt="Team image"></a>
+                </div>
+                <div class="ms-3 d-flex flex-column align-items-start">
+                    <div><#if withTeam><a class="link-dark" href="<@common.teamUrl trip.teamId '' />"><#list userTeams?filter(t -> t.id == trip.teamId) as itemTeam>${itemTeam.name}</#list></a> - </#if><a class="link-dark" href="<@common.teamUrl trip.teamId '/trips/'+ trip.permalink!trip.id />">${trip.title}</a></div>
+                    <div class="small text-muted"><i class="bi bi-signpost-2"></i> ${trip.publishedAt.format(_date_formatter)}</div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body border-bottom">
+        <h5 class="card-title">${trip.date.format(_date_formatter)}</h5>
+        <ul class="list-unstyled m-0">
+            <li >${trip.stages?size} étape<#if trip.stages?size gt 1>s</#if></li>
+            <li>Départ à ${trip.meetingTime}<#if trip.startPlace??> - ${trip.startPlace.name}</#if></li>
+            <#if trip.endPlace??>
+                <li>Arrivée : ${trip.endPlace.name}</li>
+              </#if>
+         </ul>
+        </div>
+        <div class="card-body">
+
+          <p class="card-text wrap-content small">${trip.description}</p>
+          <#if trip.imaged>
+              <div class="row justify-content-center">
+                <div class="col-12 col-md-6">
+                  <a href="<@common.teamUrl trip.teamId '/trips/'+ trip.permalink!trip.id />"><img src="<@common.teamUrl trip.teamId '/trips/${trip.id}/image?width=500' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${trip.title} image"></a>
+                </div>
+              </div>
+          </#if>
+        </div>
+        <div class="card-footer text-center">
+            <a href="<@common.teamUrl trip.teamId '/trips/'+ trip.permalink!trip.id />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye-fill"></i> Détails</a>
+        </div>
+    </div>
+  </div>
 </#macro>
 
 <#macro countrySelect selected name id required>

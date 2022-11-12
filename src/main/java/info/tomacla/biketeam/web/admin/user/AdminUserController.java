@@ -1,7 +1,6 @@
 package info.tomacla.biketeam.web.admin.user;
 
 import info.tomacla.biketeam.domain.user.User;
-import info.tomacla.biketeam.domain.userrole.Role;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -9,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = "/admin/users")
@@ -28,13 +26,13 @@ public class AdminUserController extends AbstractController {
                           @RequestParam(value = "email", required = false) String email) {
 
         User target = null;
-        if(stravaId != null) {
+        if (stravaId != null) {
             target = userService.getByStravaId(stravaId).orElseGet(() -> {
                 User u = new User();
                 u.setStravaId(stravaId);
                 return u;
             });
-        } else if(email != null) {
+        } else if (email != null) {
             target = userService.getByEmail(email.toLowerCase()).orElseGet(() -> {
                 User u = new User();
                 u.setEmail(email);

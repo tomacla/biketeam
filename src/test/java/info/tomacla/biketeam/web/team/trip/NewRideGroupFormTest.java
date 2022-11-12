@@ -1,6 +1,5 @@
 package info.tomacla.biketeam.web.team.trip;
 
-import info.tomacla.biketeam.common.geo.Point;
 import info.tomacla.biketeam.web.team.ride.NewRideGroupForm;
 import org.junit.jupiter.api.Test;
 

@@ -3,6 +3,43 @@ html {
     height: 100%;
 }
 
+.navbar-no-expand .navbar-brand {
+    font-size:1.35rem;
+}
+
+.navbar-no-expand .navbar-nav {
+    flex-direction: row;
+}
+
+.navbar-no-expand .nav-item {
+    padding: 0px 5px;
+}
+
+.navbar-no-expand .nav-link {
+    font-size: 1.25rem;
+}
+
+.navbar-no-expand .navbar-nav.order-2 {
+    justify-content:space-evenly;
+    width:100%;
+}
+
+@media (min-width: 768px) {
+
+    .navbar-no-expand .nav-item {
+        padding: 0px 8px;
+    }
+
+    .navbar-no-expand .nav-link {
+        font-size: 1rem;
+    }
+
+    .navbar-no-expand .navbar-nav.order-2 {
+        justify-content:start;
+        width:auto;
+    }
+
+}
 
 .elevation-control .tooltip {
     opacity:1 !important;

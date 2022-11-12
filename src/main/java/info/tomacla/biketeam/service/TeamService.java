@@ -5,8 +5,8 @@ import info.tomacla.biketeam.common.data.Country;
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
-import info.tomacla.biketeam.domain.feed.Feed;
-import info.tomacla.biketeam.domain.feed.FeedRepository;
+import info.tomacla.biketeam.domain.feed.FeedEntity;
+import info.tomacla.biketeam.domain.feed.FeedOptions;
 import info.tomacla.biketeam.domain.feed.FeedSorter;
 import info.tomacla.biketeam.domain.team.*;
 import info.tomacla.biketeam.domain.userrole.Role;
@@ -26,12 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,9 +45,6 @@ public class TeamService extends AbstractPermalinkService {
 
     @Autowired
     private HeatmapService heatmapService;
-
-    @Autowired
-    private FeedRepository feedRepository;
 
     @Autowired
     private RideService rideService;
@@ -72,6 +67,9 @@ public class TeamService extends AbstractPermalinkService {
     @Autowired
     private PlaceService placeService;
 
+    @Autowired
+    private MessageService messageService;
+
     public Optional<Team> get(String teamId) {
         return teamRepository.findById(teamId.toLowerCase());
     }
@@ -92,16 +90,31 @@ public class TeamService extends AbstractPermalinkService {
         return teamRepository.findByRoles_UserIdAndRoles_RoleIn(userId, Set.of(Role.ADMIN, Role.MEMBER));
     }
 
-    public List<Feed> listFeed(Team team) {
-        return this.listFeed(Set.of(team.getId()), ZoneId.of(team.getConfiguration().getTimezone()));
+    public List<FeedEntity> listFeed(Team team, FeedOptions options) {
+        return this.listFeed(Set.of(team.getId()), ZoneId.of(team.getConfiguration().getTimezone()), options);
     }
 
-    public List<Feed> listFeed(Set<String> teamIds, ZoneId zoneId) {
-        return feedRepository.findAllByTeamIdInAndPublishedAtLessThan(
-                        teamIds,
-                        ZonedDateTime.now(zoneId),
-                        PageRequest.of(0, 10, Sort.by("publishedAt").descending())).getContent()
-                .stream().sorted(FeedSorter.get(zoneId)).collect(Collectors.toList());
+    public List<FeedEntity> listFeed(Set<String> teamIds, ZoneId zoneId, FeedOptions options) {
+
+        List<FeedEntity> result = new ArrayList<>();
+
+        // TODO parallel requests to database
+        if (options.isIncludePublications()) {
+            result.addAll(publicationService.searchPublications(teamIds, 0, 10,
+                    ZonedDateTime.of(options.getFrom(), LocalTime.MIDNIGHT, zoneId),
+                    ZonedDateTime.of(options.getTo(), LocalTime.MIDNIGHT, zoneId)
+            ).getContent());
+        }
+        if (options.isIncludeRides()) {
+            result.addAll(rideService.searchRides(teamIds, 0, 10, options.getFrom(), options.getTo()).getContent());
+        }
+        if (options.isIncludeTrips()) {
+            result.addAll(tripService.searchTrips(teamIds, 0, 10, options.getFrom(), options.getTo()).getContent());
+        }
+
+        result = result.stream().sorted(FeedSorter.get(zoneId)).collect(Collectors.toList());
+
+        return result;
     }
 
     public void save(Team team) {
@@ -114,9 +127,7 @@ public class TeamService extends AbstractPermalinkService {
 
         TeamConfiguration teamConfiguration = team.getConfiguration();
 
-        if ((teamConfiguration.getDefaultPage().equals(WebPage.FEED) && !teamConfiguration.isFeedVisible())
-                || (teamConfiguration.getDefaultPage().equals(WebPage.RIDES) && !teamConfiguration.isRidesVisible())
-                || (teamConfiguration.getDefaultPage().equals(WebPage.TRIPS) && !teamConfiguration.isTripsVisible())) {
+        if ((teamConfiguration.getDefaultPage().equals(WebPage.FEED) && !teamConfiguration.isFeedVisible())) {
             teamConfiguration.setDefaultPage(WebPage.MAPS);
         }
 
@@ -215,6 +226,7 @@ public class TeamService extends AbstractPermalinkService {
         try {
             log.info("Request team deletion {}", team.getId());
             // delete all elements
+            messageService.deleteByTarget(team.getId());
             rideTemplateService.deleteByTeam(team.getId());
             rideService.deleteByTeam(team.getId());
             publicationService.deleteByTeam(team.getId());

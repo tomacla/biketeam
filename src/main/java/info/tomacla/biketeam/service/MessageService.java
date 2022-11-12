@@ -43,4 +43,9 @@ public class MessageService {
     public void deleteByUser(String userId) {
         messageRepository.deleteByUserId(userId);
     }
+
+    public void deleteByTarget(String targetId) {
+        messageRepository.deleteByTargetId(targetId);
+    }
+
 }
