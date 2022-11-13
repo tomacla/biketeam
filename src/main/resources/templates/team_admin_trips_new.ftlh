@@ -143,21 +143,6 @@
                       </select>
                     </div>
                 </div>
-                
-                <div class="row">
-                    <div class="mb-3 col-6">
-                        <label for="form-trip-lowerspeed" class="form-label">Vitesse basse</label>
-                        <div class="input-group">
-                            <input type="number" autocomplete="off" required value="${formdata.lowerSpeed}" name="lowerSpeed" id="form-trip-lowerspeed" placeholder="30.0" class="form-control">
-                            <span class="input-group-text">km/h</span>
-                        </div>
-                    </div>
-                    <div class="mb-3 col-6">
-                        <label for="form-trip-upperspeed" class="form-label">Vitesse haute</label>
-                        <div class="input-group"><input type="number" autocomplete="off" required value="${formdata.upperSpeed}" name="upperSpeed" id="form-trip-upperspeed" placeholder="30.0" class="form-control">
-                        <span class="input-group-text">km/h</span>
-                    </div>
-                </div>
 
                 <div class="mb-3">
                   <label for="form-trip-description" class="form-label">Description</label>

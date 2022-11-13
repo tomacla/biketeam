@@ -29,8 +29,7 @@ public class RideDTO {
 
         public String id;
         public String name;
-        public double lowerSpeed;
-        public double upperSpeed;
+        public double averageSpeed;
         public MapDTO map;
         public LocalTime meetingTime;
         public List<MemberDTO> participants;
@@ -45,8 +44,7 @@ public class RideDTO {
             RideGroupDTO dto = new RideGroupDTO();
             dto.id = rideGroup.getId();
             dto.name = rideGroup.getName();
-            dto.lowerSpeed = rideGroup.getLowerSpeed();
-            dto.upperSpeed = rideGroup.getUpperSpeed();
+            dto.averageSpeed = rideGroup.getAverageSpeed();
             dto.map = MapDTO.valueOf(rideGroup.getMap());
             dto.meetingTime = rideGroup.getMeetingTime();
             dto.participants = rideGroup.getParticipants().stream().map(MemberDTO::valueOf).collect(Collectors.toList());

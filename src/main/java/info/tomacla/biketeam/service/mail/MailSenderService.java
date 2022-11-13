@@ -24,6 +24,9 @@ public class MailSenderService {
     private JavaMailSender emailSender;
 
     @Value("${spring.mail.username:undefined}")
+    private String username;
+
+    @Value("${contact.email}")
     private String fromEmail;
 
     public void sendDirectly(Team team, Set<String> tos, String subject, String message, ImageDescriptor embedImage) {
@@ -80,7 +83,7 @@ public class MailSenderService {
     }
 
     public boolean isSmtpConfigured() {
-        return emailSender != null && !this.fromEmail.equals("undefined");
+        return emailSender != null && !this.username.equals("undefined");
     }
 
 }

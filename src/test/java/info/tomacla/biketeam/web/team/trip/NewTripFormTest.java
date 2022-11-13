@@ -24,8 +24,6 @@ public class NewTripFormTest {
                 .withTitle("title")
                 .withType(MapType.ROAD)
                 .withDescription("desc ride")
-                .withLowerSpeed(10)
-                .withUpperSpeed(50)
                 .withMeetingTime(LocalTime.parse("16:30"))
                 .get();
 
@@ -36,8 +34,6 @@ public class NewTripFormTest {
         assertEquals("title", parser.getTitle());
         assertEquals(MapType.ROAD, parser.getType());
         assertEquals("desc ride", parser.getDescription());
-        assertEquals(10, parser.getLowerSpeed());
-        assertEquals(50, parser.getUpperSpeed());
         assertEquals(LocalTime.parse("16:30"), parser.getMeetingTime());
         assertEquals(LocalDate.parse("2021-01-01"), parser.getStartDate());
         assertEquals(LocalDate.parse("2021-01-05"), parser.getEndDate());
@@ -58,8 +54,6 @@ public class NewTripFormTest {
         assertNull(parser.getTitle());
         assertEquals(MapType.ROAD, parser.getType());
         assertNull(parser.getDescription());
-        assertEquals(28, parser.getLowerSpeed());
-        assertEquals(30, parser.getUpperSpeed());
         assertEquals(LocalTime.parse("08:00"), parser.getMeetingTime());
         assertEquals(LocalDate.parse("2021-01-05"), parser.getStartDate());
         assertEquals(LocalDate.parse("2021-01-06"), parser.getEndDate());

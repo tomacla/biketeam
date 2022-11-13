@@ -11,26 +11,30 @@
         </a>
     </#if>
 
-    <ul class="navbar-nav order-2 order-md-1">
-        <#if team??>
-            <li class="nav-item d-list-item d-md-none">
-                <a class="nav-link<#if springMacroRequestContext.requestUri == '/' + team.id > active</#if>" href="<@common.teamUrl team.id '/' />"><i class="bi bi-collection"></i> Flux</a>
-            </li>
-            <#if team.configuration.markdownPageWritten>
+    <#if team?? && (team.configuration.feedVisible || _team_admin || team.configuration.markdownPageWritten)>
+        <ul class="navbar-nav order-2 order-md-1">
+            <#if team??>
+                <#if team.configuration.feedVisible>
+                    <li class="nav-item d-list-item d-md-none">
+                        <a class="nav-link<#if springMacroRequestContext.requestUri == '/' + team.id > active</#if>" href="<@common.teamUrl team.id '/' />"><i class="bi bi-collection"></i> Flux</a>
+                    </li>
+                </#if>
+                <#if team.configuration.markdownPageWritten>
+                    <li class="nav-item">
+                        <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/' + team.id + '/faq')> active</#if>" href="<@common.teamUrl team.id '/faq' />"><i class="bi bi-patch-question"></i> FAQ</a>
+                    </li>
+                </#if>
                 <li class="nav-item">
-                    <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/' + team.id + '/faq')> active</#if>" href="<@common.teamUrl team.id '/faq' />"><i class="bi bi-patch-question"></i> FAQ</a>
+                    <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/' + team.id + '/maps')> active</#if>" href="<@common.teamUrl team.id '/maps' />"><i class="bi bi-map"></i> Maps</a>
                 </li>
+                <#if _team_admin>
+                    <li class="nav-item">
+                        <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/' + team.id + '/admin')> active</#if>" href="<@common.teamUrl team.id '/admin' />"><i class="bi bi-shield-lock"></i> Gérer</a>
+                    </li>
+                </#if>
             </#if>
-            <li class="nav-item">
-                <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/' + team.id + '/maps')> active</#if>" href="<@common.teamUrl team.id '/maps' />"><i class="bi bi-map"></i> Maps</a>
-            </li>
-            <#if _team_admin>
-                <li class="nav-item">
-                    <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/' + team.id + '/admin')> active</#if>" href="<@common.teamUrl team.id '/admin' />"><i class="bi bi-shield-lock"></i> Gérer</a>
-                </li>
-            </#if>
-        </#if>
-    </ul>
+        </ul>
+    </#if>
 
     <ul class="navbar-nav order-1 order-md-2 ms-auto">
         <#if _authenticated>

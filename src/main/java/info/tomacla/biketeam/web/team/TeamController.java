@@ -6,7 +6,6 @@ import info.tomacla.biketeam.domain.feed.FeedEntity;
 import info.tomacla.biketeam.domain.feed.FeedOptions;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.TeamConfiguration;
-import info.tomacla.biketeam.domain.team.WebPage;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.userrole.Role;
 import info.tomacla.biketeam.domain.userrole.UserRole;
@@ -65,7 +64,7 @@ public class TeamController extends AbstractController {
         final Team team = checkTeam(teamId);
 
         final TeamConfiguration teamConfiguration = team.getConfiguration();
-        if (teamConfiguration.getDefaultPage().equals(WebPage.MAPS)) {
+        if (!teamConfiguration.isFeedVisible()) {
             return viewHandler.redirect(team, "/maps");
         }
 

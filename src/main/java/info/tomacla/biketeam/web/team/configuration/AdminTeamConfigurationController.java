@@ -152,10 +152,7 @@ public class AdminTeamConfigurationController extends AbstractController {
         EditTeamConfigurationForm form = EditTeamConfigurationForm.builder()
                 .withTimezone(teamConfiguration.getTimezone())
                 .withDefaultSearchTags(teamConfiguration.getDefaultSearchTags())
-                .withDefaultPage(teamConfiguration.getDefaultPage())
                 .withFeedVisible(teamConfiguration.isFeedVisible())
-                .withRidesVisible(teamConfiguration.isRidesVisible())
-                .withTripsVisible(teamConfiguration.isTripsVisible())
                 .get();
 
         addGlobalValues(principal, model, "Administration - Configuration", team);
@@ -185,10 +182,7 @@ public class AdminTeamConfigurationController extends AbstractController {
 
             teamConfiguration.setTimezone(parser.getTimezone());
             teamConfiguration.setDefaultSearchTags(parser.getDefaultSearchTags());
-            teamConfiguration.setDefaultPage(parser.getDefaultPage());
             teamConfiguration.setFeedVisible(parser.isFeedVisible());
-            teamConfiguration.setRidesVisible(parser.isRidesVisible());
-            teamConfiguration.setTripsVisible(parser.isTripsVisible());
             teamService.save(team);
 
             return viewHandler.redirectView(team, "/admin/configuration");

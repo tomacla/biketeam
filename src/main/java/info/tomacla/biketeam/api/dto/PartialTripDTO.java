@@ -43,8 +43,6 @@ public class PartialTripDTO {
         dto.permalink = trip.getPermalink();
         dto.startDate = trip.getStartDate();
         dto.endDate = trip.getEndDate();
-        dto.lowerSpeed = trip.getLowerSpeed();
-        dto.upperSpeed = trip.getUpperSpeed();
         dto.meetingTime = trip.getMeetingTime();
         dto.type = trip.getType();
         dto.publishedStatus = trip.getPublishedStatus();

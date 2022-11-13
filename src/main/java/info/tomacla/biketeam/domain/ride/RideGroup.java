@@ -19,10 +19,8 @@ public class RideGroup {
     @JoinColumn(name = "ride_id")
     private Ride ride;
     private String name;
-    @Column(name = "lower_speed")
-    private double lowerSpeed;
-    @Column(name = "upper_speed")
-    private double upperSpeed;
+    @Column(name = "average_speed")
+    private double averageSpeed;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "map_id")
     private Map map;
@@ -61,20 +59,12 @@ public class RideGroup {
         this.name = Strings.requireNonBlank(name, "name is blank");
     }
 
-    public double getLowerSpeed() {
-        return lowerSpeed;
+    public double getAverageSpeed() {
+        return averageSpeed;
     }
 
-    public void setLowerSpeed(double lowerSpeed) {
-        this.lowerSpeed = lowerSpeed;
-    }
-
-    public double getUpperSpeed() {
-        return upperSpeed;
-    }
-
-    public void setUpperSpeed(double upperSpeed) {
-        this.upperSpeed = upperSpeed;
+    public void setAverageSpeed(double averageSpeed) {
+        this.averageSpeed = averageSpeed;
     }
 
     public Map getMap() {

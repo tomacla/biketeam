@@ -80,7 +80,7 @@ public class FacebookService implements BroadcastService {
         if (team.getIntegration().isFacebookGroupDetails()) {
             ride.getSortedGroups().forEach(group -> {
                 sb.append(group.getName()).append(" - ");
-                sb.append(Math.round(group.getLowerSpeed())).append("/").append(Math.round(group.getUpperSpeed())).append(" km/h").append("\n");
+                sb.append(Math.round(group.getAverageSpeed())).append(" km/h").append("\n");
                 sb.append("Départ ").append(Dates.formatTime(group.getMeetingTime())).append(" - ");
                 // FIXME add meeting location
                 if (group.getMap() != null) {

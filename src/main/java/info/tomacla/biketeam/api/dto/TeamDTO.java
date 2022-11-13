@@ -38,10 +38,7 @@ public class TeamDTO {
     public static class TeamConfigurationDTO {
 
         public List<String> defaultSearchTags;
-        public String defaultPage;
         public boolean feedVisible;
-        public boolean ridesVisible;
-        public boolean tripsVisible;
         public String timezone;
 
     }
@@ -76,10 +73,7 @@ public class TeamDTO {
             dto.heatmap = team.getIntegration().isHeatmapDisplay() && team.getIntegration().isHeatmapConfigured();
             dto.configuration = new TeamConfigurationDTO();
             dto.configuration.defaultSearchTags = team.getConfiguration().getDefaultSearchTags();
-            dto.configuration.defaultPage = team.getConfiguration().getDefaultPage().name();
             dto.configuration.feedVisible = team.getConfiguration().isFeedVisible();
-            dto.configuration.ridesVisible = team.getConfiguration().isRidesVisible();
-            dto.configuration.tripsVisible = team.getConfiguration().isTripsVisible();
             dto.configuration.timezone = team.getConfiguration().getTimezone();
         }
 

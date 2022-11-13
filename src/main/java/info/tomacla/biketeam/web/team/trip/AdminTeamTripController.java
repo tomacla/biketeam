@@ -100,8 +100,6 @@ public class AdminTeamTripController extends AbstractController {
                 .withType(trip.getType())
                 .withPublishedAt(trip.getPublishedAt(), team.getZoneId())
                 .withTitle(trip.getTitle())
-                .withLowerSpeed(trip.getLowerSpeed())
-                .withUpperSpeed(trip.getUpperSpeed())
                 .withMeetingTime(trip.getMeetingTime())
                 .withStages(trip.getSortedStages())
                 .withStartPlace(trip.getStartPlace())
@@ -153,8 +151,6 @@ public class AdminTeamTripController extends AbstractController {
                 target.setTitle(parser.getTitle());
                 target.setDescription(parser.getDescription());
                 target.setType(parser.getType());
-                target.setLowerSpeed(parser.getLowerSpeed());
-                target.setUpperSpeed(parser.getUpperSpeed());
                 target.setMeetingTime(parser.getMeetingTime());
                 target.setPermalink(parser.getPermalink());
 
@@ -166,8 +162,6 @@ public class AdminTeamTripController extends AbstractController {
                 target.setType(parser.getType());
                 target.setStartDate(parser.getStartDate());
                 target.setEndDate(parser.getEndDate());
-                target.setLowerSpeed(parser.getLowerSpeed());
-                target.setUpperSpeed(parser.getUpperSpeed());
                 target.setPublishedAt(parser.getPublishedAt(timezone));
                 target.setTitle(parser.getTitle());
                 target.setDescription(parser.getDescription());

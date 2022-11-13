@@ -1,7 +1,6 @@
 package info.tomacla.biketeam.web.team.configuration;
 
 import info.tomacla.biketeam.common.data.Timezone;
-import info.tomacla.biketeam.domain.team.WebPage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,10 +10,7 @@ public class EditTeamConfigurationForm {
 
     private String timezone = Timezone.DEFAULT_TIMEZONE;
     private List<String> defaultSearchTags = new ArrayList<>();
-    private String defaultPage = WebPage.FEED.name();
     private String feedVisible = null;
-    private String ridesVisible = null;
-    private String tripsVisible = null;
 
     public static EditTeamConfigurationFormBuilder builder() {
         return new EditTeamConfigurationFormBuilder();
@@ -36,13 +32,6 @@ public class EditTeamConfigurationForm {
         this.defaultSearchTags = Objects.requireNonNullElse(defaultSearchTags, new ArrayList<>());
     }
 
-    public String getDefaultPage() {
-        return defaultPage;
-    }
-
-    public void setDefaultPage(String defaultPage) {
-        this.defaultPage = Objects.requireNonNullElse(defaultPage, WebPage.FEED.name());
-    }
 
     public String getFeedVisible() {
         return feedVisible;
@@ -50,22 +39,6 @@ public class EditTeamConfigurationForm {
 
     public void setFeedVisible(String feedVisible) {
         this.feedVisible = feedVisible;
-    }
-
-    public String getRidesVisible() {
-        return ridesVisible;
-    }
-
-    public void setRidesVisible(String ridesVisible) {
-        this.ridesVisible = ridesVisible;
-    }
-
-    public String getTripsVisible() {
-        return tripsVisible;
-    }
-
-    public void setTripsVisible(String tripsVisible) {
-        this.tripsVisible = tripsVisible;
     }
 
     public EditTeamConfigurationFormParser parser() {
@@ -88,21 +61,11 @@ public class EditTeamConfigurationForm {
             return form.getDefaultSearchTags();
         }
 
-        public WebPage getDefaultPage() {
-            return WebPage.valueOf(form.getDefaultPage());
-        }
 
         public boolean isFeedVisible() {
             return form.getFeedVisible() != null && form.getFeedVisible().equals("on");
         }
 
-        public boolean isRidesVisible() {
-            return form.getRidesVisible() != null && form.getRidesVisible().equals("on");
-        }
-
-        public boolean isTripsVisible() {
-            return form.getTripsVisible() != null && form.getTripsVisible().equals("on");
-        }
 
     }
 
@@ -131,20 +94,6 @@ public class EditTeamConfigurationForm {
             return this;
         }
 
-        public EditTeamConfigurationFormBuilder withRidesVisible(boolean ridesVisible) {
-            form.setRidesVisible(ridesVisible ? "on" : null);
-            return this;
-        }
-
-        public EditTeamConfigurationFormBuilder withTripsVisible(boolean tripsVisible) {
-            form.setTripsVisible(tripsVisible ? "on" : null);
-            return this;
-        }
-
-        public EditTeamConfigurationFormBuilder withDefaultPage(WebPage defaultPage) {
-            form.setDefaultPage(defaultPage.name());
-            return this;
-        }
 
         public EditTeamConfigurationForm get() {
             return form;

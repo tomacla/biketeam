@@ -127,10 +127,6 @@ public class TeamService extends AbstractPermalinkService {
 
         TeamConfiguration teamConfiguration = team.getConfiguration();
 
-        if ((teamConfiguration.getDefaultPage().equals(WebPage.FEED) && !teamConfiguration.isFeedVisible())) {
-            teamConfiguration.setDefaultPage(WebPage.MAPS);
-        }
-
         teamRepository.save(team);
 
         if (newTeam) {
