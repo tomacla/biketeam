@@ -3,10 +3,14 @@ package info.tomacla.biketeam.domain.trip;
 import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.datatype.Lists;
 import info.tomacla.biketeam.common.datatype.Strings;
+import info.tomacla.biketeam.domain.feed.FeedEntity;
+import info.tomacla.biketeam.domain.feed.FeedType;
 import info.tomacla.biketeam.domain.map.MapType;
 import info.tomacla.biketeam.domain.message.MessageHolder;
 import info.tomacla.biketeam.domain.message.MessageTargetType;
 import info.tomacla.biketeam.domain.place.Place;
+import info.tomacla.biketeam.domain.reaction.ReactionHolder;
+import info.tomacla.biketeam.domain.reaction.ReactionTargetType;
 import info.tomacla.biketeam.domain.user.User;
 import org.springframework.util.ObjectUtils;
 
@@ -19,7 +23,7 @@ import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "trip")
-public class Trip implements MessageHolder {
+public class Trip implements MessageHolder, ReactionHolder, FeedEntity {
 
     @Id
     private String id = UUID.randomUUID().toString();
@@ -30,10 +34,6 @@ public class Trip implements MessageHolder {
     private LocalDate startDate;
     @Column(name = "end_date")
     private LocalDate endDate;
-    @Column(name = "lower_speed")
-    private double lowerSpeed;
-    @Column(name = "upper_speed")
-    private double upperSpeed;
     @Column(name = "meeting_time")
     private LocalTime meetingTime;
     @Enumerated(EnumType.STRING)
@@ -168,22 +168,6 @@ public class Trip implements MessageHolder {
         this.endPlace = endPlace;
     }
 
-    public double getLowerSpeed() {
-        return lowerSpeed;
-    }
-
-    public void setLowerSpeed(double lowerSpeed) {
-        this.lowerSpeed = lowerSpeed;
-    }
-
-    public double getUpperSpeed() {
-        return upperSpeed;
-    }
-
-    public void setUpperSpeed(double upperSpeed) {
-        this.upperSpeed = upperSpeed;
-    }
-
     public LocalTime getMeetingTime() {
         return meetingTime;
     }
@@ -276,6 +260,21 @@ public class Trip implements MessageHolder {
     @Override
     public MessageTargetType getMessageType() {
         return MessageTargetType.TRIP;
+    }
+
+    @Override
+    public ReactionTargetType getReactionType() {
+        return ReactionTargetType.TRIP;
+    }
+
+    @Override
+    public FeedType getFeedType() {
+        return FeedType.TRIP;
+    }
+
+    @Override
+    public LocalDate getDate() {
+        return getStartDate();
     }
 
     @Override

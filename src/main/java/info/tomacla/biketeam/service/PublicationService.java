@@ -17,6 +17,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +29,7 @@ import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class PublicationService {
@@ -58,6 +63,17 @@ public class PublicationService {
             return optionalPublication;
         }
         return Optional.empty();
+    }
+
+    public Page<Publication> searchPublications(Set<String> teamIds, int page, int pageSize,
+                                                ZonedDateTime from, ZonedDateTime to) {
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by("publishedAt").descending());
+        return publicationRepository.findAllByTeamIdInAndPublishedAtBetweenAndPublishedStatus(
+                teamIds,
+                from,
+                to,
+                PublishedStatus.PUBLISHED,
+                pageable);
     }
 
     @Transactional

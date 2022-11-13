@@ -1,6 +1,5 @@
 package info.tomacla.biketeam.web.team.templates;
 
-import info.tomacla.biketeam.common.geo.Point;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalTime;
@@ -16,8 +15,7 @@ public class NewRideGroupTemplateFormTest {
         final NewRideGroupTemplateForm form = NewRideGroupTemplateForm.builder()
                 .withId("id")
                 .withName("group")
-                .withLowerSpeed(10)
-                .withUpperSpeed(50)
+                .withAverageSpeed(50)
                 .withMeetingTime(LocalTime.parse("16:30"))
                 .get();
 
@@ -25,8 +23,7 @@ public class NewRideGroupTemplateFormTest {
 
         assertEquals("id", parser.getId());
         assertEquals("group", parser.getName());
-        assertEquals(10, parser.getLowerSpeed());
-        assertEquals(50, parser.getUpperSpeed());
+        assertEquals(50, parser.getAverageSpeed());
         assertEquals(LocalTime.parse("16:30"), parser.getMeetingTime());
 
     }
@@ -40,8 +37,7 @@ public class NewRideGroupTemplateFormTest {
 
         assertNull(parser.getId());
         assertNull(parser.getName());
-        assertEquals(28, parser.getLowerSpeed());
-        assertEquals(30, parser.getUpperSpeed());
+        assertEquals(30, parser.getAverageSpeed());
         assertEquals(LocalTime.parse("12:00"), parser.getMeetingTime());
 
     }

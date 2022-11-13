@@ -28,4 +28,9 @@ public interface MessageRepository extends CrudRepository<Message, String> {
     @Query(value = "delete from message where reply_to_id = :messageId", nativeQuery = true)
     void deleteReplies(@Param("messageId") String messageId);
 
+    @Transactional
+    @Modifying
+    @Query(value = "delete from message where target_id = :targetId", nativeQuery = true)
+    void deleteByTargetId(@Param("targetId") String targetId);
+
 }

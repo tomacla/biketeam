@@ -9,8 +9,7 @@ public class NewRideGroupTemplateForm {
 
     private String id = "";
     private String name = "";
-    private double lowerSpeed = 28;
-    private double upperSpeed = 30;
+    private double averageSpeed = 30;
     private String meetingTime = "12:00";
 
     public static NewRideGroupTemplateFormBuilder builder() {
@@ -33,20 +32,12 @@ public class NewRideGroupTemplateForm {
         this.name = Strings.requireNonBlankOrDefault(name, "");
     }
 
-    public double getLowerSpeed() {
-        return lowerSpeed;
+    public double getAverageSpeed() {
+        return averageSpeed;
     }
 
-    public void setLowerSpeed(double lowerSpeed) {
-        this.lowerSpeed = lowerSpeed;
-    }
-
-    public double getUpperSpeed() {
-        return upperSpeed;
-    }
-
-    public void setUpperSpeed(double upperSpeed) {
-        this.upperSpeed = upperSpeed;
+    public void setAverageSpeed(double averageSpeed) {
+        this.averageSpeed = averageSpeed;
     }
 
     public String getMeetingTime() {
@@ -77,12 +68,9 @@ public class NewRideGroupTemplateForm {
             return Strings.requireNonBlankOrNull(form.getName());
         }
 
-        public double getLowerSpeed() {
-            return form.getLowerSpeed();
-        }
 
-        public double getUpperSpeed() {
-            return form.getUpperSpeed();
+        public double getAverageSpeed() {
+            return form.getAverageSpeed();
         }
 
         public LocalTime getMeetingTime() {
@@ -109,13 +97,9 @@ public class NewRideGroupTemplateForm {
             return this;
         }
 
-        public NewRideGroupTemplateFormBuilder withLowerSpeed(double lowerSpeed) {
-            form.setLowerSpeed(lowerSpeed);
-            return this;
-        }
 
-        public NewRideGroupTemplateFormBuilder withUpperSpeed(double upperSpeed) {
-            form.setUpperSpeed(upperSpeed);
+        public NewRideGroupTemplateFormBuilder withAverageSpeed(double averageSpeed) {
+            form.setAverageSpeed(averageSpeed);
             return this;
         }
 

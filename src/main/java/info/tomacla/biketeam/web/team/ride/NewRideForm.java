@@ -60,8 +60,7 @@ public class NewRideForm {
         for (RideGroupTemplate g : rideTemplate.getSortedGroups()) {
             groups.add(NewRideGroupForm.builder()
                     .withName(g.getName())
-                    .withLowerSpeed(g.getLowerSpeed())
-                    .withUpperSpeed(g.getUpperSpeed())
+                    .withAverageSpeed(g.getAverageSpeed())
                     .withMeetingTime(g.getMeetingTime())
                     .get());
         }
@@ -260,8 +259,7 @@ public class NewRideForm {
                 }
                 final RideGroup gg = new RideGroup();
                 gg.setName(parser.getName());
-                gg.setLowerSpeed(parser.getLowerSpeed());
-                gg.setUpperSpeed(parser.getUpperSpeed());
+                gg.setAverageSpeed(parser.getAverageSpeed());
                 gg.setMap(map);
                 gg.setMeetingTime(parser.getMeetingTime());
 
@@ -360,8 +358,7 @@ public class NewRideForm {
                             .withName(g.getName())
                             .withMapId(mapId)
                             .withMapName(mapName)
-                            .withLowerSpeed(g.getLowerSpeed())
-                            .withUpperSpeed(g.getUpperSpeed())
+                            .withAverageSpeed(g.getAverageSpeed())
                             .withMeetingTime(g.getMeetingTime())
                             .get();
                 }).collect(Collectors.toList()));

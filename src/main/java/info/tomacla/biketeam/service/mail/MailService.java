@@ -75,7 +75,7 @@ public class MailService implements BroadcastService {
             sb.append("<br/>");
             ride.getSortedGroups().forEach(group -> {
                 sb.append("<p>").append(group.getName()).append(" - ");
-                sb.append(Math.round(group.getLowerSpeed())).append("/").append(Math.round(group.getUpperSpeed())).append(" km/h").append("<br/>");
+                sb.append(Math.round(group.getAverageSpeed())).append(" km/h").append("<br/>");
                 sb.append("Départ ").append(Dates.formatTime(group.getMeetingTime())).append(" - ");
                 // FIXME add meeting location
                 if (group.getMap() != null) {
@@ -116,8 +116,7 @@ public class MailService implements BroadcastService {
             sb.append("<p>").append(trip.getTitle()).append(" - Du ").append(Dates.frenchDateFormat(trip.getStartDate())).append(" au ").append(Dates.frenchDateFormat(trip.getEndDate())).append("</p>");
             sb.append("<p>").append(getHtmlLink(urlService.getTripUrl(team, trip))).append("</p>");
             sb.append("<p>").append(trip.getDescription()).append("</p>");
-            sb.append("<p>").append(Math.round(trip.getLowerSpeed())).append("/").append(Math.round(trip.getUpperSpeed())).append(" km/h").append("<br/>");
-            sb.append("Départ ").append(Dates.formatTime(trip.getMeetingTime())).append(" - ");
+            sb.append("<p>").append("Départ ").append(Dates.formatTime(trip.getMeetingTime())).append(" - ");
             // FIXME add meeting location
             sb.append("</p>");
             sb.append("<br/>");

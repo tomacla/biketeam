@@ -29,8 +29,6 @@ public class NewTripForm {
     private String publishedAtTime = "";
     private String title = "";
     private String description = "";
-    private double lowerSpeed = 28;
-    private double upperSpeed = 30;
     private String meetingTime = "08:00";
 
     private String startPlaceId = "";
@@ -141,22 +139,6 @@ public class NewTripForm {
         this.description = Strings.requireNonBlankOrDefault(description, "");
     }
 
-    public double getLowerSpeed() {
-        return lowerSpeed;
-    }
-
-    public void setLowerSpeed(double lowerSpeed) {
-        this.lowerSpeed = lowerSpeed;
-    }
-
-    public double getUpperSpeed() {
-        return upperSpeed;
-    }
-
-    public void setUpperSpeed(double upperSpeed) {
-        this.upperSpeed = upperSpeed;
-    }
-
     public String getMeetingTime() {
         return meetingTime;
     }
@@ -229,13 +211,6 @@ public class NewTripForm {
             return Strings.requireNonBlankOrNull(form.getDescription());
         }
 
-        public double getLowerSpeed() {
-            return form.getLowerSpeed();
-        }
-
-        public double getUpperSpeed() {
-            return form.getUpperSpeed();
-        }
 
         public LocalTime getMeetingTime() {
             return LocalTime.parse(form.getMeetingTime());
@@ -352,15 +327,6 @@ public class NewTripForm {
             return this;
         }
 
-        public NewTripFormBuilder withLowerSpeed(double lowerSpeed) {
-            form.setLowerSpeed(lowerSpeed);
-            return this;
-        }
-
-        public NewTripFormBuilder withUpperSpeed(double upperSpeed) {
-            form.setUpperSpeed(upperSpeed);
-            return this;
-        }
 
         public NewTripFormBuilder withMeetingTime(LocalTime meetingTime) {
             if (meetingTime != null) {

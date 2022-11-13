@@ -15,7 +15,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.security.Principal;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -36,10 +35,10 @@ public class TeamAdminUserController extends AbstractController {
         model.addAttribute("roles", team.getRoles()
                 .stream()
                 .sorted((r1, r2) -> {
-                    if(r1.getRole().equals(Role.ADMIN) && !r2.getRole().equals(Role.ADMIN)) {
+                    if (r1.getRole().equals(Role.ADMIN) && !r2.getRole().equals(Role.ADMIN)) {
                         return -1;
                     }
-                    if(!r1.getRole().equals(Role.ADMIN) && r2.getRole().equals(Role.ADMIN)) {
+                    if (!r1.getRole().equals(Role.ADMIN) && r2.getRole().equals(Role.ADMIN)) {
                         return 1;
                     }
                     return r1.getUser().getIdentity().compareTo(r2.getUser().getIdentity());
@@ -63,7 +62,7 @@ public class TeamAdminUserController extends AbstractController {
 
             User target = null;
 
-            if(stravaId != null) {
+            if (stravaId != null) {
                 final Optional<User> optionalUser = userService.getByStravaId(stravaId);
 
                 if (optionalUser.isEmpty()) {
@@ -73,7 +72,7 @@ public class TeamAdminUserController extends AbstractController {
                     target = optionalUser.get();
                 }
 
-            } else if(!ObjectUtils.isEmpty(email)) {
+            } else if (!ObjectUtils.isEmpty(email)) {
                 final Optional<User> optionalUser = userService.getByEmail(email.toLowerCase());
                 if (optionalUser.isEmpty()) {
                     target = new User();
@@ -83,7 +82,7 @@ public class TeamAdminUserController extends AbstractController {
                 }
             }
 
-            if(target != null) {
+            if (target != null) {
                 userService.save(target);
                 if (!team.isMember(target)) {
                     userRoleService.save(new UserRole(team, target, Role.MEMBER));

@@ -2,9 +2,10 @@ package info.tomacla.biketeam.web.team;
 
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
+import info.tomacla.biketeam.domain.feed.FeedEntity;
+import info.tomacla.biketeam.domain.feed.FeedOptions;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.TeamConfiguration;
-import info.tomacla.biketeam.domain.team.WebPage;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.userrole.Role;
 import info.tomacla.biketeam.domain.userrole.UserRole;
@@ -12,7 +13,9 @@ import info.tomacla.biketeam.service.UserRoleService;
 import info.tomacla.biketeam.service.file.ThumbnailService;
 import info.tomacla.biketeam.service.heatmap.HeatmapService;
 import info.tomacla.biketeam.web.AbstractController;
+import info.tomacla.biketeam.web.SearchFeedForm;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -29,6 +32,7 @@ import org.springframework.web.servlet.view.RedirectView;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -48,6 +52,11 @@ public class TeamController extends AbstractController {
 
     @GetMapping
     public String getFeed(@PathVariable("teamId") String teamId,
+                          @RequestParam(value = "includeTrips", required = false, defaultValue = "true") boolean includeTrips,
+                          @RequestParam(value = "includeRides", required = false, defaultValue = "true") boolean includeRides,
+                          @RequestParam(value = "includePublications", required = false, defaultValue = "true") boolean includePublications,
+                          @RequestParam(value = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                          @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
                           @ModelAttribute("error") String error,
                           Principal principal,
                           Model model) {
@@ -55,18 +64,33 @@ public class TeamController extends AbstractController {
         final Team team = checkTeam(teamId);
 
         final TeamConfiguration teamConfiguration = team.getConfiguration();
-        if (teamConfiguration.getDefaultPage().equals(WebPage.MAPS)) {
+        if (!teamConfiguration.isFeedVisible()) {
             return viewHandler.redirect(team, "/maps");
         }
-        if (teamConfiguration.getDefaultPage().equals(WebPage.RIDES)) {
-            return viewHandler.redirect(team, "/rides");
-        }
-        if (teamConfiguration.getDefaultPage().equals(WebPage.TRIPS)) {
-            return viewHandler.redirect(team, "/trips");
-        }
+
+        SearchFeedForm form = SearchFeedForm.builder()
+                .withFrom(from)
+                .withTo(to)
+                .withIncludeTrips(includeTrips)
+                .withIncludeRides(includeRides)
+                .withIncludePublications(includePublications)
+                .get();
+
+        final SearchFeedForm.SearchFeedFormParser parser = form.parser();
+
+        FeedOptions options = new FeedOptions(
+                parser.isIncludePublications(),
+                parser.isIncludeTrips(),
+                parser.isIncludeRides(),
+                parser.getFrom(),
+                parser.getTo()
+        );
+
+        List<FeedEntity> feed = teamService.listFeed(team, options);
 
         addGlobalValues(principal, model, team.getName(), team);
-        model.addAttribute("feed", teamService.listFeed(team));
+        model.addAttribute("feed", feed);
+        model.addAttribute("formdata", form);
         model.addAttribute("users", team.getRoles().stream().map(UserRole::getUser).collect(Collectors.toSet()));
         model.addAttribute("hasHeatmap", team.getIntegration().isHeatmapDisplay() && heatmapService.get(team.getId()).isPresent());
         if (!ObjectUtils.isEmpty(error)) {

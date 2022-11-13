@@ -17,10 +17,8 @@ public class RideGroupTemplate {
     @JoinColumn(name = "ride_template_id")
     private RideTemplate rideTemplate;
     private String name;
-    @Column(name = "lower_speed")
-    private double lowerSpeed;
-    @Column(name = "upper_speed")
-    private double upperSpeed;
+    @Column(name = "average_speed")
+    private double averageSpeed;
     @Column(name = "meeting_time")
     private LocalTime meetingTime;
 
@@ -48,20 +46,13 @@ public class RideGroupTemplate {
         this.name = Strings.requireNonBlank(name, "name is null");
     }
 
-    public double getLowerSpeed() {
-        return lowerSpeed;
+
+    public double getAverageSpeed() {
+        return averageSpeed;
     }
 
-    public void setLowerSpeed(double lowerSpeed) {
-        this.lowerSpeed = lowerSpeed;
-    }
-
-    public double getUpperSpeed() {
-        return upperSpeed;
-    }
-
-    public void setUpperSpeed(double upperSpeed) {
-        this.upperSpeed = upperSpeed;
+    public void setAverageSpeed(double averageSpeed) {
+        this.averageSpeed = averageSpeed;
     }
 
 

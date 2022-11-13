@@ -1,6 +1,5 @@
 package info.tomacla.biketeam.web.team.trip;
 
-import info.tomacla.biketeam.common.geo.Point;
 import info.tomacla.biketeam.web.team.ride.NewRideGroupForm;
 import org.junit.jupiter.api.Test;
 
@@ -17,8 +16,7 @@ public class NewRideGroupFormTest {
         final NewRideGroupForm form = NewRideGroupForm.builder()
                 .withId("id")
                 .withName("group")
-                .withLowerSpeed(10)
-                .withUpperSpeed(50)
+                .withAverageSpeed(50)
                 .withMeetingTime(LocalTime.parse("16:30"))
                 .withMapId("mapid")
                 .withMapName("mapname")
@@ -28,8 +26,7 @@ public class NewRideGroupFormTest {
 
         assertEquals("id", parser.getId());
         assertEquals("group", parser.getName());
-        assertEquals(10, parser.getLowerSpeed());
-        assertEquals(50, parser.getUpperSpeed());
+        assertEquals(50, parser.getAverageSpeed());
         assertEquals(LocalTime.parse("16:30"), parser.getMeetingTime());
         assertEquals("mapid", parser.getMapId());
 
@@ -44,8 +41,7 @@ public class NewRideGroupFormTest {
 
         assertNull(parser.getId());
         assertNull(parser.getName());
-        assertEquals(28, parser.getLowerSpeed());
-        assertEquals(30, parser.getUpperSpeed());
+        assertEquals(30, parser.getAverageSpeed());
         assertEquals(LocalTime.parse("12:00"), parser.getMeetingTime());
         assertNull(parser.getMapId());
 

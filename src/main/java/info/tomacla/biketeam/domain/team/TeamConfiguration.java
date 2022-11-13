@@ -27,15 +27,8 @@ public class TeamConfiguration {
             joinColumns = @JoinColumn(name = "team_configuration_id", referencedColumnName = "team_id")
     )
     private List<String> defaultSearchTags = new ArrayList<>();
-    @Column(name = "default_page")
-    @Enumerated(EnumType.STRING)
-    private WebPage defaultPage = WebPage.FEED;
     @Column(name = "feed_visible")
     private boolean feedVisible = true;
-    @Column(name = "rides_visible")
-    private boolean ridesVisible = true;
-    @Column(name = "trips_visible")
-    private boolean tripsVisible = true;
     @Column
     private String domain;
     @Column(name = "markdown_page")
@@ -74,13 +67,6 @@ public class TeamConfiguration {
         this.defaultSearchTags = Objects.requireNonNullElse(defaultSearchTags, new ArrayList<>());
     }
 
-    public WebPage getDefaultPage() {
-        return defaultPage;
-    }
-
-    public void setDefaultPage(WebPage defaultPage) {
-        this.defaultPage = Objects.requireNonNullElse(defaultPage, WebPage.FEED);
-    }
 
     public boolean isFeedVisible() {
         return feedVisible;
@@ -88,22 +74,6 @@ public class TeamConfiguration {
 
     public void setFeedVisible(boolean feedVisible) {
         this.feedVisible = feedVisible;
-    }
-
-    public boolean isRidesVisible() {
-        return ridesVisible;
-    }
-
-    public void setRidesVisible(boolean ridesVisible) {
-        this.ridesVisible = ridesVisible;
-    }
-
-    public boolean isTripsVisible() {
-        return tripsVisible;
-    }
-
-    public void setTripsVisible(boolean tripsVisible) {
-        this.tripsVisible = tripsVisible;
     }
 
     public String getDomain() {

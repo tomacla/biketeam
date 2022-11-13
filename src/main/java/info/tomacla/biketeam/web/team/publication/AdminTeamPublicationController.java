@@ -107,7 +107,10 @@ public class AdminTeamPublicationController extends AbstractController {
                 publication = optionalPublication.get();
                 publication.setContent(parser.getContent());
                 publication.setTitle(parser.getTitle());
-                publication.setPublishedAt(parser.getPublishedAt(timezone));
+                if (publication.getPublishedStatus().equals(PublishedStatus.UNPUBLISHED)) {
+                    // do not change published date if already published
+                    publication.setPublishedAt(parser.getPublishedAt(timezone));
+                }
 
             } else {
                 publication = new Publication();

@@ -3,9 +3,13 @@ package info.tomacla.biketeam.domain.ride;
 import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.datatype.Lists;
 import info.tomacla.biketeam.common.datatype.Strings;
+import info.tomacla.biketeam.domain.feed.FeedEntity;
+import info.tomacla.biketeam.domain.feed.FeedType;
 import info.tomacla.biketeam.domain.message.MessageHolder;
 import info.tomacla.biketeam.domain.message.MessageTargetType;
 import info.tomacla.biketeam.domain.place.Place;
+import info.tomacla.biketeam.domain.reaction.ReactionHolder;
+import info.tomacla.biketeam.domain.reaction.ReactionTargetType;
 import org.springframework.util.ObjectUtils;
 
 import javax.persistence.*;
@@ -17,7 +21,7 @@ import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "ride")
-public class Ride implements MessageHolder {
+public class Ride implements MessageHolder, ReactionHolder, FeedEntity {
 
     @Id
     private String id = UUID.randomUUID().toString();
@@ -187,8 +191,7 @@ public class Ride implements MessageHolder {
                 this.groups.stream().filter(gg -> g.getId().equals(gg.getId())).findFirst().ifPresent(target -> {
                     target.setMeetingTime(g.getMeetingTime());
                     target.setName(g.getName());
-                    target.setUpperSpeed(g.getUpperSpeed());
-                    target.setLowerSpeed(g.getLowerSpeed());
+                    target.setAverageSpeed(g.getAverageSpeed());
                     target.setMap(g.getMap());
                 })
         );
@@ -214,6 +217,21 @@ public class Ride implements MessageHolder {
     }
 
     @Override
+    public MessageTargetType getMessageType() {
+        return MessageTargetType.RIDE;
+    }
+
+    @Override
+    public ReactionTargetType getReactionType() {
+        return ReactionTargetType.RIDE;
+    }
+
+    @Override
+    public FeedType getFeedType() {
+        return FeedType.RIDE;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -226,10 +244,5 @@ public class Ride implements MessageHolder {
         return Objects.hash(id);
     }
 
-
-    @Override
-    public MessageTargetType getMessageType() {
-        return MessageTargetType.RIDE;
-    }
 
 }

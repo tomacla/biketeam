@@ -135,7 +135,7 @@ public class User {
     }
 
     public void setEmail(String email) {
-        if(Strings.isEmail(email)) {
+        if (Strings.isEmail(email)) {
             this.email = email.toLowerCase();
         } else {
             this.email = null;

@@ -161,8 +161,7 @@ public class NewRideTemplateForm {
                 final RideGroupTemplate gt = new RideGroupTemplate();
 
                 gt.setName(parser.getName());
-                gt.setLowerSpeed(parser.getLowerSpeed());
-                gt.setUpperSpeed(parser.getUpperSpeed());
+                gt.setAverageSpeed(parser.getAverageSpeed());
                 gt.setMeetingTime(parser.getMeetingTime());
 
                 if (parser.getId() != null) {
@@ -228,8 +227,7 @@ public class NewRideTemplateForm {
                 form.setGroups(groups.stream().map(g -> NewRideGroupTemplateForm.builder()
                         .withId(g.getId())
                         .withName(g.getName())
-                        .withLowerSpeed(g.getLowerSpeed())
-                        .withUpperSpeed(g.getUpperSpeed())
+                        .withAverageSpeed(g.getAverageSpeed())
                         .withMeetingTime(g.getMeetingTime())
                         .get()).collect(Collectors.toList()));
             }
