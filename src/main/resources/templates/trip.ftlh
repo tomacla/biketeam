@@ -70,9 +70,6 @@
 
         <div class="border rounded p-2">
 
-            <div class="d-flex flex-row justify-content-between">
-                <h4>${trip.title}</h4>
-            </div>
             <#if trip.publishedStatus != 'PUBLISHED'>
                 <div class="p-1 alert alert-warning" role="alert">Ce trip n'est pas publié.<br/> <span class="small text-muted">Publication le ${trip.publishedAt.format(_date_formatter)} à ${trip.publishedAt.format(_time_formatter)} (UTC)</span></div>
             </#if>
@@ -82,10 +79,8 @@
             <hr/>
 
             <ul class="list-unstyled">
-                <li>Heure de départ : ${trip.meetingTime}</li>
-                <#if trip.startPlace??>
-                    <li>Départ : <a href="#" class="link-dark" data-bs-toggle="modal" data-bs-target="#placemodal">${trip.startPlace.name}</a></li>
-                </#if>
+                <li >${trip.stages?size} étape<#if trip.stages?size gt 1>s</#if><span class="d-inline d-md-none"> - <a class="link-dark" href="#stage-section">Détails</a></span></li>
+                <li>Départ à ${trip.meetingTime}<#if trip.startPlace??> - <a href="#" class="link-dark" data-bs-toggle="modal" data-bs-target="#placemodal">${trip.startPlace.name}</a></#if></li>
                 <#if trip.endPlace??>
                     <li>Arrivée : <a href="#" class="link-dark" data-bs-toggle="modal" data-bs-target="#placemodal">${trip.endPlace.name}</a></li>
                 </#if>
@@ -163,7 +158,7 @@
         <div class="border rounded p-2">
 
 
-            <div class="table-responsive-sm mb-4">
+            <div class="table-responsive-sm mb-4" id="stage-section">
             <table class="table table-sm table-striped">
                 <thead>
                     <tr>

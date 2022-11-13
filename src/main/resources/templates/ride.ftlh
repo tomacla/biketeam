@@ -46,24 +46,24 @@
 
         <div class="border rounded p-2">
 
-            <div class="d-flex flex-row justify-content-between">
-                <h4>${ride.title}</h4>
-            </div>
             <#if ride.publishedStatus != 'PUBLISHED'>
                 <div class="p-1 alert alert-warning" role="alert">Ce ride n'est pas publié.<br/> <span class="small text-muted">Publication le ${ride.publishedAt.format(_date_formatter)} à ${ride.publishedAt.format(_time_formatter)} (UTC)</span></div>
             </#if>
             <h5 class="text-muted">${ride.date.format(_date_formatter)}</h5>
 
-            <#if ride.startPlace?? || ride.endPlace??>
+
+
             <ul class="list-unstyled">
-                <#if ride.startPlace??>
-                    <li>Départ : <a href="#" class="link-dark" data-bs-toggle="modal" data-bs-target="#placemodal">${ride.startPlace.name}</a></li>
+                <li>${ride.groups?size} groupe<#if ride.groups?size gt 1>s</#if><span class="d-inline d-md-none"> - <a class="link-dark" href="#group-section">Détails</a></span></li>
+                <#if ride.sortedGroups?first.meetingTime != ride.sortedGroups?last.meetingTime>
+                    <li>Départ de ${ride.sortedGroups?first.meetingTime} à ${ride.sortedGroups?last.meetingTime}<#if ride.startPlace??> - <a href="#" class="link-dark" data-bs-toggle="modal" data-bs-target="#placemodal">${ride.startPlace.name}</a></#if></li>
+                    <#else>
+                    <li>Départ à ${ride.sortedGroups?first.meetingTime}<#if ride.startPlace??> - ${ride.startPlace.name}</#if></li>
                 </#if>
                 <#if ride.endPlace??>
                     <li>Arrivée : <a href="#" class="link-dark" data-bs-toggle="modal" data-bs-target="#placemodal">${ride.endPlace.name}</a></li>
                 </#if>
             </ul>
-            </#if>
 
             <hr/>
 
@@ -126,10 +126,7 @@
 
         <div class="border rounded p-2">
 
-
-
-
-            <div class="table-responsive-sm mb-4">
+            <div class="table-responsive-sm mb-4" id="group-section">
 
                 <table class="table table-sm table-striped">
                     <thead>

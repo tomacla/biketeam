@@ -4,10 +4,10 @@
 
     <aside class="col-12 col-md-4">
 
-        <section class="border p-2 mb-3 rounded">
-            <div class="row mb-3">
-               <div class="col-4"><img src="<@common.teamUrl team.id '/image' />" class="d-block w-100 my-auto" alt="Team logo"></div>
-               <div class="col-8">
+        <section class="border p-2 mb-2 rounded">
+            <div class="row">
+               <div class="col-3 col-md-4"><img src="<@common.teamUrl team.id '/image' />" class="d-block w-100 my-auto" alt="Team logo"></div>
+               <div class="col-9 col-md-8">
                    <h5 class="mb-0">${team.name}</h5>
                    <div><#if (team.description.facebook)??><span class="small"><a target="_blank" href="https://www.facebook.com/${team.description.facebook}"><i class="bi bi-facebook"></i></a></#if> <#if (team.description.twitter)??><a target="_blank" href="https://www.twitter.com/${team.description.twitter}"><i class="bi bi-twitter"></i></a></#if> <#if (team.description.instagram)??><span class="small"><a target="_blank" href="https://www.instagram.com/${team.description.instagram}"><i class="bi bi-instagram"></i></a></#if></span></div>
                     <div class="mt-2">
@@ -26,7 +26,7 @@
 
                </div>
             </div>
-             <p class="d-none d-md-block wrap-content"><em>${team.description.description}</em></p>
+             <p class="d-none d-md-block wrap-content mt-3"><em>${team.description.description}</em></p>
             <address class="d-none d-md-block">
                 <#if (team.description.addressStreetLine)?? >${team.description.addressStreetLine}<br></#if>
             <#if (team.description.addressPostalCode)?? >${team.description.addressPostalCode}<br></#if>
@@ -39,7 +39,7 @@
              </#if>
         </section>
 
-        <form id="feed-filter" action="<@common.teamUrl team.id '' />" method="GET" class="border rounded px-2 pt-2 mb-3">
+        <form id="feed-filter" action="<@common.teamUrl team.id '' />" method="GET" class="border rounded px-2 pt-2 mb-2">
             <div class="mb-3">
                 <div class="d-flex flex-row mb-2 justify-content-center">
                     <div class="pe-1"><label for="feed-filter-from" class="form-label small">Du</label></div>
@@ -53,7 +53,7 @@
                           <div class="me-1"><button tabindex="-1" role="button" aria-disabled="true" onclick="toggleVisibleButton('trips')" id="input-visible-trips-button" type="button" class="btn btn-sm <#if formdata.includeTrips>btn-success<#else>btn-outline-success</#if>"><i class="bi bi-signpost-2"></i> Trips</button></div>
                 </div>
                 <div class="d-flex flex-row justify-content-center">
-                    <button type="submit" class="btn btn-secondary btn-sm"><i class="bi bi-search"></i> Rechercher</button>
+                    <button type="submit" id="feed-search-button" class="btn btn-secondary btn-sm"><i class="bi bi-search"></i> Rechercher</button>
                 </div>
             </div>
 
@@ -64,7 +64,7 @@
         </form>
 
         <#if hasHeatmap>
-            <section class="border d-none d-md-block p-2 mb-3 rounded">
+            <section class="border d-none d-md-block p-2 rounded">
                 <h5>Heatmap</h5>
                 <a href="<@common.teamUrl team.id '/heatmap' />" target="_blank"><img src="<@common.teamUrl team.id '/heatmap?width=500' />" class="d-block w-100 my-auto" alt="Heatmap"></a>
             </section>
@@ -96,7 +96,6 @@
                 button.classList.remove('btn-outline-success');
                 button.classList.add('btn-success');
             }
-
 
         }
 
