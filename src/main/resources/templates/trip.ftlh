@@ -134,7 +134,7 @@
 
     </div>
 
-    <#assign colors=["#566B13", "#4682B4", "#732C7B", "#FF0", "#F00", "#FF005E", "#3366CC"]>
+    <#assign colors=["#566B13", "#1d32a8", "#732C7B", "#bdbd22", "#c90808", "#b81491", "#628de3", "#6dcc5c", "#c694d4", "#e3a209"]>
        <#assign stageMaps = []>
        <#assign mapCenter = [0.0,0.0]>
        <#if trip.startPlace?? && trip.startPlace.point??>
@@ -173,7 +173,7 @@
                 <tbody>
                     <#list trip.sortedStages as stage>
                         <tr <#if stage.map??> onmouseover="highlightMap(${stageMaps?seq_index_of(stage.map.id)})"</#if>>
-                            <td><#if stage.map??><span style="height: 10px; width: 10px; background-color: ${colors[stageMaps?seq_index_of(stage.map.id)%7]}; border-radius: 50%; display: inline-block;"></span></#if></td>
+                            <td><#if stage.map??><span style="height: 10px; width: 10px; background-color: ${colors[stageMaps?seq_index_of(stage.map.id)%10]}; border-radius: 50%; display: inline-block;"></span></#if></td>
                             <td>${stage.name}</td>
                             <td>${stage.date.format(_date_formatter)}</td>
                             <td class="d-none d-md-table-cell"><#if stage.map??>${stage.map.length?floor} km</#if></td>
@@ -243,7 +243,7 @@
                     var layer = L.geoJSON(geojsonFeature,
                         {
                           interactive:true,
-                          color: '${colors[map?index%7]}',
+                          color: '${colors[map?index%10]}',
                           weight: 5,
                           opacity: 0.8
                         }).on('click', function(e) {
@@ -257,13 +257,13 @@
                         geoJsonLayers.push({
                             layer: layer,
                             mapIndex: ${map?index},
-                            color: '${colors[map?index%7]}',
+                            color: '${colors[map?index%10]}',
                             elevationProfile: elevationProfile
                         });
 
                         <#if map?is_first>
                             if(elevationChart === null) {
-                                initChart(targetMap, 'chart-wrapper', elevationProfile, '${colors[map?index%7]}', function() {
+                                initChart(targetMap, 'chart-wrapper', elevationProfile, '${colors[map?index%10]}', function() {
                                     highlightMap(${map?index});
                                 });
                             }
