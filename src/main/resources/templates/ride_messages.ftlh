@@ -51,7 +51,7 @@
                         <#list messages?filter(m -> m.replyToId?? && m.replyToId == message.id) as reply>
                                 <div class="w-75 ms-auto mb-4 p-1">
                                     <p class="wrap-content p-3 m-0 rounded <#if _user?? && _user.id == reply.user.id>bg-success text-white<#else>bg-light border</#if>">${reply.content}</p>
-                                    < class="px-2 small d-flex justify-content-between align-items-center pt-1">
+                                    <div class="px-2 small d-flex justify-content-between align-items-center pt-1">
                                         <div>
                                             <#if _team_admin || (_user?? && _user.id == reply.user.id)><a class="link-danger" href="<@common.teamUrl team.id '/rides/' + ride.id + '/remove-message/' + reply.id />"><i class="bi bi-trash"></i></a></#if>
                                             <#if _authenticated><a href="#" onclick="replyTo('${message.id}', '${reply.user.identity?js_string}')" class="link-dark"><i class="bi bi-reply-fill"></i></a></#if>
