@@ -1,3 +1,5 @@
+var mouseDownFlag = 0;
+
 function initMap(mapContainerId, lat, lng, zoom, defaultLayer, layersControl, zoomControl) {
     var newMap = L.map(mapContainerId, { zoomControl: false, layers: [layers[defaultLayer]] }).setView([lat, lng], zoom);
     if(layersControl) {
@@ -96,6 +98,9 @@ function chartCorsairPlugin(containingMap) {
 
              var targetPoint = currentChartData[points[0].index];
              if(evt.event.type === 'mousemove') {
+                if(mouseDownFlag) {
+                    containingMap.panTo(new L.LatLng(targetPoint.lat, targetPoint.lng));
+                }
                 mouseHoverMarker.setLatLng(new L.LatLng(targetPoint.lat, targetPoint.lng));
                 containingMap.addLayer(mouseHoverMarker);
              } else {
@@ -198,6 +203,10 @@ function initChart(containingMap, chartContainerId, elevationProfile, color, cal
          containingMap.dragging.disable();
      });
 
+     document.getElementById(chartContainerId).addEventListener('mouseup', function () {
+          mouseDownFlag=0;
+      });
+
      document.getElementById(chartContainerId).addEventListener('mouseout', function () {
          containingMap.dragging.enable();
          if(mouseHoverMarker !== null) {
@@ -205,16 +214,23 @@ function initChart(containingMap, chartContainerId, elevationProfile, color, cal
          }
      });
 
+     document.getElementById(chartContainerId).addEventListener('mousedown', function () {
+           mouseDownFlag=1;
+       });
+
      document.getElementById(chartContainerId).addEventListener('touchstart', function () {
           containingMap.dragging.disable();
+          mouseDownFlag=1;
       });
 
       document.getElementById(chartContainerId).addEventListener('touchend', function () {
           containingMap.dragging.enable();
+          mouseDownFlag=0;
           if(mouseHoverMarker !== null) {
              containingMap.removeLayer(mouseHoverMarker);
           }
       });
+
 
      elevationChart = elevationChart === null ? new Chart(
          document.getElementById(chartContainerId),
