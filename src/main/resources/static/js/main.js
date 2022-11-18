@@ -388,21 +388,21 @@ function addReaction(targetId, url, reaction) {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() {
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-           reactionHolder(document.getElementById(targetId));
+           document.getElementById(targetId).innerHTML = xmlHttp.responseText;
         }
     }
-    xmlHttp.open("POST", url, true); // true for asynchronous
+    xmlHttp.open("GET", url + "/" + reaction, true); // true for asynchronous
     xmlHttp.setRequestHeader('Content-type', 'text/plain');
-    xmlHttp.send(reaction);
+    xmlHttp.send(null);
 }
 
 function removeReaction(targetId, url) {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() {
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-           reactionHolder(document.getElementById(targetId));
+           document.getElementById(targetId).innerHTML = xmlHttp.responseText;
         }
     }
-    xmlHttp.open("DELETE", url, true); // true for asynchronous
+    xmlHttp.open("GET", url, true); // true for asynchronous
     xmlHttp.send(null);
 }
