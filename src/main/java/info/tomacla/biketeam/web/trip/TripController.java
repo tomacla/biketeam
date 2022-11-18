@@ -4,15 +4,14 @@ import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
 import info.tomacla.biketeam.domain.message.Message;
+import info.tomacla.biketeam.domain.reaction.Reaction;
+import info.tomacla.biketeam.domain.reaction.ReactionContent;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.trip.Trip;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.userrole.Role;
 import info.tomacla.biketeam.domain.userrole.UserRole;
-import info.tomacla.biketeam.service.MapService;
-import info.tomacla.biketeam.service.MessageService;
-import info.tomacla.biketeam.service.TripService;
-import info.tomacla.biketeam.service.UserRoleService;
+import info.tomacla.biketeam.service.*;
 import info.tomacla.biketeam.service.file.ThumbnailService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +52,9 @@ public class TripController extends AbstractController {
 
     @Autowired
     private MessageService messageService;
+
+    @Autowired
+    private ReactionService reactionService;
 
     @GetMapping(value = "/{tripId}")
     public String getTrip(@PathVariable("teamId") String teamId,
@@ -110,6 +112,93 @@ public class TripController extends AbstractController {
             model.addAttribute("errors", List.of(error));
         }
         return "_fragment_reactions";
+    }
+
+    @GetMapping(value = "/{tripId}/add-reaction/{content}")
+    public String addReaction(@PathVariable("teamId") String teamId,
+                              @PathVariable("tripId") String tripId,
+                              @PathVariable("content") String content,
+                              @ModelAttribute("error") String error,
+                              Model model,
+                              Principal principal) {
+
+        final Team team = checkTeam(teamId);
+
+        Optional<Trip> optionalTrip = tripService.get(team.getId(), tripId);
+        if (optionalTrip.isEmpty()) {
+            return viewHandler.redirect(team, "/");
+        }
+
+        Trip trip = optionalTrip.get();
+        Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
+
+        if (optionalConnectedUser.isEmpty()) {
+            return viewHandler.redirect(team, "/");
+        }
+
+        User connectedUser = optionalConnectedUser.get();
+        ReactionContent parsedContent = ReactionContent.valueOfUnicode(content);
+        Reaction reaction = new Reaction();
+        reaction.setTarget(trip);
+        reaction.setContent(parsedContent.unicode());
+        reaction.setUser(connectedUser);
+
+        trip.getReactions().add(reaction);
+        reactionService.save(team, trip, reaction);
+
+        addGlobalValues(principal, model, "Trip " + trip.getTitle(), team);
+        model.addAttribute("urlPartPrefix", "trips");
+        model.addAttribute("element", trip);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
+
+        return "_fragment_reactions";
+
+    }
+
+    @GetMapping(value = "/{tripId}/remove-reaction")
+    public String removeReaction(@PathVariable("teamId") String teamId,
+                                 @PathVariable("tripId") String tripId,
+                                 @ModelAttribute("error") String error,
+                                 Model model,
+                                 Principal principal) {
+
+        final Team team = checkTeam(teamId);
+
+
+        Optional<Trip> optionalTrip = tripService.get(team.getId(), tripId);
+        if (optionalTrip.isEmpty()) {
+            return viewHandler.redirect(team, "/");
+        }
+
+        Trip trip = optionalTrip.get();
+
+        Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
+
+        if (optionalConnectedUser.isPresent()) {
+
+            User connectedUser = optionalConnectedUser.get();
+            final Optional<Reaction> optionalReaction = reactionService.getReaction(tripId, connectedUser.getId());
+
+            Reaction reaction = optionalReaction.get();
+            if (optionalReaction.isPresent()) {
+                reactionService.delete(reaction.getId());
+                trip.getReactions().remove(reaction);
+            }
+
+        }
+
+
+        addGlobalValues(principal, model, "Trip " + trip.getTitle(), team);
+        model.addAttribute("urlPartPrefix", "trips");
+        model.addAttribute("element", trip);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
+
+        return "_fragment_reactions";
+
     }
 
     @GetMapping(value = "/{tripId}/messages")

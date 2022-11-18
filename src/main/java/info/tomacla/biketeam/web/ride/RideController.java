@@ -4,6 +4,8 @@ import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
 import info.tomacla.biketeam.domain.message.Message;
+import info.tomacla.biketeam.domain.reaction.Reaction;
+import info.tomacla.biketeam.domain.reaction.ReactionContent;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.team.Team;
@@ -82,6 +84,93 @@ public class RideController extends AbstractController {
             model.addAttribute("errors", List.of(error));
         }
         return "ride";
+    }
+
+    @GetMapping(value = "/{rideId}/add-reaction/{content}")
+    public String addReaction(@PathVariable("teamId") String teamId,
+                            @PathVariable("rideId") String rideId,
+                            @PathVariable("content") String content,
+                            @ModelAttribute("error") String error,
+                            Model model,
+                            Principal principal) {
+
+        final Team team = checkTeam(teamId);
+
+        Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
+        if (optionalRide.isEmpty()) {
+            return viewHandler.redirect(team, "/");
+        }
+
+        Ride ride = optionalRide.get();
+        Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
+
+        if (optionalConnectedUser.isEmpty()) {
+            return viewHandler.redirect(team, "/");
+        }
+
+        User connectedUser = optionalConnectedUser.get();
+        ReactionContent parsedContent = ReactionContent.valueOfUnicode(content);
+        Reaction reaction = new Reaction();
+        reaction.setTarget(ride);
+        reaction.setContent(parsedContent.unicode());
+        reaction.setUser(connectedUser);
+
+        ride.getReactions().add(reaction);
+        reactionService.save(team, ride, reaction);
+
+        addGlobalValues(principal, model, "Ride " + ride.getTitle(), team);
+        model.addAttribute("urlPartPrefix", "rides");
+        model.addAttribute("element", ride);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
+
+        return "_fragment_reactions";
+
+    }
+
+    @GetMapping(value = "/{rideId}/remove-reaction")
+    public String removeReaction(@PathVariable("teamId") String teamId,
+                               @PathVariable("rideId") String rideId,
+                               @ModelAttribute("error") String error,
+                               Model model,
+                               Principal principal) {
+
+        final Team team = checkTeam(teamId);
+
+
+        Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
+        if (optionalRide.isEmpty()) {
+            return viewHandler.redirect(team, "/");
+        }
+
+        Ride ride = optionalRide.get();
+
+        Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
+
+        if (optionalConnectedUser.isPresent()) {
+
+            User connectedUser = optionalConnectedUser.get();
+            final Optional<Reaction> optionalReaction = reactionService.getReaction(rideId, connectedUser.getId());
+
+            Reaction reaction = optionalReaction.get();
+            if (optionalReaction.isPresent()) {
+                reactionService.delete(reaction.getId());
+                ride.getReactions().remove(reaction);
+            }
+
+        }
+
+
+        addGlobalValues(principal, model, "Ride " + ride.getTitle(), team);
+        model.addAttribute("urlPartPrefix", "rides");
+        model.addAttribute("element", ride);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
+
+        return "_fragment_reactions";
+
     }
 
     @GetMapping(value = "/{rideId}/reactions")
