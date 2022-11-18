@@ -8,11 +8,14 @@ import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ReactionRepository extends CrudRepository<Reaction, String> {
 
     List<Reaction> findAll();
+
+    Optional<Reaction> findByTargetIdAndUserId(String targetId, String userId);
 
     List<Reaction> findAllByTargetIdAndType(String targetId, ReactionTargetType type);
 

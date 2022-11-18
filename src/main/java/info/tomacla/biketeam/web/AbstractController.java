@@ -2,6 +2,7 @@ package info.tomacla.biketeam.web;
 
 
 import info.tomacla.biketeam.common.datatype.Dates;
+import info.tomacla.biketeam.domain.reaction.ReactionContent;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.security.OAuth2UserDetails;
@@ -51,6 +52,7 @@ public abstract class AbstractController {
         model.addAttribute("_domains", teamService.findAllTeamWithDomain());
         model.addAttribute("_siteUrl", urlService.getSiteUrl());
         model.addAttribute("_embed", false);
+        model.addAttribute("_reactions", ReactionContent.values());
 
         getUserFromPrincipal(principal).ifPresent(user -> {
             model.addAttribute("_authenticated", true);

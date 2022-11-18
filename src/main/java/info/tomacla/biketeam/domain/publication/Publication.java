@@ -4,14 +4,18 @@ import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.domain.feed.FeedEntity;
 import info.tomacla.biketeam.domain.feed.FeedType;
+import info.tomacla.biketeam.domain.reaction.Reaction;
 import info.tomacla.biketeam.domain.reaction.ReactionHolder;
 import info.tomacla.biketeam.domain.reaction.ReactionTargetType;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -31,6 +35,11 @@ public class Publication implements ReactionHolder, FeedEntity {
     @Column(length = 8000)
     private String content;
     private boolean imaged;
+
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "target_id", referencedColumnName = "id")
+    @Where(clause = "type = 'PUBLICATION'")
+    private Set<Reaction> reactions = new HashSet<>();
 
     public String getId() {
         return id;
@@ -86,6 +95,14 @@ public class Publication implements ReactionHolder, FeedEntity {
 
     public void setImaged(boolean imaged) {
         this.imaged = imaged;
+    }
+
+    public Set<Reaction> getReactions() {
+        return reactions;
+    }
+
+    public void setReactions(Set<Reaction> reactions) {
+        this.reactions = reactions;
     }
 
     @Override
