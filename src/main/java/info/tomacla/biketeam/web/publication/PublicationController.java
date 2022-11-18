@@ -4,8 +4,12 @@ import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
 import info.tomacla.biketeam.domain.publication.Publication;
+import info.tomacla.biketeam.domain.reaction.Reaction;
+import info.tomacla.biketeam.domain.reaction.ReactionContent;
 import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.service.PublicationService;
+import info.tomacla.biketeam.service.ReactionService;
 import info.tomacla.biketeam.service.file.ThumbnailService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +39,9 @@ public class PublicationController extends AbstractController {
 
     @Autowired
     private ThumbnailService thumbnailService;
+
+    @Autowired
+    private ReactionService reactionService;
 
     @ResponseBody
     @RequestMapping(value = "/{publicationId}/image", method = RequestMethod.GET)
@@ -99,6 +106,93 @@ public class PublicationController extends AbstractController {
             model.addAttribute("errors", List.of(error));
         }
         return "_fragment_reactions";
+    }
+
+    @GetMapping(value = "/{publicationId}/add-reaction/{content}")
+    public String addReaction(@PathVariable("teamId") String teamId,
+                              @PathVariable("publicationId") String publicationId,
+                              @PathVariable("content") String content,
+                              @ModelAttribute("error") String error,
+                              Model model,
+                              Principal principal) {
+
+        final Team team = checkTeam(teamId);
+
+        Optional<Publication> optionalPublication = publicationService.get(team.getId(), publicationId);
+        if (optionalPublication.isEmpty()) {
+            return viewHandler.redirect(team, "/");
+        }
+
+        Publication publication = optionalPublication.get();
+        Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
+
+        if (optionalConnectedUser.isEmpty()) {
+            return viewHandler.redirect(team, "/");
+        }
+
+        User connectedUser = optionalConnectedUser.get();
+        ReactionContent parsedContent = ReactionContent.valueOfUnicode(content);
+        Reaction reaction = new Reaction();
+        reaction.setTarget(publication);
+        reaction.setContent(parsedContent.unicode());
+        reaction.setUser(connectedUser);
+
+        publication.getReactions().add(reaction);
+        reactionService.save(team, publication, reaction);
+
+        addGlobalValues(principal, model, "Publication " + publication.getTitle(), team);
+        model.addAttribute("urlPartPrefix", "publications");
+        model.addAttribute("element", publication);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
+
+        return "_fragment_reactions";
+
+    }
+
+    @GetMapping(value = "/{publicationId}/remove-reaction")
+    public String removeReaction(@PathVariable("teamId") String teamId,
+                                 @PathVariable("publicationId") String publicationId,
+                                 @ModelAttribute("error") String error,
+                                 Model model,
+                                 Principal principal) {
+
+        final Team team = checkTeam(teamId);
+
+
+        Optional<Publication> optionalPublication = publicationService.get(team.getId(), publicationId);
+        if (optionalPublication.isEmpty()) {
+            return viewHandler.redirect(team, "/");
+        }
+
+        Publication publication = optionalPublication.get();
+
+        Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
+
+        if (optionalConnectedUser.isPresent()) {
+
+            User connectedUser = optionalConnectedUser.get();
+            final Optional<Reaction> optionalReaction = reactionService.getReaction(publicationId, connectedUser.getId());
+
+            Reaction reaction = optionalReaction.get();
+            if (optionalReaction.isPresent()) {
+                reactionService.delete(reaction.getId());
+                publication.getReactions().remove(reaction);
+            }
+
+        }
+
+
+        addGlobalValues(principal, model, "Publication " + publication.getTitle(), team);
+        model.addAttribute("urlPartPrefix", "publications");
+        model.addAttribute("element", publication);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
+
+        return "_fragment_reactions";
+
     }
 
 }
