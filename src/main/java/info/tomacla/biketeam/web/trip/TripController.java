@@ -83,6 +83,35 @@ public class TripController extends AbstractController {
         return "trip";
     }
 
+    @GetMapping(value = "/{tripId}/reactions")
+    public String getReactionFragment(@PathVariable("teamId") String teamId,
+                                      @PathVariable("tripId") String tripId,
+                                      @ModelAttribute("error") String error,
+                                      Principal principal,
+                                      Model model) {
+
+        final Team team = checkTeam(teamId);
+
+        Optional<Trip> optionalTrip = tripService.get(team.getId(), tripId);
+        if (optionalTrip.isEmpty()) {
+            return viewHandler.redirect(team, "/");
+        }
+
+        Trip trip = optionalTrip.get();
+
+        if (!trip.getPublishedStatus().equals(PublishedStatus.PUBLISHED) && !isAdmin(principal, team)) {
+            return viewHandler.redirect(team, "/");
+        }
+
+        addGlobalValues(principal, model, "Trip " + trip.getTitle(), team);
+        model.addAttribute("urlPartPrefix", "trips");
+        model.addAttribute("element", trip);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
+        return "_fragment_reactions";
+    }
+
     @GetMapping(value = "/{tripId}/messages")
     public String getTripMessages(@PathVariable("teamId") String teamId,
                                   @PathVariable("tripId") String tripId,
@@ -284,7 +313,7 @@ public class TripController extends AbstractController {
                 User connectedUser = optionalConnectedUser.get();
                 final Message message = optionalMessage.get();
 
-                if (message.getTargetId().equals(trip.getId()) && (message.getUser().equals(connectedUser) || team.isAdmin(connectedUser))) {
+                if (message.getTargetId().equals(trip.getId()) && (connectedUser.isAdmin() || message.getUser().equals(connectedUser) || team.isAdmin(connectedUser))) {
                     messageService.delete(messageId);
                 }
 

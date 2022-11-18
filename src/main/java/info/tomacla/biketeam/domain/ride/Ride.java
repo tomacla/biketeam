@@ -8,8 +8,10 @@ import info.tomacla.biketeam.domain.feed.FeedType;
 import info.tomacla.biketeam.domain.message.MessageHolder;
 import info.tomacla.biketeam.domain.message.MessageTargetType;
 import info.tomacla.biketeam.domain.place.Place;
+import info.tomacla.biketeam.domain.reaction.Reaction;
 import info.tomacla.biketeam.domain.reaction.ReactionHolder;
 import info.tomacla.biketeam.domain.reaction.ReactionTargetType;
+import org.hibernate.annotations.Where;
 import org.springframework.util.ObjectUtils;
 
 import javax.persistence.*;
@@ -51,6 +53,12 @@ public class Ride implements MessageHolder, ReactionHolder, FeedEntity {
 
     @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<RideGroup> groups = new HashSet<>();
+
+
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "target_id", referencedColumnName = "id")
+    @Where(clause = "type = 'RIDE'")
+    private Set<Reaction> reactions = new HashSet<>();
 
     public String getId() {
         return id;
@@ -146,6 +154,14 @@ public class Ride implements MessageHolder, ReactionHolder, FeedEntity {
 
     public void setEndPlace(Place endPlace) {
         this.endPlace = endPlace;
+    }
+
+    public Set<Reaction> getReactions() {
+        return reactions;
+    }
+
+    public void setReactions(Set<Reaction> reactions) {
+        this.reactions = reactions;
     }
 
     public Set<RideGroup> getGroups() {

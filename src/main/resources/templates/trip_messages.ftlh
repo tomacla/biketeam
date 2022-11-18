@@ -39,9 +39,9 @@
             <p class="wrap-content p-3 m-0 rounded <#if _user?? && _user.id == message.user.id>bg-success text-white<#else>bg-light border</#if>">${message.content}</p>
             <div class="px-2 small d-flex justify-content-between align-items-center pt-1">
                 <div>
-                    <#if _team_admin || (_user?? && _user.id == message.user.id)><a class="link-danger" href="<@common.teamUrl team.id '/trips/' + trip.id + '/remove-message/' + message.id />"><i class="bi bi-trash"></i></a></#if>
+                    <#if _team_admin || _admin || (_user?? && _user.id == message.user.id)><a class="link-danger" href="<@common.teamUrl team.id '/trips/' + trip.id + '/remove-message/' + message.id />"><i class="bi bi-trash"></i></a></#if>
                     <#if _authenticated><a href="#" onclick="replyTo('${message.id}', '${message.user.identity?js_string}')" class="link-dark"><i class="bi bi-reply-fill"></i></a></#if>
-                    <#if _team_admin || (_user?? && _user.id == message.user.id)><a href="#" onclick="edit('${message.id}', '${message.content?js_string}')" class="link-dark"><i class="bi bi-pencil-fill"></i></a></#if>
+                    <#if _team_admin || _admin || (_user?? && _user.id == message.user.id)><a href="#" onclick="edit('${message.id}', '${message.content?js_string}')" class="link-dark"><i class="bi bi-pencil-fill"></i></a></#if>
         </div>
         <div class="d-flex flex-row align-items-center mb-2">
             <span class="text-muted fst-italic">${message.publishedAt.format(_date_formatter)}</span>
@@ -53,9 +53,9 @@
         <p class="wrap-content p-3 m-0 rounded <#if _user?? && _user.id == reply.user.id>bg-success text-white<#else>bg-light border</#if>">${reply.content}</p>
         <div class="px-2 small d-flex justify-content-between align-items-center pt-1">
             <div>
-                <#if _team_admin || (_user?? && _user.id == reply.user.id)><a class="link-danger" href="<@common.teamUrl team.id '/trips/' + trip.id + '/remove-message/' + reply.id />"><i class="bi bi-trash"></i></a></#if>
+                <#if _team_admin || _admin || (_user?? && _user.id == reply.user.id)><a class="link-danger" href="<@common.teamUrl team.id '/trips/' + trip.id + '/remove-message/' + reply.id />"><i class="bi bi-trash"></i></a></#if>
                 <#if _authenticated><a href="#" onclick="replyTo('${message.id}', '${reply.user.identity?js_string}')" class="link-dark"><i class="bi bi-reply-fill"></i></a></#if>
-                <#if _team_admin || (_user?? && _user.id == reply.user.id)><a href="#" onclick="edit('${reply.id}', '${reply.content?js_string}')" class="link-dark"><i class="bi bi-pencil-fill"></i></a></#if>
+                <#if _team_admin || _admin || (_user?? && _user.id == reply.user.id)><a href="#" onclick="edit('${reply.id}', '${reply.content?js_string}')" class="link-dark"><i class="bi bi-pencil-fill"></i></a></#if>
     </div>
     <div class="d-flex flex-row align-items-center">
         <span class="text-muted fst-italic">${reply.publishedAt.format(_date_formatter)}</span>

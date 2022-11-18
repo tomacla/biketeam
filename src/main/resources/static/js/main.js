@@ -39,6 +39,7 @@ document.addEventListener("DOMContentLoaded", function() {
     Array.from(document.getElementsByClassName('markdown-content-toc')).forEach(markdownContentToc);
     Array.from(document.getElementsByClassName('form-unique-id')).forEach(initUniqueIdField);
     Array.from(document.getElementsByClassName('scroll-down')).forEach(scrollToBottom);
+    Array.from(document.getElementsByClassName('reaction-holder')).forEach(reactionHolder);
     Tags.init();
 
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
@@ -363,4 +364,45 @@ function lambertToGPS(lambert) {
         lat : lat
      }
 
+}
+
+/** REACTION **/
+
+function reactionHolder(contentContainer) {
+    getReactions(contentContainer.getAttribute('data-reaction-url'), contentContainer);
+}
+
+function getReactions(url, target) {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() {
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+           target.innerHTML = xmlHttp.responseText;
+        }
+    }
+    xmlHttp.open("GET", url, true); // true for asynchronous
+    xmlHttp.setRequestHeader('Content-type', 'text/plain');
+    xmlHttp.send(null);
+}
+
+function addReaction(targetId, url, reaction) {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() {
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+           reactionHolder(document.getElementById(targetId));
+        }
+    }
+    xmlHttp.open("POST", url, true); // true for asynchronous
+    xmlHttp.setRequestHeader('Content-type', 'text/plain');
+    xmlHttp.send(reaction);
+}
+
+function removeReaction(targetId, url) {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() {
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+           reactionHolder(document.getElementById(targetId));
+        }
+    }
+    xmlHttp.open("DELETE", url, true); // true for asynchronous
+    xmlHttp.send(null);
 }

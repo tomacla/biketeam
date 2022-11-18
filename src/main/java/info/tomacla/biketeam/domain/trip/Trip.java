@@ -9,9 +9,11 @@ import info.tomacla.biketeam.domain.map.MapType;
 import info.tomacla.biketeam.domain.message.MessageHolder;
 import info.tomacla.biketeam.domain.message.MessageTargetType;
 import info.tomacla.biketeam.domain.place.Place;
+import info.tomacla.biketeam.domain.reaction.Reaction;
 import info.tomacla.biketeam.domain.reaction.ReactionHolder;
 import info.tomacla.biketeam.domain.reaction.ReactionTargetType;
 import info.tomacla.biketeam.domain.user.User;
+import org.hibernate.annotations.Where;
 import org.springframework.util.ObjectUtils;
 
 import javax.persistence.*;
@@ -63,6 +65,11 @@ public class Trip implements MessageHolder, ReactionHolder, FeedEntity {
             joinColumns = @JoinColumn(name = "trip_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> participants = new HashSet<>();
+
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "target_id", referencedColumnName = "id")
+    @Where(clause = "type = 'TRIP'")
+    private Set<Reaction> reactions = new HashSet<>();
 
     public String getId() {
         return id;
@@ -174,6 +181,14 @@ public class Trip implements MessageHolder, ReactionHolder, FeedEntity {
 
     public void setMeetingTime(LocalTime meetingTime) {
         this.meetingTime = Objects.requireNonNull(meetingTime);
+    }
+
+    public Set<Reaction> getReactions() {
+        return reactions;
+    }
+
+    public void setReactions(Set<Reaction> reactions) {
+        this.reactions = reactions;
     }
 
     public Set<TripStage> getStages() {

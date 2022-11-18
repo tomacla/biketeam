@@ -143,9 +143,6 @@ public class Team implements MessageHolder {
     }
 
     public boolean isAdmin(User user) {
-        if (user.isAdmin()) {
-            return true;
-        }
         return this.roles.stream().anyMatch(role -> role.getUser().equals(user) && role.getRole().equals(Role.ADMIN));
     }
 
@@ -153,8 +150,8 @@ public class Team implements MessageHolder {
         return this.roles.stream().anyMatch(role -> role.getUser().equals(user));
     }
 
-    public void removeUser(User user) {
-        this.roles.remove(user);
+    public void removeUserRole(UserRole userRole) {
+        this.roles.remove(userRole);
     }
 
     @Override

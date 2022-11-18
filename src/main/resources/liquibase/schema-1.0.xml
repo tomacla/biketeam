@@ -1198,6 +1198,16 @@
 
     </changeSet>
 
+    <changeSet id="unique-reaction-constrait" author="tomacla">
+
+        <addUniqueConstraint
+                columnNames="target_id, user_id"
+                constraintName="unique_reaction_user"
+                tableName="reaction"
+        />
+
+    </changeSet>
+
 </databaseChangeLog>
 
 

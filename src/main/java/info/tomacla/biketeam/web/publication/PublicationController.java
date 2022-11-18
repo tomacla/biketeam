@@ -1,26 +1,34 @@
 package info.tomacla.biketeam.web.publication;
 
+import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
+import info.tomacla.biketeam.domain.publication.Publication;
+import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.service.PublicationService;
 import info.tomacla.biketeam.service.file.ThumbnailService;
+import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerErrorException;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.security.Principal;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
 @RequestMapping(value = "/{teamId}/publications")
-public class PublicationController {
+public class PublicationController extends AbstractController {
 
     @Autowired
     private PublicationService publicationService;
@@ -62,6 +70,35 @@ public class PublicationController {
             }
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to find publication image : " + publicationId);
+    }
+
+    @GetMapping(value = "/{publicationId}/reactions")
+    public String getReactionFragment(@PathVariable("teamId") String teamId,
+                                      @PathVariable("publicationId") String publicationId,
+                                      @ModelAttribute("error") String error,
+                                      Principal principal,
+                                      Model model) {
+
+        final Team team = checkTeam(teamId);
+
+        Optional<Publication> optionalPublication = publicationService.get(team.getId(), publicationId);
+        if (optionalPublication.isEmpty()) {
+            return viewHandler.redirect(team, "/");
+        }
+
+        Publication publication = optionalPublication.get();
+
+        if (!publication.getPublishedStatus().equals(PublishedStatus.PUBLISHED) && !isAdmin(principal, team)) {
+            return viewHandler.redirect(team, "/");
+        }
+
+        addGlobalValues(principal, model, "Publication " + publication.getTitle(), team);
+        model.addAttribute("urlPartPrefix", "publications");
+        model.addAttribute("element", publication);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
+        return "_fragment_reactions";
     }
 
 }

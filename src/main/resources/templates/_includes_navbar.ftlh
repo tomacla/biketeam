@@ -11,7 +11,7 @@
         </a>
     </#if>
 
-    <#if team?? && (team.configuration.feedVisible || _team_admin || team.configuration.markdownPageWritten)>
+    <#if team?? && (team.configuration.feedVisible || _team_admin || _admin || team.configuration.markdownPageWritten)>
         <ul class="navbar-nav order-2 order-md-1">
             <#if team??>
                 <#if team.configuration.feedVisible>
@@ -27,7 +27,7 @@
                 <li class="nav-item">
                     <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/' + team.id + '/maps')> active</#if>" href="<@common.teamUrl team.id '/maps' />"><i class="bi bi-map"></i> Maps</a>
                 </li>
-                <#if _team_admin>
+                <#if _team_admin || _admin>
                     <li class="nav-item">
                         <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/' + team.id + '/admin')> active</#if>" href="<@common.teamUrl team.id '/admin' />"><i class="bi bi-shield-lock"></i> Gérer</a>
                     </li>

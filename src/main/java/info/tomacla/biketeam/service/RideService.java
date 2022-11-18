@@ -7,9 +7,13 @@ import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
+import info.tomacla.biketeam.domain.reaction.Reaction;
+import info.tomacla.biketeam.domain.reaction.ReactionContent;
+import info.tomacla.biketeam.domain.reaction.ReactionSummary;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideProjection;
 import info.tomacla.biketeam.domain.ride.RideRepository;
+import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.service.amqp.BrokerService;
 import info.tomacla.biketeam.service.amqp.dto.TeamEntityDTO;
 import info.tomacla.biketeam.service.file.FileService;
@@ -29,9 +33,8 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class RideService extends AbstractPermalinkService {
@@ -172,6 +175,41 @@ public class RideService extends AbstractPermalinkService {
 
     public void deleteByUser(String userId) {
         rideRepository.deleteByUserId(userId);
+    }
+
+    public List<ReactionSummary> getReactions(Ride ride, User user) {
+
+        List<Reaction> reactions = reactionService.listByTarget(ride);
+
+        Map<String, Long> reactionsCount = reactions
+                .stream()
+                .collect(Collectors.groupingBy(
+                        reaction -> ReactionContent.valueOfUnicode(reaction.getContent()).name(),
+                        Collectors.counting()
+                ));
+
+        String userReaction = null;
+        if (user != null) {
+            Optional<Reaction> optionalReaction = reactions.stream().filter(r -> r.getUser().equals(user)).findFirst();
+            if (optionalReaction.isPresent()) {
+                userReaction = ReactionContent.valueOfUnicode(optionalReaction.get().getContent()).name();
+            }
+        }
+
+        List<ReactionSummary> response = new ArrayList<>();
+        for (ReactionContent value : ReactionContent.values()) {
+            ReactionSummary dto = new ReactionSummary(
+                    value.htmlRepresentation(),
+                    value.unicodeRepresentation(),
+                    value.name().equals(userReaction),
+                    reactionsCount.containsKey(value.name()) ? reactionsCount.get(value.name()) : 0
+            );
+
+            response.add(dto);
+        }
+
+        return response;
+
     }
 
 }

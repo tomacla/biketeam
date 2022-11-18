@@ -10,10 +10,7 @@ import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.userrole.Role;
 import info.tomacla.biketeam.domain.userrole.UserRole;
-import info.tomacla.biketeam.service.MapService;
-import info.tomacla.biketeam.service.MessageService;
-import info.tomacla.biketeam.service.RideService;
-import info.tomacla.biketeam.service.UserRoleService;
+import info.tomacla.biketeam.service.*;
 import info.tomacla.biketeam.service.file.ThumbnailService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +52,9 @@ public class RideController extends AbstractController {
     @Autowired
     private MessageService messageService;
 
+    @Autowired
+    private ReactionService reactionService;
+
     @GetMapping(value = "/{rideId}")
     public String getRide(@PathVariable("teamId") String teamId,
                           @PathVariable("rideId") String rideId,
@@ -82,6 +82,35 @@ public class RideController extends AbstractController {
             model.addAttribute("errors", List.of(error));
         }
         return "ride";
+    }
+
+    @GetMapping(value = "/{rideId}/reactions")
+    public String getReactionFragment(@PathVariable("teamId") String teamId,
+                                      @PathVariable("rideId") String rideId,
+                                      @ModelAttribute("error") String error,
+                                      Principal principal,
+                                      Model model) {
+
+        final Team team = checkTeam(teamId);
+
+        Optional<Ride> optionalRide = rideService.get(team.getId(), rideId);
+        if (optionalRide.isEmpty()) {
+            return viewHandler.redirect(team, "/");
+        }
+
+        Ride ride = optionalRide.get();
+
+        if (!ride.getPublishedStatus().equals(PublishedStatus.PUBLISHED) && !isAdmin(principal, team)) {
+            return viewHandler.redirect(team, "/");
+        }
+
+        addGlobalValues(principal, model, "Ride " + ride.getTitle(), team);
+        model.addAttribute("urlPartPrefix", "rides");
+        model.addAttribute("element", ride);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
+        return "_fragment_reactions";
     }
 
     @GetMapping
@@ -292,7 +321,7 @@ public class RideController extends AbstractController {
                 User connectedUser = optionalConnectedUser.get();
                 final Message message = optionalMessage.get();
 
-                if (message.getTargetId().equals(ride.getId()) && (message.getUser().equals(connectedUser) || team.isAdmin(connectedUser))) {
+                if (message.getTargetId().equals(ride.getId()) && (connectedUser.isAdmin() || message.getUser().equals(connectedUser) || team.isAdmin(connectedUser))) {
                     messageService.delete(messageId);
                 }
 
@@ -305,6 +334,7 @@ public class RideController extends AbstractController {
             return viewHandler.redirectView(team, "/rides/" + rideId + "/messages");
         }
     }
+
 
     @ResponseBody
     @RequestMapping(value = "/{rideId}/image", method = RequestMethod.GET)
