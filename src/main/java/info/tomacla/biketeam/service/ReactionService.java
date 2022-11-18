@@ -24,6 +24,11 @@ public class ReactionService {
         return reactionRepository.findById(id);
     }
 
+    public Optional<Reaction> getReaction(String targetId, String userId) {
+        return reactionRepository.findByTargetIdAndUserId(targetId, userId);
+    }
+
+
     public void save(Team team, ReactionHolder holder, Reaction reaction) {
         reactionRepository.save(reaction);
     }

@@ -28,8 +28,8 @@ public class UserRoleService {
     @Transactional
     public void delete(Team team, User user) {
         get(team, user).ifPresent(userRole -> {
-            team.removeUser(user);
-            user.removeTeam(team);
+            team.removeUserRole(userRole);
+            user.removeUserRole(userRole);
             userRoleRepository.delete(userRole);
         });
     }

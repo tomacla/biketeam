@@ -17,7 +17,7 @@
 
             <#if userTeams?size != 0>
                 <div class="list-group">
-                    <div class="list-group-item list-group-item-secondary">Mes groupes</div>
+                    <div class="list-group-item list-group-item-secondary"><i class="bi bi-bookmarks"></i> Groupes suivis</div>
                     <#list userTeams as userTeam>
                         <a href="<@common.teamUrl userTeam.id '' />" class="list-group-item list-group-item-action">
                             <img src="<@common.teamUrl userTeam.id '/image' />" height="18" alt="Team image"> ${userTeam.name}

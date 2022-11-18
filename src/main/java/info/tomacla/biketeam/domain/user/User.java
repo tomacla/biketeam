@@ -1,7 +1,6 @@
 package info.tomacla.biketeam.domain.user;
 
 import info.tomacla.biketeam.common.datatype.Strings;
-import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.userrole.UserRole;
 
 import javax.persistence.*;
@@ -122,8 +121,8 @@ public class User {
         this.roles = Objects.requireNonNullElse(roles, new HashSet<>());
     }
 
-    public void removeTeam(Team team) {
-        this.roles.removeIf(role -> role.getTeam().equals(team));
+    public void removeUserRole(UserRole userRole) {
+        this.roles.remove(userRole);
     }
 
     public String getIdentity() {

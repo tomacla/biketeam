@@ -12,15 +12,16 @@
                    <div><#if (team.description.facebook)??><span class="small"><a target="_blank" href="https://www.facebook.com/${team.description.facebook}"><i class="bi bi-facebook"></i></a></#if> <#if (team.description.twitter)??><a target="_blank" href="https://www.twitter.com/${team.description.twitter}"><i class="bi bi-twitter"></i></a></#if> <#if (team.description.instagram)??><span class="small"><a target="_blank" href="https://www.instagram.com/${team.description.instagram}"><i class="bi bi-instagram"></i></a></#if></span></div>
                     <div class="mt-2">
                         <#if _authenticated>
-                                <#if _team_admin>
-                                <button disabled class="btn btn-sm btn-success"><i class="bi-bookmark-check-fill bi"></i> Admin</button>
-                                <#elseif _team_member>
-                                <a href="<@common.teamUrl team.id '/leave' />" class="btn btn-sm btn-success"><i class="bi-bookmark-fill bi"></i> Suivi</a>
-                                <#else>
-                                <a href="<@common.teamUrl team.id '/join' />" class="btn btn-sm btn-outline-success"><i class="bi-bookmark bi"></i> Suivre</a>
-                            </#if>
+                            <#if _team_admin>
+                                <button disabled class="px-2 py-0 btn btn-sm btn-success"><i class="bi-bookmark-fill bi"></i> Suivi</button>
+                                <button disabled class="px-2 py-0 btn btn-sm btn-success"><i class="bi bi-shield-fill"></i> Admin</button>
+                            <#elseif _team_member>
+                                <a href="<@common.teamUrl team.id '/leave' />" class="px-2 py-0 btn btn-sm btn-success"><i class="bi-bookmark-fill bi"></i> Suivi</a>
                             <#else>
-                            <a href="<@common.teamUrl '' '/login?requestUri=/${team.id}/join' />" class="btn btn-sm btn-outline-success"><i class="bi-bookmark bi"></i> Suivre</a>
+                                <a href="<@common.teamUrl team.id '/join' />" class="px-2 py-0 btn btn-sm btn-outline-success"><i class="bi-bookmark bi"></i> Suivre</a>
+                            </#if>
+                        <#else>
+                            <a href="<@common.teamUrl '' '/login?requestUri=/${team.id}/join' />" class="px-2 py-0 btn btn-sm btn-outline-success"><i class="bi-bookmark bi"></i> Suivre</a>
                         </#if>
                 </div>
 

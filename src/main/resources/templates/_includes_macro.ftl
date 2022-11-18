@@ -82,6 +82,10 @@
                   </div>
               </#if>
             </div>
+            <div class="card-footer d-flex justify-content-start">
+                <div class="d-flex flex-row reaction-holder" id="reaction-holder-${publication.id}" data-reaction-url="<@common.teamUrl publication.teamId '/publications/' + publication.id + '/reactions' />">
+                </div>
+            </div>
         </div>
       </div>
 </#macro>
@@ -124,8 +128,10 @@
                   </div>
               </#if>
             </div>
-            <div class="card-footer text-center">
-                <a href="<@common.teamUrl ride.teamId '/rides/'+ ride.permalink!ride.id />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye-fill"></i> Détails</a>
+            <div class="card-footer d-flex justify-content-between">
+                <div class="d-flex flex-row reaction-holder" id="reaction-holder-${ride.id}" data-reaction-url="<@common.teamUrl ride.teamId '/rides/' + (ride.permalink!ride.id) + '/reactions' />">
+                </div>
+                <div><a href="<@common.teamUrl ride.teamId '/rides/'+ ride.permalink!ride.id />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye-fill"></i> Détails</a></div>
             </div>
         </div>
       </div>
@@ -166,8 +172,10 @@
               </div>
           </#if>
         </div>
-        <div class="card-footer text-center">
-            <a href="<@common.teamUrl trip.teamId '/trips/'+ trip.permalink!trip.id />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye-fill"></i> Détails</a>
+        <div class="card-footer d-flex justify-content-between">
+            <div class="d-flex flex-row reaction-holder" id="reaction-holder-${trip.id}" data-reaction-url="<@common.teamUrl trip.teamId '/trips/' + (trip.permalink!ride.id) + '/reactions' />">
+            </div>
+            <div><a href="<@common.teamUrl trip.teamId '/trips/'+ trip.permalink!trip.id />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye-fill"></i> Détails</a></div>
         </div>
     </div>
   </div>

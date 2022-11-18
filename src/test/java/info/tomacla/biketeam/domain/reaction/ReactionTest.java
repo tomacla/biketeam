@@ -45,7 +45,7 @@ public class ReactionTest extends AbstractDBTest {
 
         Reaction r = new Reaction();
         r.setTarget(ride);
-        r.setContent("\uD83D\uDC95");
+        r.setContent("1F803");
         r.setUser(user);
 
         assertEquals(0, reactionRepository.findAllByTargetIdAndType(ride.getId(), ReactionTargetType.RIDE).size());
