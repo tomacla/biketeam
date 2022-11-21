@@ -29,7 +29,7 @@ public class ReactionService {
     }
 
 
-    public void save(Team team, ReactionHolder holder, Reaction reaction) {
+    public void save(Reaction reaction) {
         reactionRepository.save(reaction);
     }
 

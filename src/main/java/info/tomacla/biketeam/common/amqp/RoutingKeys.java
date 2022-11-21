@@ -15,5 +15,7 @@ public interface RoutingKeys {
     String TASK_GENERATE_HEATMAPS = "task_generate_heatmaps";
     String TASK_DOWNLOAD_PROFILE_IMAGE = "task_download_profile_image";
 
+    String TASK_CLEAN_NOTIFICATIONS = "task_clean_notifications";
+
 
 }

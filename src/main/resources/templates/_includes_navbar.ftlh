@@ -41,6 +41,30 @@
             <li class="nav-item">
                 <a class="nav-link" href="<@common.teamUrl '' '/users/me' />"><img class="rounded" height="24" src="<@common.teamUrl '' '/users/${_user.id}/image' />" alt="profile"></a>
             </li>
+            <#if _notifications?? && _notifications?size gt 0>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="notification-dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"><span class="text-danger"><i class="bi bi-bell-fill"></i></span></a>
+              <ul class="dropdown-menu p-1" aria-labelledby="notification-dropdown">
+                <#list _notifications as notification>
+                    <li class="p-1 d-flex flex-row align-items-center justify-content-between">
+                        <img class="rounded" src="<@common.teamUrl notification.teamId '/image' />" height="15" alt="Team image">
+                        <a class="dropdown-item p-0 ps-1 small link-dark" href="<@common.teamUrl '' '/notifications/${notification.id}' />">
+                            <#if notification.type == 'NEW_RIDE_MESSAGE' || notification.type == 'NEW_TRIP_MESSAGE'>
+                                Nouveau message
+                            <#elseif notification.type == 'RIDE_PUBLISHED'>
+                                Nouveau ride publié
+                            <#elseif notification.type == 'TRIP_PUBLISHED'>
+                                Nouveau trip publié
+                            </#if>
+                        </a>
+                    </li>
+                </#list>
+                <li class="p-1 d-flex flex-row align-items-center justify-content-between">
+                    <a class="dropdown-item p-0 ps-1 small link-secondary" href="<@common.teamUrl '' '/notifications/read-all' />">Tout marquer comme lu</a>
+                </li>
+              </ul>
+            </li>
+            </#if>
             <li class="nav-item">
                 <a class="nav-link" href="<@common.teamUrl '' '/logout' />"><i class="bi bi-door-closed"></i></a>
             </li>

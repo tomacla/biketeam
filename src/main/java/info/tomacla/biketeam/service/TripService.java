@@ -56,6 +56,9 @@ public class TripService extends AbstractPermalinkService {
     @Autowired
     private ReactionService reactionService;
 
+    @Autowired
+    private NotificationService notificationService;
+
     public Optional<Trip> get(String teamId, String tripId) {
         Optional<Trip> optionalTrip = tripRepository.findById(tripId);
         if (optionalTrip.isPresent() && optionalTrip.get().getTeamId().equals(teamId)) {
@@ -130,6 +133,7 @@ public class TripService extends AbstractPermalinkService {
         if (optionalTrip.isPresent()) {
             messageService.deleteByTarget(tripId);
             reactionService.deleteByTarget(tripId);
+            notificationService.deleteByElement(tripId);
             final Trip trip = optionalTrip.get();
             deleteImage(trip.getTeamId(), trip.getId());
             tripRepository.delete(trip);

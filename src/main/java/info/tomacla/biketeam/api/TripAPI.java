@@ -105,7 +105,7 @@ public class TripAPI extends AbstractAPI {
         reaction.setContent(parsedContent.unicode());
         reaction.setUser(connectedUser);
 
-        reactionService.save(team, trip, reaction);
+        reactionService.save(reaction);
 
     }
 
