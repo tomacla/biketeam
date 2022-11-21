@@ -29,6 +29,7 @@ import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.security.Principal;
@@ -91,6 +92,7 @@ public class RideController extends AbstractController {
                             @PathVariable("rideId") String rideId,
                             @PathVariable("content") String content,
                             @ModelAttribute("error") String error,
+                            HttpSession session,
                             Model model,
                             Principal principal) {
 
@@ -118,7 +120,7 @@ public class RideController extends AbstractController {
         ride.getReactions().add(reaction);
         reactionService.save(team, ride, reaction);
 
-        addGlobalValues(principal, model, "Ride " + ride.getTitle(), team);
+        addGlobalValues(principal, model, "Ride " + ride.getTitle(), team, session);
         model.addAttribute("urlPartPrefix", "rides");
         model.addAttribute("element", ride);
         if (!ObjectUtils.isEmpty(error)) {
@@ -133,6 +135,7 @@ public class RideController extends AbstractController {
     public String removeReaction(@PathVariable("teamId") String teamId,
                                @PathVariable("rideId") String rideId,
                                @ModelAttribute("error") String error,
+                               HttpSession session,
                                Model model,
                                Principal principal) {
 
@@ -162,7 +165,7 @@ public class RideController extends AbstractController {
         }
 
 
-        addGlobalValues(principal, model, "Ride " + ride.getTitle(), team);
+        addGlobalValues(principal, model, "Ride " + ride.getTitle(), team, session);
         model.addAttribute("urlPartPrefix", "rides");
         model.addAttribute("element", ride);
         if (!ObjectUtils.isEmpty(error)) {
@@ -177,6 +180,7 @@ public class RideController extends AbstractController {
     public String getReactionFragment(@PathVariable("teamId") String teamId,
                                       @PathVariable("rideId") String rideId,
                                       @ModelAttribute("error") String error,
+                                      HttpSession session,
                                       Principal principal,
                                       Model model) {
 
@@ -193,7 +197,7 @@ public class RideController extends AbstractController {
             return viewHandler.redirect(team, "/");
         }
 
-        addGlobalValues(principal, model, "Ride " + ride.getTitle(), team);
+        addGlobalValues(principal, model, "Ride " + ride.getTitle(), team, session);
         model.addAttribute("urlPartPrefix", "rides");
         model.addAttribute("element", ride);
         if (!ObjectUtils.isEmpty(error)) {

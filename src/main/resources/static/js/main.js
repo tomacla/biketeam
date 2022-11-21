@@ -369,10 +369,10 @@ function lambertToGPS(lambert) {
 /** REACTION **/
 
 function reactionHolder(contentContainer) {
-    getReactions(contentContainer.getAttribute('data-reaction-url'), contentContainer);
+    getReactions(contentContainer.getAttribute('data-reaction-url'), contentContainer, contentContainer.getAttribute('data-reaction-session'));
 }
 
-function getReactions(url, target) {
+function getReactions(url, target, session = null) {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() {
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
@@ -381,10 +381,13 @@ function getReactions(url, target) {
     }
     xmlHttp.open("GET", url, true); // true for asynchronous
     xmlHttp.setRequestHeader('Content-type', 'text/plain');
+    if(session !== null) {
+        xmlHttp.setRequestHeader('X-Auth-Token', session);
+    }
     xmlHttp.send(null);
 }
 
-function addReaction(targetId, url, reaction) {
+function addReaction(targetId, url, reaction, session = null) {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() {
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
@@ -393,10 +396,13 @@ function addReaction(targetId, url, reaction) {
     }
     xmlHttp.open("GET", url + "/" + reaction, true); // true for asynchronous
     xmlHttp.setRequestHeader('Content-type', 'text/plain');
+    if(session !== null) {
+        xmlHttp.setRequestHeader('X-Auth-Token', session);
+    }
     xmlHttp.send(null);
 }
 
-function removeReaction(targetId, url) {
+function removeReaction(targetId, url, session = null) {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() {
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
@@ -404,5 +410,8 @@ function removeReaction(targetId, url) {
         }
     }
     xmlHttp.open("GET", url, true); // true for asynchronous
+    if(session !== null) {
+        xmlHttp.setRequestHeader('X-Auth-Token', session);
+    }
     xmlHttp.send(null);
 }

@@ -19,6 +19,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
+import javax.servlet.http.HttpSession;
 import java.security.Principal;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ public class RootController extends AbstractController {
     @GetMapping
     public String getRoot(@RequestParam(required = false, name = "error") String error,
                           @ModelAttribute(name = "error") String modelError,
+                          HttpSession session,
                           Principal principal,
                           Model model) {
 
@@ -74,7 +76,7 @@ public class RootController extends AbstractController {
             // TODO should be user time zone and not UTC
             final List<FeedEntity> feeds = teamService.listFeed(teams.stream().map(Team::getId).collect(Collectors.toSet()), ZoneOffset.UTC, new FeedOptions());
 
-            addGlobalValues(principal, model, "Biketeam", null);
+            addGlobalValues(principal, model, "Biketeam", null, session);
             if (error != null) {
                 model.addAttribute("errors", List.of(error));
             }
