@@ -5,6 +5,7 @@ import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
+import info.tomacla.biketeam.domain.notification.NotificationRepository;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.Visibility;
 import info.tomacla.biketeam.domain.user.User;
@@ -61,6 +62,12 @@ public class UserService {
 
     @Autowired
     private MessageService messageService;
+
+    @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
+    private ReactionService reactionService;
 
     @Autowired
     private FileService fileService;
@@ -246,6 +253,8 @@ public class UserService {
         try {
             log.info("Request user deletion {}", user.getId());
             // remove all access to this user
+            reactionService.deleteByUser(user.getId());
+            notificationService.deleteByUser(user.getId());
             userRoleService.deleteByUser(user.getId());
             rideService.deleteByUser(user.getId());
             tripService.deleteByUser(user.getId());

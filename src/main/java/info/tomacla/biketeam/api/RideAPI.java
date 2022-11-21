@@ -105,7 +105,7 @@ public class RideAPI extends AbstractAPI {
         reaction.setContent(parsedContent.unicode());
         reaction.setUser(connectedUser);
 
-        reactionService.save(team, ride, reaction);
+        reactionService.save(reaction);
 
     }
 

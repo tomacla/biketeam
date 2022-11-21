@@ -147,7 +147,7 @@ public class TripController extends AbstractController {
         reaction.setUser(connectedUser);
 
         trip.getReactions().add(reaction);
-        reactionService.save(team, trip, reaction);
+        reactionService.save(reaction);
 
         addGlobalValues(principal, model, "Trip " + trip.getTitle(), team, session);
         model.addAttribute("urlPartPrefix", "trips");

@@ -99,7 +99,7 @@ public class PublicationApi extends AbstractAPI {
         reaction.setContent(parsedContent.unicode());
         reaction.setUser(connectedUser);
 
-        reactionService.save(team, publication, reaction);
+        reactionService.save(reaction);
 
     }
 

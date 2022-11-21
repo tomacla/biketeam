@@ -118,7 +118,7 @@ public class RideController extends AbstractController {
         reaction.setUser(connectedUser);
 
         ride.getReactions().add(reaction);
-        reactionService.save(team, ride, reaction);
+        reactionService.save(reaction);
 
         addGlobalValues(principal, model, "Ride " + ride.getTitle(), team, session);
         model.addAttribute("urlPartPrefix", "rides");

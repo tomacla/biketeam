@@ -59,6 +59,9 @@ public class RideService extends AbstractPermalinkService {
     @Autowired
     private ReactionService reactionService;
 
+    @Autowired
+    private NotificationService notificationService;
+
     public Optional<ImageDescriptor> getImage(String teamId, String rideId) {
 
         final Optional<Ride> optionalRide = get(teamId, rideId);
@@ -134,6 +137,7 @@ public class RideService extends AbstractPermalinkService {
             final Ride ride = optionalRide.get();
             messageService.deleteByTarget(rideId);
             reactionService.deleteByTarget(rideId);
+            notificationService.deleteByElement(rideId);
             deleteImage(ride.getTeamId(), ride.getId());
             rideRepository.delete(ride);
         }

@@ -141,7 +141,7 @@ public class PublicationController extends AbstractController {
         reaction.setUser(connectedUser);
 
         publication.getReactions().add(reaction);
-        reactionService.save(team, publication, reaction);
+        reactionService.save(reaction);
 
         addGlobalValues(principal, model, "Publication " + publication.getTitle(), team, session);
         model.addAttribute("urlPartPrefix", "publications");

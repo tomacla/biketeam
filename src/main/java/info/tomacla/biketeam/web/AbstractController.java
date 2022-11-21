@@ -6,6 +6,7 @@ import info.tomacla.biketeam.domain.reaction.ReactionContent;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.security.OAuth2UserDetails;
+import info.tomacla.biketeam.service.NotificationService;
 import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.service.UserService;
 import info.tomacla.biketeam.service.url.UrlService;
@@ -31,6 +32,9 @@ public abstract class AbstractController {
 
     @Autowired
     protected UserService userService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Value("${rememberme.key}")
     private String rememberMeKey;
@@ -58,19 +62,25 @@ public abstract class AbstractController {
         model.addAttribute("_siteUrl", urlService.getSiteUrl());
         model.addAttribute("_embed", false);
         model.addAttribute("_reactions", ReactionContent.values());
+
         if (session != null && session.getId() != null) {
             model.addAttribute("_session", session.getId());
         }
 
         getUserFromPrincipal(principal).ifPresent(user -> {
+
             model.addAttribute("_authenticated", true);
             model.addAttribute("_user", user);
 
             model.addAttribute("_admin", user.isAdmin());
+
             if (team != null) {
                 model.addAttribute("_team_admin", team.isAdmin(user));
                 model.addAttribute("_team_member", team.isMember(user));
             }
+
+            model.addAttribute("_notifications", notificationService.listUnviewedByUser(user.getId()));
+
         });
 
         if (team != null) {

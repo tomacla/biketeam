@@ -1208,8 +1208,38 @@
 
     </changeSet>
 
+    <changeSet id="add-notification-system" author="tomacla">
+
+        <createTable tableName="notification">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="VARCHAR(100)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="team_id" type="VARCHAR(20)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(50)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="element_id" type="VARCHAR(100)" />
+            <column name="viewed" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="notification" columnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="notification"
+                                 baseColumnNames="team_id"
+                                 constraintName="fk_notification_team_id"
+                                 referencedTableName="team"
+                                 referencedColumnNames="id"/>
+
+    </changeSet>
+
 </databaseChangeLog>
-
-
-
-
