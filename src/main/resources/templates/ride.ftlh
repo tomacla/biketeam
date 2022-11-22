@@ -132,7 +132,7 @@
                     <thead>
                         <tr>
                             <th></th>
-                            <th>Départ</th>
+                            <th><span class="d-inline d-md-none"><i class="bi bi-clock"></i></span><span class="d-none d-md-inline">Départ</span></th>
                             <th>Groupe</th>
                             <th class="d-none d-md-table-cell">Allure</th>
                             <th class="d-none d-md-table-cell">KM</th>
@@ -146,7 +146,7 @@
                             <tr<#if group.map??> onmouseover="highlightMap(${groupMaps?seq_index_of(group.map.id)})" </#if>>
                                 <td><#if group.map??><span style="height: 10px; width: 10px; background-color: ${colors[groupMaps?seq_index_of(group.map.id)%10]}; border-radius: 50%; display: inline-block;"></span></#if></td>
                                 <td>${group.meetingTime}</td>
-                                <td>${group.name}</td>
+                                <td>${group.name}<span class="d-inline d-md-none small"> ${group.averageSpeed}km/h</span></td>
                                 <td class="d-none d-md-table-cell">${group.averageSpeed} km/h</td>
                                 <td class="d-none d-md-table-cell"><#if group.map??>${group.map.length?floor} km</#if></td>
                                 <td class="d-none d-md-table-cell"><#if group.map??>${group.map.positiveElevation?floor} m</#if></td>
