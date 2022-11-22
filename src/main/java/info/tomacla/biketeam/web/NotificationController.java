@@ -5,18 +5,21 @@ import info.tomacla.biketeam.domain.notification.NotificationType;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.service.NotificationService;
+import info.tomacla.biketeam.service.RideService;
+import info.tomacla.biketeam.service.TripService;
+import info.tomacla.biketeam.service.url.UrlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.websocket.server.PathParam;
 import java.security.Principal;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Controller
 @RequestMapping(value = "/notifications")
@@ -24,6 +27,15 @@ public class NotificationController extends AbstractController {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private UrlService urlService;
+
+    @Autowired
+    private RideService rideService;
+
+    @Autowired
+    private TripService tripService;
 
     @GetMapping(value = "/read-all")
     public String readAll(@RequestHeader(HttpHeaders.REFERER) String referer,
@@ -37,10 +49,12 @@ public class NotificationController extends AbstractController {
     }
 
     @GetMapping(value = "/{notificationId}")
-    public ModelAndView readOne(@PathVariable("notificationId") String notificationId,
-                                @RequestHeader(HttpHeaders.REFERER) String referer,
-                                Principal principal,
-                                Model model) {
+    public String readOne(@PathVariable("notificationId") String notificationId,
+                          @RequestHeader(HttpHeaders.REFERER) String referer,
+                          Principal principal,
+                          Model model) {
+
+        AtomicReference<String> redirectUrl = new AtomicReference<>(referer);
 
         Optional<User> optionalUser = getUserFromPrincipal(principal);
         if (optionalUser.isPresent()) {
@@ -53,7 +67,7 @@ public class NotificationController extends AbstractController {
 
                 Notification notification = optionalNotification.get();
 
-                if(notification.getUser().equals(user)) {
+                if (notification.getUser().equals(user)) {
 
                     notification.setViewed(true);
                     notificationService.save(notification);
@@ -61,13 +75,13 @@ public class NotificationController extends AbstractController {
                     Team team = checkTeam(notification.getTeamId());
 
                     if (notification.getType().equals(NotificationType.RIDE_PUBLISHED)) {
-                        return new ModelAndView(viewHandler.redirectView(team, "/rides/" + notification.getElementId()));
-                    } else if(notification.getType().equals(NotificationType.TRIP_PUBLISHED)) {
-                        return new ModelAndView(viewHandler.redirectView(team, "/trips/" + notification.getElementId()));
+                        rideService.get(team.getId(), notification.getElementId()).ifPresent(ride -> redirectUrl.set(urlService.getRideUrl(team, ride)));
+                    } else if (notification.getType().equals(NotificationType.TRIP_PUBLISHED)) {
+                        tripService.get(team.getId(), notification.getElementId()).ifPresent(trip -> redirectUrl.set(urlService.getTripUrl(team, trip)));
                     } else if (notification.getType().equals(NotificationType.NEW_RIDE_MESSAGE)) {
-                        return new ModelAndView(viewHandler.redirectView(team, "/rides/" + notification.getElementId() + "/messages"));
-                    } else if(notification.getType().equals(NotificationType.NEW_TRIP_MESSAGE)) {
-                        return new ModelAndView(viewHandler.redirectView(team, "/trips/" + notification.getElementId() + "/messages"));
+                        rideService.get(team.getId(), notification.getElementId()).ifPresent(ride -> redirectUrl.set(urlService.getRideUrl(team, ride) + "/messages"));
+                    } else if (notification.getType().equals(NotificationType.NEW_TRIP_MESSAGE)) {
+                        tripService.get(team.getId(), notification.getElementId()).ifPresent(trip -> redirectUrl.set(urlService.getTripUrl(team, trip) + "/messages"));
                     }
 
                 }
@@ -76,7 +90,7 @@ public class NotificationController extends AbstractController {
 
         }
 
-        return new ModelAndView("redirect:" + referer);
+        return "redirect:" + redirectUrl.get();
 
     }
 
