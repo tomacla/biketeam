@@ -28,13 +28,13 @@ public class ScheduledTaskService {
         brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_PUBLISH_TRIPS);
     }
 
-    @Scheduled(fixedRate = 300000, initialDelay = 15000)
+    @Scheduled(cron = "0 30 3 * * 0")
     public void cleanTmpDirectory() {
         log.info("Executing scheduled cleanTmpDirectory");
         brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_CLEAN_TMP_FILES);
     }
 
-    @Scheduled(fixedRate = 600000, initialDelay = 17000)
+    @Scheduled(cron = "0 0 3 * * 0")
     public void cleanDeleteTeamsDirectory() {
         log.info("Executing scheduled cleanDeleteTeamsDirectory");
         brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_CLEAN_TEAM_FILES);
@@ -46,5 +46,10 @@ public class ScheduledTaskService {
         brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_GENERATE_HEATMAPS);
     }
 
+    @Scheduled(cron = "0 30 2 * * 0")
+    public void cleanNotifications() {
+        log.info("Executing scheduled cleanNotifications");
+        brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_CLEAN_NOTIFICATIONS);
+    }
 
 }

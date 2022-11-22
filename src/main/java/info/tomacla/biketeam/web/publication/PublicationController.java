@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerErrorException;
 
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.security.Principal;
@@ -83,6 +84,7 @@ public class PublicationController extends AbstractController {
     public String getReactionFragment(@PathVariable("teamId") String teamId,
                                       @PathVariable("publicationId") String publicationId,
                                       @ModelAttribute("error") String error,
+                                      HttpSession session,
                                       Principal principal,
                                       Model model) {
 
@@ -99,7 +101,7 @@ public class PublicationController extends AbstractController {
             return viewHandler.redirect(team, "/");
         }
 
-        addGlobalValues(principal, model, "Publication " + publication.getTitle(), team);
+        addGlobalValues(principal, model, "Publication " + publication.getTitle(), team, session);
         model.addAttribute("urlPartPrefix", "publications");
         model.addAttribute("element", publication);
         if (!ObjectUtils.isEmpty(error)) {
@@ -113,6 +115,7 @@ public class PublicationController extends AbstractController {
                               @PathVariable("publicationId") String publicationId,
                               @PathVariable("content") String content,
                               @ModelAttribute("error") String error,
+                              HttpSession session,
                               Model model,
                               Principal principal) {
 
@@ -138,9 +141,9 @@ public class PublicationController extends AbstractController {
         reaction.setUser(connectedUser);
 
         publication.getReactions().add(reaction);
-        reactionService.save(team, publication, reaction);
+        reactionService.save(reaction);
 
-        addGlobalValues(principal, model, "Publication " + publication.getTitle(), team);
+        addGlobalValues(principal, model, "Publication " + publication.getTitle(), team, session);
         model.addAttribute("urlPartPrefix", "publications");
         model.addAttribute("element", publication);
         if (!ObjectUtils.isEmpty(error)) {
@@ -155,6 +158,7 @@ public class PublicationController extends AbstractController {
     public String removeReaction(@PathVariable("teamId") String teamId,
                                  @PathVariable("publicationId") String publicationId,
                                  @ModelAttribute("error") String error,
+                                 HttpSession session,
                                  Model model,
                                  Principal principal) {
 
@@ -184,7 +188,7 @@ public class PublicationController extends AbstractController {
         }
 
 
-        addGlobalValues(principal, model, "Publication " + publication.getTitle(), team);
+        addGlobalValues(principal, model, "Publication " + publication.getTitle(), team, session);
         model.addAttribute("urlPartPrefix", "publications");
         model.addAttribute("element", publication);
         if (!ObjectUtils.isEmpty(error)) {
