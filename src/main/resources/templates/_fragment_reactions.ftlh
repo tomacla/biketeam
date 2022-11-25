@@ -8,9 +8,9 @@
     </#list>
 </div>
 <#if _authenticated && !userReaction && unusedReaction?size gt 0>
-<div class="ms-1 d-flex flex-row align-items-center" style="width:${unusedReaction?size * 15}px">
+<div class="reaction-choices ms-1 d-flex flex-row align-items-center" style="width:${unusedReaction?size * 15}px">
     <#list unusedReaction as reaction>
-        <div role="button" onclick="addReaction('reaction-holder-${element.id}', '<@common.teamUrl element.teamId '/${urlPartPrefix}/${element.id}/add-reaction' />', '${reaction.unicode()}'<#if _session??>, '${_session}'</#if>)" class="me-0">&#x${reaction.unicode()};</div>
+        <div class="reaction-choice" role="button" onclick="addReaction('reaction-holder-${element.id}', '<@common.teamUrl element.teamId '/${urlPartPrefix}/${element.id}/add-reaction' />', '${reaction.unicode()}'<#if _session??>, '${_session}'</#if>)" class="me-0">&#x${reaction.unicode()};</div>
     </#list>
 </div>
 </#if>

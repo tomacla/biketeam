@@ -27,7 +27,9 @@
             <dt>Profil utilisateur</dt>
             <dd>Nous collectons une liste des utilisateurs s'étant connectés au moins une fois et ne conservons les données suivantes (si disponible lors de la connexion avec le fournisseur d'identité choisi) : id de profil strava, id du profil facebook, id du profil google, email, nom, prénom, ville et image de profil.</dd>
             <dt>Données de participations aux rides</dt>
-            <dd>Nous collectons la liste des participants à chaque ride de chaque groupe Biketeam. Les participants peuvent à tout moment s'ajouter ou se retirer d'un ride.</dd>
+            <dd>Nous collectons la liste des participants à chaque ride et trip de chaque groupe Biketeam. Les participants peuvent à tout moment s'ajouter ou se retirer d'un ride ou d'un trip. Aucune trace n'est conservée en cas de suppression.</dd>
+            <dt>Messages et réactions</dt>
+            <dd>Nous collectons les auteurs des messages et réactions ajoutés sur les rides et les trips. Les utilisateurs peuvent à tout moment supprimer leur message ou leur réaction. Aucune trace n'est conservée en cas de suppression.</dd>
         </dl>
 
         <h3>Comment Biketeam utilise ces données ?</h3>

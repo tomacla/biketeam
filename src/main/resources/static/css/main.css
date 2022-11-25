@@ -249,3 +249,15 @@ html {
         height:25%!important;
     }
 }
+
+.github-fork-ribbon.done:before {
+    background-color: #8e8e8e;
+}
+
+.reaction-choice:not(:first-child) {
+    display:none;
+}
+
+.reaction-choices:hover .reaction-choice {
+    display:block;
+}
