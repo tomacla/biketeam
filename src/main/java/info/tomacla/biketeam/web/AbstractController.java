@@ -21,7 +21,10 @@ import org.springframework.ui.Model;
 
 import javax.servlet.http.HttpSession;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -54,6 +57,7 @@ public abstract class AbstractController {
         model.addAttribute("_pagetitle", pageTitle);
         model.addAttribute("_date_formatter", Dates.frenchFormatter);
         model.addAttribute("_time_formatter", Dates.timeFormatter);
+        model.addAttribute("_date_today", LocalDate.now(getZoneId(team)));
         model.addAttribute("_authenticated", false);
         model.addAttribute("_admin", false);
         model.addAttribute("_team_admin", false);
@@ -147,6 +151,13 @@ public abstract class AbstractController {
 
     protected List<String> getAllAvailableTimeZones() {
         return ZoneId.getAvailableZoneIds().stream().map(ZoneId::of).map(ZoneId::toString).sorted().collect(Collectors.toList());
+    }
+
+    protected ZoneId getZoneId(Team team) {
+        if(team == null) {
+            return ZoneOffset.UTC;
+        }
+        return ZoneId.of(team.getConfiguration().getTimezone());
     }
 
     protected Team checkTeam(String teamId) {
