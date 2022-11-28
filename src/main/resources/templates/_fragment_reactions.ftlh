@@ -8,9 +8,13 @@
     </#list>
 </div>
 <#if _authenticated && !userReaction && unusedReaction?size gt 0>
-<div class="ms-1 d-flex flex-row align-items-center" style="width:${unusedReaction?size * 15}px">
-    <#list unusedReaction as reaction>
-        <div role="button" onclick="addReaction('reaction-holder-${element.id}', '<@common.teamUrl element.teamId '/${urlPartPrefix}/${element.id}/add-reaction' />', '${reaction.unicode()}'<#if _session??>, '${_session}'</#if>)" class="me-0">&#x${reaction.unicode()};</div>
-    </#list>
+<div class="ms-1 d-flex flex-row align-items-center">
+    <div class="reaction-choice-opener position-relative" role="button" class="me-0">&#x1F603;<div class="reaction-choices px-1 py-0 flex-row align-items-center" style="width:${10 + (unusedReaction?size * 20)}px">
+            <#list unusedReaction as reaction>
+                <div class="reaction-choice" role="button" onclick="addReaction('reaction-holder-${element.id}', '<@common.teamUrl element.teamId '/${urlPartPrefix}/${element.id}/add-reaction' />', '${reaction.unicode()}'<#if _session??>, '${_session}'</#if>)" class="me-0">&#x${reaction.unicode()};</div>
+            </#list>
+        </div>
+    </div>
+
 </div>
 </#if>

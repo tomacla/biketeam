@@ -93,6 +93,9 @@
 <#macro displayRide ride withTeam>
     <div class="col-12">
         <div class="card">
+            <#if _date_today.isAfter(ride.date)>
+                <a class="github-fork-ribbon done" href="<@common.teamUrl ride.teamId '/rides/'+ ride.permalink!ride.id />" data-ribbon="Terminé" title="Terminé">Terminé</a>
+            </#if>
             <div class="card-header p-1">
                 <div class="d-flex flex-row justify-content-start align-items-start p-0">
                     <div>
@@ -104,7 +107,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-body border-bottom">
+            <div class="card-body">
             <h5 class="card-title">${ride.date.format(_date_formatter)}</h5>
             <ul class="list-unstyled m-0">
                 <li >${ride.groups?size} groupe<#if ride.groups?size gt 1>s</#if></li>
@@ -118,16 +121,16 @@
                   </#if>
              </ul>
             </div>
+            <#if ride.imaged>
             <div class="card-body">
-               <p class="card-text wrap-content small">${ride.description}</p>
-              <#if ride.imaged>
+
                   <div class="row justify-content-center">
                     <div class="col-12 col-md-6">
                       <a href="<@common.teamUrl ride.teamId '/rides/'+ ride.permalink!ride.id />"><img src="<@common.teamUrl ride.teamId '/rides/${ride.id}/image?width=500' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${ride.title} image"></a>
                     </div>
                   </div>
-              </#if>
             </div>
+            </#if>
             <div class="card-footer d-flex justify-content-between">
                 <div class="d-flex flex-row reaction-holder" id="reaction-holder-${ride.id}" <#if _session??>data-reaction-session="${_session}"</#if> data-reaction-url="<@common.teamUrl ride.teamId '/rides/' + (ride.permalink!ride.id) + '/reactions' />">
                 </div>
@@ -140,6 +143,9 @@
 <#macro displayTrip trip withTeam>
     <div class="col-12">
       <div class="card">
+        <#if _date_today.isAfter(trip.endDate)>
+            <a class="github-fork-ribbon done" href="<@common.teamUrl trip.teamId '/trips/'+ trip.permalink!trip.id />" data-ribbon="Terminé" title="Terminé">Terminé</a>
+        </#if>
         <div class="card-header p-1">
             <div class="d-flex flex-row justify-content-start align-items-start p-0">
                 <div>
@@ -151,7 +157,7 @@
                 </div>
             </div>
         </div>
-        <div class="card-body border-bottom">
+        <div class="card-body">
         <h5 class="card-title">${trip.date.format(_date_formatter)}</h5>
         <ul class="list-unstyled m-0">
             <li >${trip.stages?size} étape<#if trip.stages?size gt 1>s</#if></li>
@@ -161,17 +167,17 @@
               </#if>
          </ul>
         </div>
+        <#if trip.imaged>
         <div class="card-body">
 
-          <p class="card-text wrap-content small">${trip.description}</p>
-          <#if trip.imaged>
               <div class="row justify-content-center">
                 <div class="col-12 col-md-6">
                   <a href="<@common.teamUrl trip.teamId '/trips/'+ trip.permalink!trip.id />"><img src="<@common.teamUrl trip.teamId '/trips/${trip.id}/image?width=500' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${trip.title} image"></a>
                 </div>
               </div>
-          </#if>
+
         </div>
+        </#if>
         <div class="card-footer d-flex justify-content-between">
             <div class="d-flex flex-row reaction-holder" id="reaction-holder-${trip.id}" <#if _session??>data-reaction-session="${_session}"</#if> data-reaction-url="<@common.teamUrl trip.teamId '/trips/' + (trip.permalink!ride.id) + '/reactions' />">
             </div>
