@@ -9,7 +9,8 @@ public enum ReactionContent {
     NEUTRAL("1F610"),
     SAD_1("1F641"),
     SAD_2("1F625"),
-    ANGRY("1F621");
+    ANGRY("1F621"),
+    FOX("1F98A");
 
     private String unicode;
 
