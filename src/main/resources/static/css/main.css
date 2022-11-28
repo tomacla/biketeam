@@ -251,13 +251,23 @@ html {
 }
 
 .github-fork-ribbon.done:before {
-    background-color: #8e8e8e;
+    background-color: #dedede;
 }
 
-.reaction-choice:not(:first-child) {
+.github-fork-ribbon.done:after {
+    color: #4e4e4e;
+}
+
+.reaction-choices {
+    position:absolute;
+    top:100%;
     display:none;
+    background-color:white;
+    border-radius:3px;
+    border:1px solid #dedede;
 }
 
-.reaction-choices:hover .reaction-choice {
-    display:block;
+.reaction-choice-opener:hover .reaction-choices,
+.reaction-choices:hover {
+    display:flex;
 }
