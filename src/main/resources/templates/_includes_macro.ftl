@@ -94,7 +94,7 @@
     <div class="col-12">
         <div class="card">
             <#if _date_today.isAfter(ride.date)>
-                <a class="github-fork-ribbon done" href="<@common.teamUrl ride.teamId '/rides/'+ ride.permalink!ride.id />" data-ribbon="Terminé" title="Terminé">Terminé</a>
+                <div class="done-ribbon" data-ribbon="Terminé"></div>
             </#if>
             <div class="card-header p-1">
                 <div class="d-flex flex-row justify-content-start align-items-start p-0">
@@ -144,7 +144,7 @@
     <div class="col-12">
       <div class="card">
         <#if _date_today.isAfter(trip.endDate)>
-            <a class="github-fork-ribbon done" href="<@common.teamUrl trip.teamId '/trips/'+ trip.permalink!trip.id />" data-ribbon="Terminé" title="Terminé">Terminé</a>
+            <div class="done-ribbon" data-ribbon="Terminé"></div>
         </#if>
         <div class="card-header p-1">
             <div class="d-flex flex-row justify-content-start align-items-start p-0">
