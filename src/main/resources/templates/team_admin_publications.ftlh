@@ -41,7 +41,7 @@
                 }
 
                 function nextPage() {
-                    currentPage = Math.min(${publications?size} - 20, currentPage+20);
+                    currentPage = Math.min(${publications?size?c} - 20, currentPage+20);
                     displayItems();
                 }
 
