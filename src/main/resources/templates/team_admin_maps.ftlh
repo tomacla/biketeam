@@ -54,7 +54,7 @@
                 }
 
                 function nextPage() {
-                    currentPage = Math.min(${maps?size} - 20, currentPage+20);
+                    currentPage = Math.min(${maps?size?c} - 20, currentPage+20);
                     displayItems();
                 }
 

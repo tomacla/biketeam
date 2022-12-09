@@ -59,7 +59,7 @@
                 }
 
                 function nextPage() {
-                    currentPage = Math.min(${rides?size} - 20, currentPage+20);
+                    currentPage = Math.min(${rides?size?c} - 20, currentPage+20);
                     displayItems();
                 }
 
