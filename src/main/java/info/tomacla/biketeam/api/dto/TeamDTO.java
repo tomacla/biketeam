@@ -39,6 +39,7 @@ public class TeamDTO {
 
         public List<String> defaultSearchTags;
         public boolean feedVisible;
+        public boolean reactionVisible;
         public String timezone;
 
     }
@@ -74,6 +75,7 @@ public class TeamDTO {
             dto.configuration = new TeamConfigurationDTO();
             dto.configuration.defaultSearchTags = team.getConfiguration().getDefaultSearchTags();
             dto.configuration.feedVisible = team.getConfiguration().isFeedVisible();
+            dto.configuration.reactionVisible = team.getConfiguration().isReactionVisible();
             dto.configuration.timezone = team.getConfiguration().getTimezone();
         }
 

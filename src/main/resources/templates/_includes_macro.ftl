@@ -82,10 +82,12 @@
                   </div>
               </#if>
             </div>
-            <div class="card-footer d-flex justify-content-start">
-                <div class="d-flex flex-row reaction-holder" id="reaction-holder-${publication.id}" <#if _session??>data-reaction-session="${_session}"</#if> data-reaction-url="<@common.teamUrl publication.teamId '/publications/' + publication.id + '/reactions' />">
+            <#if (!withTeam && team.configuration.reactionVisible) || (withTeam && (userTeams?filter(t -> t.id == publication.teamId))[0].configuration.reactionVisible)>
+                <div class="card-footer d-flex justify-content-start">
+                    <div class="d-flex flex-row reaction-holder" id="reaction-holder-${publication.id}" <#if _session??>data-reaction-session="${_session}"</#if> data-reaction-url="<@common.teamUrl publication.teamId '/publications/' + publication.id + '/reactions' />">
+                    </div>
                 </div>
-            </div>
+            </#if>
         </div>
       </div>
 </#macro>
@@ -131,11 +133,17 @@
                   </div>
             </div>
             </#if>
-            <div class="card-footer d-flex justify-content-between">
-                <div class="d-flex flex-row reaction-holder" id="reaction-holder-${ride.id}" <#if _session??>data-reaction-session="${_session}"</#if> data-reaction-url="<@common.teamUrl ride.teamId '/rides/' + (ride.permalink!ride.id) + '/reactions' />">
+            <#if (!withTeam && team.configuration.reactionVisible) || (withTeam && (userTeams?filter(t -> t.id == ride.teamId))[0].configuration.reactionVisible)>
+                <div class="card-footer d-flex justify-content-between">
+                    <div class="d-flex flex-row reaction-holder" id="reaction-holder-${ride.id}" <#if _session??>data-reaction-session="${_session}"</#if> data-reaction-url="<@common.teamUrl ride.teamId '/rides/' + (ride.permalink!ride.id) + '/reactions' />">
+                    </div>
+                    <div><a href="<@common.teamUrl ride.teamId '/rides/'+ ride.permalink!ride.id />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye-fill"></i> Détails</a></div>
                 </div>
-                <div><a href="<@common.teamUrl ride.teamId '/rides/'+ ride.permalink!ride.id />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye-fill"></i> Détails</a></div>
-            </div>
+            <#else>
+            <div class="card-footer d-flex justify-content-center">
+                    <div><a href="<@common.teamUrl ride.teamId '/rides/'+ ride.permalink!ride.id />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye-fill"></i> Détails</a></div>
+                </div>
+            </#if>
         </div>
       </div>
 </#macro>
@@ -178,11 +186,17 @@
 
         </div>
         </#if>
-        <div class="card-footer d-flex justify-content-between">
-            <div class="d-flex flex-row reaction-holder" id="reaction-holder-${trip.id}" <#if _session??>data-reaction-session="${_session}"</#if> data-reaction-url="<@common.teamUrl trip.teamId '/trips/' + (trip.permalink!ride.id) + '/reactions' />">
+        <#if (!withTeam && team.configuration.reactionVisible) || (withTeam && (userTeams?filter(t -> t.id == trip.teamId))[0].configuration.reactionVisible)>
+            <div class="card-footer d-flex justify-content-between">
+                <div class="d-flex flex-row reaction-holder" id="reaction-holder-${trip.id}" <#if _session??>data-reaction-session="${_session}"</#if> data-reaction-url="<@common.teamUrl trip.teamId '/trips/' + (trip.permalink!ride.id) + '/reactions' />">
+                </div>
+                <div><a href="<@common.teamUrl trip.teamId '/trips/'+ trip.permalink!trip.id />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye-fill"></i> Détails</a></div>
             </div>
-            <div><a href="<@common.teamUrl trip.teamId '/trips/'+ trip.permalink!trip.id />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye-fill"></i> Détails</a></div>
-        </div>
+        <#else>
+            <div class="card-footer d-flex justify-content-center">
+                <div><a href="<@common.teamUrl trip.teamId '/trips/'+ trip.permalink!trip.id />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye-fill"></i> Détails</a></div>
+            </div>
+        </#if>
     </div>
   </div>
 </#macro>
