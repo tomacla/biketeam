@@ -33,6 +33,15 @@
                       </div>
                 </div>
 
+                <h5>Emojis</h5>
+
+                <div class="mb-3">
+                      <div class="form-check form-switch">
+                        <input class="form-check-input" name="reactionVisible" type="checkbox" id="form-configuration-reactionVisible"<#if formdata.reactionVisible?? && formdata.reactionVisible == 'on'> checked</#if>>
+                        <label class="form-check-label" for="form-configuration-reactionVisible">Activer les emojis dans le flux</label>
+                      </div>
+                </div>
+
                 <hr/>
 
                 <h5>Localisation</h5>

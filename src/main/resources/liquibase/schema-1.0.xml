@@ -1242,4 +1242,14 @@
 
     </changeSet>
 
+    <changeSet id="hide-or-show-reaction" author="tomacla">
+
+        <addColumn tableName="team_configuration">
+            <column name="reaction_visible" type="BOOLEAN"/>
+        </addColumn>
+
+        <sql>update team_configuration set reaction_visible = FALSE</sql>
+
+    </changeSet>
+
 </databaseChangeLog>
