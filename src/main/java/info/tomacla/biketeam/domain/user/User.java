@@ -1,6 +1,7 @@
 package info.tomacla.biketeam.domain.user;
 
 import info.tomacla.biketeam.common.datatype.Strings;
+import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.userrole.UserRole;
 
 import javax.persistence.*;
@@ -40,6 +41,13 @@ public class User {
     private boolean emailPublishPublications;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<UserRole> roles = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "map_favorite",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "map_id"))
+    private Set<Map> mapFavorites = new HashSet<>();
 
     public String getId() {
         return id;
@@ -163,6 +171,14 @@ public class User {
 
     public void setEmailPublishPublications(boolean emailPublishPublications) {
         this.emailPublishPublications = emailPublishPublications;
+    }
+
+    public Set<Map> getMapFavorites() {
+        return mapFavorites;
+    }
+
+    public void setMapFavorites(Set<Map> mapFavorites) {
+        this.mapFavorites = mapFavorites;
     }
 
     @Override

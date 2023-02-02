@@ -2,7 +2,12 @@ package info.tomacla.biketeam.web.map;
 
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.domain.map.*;
+import info.tomacla.biketeam.domain.ride.Ride;
+import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.domain.user.User;
+import info.tomacla.biketeam.domain.userrole.Role;
+import info.tomacla.biketeam.domain.userrole.UserRole;
 import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.service.file.ThumbnailService;
 import info.tomacla.biketeam.service.url.UrlService;
@@ -19,6 +24,8 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerErrorException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -324,6 +331,74 @@ public class MapController extends AbstractController {
             }
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to find image : " + mapId);
+    }
+
+    @GetMapping(value = "/{mapId}/add-favorite")
+    public RedirectView addMapFavorite(@PathVariable("teamId") String teamId,
+                                             @PathVariable("mapId") String mapId,
+                                             RedirectAttributes attributes,
+                                             Principal principal, Model model) {
+
+        final Team team = checkTeam(teamId);
+
+        try {
+            Optional<Map> optionalMap = mapService.get(team.getId(), mapId);
+            if (optionalMap.isEmpty()) {
+                return viewHandler.redirectView(team, "/");
+            }
+
+            Map targetMap = optionalMap.get();
+            Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
+
+            if (optionalConnectedUser.isPresent()) {
+
+                User connectedUser = optionalConnectedUser.get();
+
+                connectedUser.getMapFavorites().add(targetMap);
+                userService.save(connectedUser);
+
+            }
+
+            return viewHandler.redirectView(team, "/maps/" + mapId);
+
+        } catch (Exception e) {
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/maps/" + mapId);
+        }
+    }
+
+    @GetMapping(value = "/{mapId}/remove-favorite")
+    public RedirectView removeFavorite(@PathVariable("teamId") String teamId,
+                                                  @PathVariable("mapId") String mapId,
+                                                  RedirectAttributes attributes,
+                                                  Principal principal, Model model) {
+
+        final Team team = checkTeam(teamId);
+
+        try {
+            Optional<Map> optionalMap = mapService.get(team.getId(), mapId);
+            if (optionalMap.isEmpty()) {
+                return viewHandler.redirectView(team, "/");
+            }
+
+            Map targetMap = optionalMap.get();
+            Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
+
+            if (optionalConnectedUser.isPresent() ) {
+
+                User connectedUser = optionalConnectedUser.get();
+
+                connectedUser.getMapFavorites().removeIf(map -> map.getId().equals(targetMap.getId()));
+                userService.save(connectedUser);
+
+            }
+
+            return viewHandler.redirectView(team, "/maps/" + mapId);
+
+        } catch (Exception e) {
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/maps/" + mapId);
+        }
     }
 
     public String getMapOGDescription(Map map) {
