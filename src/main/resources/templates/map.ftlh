@@ -26,10 +26,12 @@
 
              <#if !_embed>
                 <div class="btn-group btn-group-sm" role="group">
-                    <#if _user.mapFavorites?filter(mp -> mp.id == map.id)?size == 0>
-                        <a href="<@common.teamUrl team.id '/maps/${map.id}/add-favorite' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-star"></i> Favori</a>
-                    <#else>
-                        <a href="<@common.teamUrl team.id '/maps/${map.id}/remove-favorite' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-star-fill"></i> Favori</a>
+                    <#if _authenticated>
+                        <#if _user.mapFavorites?filter(mp -> mp.id == map.id)?size == 0>
+                            <a href="<@common.teamUrl team.id '/maps/${map.id}/add-favorite' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-star"></i> Favori</a>
+                        <#else>
+                            <a href="<@common.teamUrl team.id '/maps/${map.id}/remove-favorite' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-star-fill"></i> Favori</a>
+                        </#if>
                     </#if>
                     <a download="${map.name}.gpx" href="<@common.teamUrl team.id '/maps/${map.id}/gpx' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-download"></i> GPX</a>
                     <a download="${map.name}.fit" href="<@common.teamUrl team.id '/maps/${map.id}/fit' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-download"></i> FIT</a>
