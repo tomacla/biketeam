@@ -1242,4 +1242,37 @@
 
     </changeSet>
 
+    <changeSet id="hide-or-show-reaction" author="tomacla">
+
+        <addColumn tableName="team_configuration">
+            <column name="reaction_visible" type="BOOLEAN"/>
+        </addColumn>
+
+        <sql>update team_configuration set reaction_visible = FALSE</sql>
+
+    </changeSet>
+
+    <changeSet id="favorites-maps" author="tomacla">
+
+        <createTable tableName="map_favorite">
+            <column name="map_id" type="VARCHAR(255)" />
+            <column name="user_id" type="VARCHAR(255)" />
+        </createTable>
+
+        <addPrimaryKey tableName="map_favorite" columnNames="map_id, user_id"/>
+
+        <addForeignKeyConstraint baseTableName="map_favorite"
+                                 baseColumnNames="map_id"
+                                 constraintName="fk_map_favorite_id"
+                                 referencedTableName="map"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="map_favorite"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_map_favorite_user_id"
+                                 referencedTableName="user_account"
+                                 referencedColumnNames="id"/>
+
+    </changeSet>
+
 </databaseChangeLog>

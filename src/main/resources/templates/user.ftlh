@@ -60,6 +60,8 @@
 
         <form name="form-user" action="<@common.teamUrl '' '/users/me' />" method="POST" class="border rounded p-4">
 
+               <h4>Préférences</h4>
+
              <h5>Strava</h5>
 
              <div class="alert alert-info" role="alert">
@@ -111,6 +113,17 @@
               
               <button type="submit" class="btn btn-secondary">Enregistrer</button>
         </form>
+
+        <div class="border rounded mt-2 p-4">
+            <h4>Maps favorites</h4>
+
+            <div>
+                <#list _user.mapFavorites as favorite>
+                    <span class="text-nowrap me-2 mb-2"><img src="<@common.teamUrl favorite.teamId '/image' />" height="18" alt="Team image"> <a href="<@common.teamUrl favorite.teamId '/maps/${favorite.permalink!favorite.id}' />" class="link-dark" role="button"> ${favorite.name}</a></span>
+                </#list>
+            </div>
+
+        </div>
 
     </div>
 
