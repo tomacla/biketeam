@@ -12,6 +12,10 @@ public class NewPlaceForm {
     private double pointLat = 0.0;
     private double pointLng = 0.0;
 
+    private String startPlace = null;
+
+    private String endPlace = null;
+
     public static NewPlaceFormBuilder builder() {
         return new NewPlaceFormBuilder();
     }
@@ -64,6 +68,22 @@ public class NewPlaceForm {
         this.pointLng = pointLng;
     }
 
+    public String getStartPlace() {
+        return startPlace;
+    }
+
+    public void setStartPlace(String startPlace) {
+        this.startPlace = startPlace;
+    }
+
+    public String getEndPlace() {
+        return endPlace;
+    }
+
+    public void setEndPlace(String endPlace) {
+        this.endPlace = endPlace;
+    }
+
     public NewPlaceFormParser parser() {
         return new NewPlaceFormParser(this);
     }
@@ -108,6 +128,14 @@ public class NewPlaceForm {
             return null;
         }
 
+        public boolean isStartPlace() {
+            return form.getStartPlace() != null && form.getStartPlace().equals("on");
+        }
+
+        public boolean isEndPlace() {
+            return form.getEndPlace() != null && form.getEndPlace().equals("on");
+        }
+
     }
 
     public static class NewPlaceFormBuilder {
@@ -144,6 +172,17 @@ public class NewPlaceForm {
                 form.setPointLat(point.getLat());
                 form.setPointLng(point.getLng());
             }
+            return this;
+        }
+
+        public NewPlaceFormBuilder withStartPlace(boolean startPlace) {
+            form.setStartPlace(startPlace ? "on" : null);
+            return this;
+        }
+
+
+        public NewPlaceFormBuilder withEndPlace(boolean endPlace) {
+            form.setEndPlace(endPlace ? "on" : null);
             return this;
         }
 

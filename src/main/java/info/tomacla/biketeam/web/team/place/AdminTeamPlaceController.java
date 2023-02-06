@@ -61,7 +61,9 @@ public class AdminTeamPlaceController extends AbstractController {
                     .withName(place.getName())
                     .withAddress(place.getAddress())
                     .withLink(place.getLink())
-                    .withPoint(place.getPoint());
+                    .withPoint(place.getPoint())
+                    .withStartPlace(place.isStartPlace())
+                    .withEndPlace(place.isEndPlace());
 
         }
 
@@ -99,21 +101,18 @@ public class AdminTeamPlaceController extends AbstractController {
                 }
 
                 target = optionalPlace.get();
-                target.setName(parser.getName());
-                target.setAddress(parser.getAddress());
-                target.setLink(parser.getLink());
-                target.setPoint(parser.getPoint());
 
             } else {
-
                 target = new Place();
                 target.setTeamId(team.getId());
-                target.setName(parser.getName());
-                target.setAddress(parser.getAddress());
-                target.setLink(parser.getLink());
-                target.setPoint(parser.getPoint());
-
             }
+
+            target.setName(parser.getName());
+            target.setAddress(parser.getAddress());
+            target.setLink(parser.getLink());
+            target.setPoint(parser.getPoint());
+            target.setEndPlace(parser.isEndPlace());
+            target.setStartPlace(parser.isStartPlace());
 
             placeService.save(target);
 
