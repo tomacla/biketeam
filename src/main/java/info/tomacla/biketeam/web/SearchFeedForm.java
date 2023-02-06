@@ -9,7 +9,7 @@ import java.util.Objects;
 public class SearchFeedForm {
 
     private String from = Dates.formatDate(LocalDate.now().minus(1, ChronoUnit.MONTHS));
-    private String to = Dates.formatDate(LocalDate.now().plus(3, ChronoUnit.MONTHS));
+    private String to = Dates.formatDate(LocalDate.now().plus(1, ChronoUnit.YEARS));
 
     private boolean includeTrips = true;
 

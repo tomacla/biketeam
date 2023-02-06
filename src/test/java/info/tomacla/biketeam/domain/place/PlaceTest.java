@@ -34,6 +34,8 @@ public class PlaceTest extends AbstractDBTest {
         place.setLink("http://toto");
         place.setName("place 1");
         place.setAddress("somewhere");
+        place.setStartPlace(true);
+        place.setEndPlace(false);
 
         assertFalse(placeRepository.findById("placeRepositoryTU-id").isPresent());
 

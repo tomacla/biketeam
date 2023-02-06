@@ -10,6 +10,8 @@ public class PlaceDTO {
     public String address;
     public String link;
     public PointDTO point;
+    public boolean startPlace;
+    public boolean endPlace;
 
     public static PlaceDTO valueOf(Place place) {
 
@@ -22,7 +24,9 @@ public class PlaceDTO {
         dto.name = place.getName();
         dto.address = place.getAddress();
         dto.link = place.getLink();
-        ;
+        dto.startPlace = place.isStartPlace();
+        dto.endPlace = place.isEndPlace();
+
         if (place.getPoint() != null) {
             dto.point = PointDTO.valueOf(place.getPoint());
         }

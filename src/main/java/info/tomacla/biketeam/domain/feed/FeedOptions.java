@@ -9,7 +9,7 @@ public class FeedOptions {
     private boolean includeTrips = true;
     private boolean includeRides = true;
     private LocalDate from = LocalDate.now().minus(1, ChronoUnit.MONTHS);
-    private LocalDate to = LocalDate.now().plus(3, ChronoUnit.MONTHS);
+    private LocalDate to = LocalDate.now().plus(1, ChronoUnit.YEARS);
 
     public FeedOptions() {
     }

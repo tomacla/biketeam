@@ -26,4 +26,8 @@ public interface PlaceAppearanceProjection {
 
     int getRideEndPlaceAppearances();
 
+    boolean isStartPlace();
+
+    boolean isEndPlace();
+
 }

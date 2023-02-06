@@ -131,7 +131,7 @@
                       <label for="form-ride-startplace" class="form-label">Départ</label>
                       <select required name="startPlaceId" class="form-select" id="form-ride-startplace">
                           <option value="---"<#if formdata.startPlaceId == ''> selected</#if>>---</option>
-                          <#list startPlaces as place>
+                          <#list startPlaces?filter(p -> p.startPlace) as place>
                               <option value="${place.id}"<#if formdata.startPlaceId == place.id> selected</#if>>${place.name}</option>
                           </#list>
                         </select>
@@ -141,7 +141,7 @@
                       <label for="form-ride-endplace" class="form-label">Arrivée</label>
                       <select required name="endPlaceId" class="form-select" id="form-ride-endplace">
                         <option value="---"<#if formdata.endPlaceId == ''> selected</#if>>---</option>
-                        <#list endPlaces as place>
+                        <#list endPlaces?filter(p -> p.endPlace) as place>
                             <option value="${place.id}"<#if formdata.endPlaceId == place.id> selected</#if>>${place.name}</option>
                         </#list>
                       </select>

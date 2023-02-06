@@ -31,6 +31,10 @@ public class Place {
     })
     @Embedded
     private Point point;
+    @Column(name = "start_place")
+    private boolean startPlace;
+    @Column(name = "end_place")
+    private boolean endPlace;
 
     public String getId() {
         return id;
@@ -63,7 +67,6 @@ public class Place {
 
     public void setAddress(String address) {
         this.address = Strings.requireNonBlank(address, "address is blank");
-        ;
     }
 
     public String getLink() {
@@ -80,6 +83,22 @@ public class Place {
 
     public void setPoint(Point point) {
         this.point = point;
+    }
+
+    public boolean isStartPlace() {
+        return startPlace;
+    }
+
+    public void setStartPlace(boolean startPlace) {
+        this.startPlace = startPlace;
+    }
+
+    public boolean isEndPlace() {
+        return endPlace;
+    }
+
+    public void setEndPlace(boolean endPlace) {
+        this.endPlace = endPlace;
     }
 
 }
