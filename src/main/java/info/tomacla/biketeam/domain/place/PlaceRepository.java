@@ -14,7 +14,7 @@ public interface PlaceRepository extends CrudRepository<Place, String> {
 
     List<Place> findAllByTeamIdOrderByNameAsc(String teamId);
 
-    @Query(value = "select p.id as id, p.team_id as teamId, p.name as name,  " +
+    @Query(value = "select p.id as id, p.team_id as teamId, p.name as name, p.start_place as startPlace, p.end_place as endPlace,  " +
             "MAX(t1.start_date) as lastTripStartPlaceAppearance, count(distinct t1.id) as tripStartPlaceAppearances, " +
             "MAX(t2.start_date) as lastTripEndPlaceAppearance, count(distinct t2.id) as tripEndPlaceAppearances, " +
             "MAX(r1.date) as lastRideStartPlaceAppearance, count(distinct r1.id) as rideStartPlaceAppearances, " +

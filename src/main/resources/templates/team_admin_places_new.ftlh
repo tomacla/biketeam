@@ -26,6 +26,23 @@
                   <input autocomplete="off" value="${formdata.link}" name="link" type="text" class="form-control" id="form-place-link" placeholder="https://www.barducoin.com">
                 </div>
 
+                <div class="mb-3 row">
+                    <div class="col-6">
+                      <div class="form-check form-switch">
+                        <input class="form-check-input" name="startPlace" type="checkbox" id="form-place-startPlace"<#if formdata.startPlace?? && formdata.startPlace == 'on'> checked</#if>>
+                        <label class="form-check-label" for="form-place-startPlace">Lieu de départ</label>
+                      </div>
+                    </div>
+
+                     <div class="col-6">
+                      <div class="form-check form-switch">
+                        <input class="form-check-input" name="endPlace" type="checkbox" id="form-place-endPlace"<#if formdata.endPlace?? && formdata.endPlace == 'on'> checked</#if>>
+                        <label class="form-check-label" for="form-place-endPlace">Lieu d'arrivée</label>
+                      </div>
+                    </div>
+
+                </div>
+
                 <button type="submit" class="btn btn-secondary">Enregistrer</button>
         </form>
 

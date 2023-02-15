@@ -1275,4 +1275,15 @@
 
     </changeSet>
 
+    <changeSet id="github-189-startend-places" author="tomacla">
+
+        <addColumn tableName="place">
+            <column name="start_place" type="BOOLEAN" />
+            <column name="end_place" type="BOOLEAN" />
+        </addColumn>
+
+        <sql>update place set start_place = TRUE, end_place = TRUE</sql>
+
+    </changeSet>
+
 </databaseChangeLog>
