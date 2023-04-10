@@ -185,7 +185,7 @@ public class MapController extends AbstractController {
         final Team team = teamService.get(teamId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to find team : " + teamId));
 
-        return java.util.Map.of("tracks", mapService.listMaps(teamId, 50).stream()
+        return java.util.Map.of("tracks", mapService.listMapsForNearestRides(teamId).stream()
                 .map(m -> {
                     GarminMapDTO dto = new GarminMapDTO();
                     dto.setTitle(m.getName());
