@@ -51,23 +51,11 @@ class RideServiceTest {
         Team team = new Team();
         TeamConfiguration teamConfiguration = new TeamConfiguration();
         String timezone = "Europe/Paris";
-        ZoneId zoneId = ZoneId.of(timezone);
         teamConfiguration.setTimezone(timezone);
         team.setConfiguration(teamConfiguration);
         when(teamService.get("teamId")).thenReturn(Optional.of(team));
 
-        AtomicInteger mapIdCounter = new AtomicInteger(1);
-
-        Instant now = Instant.now();
-
         List<Ride> rides = new ArrayList<>();
-        rides.add(getRide(zoneId, PublishedStatus.UNPUBLISHED, now, mapIdCounter,
-                new TestGroup(0, true),
-                new TestGroup(0, true),
-                new TestGroup(0, true),
-                new TestGroup(0, true)
-        ));
-
         when(rideRepository.findAllByTeamIdInAndDateBetweenAndPublishedStatus(eq(Set.of("teamId")), any(), any(), any(), any()))
                 .thenReturn(new PageImpl<>(rides));
 
@@ -94,40 +82,34 @@ class RideServiceTest {
         Instant now = Instant.now();
 
         List<Ride> rides = new ArrayList<>();
-        rides.add(getRide(zoneId, PublishedStatus.UNPUBLISHED, now, mapIdCounter,
-                new TestGroup(0, true), // 1 - not included
-                new TestGroup(0, true), // 2 - not included
-                new TestGroup(0, true), // 3 - not included
-                new TestGroup(0, true) // 4 - not included
-        ));
-        rides.add(getRide(zoneId, PublishedStatus.PUBLISHED, now, mapIdCounter,
-                new TestGroup(-55, true), // 5 - rank 7
-                new TestGroup(-55, true), // 6 - rank 8
-                new TestGroup(-40, true), // 7 - rank 5
-                new TestGroup(-40, true), // 8 - rank 6
-                new TestGroup(-25, true), // 9 - rank 3
-                new TestGroup(-25, true), // 10 - rank 4
+        rides.add(getRide(zoneId, now, mapIdCounter,
+                new TestGroup(-55, true), // 1 - rank 7
+                new TestGroup(-55, true), // 2 - rank 8
+                new TestGroup(-40, true), // 3 - rank 5
+                new TestGroup(-40, true), // 4 - rank 6
+                new TestGroup(-25, true), // 5 - rank 3
+                new TestGroup(-25, true), // 6 - rank 4
                 new TestGroup(0, false),
-                new TestGroup(5, true), // 11 - rank 1
-                new TestGroup(5, true) // 12 - rank 2
+                new TestGroup(5, true), // 7 - rank 1
+                new TestGroup(5, true) // 8 - rank 2
         ));
-        rides.add(getRide(zoneId, PublishedStatus.PUBLISHED, now.plus(24, ChronoUnit.HOURS),
+        rides.add(getRide(zoneId, now.plus(24, ChronoUnit.HOURS),
                 mapIdCounter,
                 new TestGroup(0, false),
-                new TestGroup(0, true), // 13 - rank 9
-                new TestGroup(0, true), // 14 - rank 10
+                new TestGroup(0, true), // 9 - rank 9
+                new TestGroup(0, true), // 10 - rank 10
                 new TestGroup(0, false),
-                new TestGroup(10, true), // 15 - rank 12
-                new TestGroup(5, true) // 16 - rank 11
+                new TestGroup(10, true), // 11 - rank 12
+                new TestGroup(5, true) // 12 - rank 11
         ));
-        rides.add(getRide(zoneId, PublishedStatus.PUBLISHED, now.minus(48, ChronoUnit.HOURS),
+        rides.add(getRide(zoneId, now.minus(48, ChronoUnit.HOURS),
                 mapIdCounter,
                 new TestGroup(0, false),
-                new TestGroup(-5, true), // 17 - rank 16
-                new TestGroup(0, true), // 18 - rank 14
+                new TestGroup(-5, true), // 13 - rank 16
+                new TestGroup(0, true), // 14 - rank 14
                 new TestGroup(0, false),
-                new TestGroup(0, true), // 19 - rank 15
-                new TestGroup(5, true) // 20 - rank 13
+                new TestGroup(0, true), // 15 - rank 15
+                new TestGroup(5, true) // 16 - rank 13
         ));
 
         when(rideRepository.findAllByTeamIdInAndDateBetweenAndPublishedStatus(eq(Set.of("teamId")), any(), any(), any(), any()))
@@ -136,27 +118,27 @@ class RideServiceTest {
         List<RideGroup> rideGroups = rideService.listRideGroupsByStartProximity("teamId");
         List<String> actualMapIds = rideGroups.stream().map(RideGroup::getMap).map(Map::getId).toList();
         List<String> expectedMapIds = List.of(
-                "map11",
-                "map12",
-                "map09",
-                "map10",
                 "map07",
                 "map08",
                 "map05",
                 "map06",
-                "map13",
-                "map14",
+                "map03",
+                "map04",
+                "map01",
+                "map02",
+                "map09",
+                "map10",
+                "map12",
+                "map11",
                 "map16",
+                "map14",
                 "map15",
-                "map20",
-                "map18",
-                "map19",
-                "map17"
+                "map13"
         );
         Assertions.assertEquals(expectedMapIds, actualMapIds);
     }
 
-    private Ride getRide(ZoneId zoneId, PublishedStatus publishedStatus, Instant rideStart, AtomicInteger mapIdCounter, TestGroup... testGroups) {
+    private Ride getRide(ZoneId zoneId, Instant rideStart, AtomicInteger mapIdCounter, TestGroup... testGroups) {
         Ride ride = new Ride();
         ride.setDate(rideStart.atZone(zoneId).toLocalDate());
         Set<RideGroup> groups = new HashSet<>();
@@ -172,7 +154,7 @@ class RideServiceTest {
         }
 
         ride.setGroups(groups);
-        ride.setPublishedStatus(publishedStatus);
+        ride.setPublishedStatus(PublishedStatus.PUBLISHED);
         return ride;
     }
 

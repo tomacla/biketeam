@@ -8,7 +8,6 @@ import info.tomacla.biketeam.common.data.Timezone;
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
-import info.tomacla.biketeam.domain.feed.FeedOptions;
 import info.tomacla.biketeam.domain.reaction.Reaction;
 import info.tomacla.biketeam.domain.reaction.ReactionContent;
 import info.tomacla.biketeam.domain.reaction.ReactionSummary;
@@ -36,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.*;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -260,8 +260,12 @@ public class RideService extends AbstractPermalinkService {
         // retrieve team zone id
         ZoneId zoneId = teamService.get(teamId).map(Team::getZoneId).orElse(ZoneId.of(Timezone.DEFAULT_TIMEZONE));
         // get rides
-        FeedOptions options = new FeedOptions();
-        List<Ride> rides = searchRides(Set.of(teamId), 0, 10, options.getFrom(), options.getTo()).toList();
+        Page<Ride> rides = rideRepository.findAllByTeamIdInAndDateBetweenAndPublishedStatus(
+                Set.of(teamId),
+                LocalDate.now().minus(3, ChronoUnit.DAYS),
+                LocalDate.now().plus(7, ChronoUnit.DAYS),
+                PublishedStatus.PUBLISHED,
+                PageRequest.of(0, 10));
         // now
         Instant now = Instant.now();
 
@@ -272,8 +276,6 @@ public class RideService extends AbstractPermalinkService {
         Comparator<RideGroupStart> comparator = nearesetComparator.thenComparing(idComparator);
 
         return rides.stream()
-                // only published rides
-                .filter(ride -> ride.getPublishedStatus() == PublishedStatus.PUBLISHED)
                 // retrieve maps with start
                 .flatMap(ride ->
                         ride.getGroups().stream()
