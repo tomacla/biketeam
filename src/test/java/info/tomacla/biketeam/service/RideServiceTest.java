@@ -2,13 +2,11 @@ package info.tomacla.biketeam.service;
 
 import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.domain.map.Map;
-import info.tomacla.biketeam.domain.map.MapRepository;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
+import info.tomacla.biketeam.domain.ride.RideRepository;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.TeamConfiguration;
-import info.tomacla.biketeam.service.file.FileService;
-import info.tomacla.biketeam.service.gpx.GpxService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;
@@ -21,19 +19,33 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.mockito.Mockito.*;
 
-class MapServiceTest {
+class RideServiceTest {
 
     record TestGroup(int minutes, boolean hasMap) {
     }
 
     @Test
+    void getShortNameTest() {
+        RideService rideService = new RideService(null, null, null, null, null, null, null);
+
+        Assertions.assertEquals("RR122", rideService.getShortName(getRide("Raymond Ride #122")));
+        Assertions.assertEquals("NP492", rideService.getShortName(getRide("N-Peloton #492")));
+        Assertions.assertEquals("MMH12", rideService.getShortName(getRide("MMH #12")));
+        Assertions.assertEquals("NBR7", rideService.getShortName(getRide("N-Bappé Ride #7")));
+        Assertions.assertEquals("200dR", rideService.getShortName(getRide("200 des Ribines")));
+    }
+
+    private Ride getRide(String s) {
+        Ride ride = new Ride();
+        ride.setTitle(s);
+        return ride;
+    }
+
+    @Test
     void listMapsForNearestRidesNoRideTest() {
-        GpxService gpxService = mock(GpxService.class);
-        FileService fileService = mock(FileService.class);
-        RideService rideService = mock(RideService.class);
         TeamService teamService = mock(TeamService.class);
-        MapRepository mapRepository = mock(MapRepository.class);
-        MapService mapService = new MapService(gpxService, fileService, rideService, teamService, mapRepository);
+        RideRepository rideRepository = mock(RideRepository.class);
+        RideService rideService = new RideService(null, rideRepository, teamService, null, null, null, null);
 
         Team team = new Team();
         TeamConfiguration teamConfiguration = new TeamConfiguration();
@@ -55,28 +67,18 @@ class MapServiceTest {
                 new TestGroup(0, true)
         ));
 
-        when(rideService.searchRides(eq(Set.of("teamId")), eq(0), eq(10), any(), any()))
+        when(rideRepository.findAllByTeamIdInAndDateBetweenAndPublishedStatus(eq(Set.of("teamId")), any(), any(), any(), any()))
                 .thenReturn(new PageImpl<>(rides));
 
-        List<Map> findMapsResult = new ArrayList<>();
-        findMapsResult.add(createMap(mapIdCounter));
-        findMapsResult.add(createMap(mapIdCounter));
-        findMapsResult.add(createMap(mapIdCounter));
-        findMapsResult.add(createMap(mapIdCounter));
-        when(mapRepository.findByTeamId(eq("teamId"), any())).thenReturn(new PageImpl<>(findMapsResult));
-
-        List<Map> maps = mapService.listMapsForNearestRides("teamId");
-        Assertions.assertEquals(findMapsResult, maps);
+        List<RideGroup> rideGroups = rideService.listRideGroupsByStartProximity("teamId");
+        Assertions.assertTrue(rideGroups.isEmpty());
     }
 
     @Test
     void listMapsForNearestRidesTest() {
-        GpxService gpxService = mock(GpxService.class);
-        FileService fileService = mock(FileService.class);
-        RideService rideService = mock(RideService.class);
         TeamService teamService = mock(TeamService.class);
-        MapRepository mapRepository = mock(MapRepository.class);
-        MapService mapService = new MapService(gpxService, fileService, rideService, teamService, mapRepository);
+        RideRepository rideRepository = mock(RideRepository.class);
+        RideService rideService = new RideService(null, rideRepository, teamService, null, null, null, null);
 
         Team team = new Team();
         TeamConfiguration teamConfiguration = new TeamConfiguration();
@@ -127,11 +129,11 @@ class MapServiceTest {
                 new TestGroup(5, true) // 20 - rank 13
         ));
 
-        when(rideService.searchRides(eq(Set.of("teamId")), eq(0), eq(10), any(), any()))
+        when(rideRepository.findAllByTeamIdInAndDateBetweenAndPublishedStatus(eq(Set.of("teamId")), any(), any(), any(), any()))
                 .thenReturn(new PageImpl<>(rides));
 
-        List<Map> maps = mapService.listMapsForNearestRides("teamId");
-        List<String> actualMapIds = maps.stream().map(Map::getId).toList();
+        List<RideGroup> rideGroups = rideService.listRideGroupsByStartProximity("teamId");
+        List<String> actualMapIds = rideGroups.stream().map(RideGroup::getMap).map(Map::getId).toList();
         List<String> expectedMapIds = List.of(
                 "map11",
                 "map12",

@@ -1,12 +1,7 @@
 package info.tomacla.biketeam.service;
 
-import info.tomacla.biketeam.common.data.PublishedStatus;
-import info.tomacla.biketeam.common.data.Timezone;
 import info.tomacla.biketeam.common.file.FileRepositories;
-import info.tomacla.biketeam.domain.feed.FeedOptions;
 import info.tomacla.biketeam.domain.map.*;
-import info.tomacla.biketeam.domain.map.Map;
-import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.service.file.FileService;
 import info.tomacla.biketeam.service.gpx.GpxService;
@@ -24,32 +19,22 @@ import org.springframework.util.ObjectUtils;
 
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.time.*;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MapService extends AbstractPermalinkService {
 
     private static final Logger log = LoggerFactory.getLogger(MapService.class);
 
-    private final GpxService gpxService;
-
-    private final FileService fileService;
-
-    private final RideService rideService;
-
-    private final TeamService teamService;
-
-    private final MapRepository mapRepository;
+    @Autowired
+    private GpxService gpxService;
 
     @Autowired
-    public MapService(GpxService gpxService, FileService fileService, RideService rideService, TeamService teamService, MapRepository mapRepository) {
-        this.gpxService = gpxService;
-        this.fileService = fileService;
-        this.rideService = rideService;
-        this.teamService = teamService;
-        this.mapRepository = mapRepository;
-    }
+    private FileService fileService;
+
+    @Autowired
+    private MapRepository mapRepository;
 
     public void save(Map map) {
         this.save(map, false);
@@ -241,48 +226,4 @@ public class MapService extends AbstractPermalinkService {
     public void deleteByTeam(String teamId) {
         mapRepository.findAllByTeamIdOrderByPostedAtDesc(teamId).stream().map(MapProjection::getId).forEach(mapRepository::deleteById);
     }
-
-    record MapStart(Instant start, Map map) {
-    }
-
-    public List<Map> listMapsForNearestRides(String teamId) {
-        // retrieve team zone id
-        ZoneId zoneId = teamService.get(teamId).map(Team::getZoneId).orElse(ZoneId.of(Timezone.DEFAULT_TIMEZONE));
-        // get rides
-        FeedOptions options = new FeedOptions();
-        List<Ride> rides = rideService.searchRides(Set.of(teamId), 0, 10, options.getFrom(), options.getTo()).toList();
-        // now
-        Instant now = Instant.now();
-
-        // compare for nearest start
-        Comparator<MapStart> nearesetComparator = Comparator.comparing(ms -> Duration.between(ms.start(), now).abs());
-        Comparator<MapStart> idComparator = Comparator.comparing(ms -> ms.map().getId());
-        // then compare by map id if duration is the same
-        Comparator<MapStart> comparator = nearesetComparator.thenComparing(idComparator);
-
-        List<Map> maps = rides.stream()
-                // only published rides
-                .filter(ride -> ride.getPublishedStatus() == PublishedStatus.PUBLISHED)
-                // retrieve maps with start
-                .flatMap(ride ->
-                        ride.getGroups().stream()
-                                // only groups with a map
-                                .filter(rideGroup -> rideGroup.getMap() != null)
-                                .map(rideGroup -> new MapStart(
-                                        // ride start as instant
-                                        ride.getDate().atTime(rideGroup.getMeetingTime()).atZone(zoneId).toInstant(),
-                                        rideGroup.getMap()
-                                ))
-                )
-                // sort by nearest starts
-                .sorted(comparator)
-                .map(MapStart::map)
-                .toList();
-        if (maps.isEmpty()) {
-            // no rides planned
-            return listMaps(teamId, 50).toList();
-        }
-        return maps;
-    }
-
 }
