@@ -33,6 +33,7 @@ class RideServiceTest {
         Assertions.assertEquals("MMH12", rideService.getShortName(getRide("MMH #12")));
         Assertions.assertEquals("NBR7", rideService.getShortName(getRide("N-Bappé Ride #7")));
         Assertions.assertEquals("200dR", rideService.getShortName(getRide("200 des Ribines")));
+        Assertions.assertEquals("--$*!€", rideService.getShortName(getRide("--$*!€")));
     }
 
     private Ride getRide(String s) {
