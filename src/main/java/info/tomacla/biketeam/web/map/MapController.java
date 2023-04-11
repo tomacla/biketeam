@@ -2,13 +2,11 @@ package info.tomacla.biketeam.web.map;
 
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.domain.map.*;
-import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
-import info.tomacla.biketeam.domain.userrole.Role;
-import info.tomacla.biketeam.domain.userrole.UserRole;
 import info.tomacla.biketeam.service.MapService;
+import info.tomacla.biketeam.service.RideService;
 import info.tomacla.biketeam.service.file.ThumbnailService;
 import info.tomacla.biketeam.service.url.UrlService;
 import info.tomacla.biketeam.web.AbstractController;
@@ -38,6 +36,9 @@ import java.util.stream.Collectors;
 @Controller
 @RequestMapping(value = "/{teamId}/maps")
 public class MapController extends AbstractController {
+
+    @Autowired
+    private RideService rideService;
 
     @Autowired
     private MapService mapService;
@@ -185,14 +186,24 @@ public class MapController extends AbstractController {
         final Team team = teamService.get(teamId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to find team : " + teamId));
 
-        return java.util.Map.of("tracks", mapService.listMaps(teamId, 50).stream()
-                .map(m -> {
-                    GarminMapDTO dto = new GarminMapDTO();
-                    dto.setTitle(m.getName());
-                    dto.setUrl(urlService.getMapFitUrl(team, m));
-                    return dto;
-                }).collect(Collectors.toList()));
-
+        List<RideGroup> rideGroups = rideService.listRideGroupsByStartProximity(teamId);
+        if (!rideGroups.isEmpty()) {
+            return java.util.Map.of("tracks", rideGroups.stream()
+                    .map(rideGroup -> {
+                        GarminMapDTO dto = new GarminMapDTO();
+                        dto.setTitle(rideService.getShortName(rideGroup.getRide()) + " " + rideGroup.getName());
+                        dto.setUrl(urlService.getMapFitUrl(team, rideGroup.getMap()));
+                        return dto;
+                    }).collect(Collectors.toList()));
+        } else {
+            return java.util.Map.of("tracks", mapService.listMaps(teamId, 50).stream()
+                    .map(map -> {
+                        GarminMapDTO dto = new GarminMapDTO();
+                        dto.setTitle(map.getName());
+                        dto.setUrl(urlService.getMapFitUrl(team, map));
+                        return dto;
+                    }).collect(Collectors.toList()));
+        }
     }
 
     @ResponseBody
