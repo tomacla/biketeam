@@ -4,6 +4,7 @@ import info.tomacla.biketeam.common.amqp.Exchanges;
 import info.tomacla.biketeam.common.amqp.Queues;
 import info.tomacla.biketeam.common.amqp.RoutingKeys;
 import info.tomacla.biketeam.common.data.PublishedStatus;
+import info.tomacla.biketeam.common.data.Timezone;
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
@@ -11,8 +12,10 @@ import info.tomacla.biketeam.domain.reaction.Reaction;
 import info.tomacla.biketeam.domain.reaction.ReactionContent;
 import info.tomacla.biketeam.domain.reaction.ReactionSummary;
 import info.tomacla.biketeam.domain.ride.Ride;
+import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.ride.RideProjection;
 import info.tomacla.biketeam.domain.ride.RideRepository;
+import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.service.amqp.BrokerService;
 import info.tomacla.biketeam.service.amqp.dto.TeamEntityDTO;
@@ -31,8 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
+import java.time.*;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,26 +44,30 @@ public class RideService extends AbstractPermalinkService {
 
     private static final Logger log = LoggerFactory.getLogger(RideService.class);
 
-    @Autowired
-    private FileService fileService;
+    private final FileService fileService;
+
+    private final RideRepository rideRepository;
+
+    private final TeamService teamService;
+
+    private final BrokerService brokerService;
+
+    private final MessageService messageService;
+
+    private final ReactionService reactionService;
+
+    private final NotificationService notificationService;
 
     @Autowired
-    private RideRepository rideRepository;
-
-    @Autowired
-    private TeamService teamService;
-
-    @Autowired
-    private BrokerService brokerService;
-
-    @Autowired
-    private MessageService messageService;
-
-    @Autowired
-    private ReactionService reactionService;
-
-    @Autowired
-    private NotificationService notificationService;
+    public RideService(FileService fileService, RideRepository rideRepository, TeamService teamService, BrokerService brokerService, MessageService messageService, ReactionService reactionService, NotificationService notificationService) {
+        this.fileService = fileService;
+        this.rideRepository = rideRepository;
+        this.teamService = teamService;
+        this.brokerService = brokerService;
+        this.messageService = messageService;
+        this.reactionService = reactionService;
+        this.notificationService = notificationService;
+    }
 
     public Optional<ImageDescriptor> getImage(String teamId, String rideId) {
 
@@ -214,6 +221,76 @@ public class RideService extends AbstractPermalinkService {
 
         return response;
 
+    }
+
+    public String getShortName(Ride ride) {
+        StringBuilder result = new StringBuilder();
+        String title = ride.getTitle();
+        boolean inWord = false;
+        for (char c : title.toCharArray()) {
+            boolean add = false;
+            if (inWord) {
+                if (!Character.isLetter(c)) {
+                    inWord = false;
+                }
+            } else {
+                if (Character.isLetter(c)) {
+                    inWord = true;
+                    add = true;
+                }
+            }
+            if (Character.getType(c) == Character.UPPERCASE_LETTER || Character.isDigit(c)) {
+                add = true;
+            }
+            if (add) {
+                result.append(c);
+            }
+        }
+        if (result.length() == 0) {
+            return title;
+        } else {
+            return result.toString();
+        }
+    }
+
+    record RideGroupStart(RideGroup rideGroup, Instant start) {
+    }
+
+    public List<RideGroup> listRideGroupsByStartProximity(String teamId) {
+        // retrieve team zone id
+        ZoneId zoneId = teamService.get(teamId).map(Team::getZoneId).orElse(ZoneId.of(Timezone.DEFAULT_TIMEZONE));
+        // get rides
+        Page<Ride> rides = rideRepository.findAllByTeamIdInAndDateBetweenAndPublishedStatus(
+                Set.of(teamId),
+                LocalDate.now().minus(3, ChronoUnit.DAYS),
+                LocalDate.now().plus(7, ChronoUnit.DAYS),
+                PublishedStatus.PUBLISHED,
+                PageRequest.of(0, 10));
+        // now
+        Instant now = Instant.now();
+
+        // compare for nearest start
+        Comparator<RideGroupStart> nearesetComparator = Comparator.comparing(ms -> Duration.between(ms.start(), now).abs());
+        Comparator<RideGroupStart> idComparator = Comparator.comparing(ms -> ms.rideGroup().getMap().getId());
+        // then compare by rideGroup id if duration is the same
+        Comparator<RideGroupStart> comparator = nearesetComparator.thenComparing(idComparator);
+
+        return rides.stream()
+                // retrieve maps with start
+                .flatMap(ride ->
+                        ride.getGroups().stream()
+                                // only groups with a rideGroup
+                                .filter(rideGroup -> rideGroup.getMap() != null)
+                                .map(rideGroup -> new RideGroupStart(
+                                        rideGroup,
+                                        // ride start as instant
+                                        ride.getDate().atTime(rideGroup.getMeetingTime()).atZone(zoneId).toInstant()
+                                ))
+                )
+                // sort by nearest starts
+                .sorted(comparator)
+                .map(RideGroupStart::rideGroup)
+                .toList();
     }
 
 }
