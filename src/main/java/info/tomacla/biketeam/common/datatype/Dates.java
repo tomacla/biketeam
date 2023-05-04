@@ -9,6 +9,7 @@ import java.util.Locale;
 public class Dates {
 
     public static final DateTimeFormatter frenchFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(Locale.FRANCE);
+    public static final DateTimeFormatter frenchShortFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withLocale(Locale.FRANCE);
     public static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
     public static String formatTime(LocalTime temporal) {

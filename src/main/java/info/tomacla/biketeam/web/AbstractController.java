@@ -56,6 +56,7 @@ public abstract class AbstractController {
 
         model.addAttribute("_pagetitle", pageTitle);
         model.addAttribute("_date_formatter", Dates.frenchFormatter);
+        model.addAttribute("_date_short_formatter", Dates.frenchShortFormatter);
         model.addAttribute("_time_formatter", Dates.timeFormatter);
         model.addAttribute("_date_today", LocalDate.now(getZoneId(team)));
         model.addAttribute("_authenticated", false);

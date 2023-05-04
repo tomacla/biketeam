@@ -458,3 +458,9 @@
         <option<#if selected == 'XK'> selected</#if> value="XK">Kosovo"</option>
     </select>
 </#macro>
+
+<#macro displayMapType mapType>
+    <#if mapType == 'ROAD'>Route</#if>
+    <#if mapType == 'GRAVEL'>Gravel</#if>
+    <#if mapType == 'MTB'>VTT</#if>
+</#macro>
