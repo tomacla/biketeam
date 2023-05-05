@@ -126,74 +126,74 @@
 
         <div class="border rounded p-2">
 
-            <div class="table-responsive-sm mb-4" id="group-section">
+              <div id="group-section">
+                <#list ride.sortedGroups as group>
 
-                <table class="table table-sm">
-                    <thead>
-                        <tr>
-                            <th><span class="d-inline d-md-none"><i class="bi bi-clock"></i></span><span class="d-none d-md-inline">Départ</span></th>
-                            <th><span class="d-none d-md-inline">Groupe</span></th>
-                            <th><span class="d-none d-md-inline">Allure</span></th>
-                            <th><span class="d-none d-md-inline">Participants</span></th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <#list ride.sortedGroups as group>
-                            <tr<#if group.map??> onmouseover="highlightMap(${groupMaps?seq_index_of(group.map.id)})" <#else> class="border-0 border-bottom border-2"</#if>>
-                                <td>${group.meetingTime}</td>
-                                <td>${group.name}</td>
-                                <td class="text-nowrap">${group.averageSpeed} km/h</td>
-                                <td>
-                                    <div class="d-flex flex-row align-items-start justify-content-end">
-                                        <div class="d-flex profile-images me-2">
-                                            <#if group.sortedParticipants?size gt 0>
-                                                <#list group.sortedParticipants?chunk(3)[0] as participant>
-                                                        <div class="profile-images-item" style="width:24px; height:24px;" class="d-inline-block"><a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#groupmodal-${group.id}"><img class="w-100 h-100 d-block" src="<@common.teamUrl '' '/users/${participant.id}/image' />" alt="${participant.identity}"></a></div>
-                                                </#list>
-                                            </#if>
-                                        </div>
-                                        <div>
-                                            <#if group.sortedParticipants?size gt 3>
-                                                <a href="#" class="text-decoration-none link-secondary" data-bs-toggle="modal" data-bs-target="#groupmodal-${group.id}"><span class="text-muted small fst-italic">+${group.sortedParticipants?size - 3}</span></a>
-                                            </#if>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="btn-group">
-                                        <#if _authenticated>
-                                            <#if group.hasParticipant(_user.id)>
-                                                <a class="btn btn-sm btn-success py-0 px-2" href="<@common.teamUrl team.id '/rides/${ride.permalink!ride.id}/remove-participant/${group.id}' />" ><i class="bi bi-person-check"></i></a>
-                                            <#else>
-                                                <#if !ride.isParticipantInAnotherGroup(group.id, _user.id)>
-                                                    <a class="btn btn-sm btn-outline-success py-0 px-2" href="<@common.teamUrl team.id '/rides/${ride.permalink!ride.id}/add-participant/${group.id}' />"><i class="bi bi-person"></i></a>
-                                                </#if>
-                                             </#if>
+                    <div class="gap-1 gap-md-3 d-flex flex-row justify-content-between align-items-center border rounded mb-1 py-1 px-2" <#if group.map??> onmouseover="highlightMap(${groupMaps?seq_index_of(group.map.id)})"</#if>>
+
+                        <div class="d-flex flex-column flex-grow-1 gap-1">
+                            <div class="gap-2 d-flex flex-row justify-content-start align-items-center">
+                                <strong>${group.meetingTime}</strong>
+                                <span>${group.name}</span>
+                                <#if group.map??><span class="text-nowrap badge bg-light text-dark border px-2 py-1"><@common.displayMapType group.map.type /></span></#if>
+                            </div>
+
+                            <div class="d-flex flex-row justify-content-start align-items-center small gap-1 gap-md-3">
+                                <#if group.map??>
+                                       <div><span style="height: 10px; width: 10px; background-color: ${colors[groupMaps?seq_index_of(group.map.id)%10]}; border-radius: 50%; display: inline-block;"></span></div>
+                                </#if>
+                                <span><i class="bi bi-speedometer2"></i> ${group.averageSpeed}km/h</span>
+                                <#if group.map??>
+                                    <span class="text-nowrap"><i class="bi bi-arrow-left-right"></i> ${group.map.length?floor}km</span>
+                                    <span class="text-nowrap"><i class="bi bi-arrow-up"></i> ${group.map.positiveElevation?floor}m</span>
+                               </#if>
+                            </div>
+
+                        </div>
+
+                        <div class="d-flex flex-column gap-1">
+
+                            <div class="d-flex flex-row align-items-start justify-content-end">
+                                <div class="d-flex profile-images me-2">
+                                    <#if group.sortedParticipants?size gt 0>
+                                        <#list group.sortedParticipants?chunk(3)[0] as participant>
+                                                <div class="profile-images-item" style="width:24px; height:24px;" class="d-inline-block"><a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#groupmodal-${group.id}"><img class="w-100 h-100 d-block" src="<@common.teamUrl '' '/users/${participant.id}/image' />" alt="${participant.identity}"></a></div>
+                                        </#list>
+                                    </#if>
+                                </div>
+                                <div>
+                                    <#if group.sortedParticipants?size gt 3>
+                                        <a href="#" class="text-decoration-none link-secondary" data-bs-toggle="modal" data-bs-target="#groupmodal-${group.id}"><span class="text-muted small fst-italic">+${group.sortedParticipants?size - 3}</span></a>
+                                    </#if>
+                                </div>
+                                <div>
+                                    <#if _authenticated>
+                                        <#if group.hasParticipant(_user.id)>
+                                            <a class="btn btn-sm btn-success py-0 px-2" href="<@common.teamUrl team.id '/rides/${ride.permalink!ride.id}/remove-participant/${group.id}' />" ><i class="bi bi-person-dash"></i></a>
                                         <#else>
-                                              <a class="btn btn-sm btn-outline-success py-0 px-2" href="<@common.teamUrl team.id '/rides/${ride.permalink!ride.id}/add-participant/${group.id}' />"><i class="bi bi-person"></i></a>
-                                        </#if>
-                                    </div>
-                                </td>
-                            </tr>
-                            <#if group.map??>
-                                <tr class="border-0 border-bottom border-2 bg-light" onmouseover="highlightMap(${groupMaps?seq_index_of(group.map.id)})">
-                                    <td colspan="5">
-                                        <div class="mx-auto w-100 w-md-75 d-flex flex-row small justify-content-between">
-                                            <div><span style="height: 10px; width: 10px; background-color: ${colors[groupMaps?seq_index_of(group.map.id)%10]}; border-radius: 50%; display: inline-block;"></span></div>
-                                            <div><span class="text-nowrap"><i class="bi bi-tag"></i> <@common.displayMapType group.map.type /></span> <span class="text-nowrap"><i class="bi bi-arrow-left-right"></i> ${group.map.length?floor}km</span> <span class="text-nowrap"><i class="bi bi-arrow-up"></i> ${group.map.positiveElevation?floor}m</span></div>
-                                           <div>
-                                               <a class="btn btn-sm btn-link link-dark py-0 px-2" download="${ride.title}-${group.name}.gpx" href="<@common.teamUrl team.id '/maps/${group.map.id}/gpx' />"><i class="bi bi-download"></i></a>
-                                               <a class="btn btn-sm btn-link link-dark py-0 px-2" href="<@common.teamUrl team.id '/maps/${group.map.permalink!group.map.id}' />"><i class="bi bi-map"></i></a>
-                                           </div>
-                                        </div>
-                                    </td>
+                                            <#if !ride.isParticipantInAnotherGroup(group.id, _user.id)>
+                                                <a class="btn btn-sm btn-outline-success py-0 px-2" href="<@common.teamUrl team.id '/rides/${ride.permalink!ride.id}/add-participant/${group.id}' />"><i class="bi bi-person-add"></i></a>
+                                            </#if>
+                                         </#if>
+                                    <#else>
+                                          <a class="btn btn-sm btn-outline-success py-0 px-2" href="<@common.teamUrl team.id '/rides/${ride.permalink!ride.id}/add-participant/${group.id}' />"><i class="bi bi-person-add"></i></a>
+                                    </#if>
+                                </div>
+                            </div>
 
-                                </tr>
-                            </#if>
-                        </#list>
-                    </tbody>
-                    </table>
+                            <div>
+                                <div class="btn-group">
+                                     <#if group.map??>
+                                        <a class="btn btn-sm btn-link link-dark py-0 px-2" download="${ride.title}-${group.name}.gpx" href="<@common.teamUrl team.id '/maps/${group.map.id}/gpx' />"><i class="bi bi-download"></i></a>
+                                        <a class="btn btn-sm btn-link link-dark py-0 px-2" href="<@common.teamUrl team.id '/maps/${group.map.permalink!group.map.id}' />"><i class="bi bi-map"></i></a>
+                                     </#if>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </#list>
               </div>
 
               <div class="position-relative w-100" style="z-index:1; height:500px;" id="map-wrapper">
