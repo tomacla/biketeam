@@ -22,9 +22,6 @@ public class ViewHandler {
     }
 
     protected String getViewName(Team team, String suffix) {
-        if (team.getConfiguration().isDomainConfigured()) {
-            return suffix;
-        }
         return "/" + team.getId() + suffix;
     }
 

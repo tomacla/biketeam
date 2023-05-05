@@ -75,13 +75,13 @@ public class NotificationController extends AbstractController {
                     Team team = checkTeam(notification.getTeamId());
 
                     if (notification.getType().equals(NotificationType.RIDE_PUBLISHED)) {
-                        rideService.get(team.getId(), notification.getElementId()).ifPresent(ride -> redirectUrl.set(urlService.getRideUrl(team, ride)));
+                        rideService.get(team.getId(), notification.getElementId()).ifPresent(ride -> redirectUrl.set(viewHandler.redirect(team, "/rides/" + ride.getId())));
                     } else if (notification.getType().equals(NotificationType.TRIP_PUBLISHED)) {
-                        tripService.get(team.getId(), notification.getElementId()).ifPresent(trip -> redirectUrl.set(urlService.getTripUrl(team, trip)));
+                        tripService.get(team.getId(), notification.getElementId()).ifPresent(trip -> redirectUrl.set(viewHandler.redirect(team, "/trips/" + trip.getId())));
                     } else if (notification.getType().equals(NotificationType.NEW_RIDE_MESSAGE)) {
-                        rideService.get(team.getId(), notification.getElementId()).ifPresent(ride -> redirectUrl.set(urlService.getRideUrl(team, ride) + "/messages"));
+                        rideService.get(team.getId(), notification.getElementId()).ifPresent(ride -> redirectUrl.set(viewHandler.redirect(team, "/messages" )));
                     } else if (notification.getType().equals(NotificationType.NEW_TRIP_MESSAGE)) {
-                        tripService.get(team.getId(), notification.getElementId()).ifPresent(trip -> redirectUrl.set(urlService.getTripUrl(team, trip) + "/messages"));
+                        tripService.get(team.getId(), notification.getElementId()).ifPresent(trip -> redirectUrl.set(viewHandler.redirect(team, "/messages" )));
                     }
 
                 }
@@ -90,7 +90,7 @@ public class NotificationController extends AbstractController {
 
         }
 
-        return "redirect:" + redirectUrl.get();
+        return redirectUrl.get();
 
     }
 

@@ -27,12 +27,10 @@ public class CustomSessionIdResolver implements HttpSessionIdResolver {
 
     private final CookieSerializer cookieSerializer = new DefaultCookieSerializer();
     private final UrlService urlService;
-    private final SSOService ssoService;
 
     @Autowired
-    public CustomSessionIdResolver(UrlService urlService, SSOService ssoService) {
+    public CustomSessionIdResolver(UrlService urlService) {
         this.urlService = urlService;
-        this.ssoService = ssoService;
     }
 
     @PostConstruct
@@ -42,16 +40,6 @@ public class CustomSessionIdResolver implements HttpSessionIdResolver {
 
     @Override
     public List<String> resolveSessionIds(HttpServletRequest request) {
-
-        // try to resolve by sso param
-        final String sso = getSSOParam(request);
-        if (sso != null) {
-            String ssoToken = URLDecoder.decode(sso, StandardCharsets.UTF_8);
-            final Optional<String> authTokenFromSSOToken = ssoService.getSessionIdFromSSOToken(ssoToken);
-            if (authTokenFromSSOToken.isPresent()) {
-                return List.of(authTokenFromSSOToken.get());
-            }
-        }
 
         // try to resolve by http header
         final String xAuthHeader = getXAuthHeader(request);
@@ -76,15 +64,6 @@ public class CustomSessionIdResolver implements HttpSessionIdResolver {
     @Override
     public void expireSession(HttpServletRequest request, HttpServletResponse response) {
         this.cookieSerializer.writeCookieValue(new CookieSerializer.CookieValue(request, response, ""));
-    }
-
-    private String getSSOParam(HttpServletRequest request) {
-        UriComponents uriComponents = UriComponentsBuilder.newInstance()
-                .query(request.getQueryString())
-                .build();
-
-        MultiValueMap<String, String> queryParams = uriComponents.getQueryParams();
-        return queryParams.getFirst(SSOService.SSO_PARAM);
     }
 
     private String getXAuthHeader(HttpServletRequest request) {

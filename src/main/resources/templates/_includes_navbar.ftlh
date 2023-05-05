@@ -80,7 +80,7 @@
             </#if>
         <#else>
             <li class="nav-item">
-                <a class="nav-link" href="<@common.teamUrl '' '/login?requestUri=${springMacroRequestContext.requestUri}' />">Connexion</a>
+                <a class="nav-link" href="<@common.teamUrl '' '/login' />">Connexion</a>
             </li>
             <#if team??>
                 <li class="nav-item border-start ps-1">
