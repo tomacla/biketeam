@@ -171,7 +171,7 @@
                                                 </#if>
                                              </#if>
                                         <#else>
-                                                <a class="btn btn-sm btn-outline-success py-0 px-2" href="<@common.teamUrl '' '/login?requestUri=/${team.id}/rides/${ride.permalink!ride.id}/add-participant/${group.id}' />"><i class="bi bi-person"></i></a>
+                                              <a class="btn btn-sm btn-outline-success py-0 px-2" href="<@common.teamUrl team.id '/rides/${ride.permalink!ride.id}/add-participant/${group.id}' />"><i class="bi bi-person"></i></a>
                                         </#if>
                                     </div>
                                 </td>

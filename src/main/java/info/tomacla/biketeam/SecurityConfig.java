@@ -2,12 +2,7 @@ package info.tomacla.biketeam;
 
 import info.tomacla.biketeam.security.login.CustomAccessDeniedHandler;
 import info.tomacla.biketeam.security.login.CustomLoginUrlAuthenticationEntryPoint;
-import info.tomacla.biketeam.security.oauth2.OAuth2FailureHandler;
-import info.tomacla.biketeam.security.oauth2.OAuth2StateWriter;
-import info.tomacla.biketeam.security.oauth2.OAuth2SuccessHandler;
 import info.tomacla.biketeam.security.session.CustomSessionIdResolver;
-import info.tomacla.biketeam.security.session.SSOService;
-import info.tomacla.biketeam.security.session.SSOTokenFilter;
 import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.service.url.UrlService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,14 +20,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.JdbcOAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
-import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
-import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
-import org.springframework.util.ReflectionUtils;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import java.lang.reflect.Field;
 
 @Configuration
 @EnableWebSecurity
@@ -46,9 +36,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private TeamService teamService;
-
-    @Autowired
-    private SSOService ssoService;
 
     @Autowired
     private ClientRegistrationRepository clientRegistrationRepository;
@@ -100,6 +87,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             auth.antMatchers("/admin/**").hasRole("ADMIN");
             auth.antMatchers("/management/**").hasRole("ADMIN");
             auth.antMatchers("/{teamId}/admin/**").access("@userService.authorizeAdminAccess(authentication, #teamId)");
+            auth.antMatchers("/{teamId}/**/add-participant/**").access("@userService.authorizeAuthenticatedPublicAccess(authentication, #teamId)");
+            auth.antMatchers("/{teamId}/**/remove-participant/**").access("@userService.authorizeAuthenticatedPublicAccess(authentication, #teamId)");
+            auth.antMatchers("/{teamId}/join").access("@userService.authorizeAuthenticatedPublicAccess(authentication, #teamId)");
+            auth.antMatchers("/{teamId}/leave").access("@userService.authorizeAuthenticatedPublicAccess(authentication, #teamId)");
             auth.antMatchers("/{teamId}/**").access("@userService.authorizePublicAccess(authentication, #teamId)");
 
             // other request are permitted
@@ -124,26 +115,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         });
 
         // oauth2 conf
-        http.oauth2Login(oauth2 -> {
-            oauth2.authorizationEndpoint(config -> config.authorizationRequestResolver(oAuth2AuthorizationRequestResolver()));
-            oauth2.successHandler(oAuth2SuccessHandler());
-            oauth2.failureHandler(oAuth2FailureHandler());
-        });
+        http.oauth2Login();
 
         // logout
         http.logout(logout -> logout.logoutSuccessUrl("/"));
 
 
-    }
-
-    @Bean
-    public OAuth2SuccessHandler oAuth2SuccessHandler() {
-        return new OAuth2SuccessHandler(ssoService, urlService, teamService);
-    }
-
-    @Bean
-    public OAuth2FailureHandler oAuth2FailureHandler() {
-        return new OAuth2FailureHandler(ssoService, urlService, teamService);
     }
 
     @Bean
@@ -158,28 +135,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 
     @Bean
-    public OAuth2AuthorizationRequestResolver oAuth2AuthorizationRequestResolver() {
-        Field field = ReflectionUtils.findField(DefaultOAuth2AuthorizationRequestResolver.class, "stateGenerator");
-        ReflectionUtils.makeAccessible(field);
-
-        DefaultOAuth2AuthorizationRequestResolver defaultOAuth2AuthorizationRequestResolver = new DefaultOAuth2AuthorizationRequestResolver(clientRegistrationRepository, OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI);
-        ReflectionUtils.setField(field, defaultOAuth2AuthorizationRequestResolver, oAuth2StateWriter());
-        return defaultOAuth2AuthorizationRequestResolver;
-    }
-
-    @Bean
     public CustomSessionIdResolver customCookieHttpSessionIdResolver() {
-        return new CustomSessionIdResolver(urlService, ssoService);
-    }
-
-    @Bean
-    public SSOTokenFilter ssoTokenFilter() {
-        return new SSOTokenFilter();
-    }
-
-    @Bean
-    public OAuth2StateWriter oAuth2StateWriter() {
-        return new OAuth2StateWriter(urlService, teamService);
+        return new CustomSessionIdResolver(urlService);
     }
 
     @Bean

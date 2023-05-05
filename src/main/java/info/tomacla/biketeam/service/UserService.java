@@ -21,6 +21,9 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -123,6 +126,26 @@ public class UserService {
     }
 
     public boolean authorizePublicAccess(Authentication authentication, String teamId) {
+
+        if (authentication.getAuthorities().contains(Authorities.admin())
+                || authentication.getAuthorities().contains(Authorities.teamAdmin(teamId))) {
+            return true;
+        }
+
+        final Team team = teamService.get(teamId).orElseThrow(() -> new IllegalArgumentException("Unknown team " + teamId));
+        if (team.getVisibility().equals(Visibility.PUBLIC) || team.getVisibility().equals(Visibility.PUBLIC_UNLISTED)) {
+            return true;
+        }
+
+        return authentication.getAuthorities().contains(Authorities.teamUser(teamId));
+
+    }
+
+    public boolean authorizeAuthenticatedPublicAccess(Authentication authentication, String teamId) {
+
+        if(!authentication.isAuthenticated() || authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ANONYMOUS"))) {
+            return false;
+        }
 
         if (authentication.getAuthorities().contains(Authorities.admin())
                 || authentication.getAuthorities().contains(Authorities.teamAdmin(teamId))) {

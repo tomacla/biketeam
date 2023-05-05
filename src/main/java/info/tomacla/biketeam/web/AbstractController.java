@@ -63,7 +63,6 @@ public abstract class AbstractController {
         model.addAttribute("_admin", false);
         model.addAttribute("_team_admin", false);
         model.addAttribute("_team_member", false);
-        model.addAttribute("_domains", teamService.findAllTeamWithDomain());
         model.addAttribute("_siteUrl", urlService.getSiteUrl());
         model.addAttribute("_embed", false);
         model.addAttribute("_reactions", ReactionContent.values());

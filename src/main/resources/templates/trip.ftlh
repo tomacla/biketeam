@@ -114,7 +114,7 @@
                                     <a href="<@common.teamUrl team.id '/trips/${trip.permalink!trip.id}/add-participant' />" class="py-0 px-2 d-block btn btn-sm btn-outline-success"><i class="bi-person-plus bi"></i></a>
                                  </#if>
                             <#else>
-                                    <a href="<@common.teamUrl '' '/login?requestUri=/${team.id}/trips/${trip.permalink!trip.id}/add-participant' />" class="py-0 px-2 d-block btn btn-sm btn-outline-success"><i class="bi-person-plus bi"></i></a>
+                                   <a href="<@common.teamUrl team.id '/trips/${trip.permalink!trip.id}/add-participant' />" class="py-0 px-2 d-block btn btn-sm btn-outline-success"><i class="bi-person-plus bi"></i></a>
                             </#if>
                         </div>
                     </div>
