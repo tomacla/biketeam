@@ -3,7 +3,6 @@ package info.tomacla.biketeam.api;
 import info.tomacla.biketeam.api.dto.TokenDTO;
 import info.tomacla.biketeam.api.dto.UserDTO;
 import info.tomacla.biketeam.security.session.RememberMeService;
-import info.tomacla.biketeam.security.session.SSOService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,9 +20,6 @@ import java.util.Optional;
 public class AuthAPI extends AbstractAPI {
 
     @Autowired
-    private SSOService ssoService;
-
-    @Autowired
     private RememberMeService rememberMeService;
 
     @Autowired
@@ -33,15 +29,6 @@ public class AuthAPI extends AbstractAPI {
     public UserDTO whoami(Principal principal) {
         return UserDTO.valueOf(getUserFromPrincipal(principal)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN)));
-    }
-
-    @PostMapping(path = "/sso", consumes = "text/plain", produces = "application/json")
-    public TokenDTO exchangeSSOToken(@RequestBody String ssoToken) {
-
-        final Optional<String> sessionId = ssoService.getSessionIdFromSSOToken(ssoToken);
-        final Optional<String> rememberMe = ssoService.getRememberMeFromSSOToken(ssoToken);
-
-        return TokenDTO.valueOf(sessionId.orElse(null), rememberMe.orElse(null));
     }
 
     @PostMapping(path = "/refresh", consumes = "text/plain", produces = "application/json")

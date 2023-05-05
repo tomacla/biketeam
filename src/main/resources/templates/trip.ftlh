@@ -114,7 +114,7 @@
                                     <a href="<@common.teamUrl team.id '/trips/${trip.permalink!trip.id}/add-participant' />" class="py-0 px-2 d-block btn btn-sm btn-outline-success"><i class="bi-person-plus bi"></i></a>
                                  </#if>
                             <#else>
-                                    <a href="<@common.teamUrl '' '/login?requestUri=/${team.id}/trips/${trip.permalink!trip.id}/add-participant' />" class="py-0 px-2 d-block btn btn-sm btn-outline-success"><i class="bi-person-plus bi"></i></a>
+                                   <a href="<@common.teamUrl team.id '/trips/${trip.permalink!trip.id}/add-participant' />" class="py-0 px-2 d-block btn btn-sm btn-outline-success"><i class="bi-person-plus bi"></i></a>
                             </#if>
                         </div>
                     </div>
@@ -162,29 +162,30 @@
             <table class="table table-sm table-striped">
                 <thead>
                     <tr>
-                        <th></th>
                         <th>Etape</th>
                         <th>Date</th>
-                        <th class="d-none d-md-table-cell">KM</th>
-                        <th class="d-none d-md-table-cell">D+</th>
-                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     <#list trip.sortedStages as stage>
-                        <tr <#if stage.map??> onmouseover="highlightMap(${stageMaps?seq_index_of(stage.map.id)})"</#if>>
-                            <td><#if stage.map??><span style="height: 10px; width: 10px; background-color: ${colors[stageMaps?seq_index_of(stage.map.id)%10]}; border-radius: 50%; display: inline-block;"></span></#if></td>
+                        <tr <#if stage.map??> onmouseover="highlightMap(${stageMaps?seq_index_of(stage.map.id)})" <#else> class="border-0 border-bottom border-2"</#if>>
                             <td>${stage.name}</td>
                             <td>${stage.date.format(_date_formatter)}</td>
-                            <td class="d-none d-md-table-cell"><#if stage.map??>${stage.map.length?floor} km</#if></td>
-                            <td class="d-none d-md-table-cell"><#if stage.map??>${stage.map.positiveElevation?floor} m</#if></td>
-                            <td>
-                                <#if stage.map??>
-                                    <a class="link-dark me-2" download="${trip.title}-${stage.name}.gpx" href="<@common.teamUrl team.id '/maps/${stage.map.id}/gpx' />"><i class="bi bi-download"></i></a>
-                                    <a class="link-dark" href="<@common.teamUrl team.id '/maps/${stage.map.permalink!stage.map.id}' />"><i class="bi bi-map"></i></a>
-                                </#if>
-                            </td>
                         </tr>
+                        <#if stage.map??>
+                            <tr class="border-0 border-bottom border-2 bg-light" onmouseover="highlightMap(${stageMaps?seq_index_of(stage.map.id)})">
+                                <td colspan="2">
+                                    <div class="mx-auto w-100 w-md-75 d-flex flex-row small justify-content-between">
+                                        <div><span style="height: 10px; width: 10px; background-color: ${colors[stageMaps?seq_index_of(stage.map.id)%10]}; border-radius: 50%; display: inline-block;"></span></div>
+                                        <div><span class="text-nowrap"><i class="bi bi-tag"></i> <@common.displayMapType stage.map.type /></span> <span class="text-nowrap"><i class="bi bi-arrow-left-right"></i> ${stage.map.length?floor}km</span> <span class="text-nowrap"><i class="bi bi-arrow-up"></i> ${stage.map.positiveElevation?floor}m</span></div>
+                                       <div>
+                                           <a class="btn btn-sm btn-link link-dark py-0 px-2" download="${trip.title}-${stage.name}.gpx" href="<@common.teamUrl team.id '/maps/${stage.map.id}/gpx' />"><i class="bi bi-download"></i></a>
+                                           <a class="btn btn-sm btn-link link-dark py-0 px-2" href="<@common.teamUrl team.id '/maps/${stage.map.permalink!stage.map.id}' />"><i class="bi bi-map"></i></a>
+                                       </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </#if>
                     </#list>
                 </tbody>
                 </table>

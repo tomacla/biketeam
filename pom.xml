@@ -39,7 +39,6 @@
 		<postgresql.version>42.5.1</postgresql.version>
 		<thumbnailator.version>0.4.14</thumbnailator.version>
 		<testcontainers.version>1.17.1</testcontainers.version>
-
 		<spring-boot.build-image.imageName>github.com/tomacla/biketeam:latest</spring-boot.build-image.imageName>
 	</properties>
 

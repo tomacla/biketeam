@@ -128,30 +128,24 @@
 
             <div class="table-responsive-sm mb-4" id="group-section">
 
-                <table class="table table-sm table-striped">
+                <table class="table table-sm">
                     <thead>
                         <tr>
-                            <th></th>
                             <th><span class="d-inline d-md-none"><i class="bi bi-clock"></i></span><span class="d-none d-md-inline">Départ</span></th>
-                            <th>Groupe</th>
-                            <th class="d-none d-md-table-cell">Allure</th>
-                            <th class="d-none d-md-table-cell">KM</th>
-                            <th class="d-none d-md-table-cell">D+</th>
+                            <th><span class="d-none d-md-inline">Groupe</span></th>
+                            <th><span class="d-none d-md-inline">Allure</span></th>
                             <th><span class="d-none d-md-inline">Participants</span></th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         <#list ride.sortedGroups as group>
-                            <tr<#if group.map??> onmouseover="highlightMap(${groupMaps?seq_index_of(group.map.id)})" </#if>>
-                                <td><#if group.map??><span style="height: 10px; width: 10px; background-color: ${colors[groupMaps?seq_index_of(group.map.id)%10]}; border-radius: 50%; display: inline-block;"></span></#if></td>
+                            <tr<#if group.map??> onmouseover="highlightMap(${groupMaps?seq_index_of(group.map.id)})" <#else> class="border-0 border-bottom border-2"</#if>>
                                 <td>${group.meetingTime}</td>
-                                <td>${group.name}<span class="d-inline d-md-none small"> ${group.averageSpeed}km/h</span></td>
-                                <td class="d-none d-md-table-cell">${group.averageSpeed} km/h</td>
-                                <td class="d-none d-md-table-cell"><#if group.map??>${group.map.length?floor} km</#if></td>
-                                <td class="d-none d-md-table-cell"><#if group.map??>${group.map.positiveElevation?floor} m</#if></td>
+                                <td>${group.name}</td>
+                                <td class="text-nowrap">${group.averageSpeed} km/h</td>
                                 <td>
-                                    <div class="d-flex flex-row align-items-start justify-content-start">
+                                    <div class="d-flex flex-row align-items-start justify-content-end">
                                         <div class="d-flex profile-images me-2">
                                             <#if group.sortedParticipants?size gt 0>
                                                 <#list group.sortedParticipants?chunk(3)[0] as participant>
@@ -172,18 +166,31 @@
                                             <#if group.hasParticipant(_user.id)>
                                                 <a class="btn btn-sm btn-success py-0 px-2" href="<@common.teamUrl team.id '/rides/${ride.permalink!ride.id}/remove-participant/${group.id}' />" ><i class="bi bi-person-check"></i></a>
                                             <#else>
-                                                <a class="btn btn-sm btn-outline-success py-0 px-2 <#if ride.isParticipantInAnotherGroup(group.id, _user.id)>disabled</#if>" href="<@common.teamUrl team.id '/rides/${ride.permalink!ride.id}/add-participant/${group.id}' />"><i class="bi bi-person"></i></a>
+                                                <#if !ride.isParticipantInAnotherGroup(group.id, _user.id)>
+                                                    <a class="btn btn-sm btn-outline-success py-0 px-2" href="<@common.teamUrl team.id '/rides/${ride.permalink!ride.id}/add-participant/${group.id}' />"><i class="bi bi-person"></i></a>
+                                                </#if>
                                              </#if>
                                         <#else>
-                                                <a class="btn btn-sm btn-outline-success py-0 px-2" href="<@common.teamUrl '' '/login?requestUri=/${team.id}/rides/${ride.permalink!ride.id}/add-participant/${group.id}' />"><i class="bi bi-person"></i></a>
-                                        </#if>
-                                        <#if group.map??>
-                                            <a class="btn btn-sm btn-outline-secondary py-0 px-2" download="${ride.title}-${group.name}.gpx" href="<@common.teamUrl team.id '/maps/${group.map.id}/gpx' />"><i class="bi bi-download"></i></a>
-                                            <a class="btn btn-sm btn-outline-secondary py-0 px-2" href="<@common.teamUrl team.id '/maps/${group.map.permalink!group.map.id}' />"><i class="bi bi-map"></i></a>
+                                              <a class="btn btn-sm btn-outline-success py-0 px-2" href="<@common.teamUrl team.id '/rides/${ride.permalink!ride.id}/add-participant/${group.id}' />"><i class="bi bi-person"></i></a>
                                         </#if>
                                     </div>
                                 </td>
                             </tr>
+                            <#if group.map??>
+                                <tr class="border-0 border-bottom border-2 bg-light" onmouseover="highlightMap(${groupMaps?seq_index_of(group.map.id)})">
+                                    <td colspan="5">
+                                        <div class="mx-auto w-100 w-md-75 d-flex flex-row small justify-content-between">
+                                            <div><span style="height: 10px; width: 10px; background-color: ${colors[groupMaps?seq_index_of(group.map.id)%10]}; border-radius: 50%; display: inline-block;"></span></div>
+                                            <div><span class="text-nowrap"><i class="bi bi-tag"></i> <@common.displayMapType group.map.type /></span> <span class="text-nowrap"><i class="bi bi-arrow-left-right"></i> ${group.map.length?floor}km</span> <span class="text-nowrap"><i class="bi bi-arrow-up"></i> ${group.map.positiveElevation?floor}m</span></div>
+                                           <div>
+                                               <a class="btn btn-sm btn-link link-dark py-0 px-2" download="${ride.title}-${group.name}.gpx" href="<@common.teamUrl team.id '/maps/${group.map.id}/gpx' />"><i class="bi bi-download"></i></a>
+                                               <a class="btn btn-sm btn-link link-dark py-0 px-2" href="<@common.teamUrl team.id '/maps/${group.map.permalink!group.map.id}' />"><i class="bi bi-map"></i></a>
+                                           </div>
+                                        </div>
+                                    </td>
+
+                                </tr>
+                            </#if>
                         </#list>
                     </tbody>
                     </table>
@@ -194,8 +201,6 @@
                           <canvas class="w-100" style="height:150px;" id="chart-wrapper"></canvas>
                      </div>
               </div>
-
-
 
         </div>
 

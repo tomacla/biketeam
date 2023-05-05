@@ -91,16 +91,28 @@ html {
     margin-left: -12px;
 }
 
-.profile-images-item:nth-child(3) {
+.profile-images-item:nth-child(6) {
     z-index:1;
 }
 
-.profile-images-item:nth-child(2) {
+.profile-images-item:nth-child(5) {
     z-index:2;
 }
 
-.profile-images-item:nth-child(1) {
+.profile-images-item:nth-child(4) {
     z-index:3;
+}
+
+.profile-images-item:nth-child(3) {
+    z-index:4;
+}
+
+.profile-images-item:nth-child(2) {
+    z-index:5;
+}
+
+.profile-images-item:nth-child(1) {
+    z-index:6;
 }
 
 .mapHoverIcon {

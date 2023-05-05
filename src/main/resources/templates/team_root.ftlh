@@ -21,7 +21,7 @@
                                 <a href="<@common.teamUrl team.id '/join' />" class="px-2 py-0 btn btn-sm btn-outline-success"><i class="bi-bookmark bi"></i> Suivre</a>
                             </#if>
                         <#else>
-                            <a href="<@common.teamUrl '' '/login?requestUri=/${team.id}/join' />" class="px-2 py-0 btn btn-sm btn-outline-success"><i class="bi-bookmark bi"></i> Suivre</a>
+                            <a href="<@common.teamUrl team.id '/join' />" class="px-2 py-0 btn btn-sm btn-outline-success"><i class="bi-bookmark bi"></i> Suivre</a>
                         </#if>
                 </div>
 

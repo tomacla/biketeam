@@ -207,12 +207,6 @@ public class TeamService extends AbstractPermalinkService {
 
     }
 
-    public Map<String, String> findAllTeamWithDomain() {
-        return teamRepository.findAllTeamWithDomain()
-                .stream()
-                .collect(Collectors.toMap(TeamProjection::getId, TeamProjection::getDomain));
-    }
-
     public void delete(String teamId) {
         get(teamId).ifPresent(this::delete);
     }

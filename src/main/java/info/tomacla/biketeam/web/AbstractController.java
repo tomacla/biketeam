@@ -56,13 +56,13 @@ public abstract class AbstractController {
 
         model.addAttribute("_pagetitle", pageTitle);
         model.addAttribute("_date_formatter", Dates.frenchFormatter);
+        model.addAttribute("_date_short_formatter", Dates.frenchShortFormatter);
         model.addAttribute("_time_formatter", Dates.timeFormatter);
         model.addAttribute("_date_today", LocalDate.now(getZoneId(team)));
         model.addAttribute("_authenticated", false);
         model.addAttribute("_admin", false);
         model.addAttribute("_team_admin", false);
         model.addAttribute("_team_member", false);
-        model.addAttribute("_domains", teamService.findAllTeamWithDomain());
         model.addAttribute("_siteUrl", urlService.getSiteUrl());
         model.addAttribute("_embed", false);
         model.addAttribute("_reactions", ReactionContent.values());

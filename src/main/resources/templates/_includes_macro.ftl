@@ -1,4 +1,4 @@
-<#macro teamUrlPrefix teamId><#if teamId != '' && _domains[teamId]??>${_domains[teamId]}<#else>${_siteUrl}<#if teamId != ''>/${teamId}</#if></#if></#macro>
+<#macro teamUrlPrefix teamId>${_siteUrl}<#if teamId != ''>/${teamId}</#if></#macro>
 <#macro teamUrl teamId targetUrl><@common.teamUrlPrefix teamId />${targetUrl}</#macro>
 
 <#macro pagination page pages pageFieldId formId>
@@ -457,4 +457,10 @@
         <option<#if selected == 'SS'> selected</#if> value="SS">Sud-Soudan</option>
         <option<#if selected == 'XK'> selected</#if> value="XK">Kosovo"</option>
     </select>
+</#macro>
+
+<#macro displayMapType mapType>
+    <#if mapType == 'ROAD'>Route</#if>
+    <#if mapType == 'GRAVEL'>Gravel</#if>
+    <#if mapType == 'MTB'>VTT</#if>
 </#macro>
