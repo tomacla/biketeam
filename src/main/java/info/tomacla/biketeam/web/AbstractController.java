@@ -167,9 +167,6 @@ public abstract class AbstractController {
 
 
     protected String createRedirect(Team team, String suffix) {
-        if (team.getConfiguration().isDomainConfigured()) {
-            return "redirect:" + suffix;
-        }
         return "redirect:/" + team.getId() + suffix;
     }
 
