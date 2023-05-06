@@ -135,6 +135,7 @@
     </div>
 
     <#assign colors=["#566B13", "#1d32a8", "#732C7B", "#bdbd22", "#c90808", "#b81491", "#628de3", "#6dcc5c", "#c694d4", "#e3a209"]>
+       <#assign textColors=["#ffffff", "#ffffff", "#ffffff", "#000000", "#ffffff", "#ffffff", "#000000", "#000000", "#000000", "#000000"]>
        <#assign stageMaps = []>
        <#assign mapCenter = [0.0,0.0]>
        <#if trip.startPlace?? && trip.startPlace.point??>
@@ -166,16 +167,15 @@
 
                        <div class="d-flex flex-column flex-grow-1 gap-1">
                            <div class="gap-2 d-flex flex-row justify-content-start align-items-center">
+                                <span>${stage.date.format(_date_short_formatter)}</span>
                                <span>${stage.name}</span>
-                               <span>${stage.date.format(_date_short_formatter)}</span>
-                               <#if stage.map??><span class="text-nowrap badge bg-light text-dark border px-2 py-1"><@common.displayMapType stage.map.type /></span></#if>
                            </div>
 
                            <div class="d-flex flex-row justify-content-start align-items-center small gap-1 gap-md-3">
                                <#if stage.map??>
-                                      <div><span style="height: 10px; width: 10px; background-color: ${colors[stageMaps?seq_index_of(stage.map.id)%10]}; border-radius: 50%; display: inline-block;"></span></div>
-                                   <span class="text-nowrap"><i class="bi bi-arrow-left-right"></i> ${stage.map.length?floor}km</span>
-                                   <span class="text-nowrap"><i class="bi bi-arrow-up"></i> ${stage.map.positiveElevation?floor}m</span>
+                                   <span style="color: ${textColors[stageMaps?seq_index_of(stage.map.id)%10]}; background-color: ${colors[stageMaps?seq_index_of(stage.map.id)%10]};" class="text-nowrap badge border px-1 py-1"><@common.displayMapType stage.map.type /></span>
+                                   <span class="text-nowrap"><i class="bi bi-arrow-left-right d-none d-md-inline-block"></i> ${stage.map.length?floor}km</span>
+                                   <span class="text-nowrap"><i class="bi bi-arrow-up d-none d-md-inline-block"></i> ${stage.map.positiveElevation?floor}m</span>
                               </#if>
                            </div>
 
