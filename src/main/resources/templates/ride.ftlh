@@ -79,6 +79,7 @@
 
 
    <#assign colors=["#566B13", "#1d32a8", "#732C7B", "#bdbd22", "#c90808", "#b81491", "#628de3", "#6dcc5c", "#c694d4", "#e3a209"]>
+   <#assign textColors=["#ffffff", "#ffffff", "#ffffff", "#000000", "#ffffff", "#ffffff", "#000000", "#000000", "#000000", "#000000"]>
    <#assign groupMaps = []>
    <#assign mapCenter = [0.0,0.0]>
    <#if ride.startPlace?? && ride.startPlace.point??>
@@ -129,32 +130,32 @@
               <div id="group-section">
                 <#list ride.sortedGroups as group>
 
-                    <div class="gap-1 gap-md-3 d-flex flex-row justify-content-between align-items-center border rounded mb-1 py-1 px-2" <#if group.map??> onmouseover="highlightMap(${groupMaps?seq_index_of(group.map.id)})"</#if>>
+                    <div style="oveflow:hidden;" class="gap-1 gap-md-3 d-flex flex-row justify-content-between align-items-center border rounded mb-1 py-1 px-2" <#if group.map??> onmouseover="highlightMap(${groupMaps?seq_index_of(group.map.id)})"</#if>>
 
                         <div class="d-flex flex-column flex-grow-1 gap-1">
+
                             <div class="gap-2 d-flex flex-row justify-content-start align-items-center">
                                 <strong>${group.meetingTime}</strong>
-                                <span>${group.name}</span>
-                                <#if group.map??><span class="text-nowrap badge bg-light text-dark border px-2 py-1"><@common.displayMapType group.map.type /></span></#if>
+                                <span style="max-width:40vw; text-overflow:ellipsis;" class="text-nowrap text-truncate">${group.name}</span>
                             </div>
 
                             <div class="d-flex flex-row justify-content-start align-items-center small gap-1 gap-md-3">
                                 <#if group.map??>
-                                       <div><span style="height: 10px; width: 10px; background-color: ${colors[groupMaps?seq_index_of(group.map.id)%10]}; border-radius: 50%; display: inline-block;"></span></div>
+                                       <span style="color: ${textColors[groupMaps?seq_index_of(group.map.id)%10]}; background-color: ${colors[groupMaps?seq_index_of(group.map.id)%10]};" class="text-nowrap badge border px-1 py-1"><@common.displayMapType group.map.type /></span>
                                 </#if>
-                                <span><i class="bi bi-speedometer2"></i> ${group.averageSpeed}km/h</span>
+                                <span class="text-nowrap"><i class="bi bi-speedometer2 d-none d-md-inline-block"></i> ${group.averageSpeed}km/h</span>
                                 <#if group.map??>
-                                    <span class="text-nowrap"><i class="bi bi-arrow-left-right"></i> ${group.map.length?floor}km</span>
-                                    <span class="text-nowrap"><i class="bi bi-arrow-up"></i> ${group.map.positiveElevation?floor}m</span>
+                                    <span class="text-nowrap"><i class="bi bi-arrow-left-right d-none d-md-inline-block"></i> ${group.map.length?floor}km</span>
+                                    <span class="text-nowrap"><i class="bi bi-arrow-up d-none d-md-inline-block"></i> ${group.map.positiveElevation?floor}m</span>
                                </#if>
                             </div>
 
                         </div>
 
-                        <div class="d-flex flex-column gap-1">
+                        <div class="d-flex flex-column gap-1 align-items-end">
 
-                            <div class="d-flex flex-row align-items-start justify-content-end">
-                                <div class="d-flex profile-images me-2">
+                            <div class="d-flex flex-row align-items-start justify-content-end gap-1 gap-md-2">
+                                <div class="d-flex profile-images">
                                     <#if group.sortedParticipants?size gt 0>
                                         <#list group.sortedParticipants?chunk(3)[0] as participant>
                                                 <div class="profile-images-item" style="width:24px; height:24px;" class="d-inline-block"><a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#groupmodal-${group.id}"><img class="w-100 h-100 d-block" src="<@common.teamUrl '' '/users/${participant.id}/image' />" alt="${participant.identity}"></a></div>
