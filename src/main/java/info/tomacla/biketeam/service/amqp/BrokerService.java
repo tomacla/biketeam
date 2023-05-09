@@ -14,12 +14,12 @@ public class BrokerService {
     @Autowired
     private RabbitTemplate rabbitMqPublisher;
 
-    public void sendToBroker(String exchange, String routingKey) {
-        this.sendToBroker(exchange, routingKey, "{}".getBytes());
+    public void sendToBroker(String exchange, Object message) {
+        this.sendToBroker(exchange, null, message == null ? "{}".getBytes() : Json.serialize(message).getBytes());
     }
 
     public void sendToBroker(String exchange, String routingKey, Object message) {
-        this.sendToBroker(exchange, routingKey, Json.serialize(message).getBytes());
+        this.sendToBroker(exchange, routingKey, message == null ? "{}".getBytes() : Json.serialize(message).getBytes());
     }
 
     private synchronized void sendToBroker(String exchange, String routingKey, byte[] message) {

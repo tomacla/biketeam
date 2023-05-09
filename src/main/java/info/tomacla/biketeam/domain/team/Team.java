@@ -45,6 +45,8 @@ public class Team implements MessageHolder {
     @Enumerated(EnumType.STRING)
     private Visibility visibility = Visibility.PUBLIC;
 
+    private boolean deletion;
+
     public Team() {
         setConfiguration(new TeamConfiguration());
         setIntegration(new TeamIntegration());
@@ -152,6 +154,14 @@ public class Team implements MessageHolder {
 
     public void removeUserRole(UserRole userRole) {
         this.roles.remove(userRole);
+    }
+
+    public boolean isDeletion() {
+        return deletion;
+    }
+
+    public void setDeletion(boolean deletion) {
+        this.deletion = deletion;
     }
 
     @Override

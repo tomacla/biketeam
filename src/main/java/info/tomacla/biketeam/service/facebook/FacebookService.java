@@ -6,21 +6,21 @@ import com.restfb.scope.ScopeBuilder;
 import com.restfb.types.Account;
 import com.restfb.types.GraphResponse;
 import com.restfb.types.User;
+import info.tomacla.biketeam.common.amqp.Queues;
 import info.tomacla.biketeam.common.datatype.Dates;
 import info.tomacla.biketeam.domain.parameter.Parameter;
 import info.tomacla.biketeam.domain.parameter.ParameterRepository;
-import info.tomacla.biketeam.domain.publication.Publication;
-import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.team.Team;
-import info.tomacla.biketeam.domain.trip.Trip;
 import info.tomacla.biketeam.service.PublicationService;
 import info.tomacla.biketeam.service.RideService;
+import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.service.TripService;
-import info.tomacla.biketeam.service.broadcast.BroadcastService;
+import info.tomacla.biketeam.service.amqp.dto.TeamEntityDTO;
 import info.tomacla.biketeam.service.url.UrlService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -33,7 +33,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class FacebookService implements BroadcastService {
+public class FacebookService {
 
     private static final Logger log = LoggerFactory.getLogger(FacebookService.class);
     private static String FACEBOOK_TOKEN_PARAMETER_KEY = "FACEBOOK_TOKEN";
@@ -56,93 +56,133 @@ public class FacebookService implements BroadcastService {
     @Autowired
     private ParameterRepository parameterRepository;
 
-    @Override
+    @Autowired
+    private TeamService teamService;
+
     public boolean isConfigured(Team team) {
         return team.getIntegration().isFacebookConfigured();
     }
 
-    public void broadcast(Team team, Ride ride) {
+    @RabbitListener(queues = Queues.RIDE_PUBLISHED_FACEBOOK)
+    public void consumeRidePublished(TeamEntityDTO body) {
+        try {
 
-        if (!team.getIntegration().isFacebookPublishRides()) {
-            return;
-        }
+            log.info("Received event on " + Queues.RIDE_PUBLISHED_FACEBOOK);
+            teamService.get(body.teamId).ifPresent(team -> {
+                rideService.get(body.teamId, body.id).ifPresent(ride -> {
 
-        log.info("Publish ride {} to facebook", ride.getId());
+                    if (!team.getIntegration().isFacebookPublishRides()) {
+                        return;
+                    }
 
-        StringBuilder sb = new StringBuilder();
-        sb.append(ride.getTitle()).append("\n");
-        sb.append("RDV ").append(Dates.frenchDateFormat(ride.getDate())).append("\n");
-        if (!team.getIntegration().isFacebookGroupDetails()) {
-            sb.append(ride.getSortedGroups().stream().map(RideGroup::getName).collect(Collectors.joining(", "))).append("\n");
-        }
-        sb.append("Toutes les infos : ").append(urlService.getRideUrl(team, ride)).append("\n\n");
-        sb.append(ride.getDescription()).append("\n\n");
-        if (team.getIntegration().isFacebookGroupDetails()) {
-            ride.getSortedGroups().forEach(group -> {
-                sb.append(group.getName()).append(" - ");
-                sb.append(Math.round(group.getAverageSpeed())).append(" km/h").append("\n");
-                sb.append("Départ ").append(Dates.formatTime(group.getMeetingTime())).append(" - ");
-                // FIXME add meeting location
-                if (group.getMap() != null) {
-                    sb.append("Map : ").append(urlService.getMapUrl(team, group.getMap())).append("\n");
-                }
-                sb.append("\n");
+                    log.info("Publish ride {} to facebook", ride.getId());
+
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(ride.getTitle()).append("\n");
+                    sb.append("RDV ").append(Dates.frenchDateFormat(ride.getDate())).append("\n");
+                    if (!team.getIntegration().isFacebookGroupDetails()) {
+                        sb.append(ride.getSortedGroups().stream().map(RideGroup::getName).collect(Collectors.joining(", "))).append("\n");
+                    }
+                    sb.append("Toutes les infos : ").append(urlService.getRideUrl(team, ride)).append("\n\n");
+                    sb.append(ride.getDescription()).append("\n\n");
+                    if (team.getIntegration().isFacebookGroupDetails()) {
+                        ride.getSortedGroups().forEach(group -> {
+                            sb.append(group.getName()).append(" - ");
+                            sb.append(Math.round(group.getAverageSpeed())).append(" km/h").append("\n");
+                            sb.append("Départ ").append(Dates.formatTime(group.getMeetingTime())).append(" - ");
+                            // FIXME add meeting location
+                            if (group.getMap() != null) {
+                                sb.append("Map : ").append(urlService.getMapUrl(team, group.getMap())).append("\n");
+                            }
+                            sb.append("\n");
+                        });
+                    }
+
+                    final String content = sb.toString();
+                    if (ride.isImaged()) {
+                        rideService.getImage(team.getId(), ride.getId()).ifPresent(rideImage -> this.broadcast(team, content, rideImage.getPath()));
+                    } else {
+                        this.broadcast(team, content, null);
+                    }
+
+                });
+
             });
-        }
 
-        final String content = sb.toString();
-        if (ride.isImaged()) {
-            rideService.getImage(team.getId(), ride.getId()).ifPresent(rideImage -> this.broadcast(team, content, rideImage.getPath()));
-        } else {
-            this.broadcast(team, content, null);
+        } catch (Exception e) {
+            log.error("Error in event " + Queues.RIDE_PUBLISHED_FACEBOOK, e);
         }
-
     }
 
-    public void broadcast(Team team, Trip trip) {
+    @RabbitListener(queues = Queues.TRIP_PUBLISHED_FACEBOOK)
+    public void consumeTripPublished(TeamEntityDTO body) {
+        try {
 
-        if (!team.getIntegration().isFacebookPublishTrips()) {
-            return;
+            log.info("Received event on " + Queues.TRIP_PUBLISHED_FACEBOOK);
+            teamService.get(body.teamId).ifPresent(team ->
+                    tripService.get(body.teamId, body.id).ifPresent(trip -> {
+
+                        if (!team.getIntegration().isFacebookPublishTrips()) {
+                            return;
+                        }
+
+                        log.info("Publish trip {} to facebook", trip.getId());
+
+                        StringBuilder sb = new StringBuilder();
+                        sb.append(trip.getTitle()).append("\n");
+                        sb.append("Du ").append(Dates.frenchDateFormat(trip.getStartDate())).append(" au ").append(Dates.frenchDateFormat(trip.getEndDate())).append("\n");
+                        sb.append("Toutes les infos : ").append(urlService.getTripUrl(team, trip)).append("\n\n");
+                        sb.append(trip.getDescription()).append("\n\n");
+
+                        final String content = sb.toString();
+                        if (trip.isImaged()) {
+                            tripService.getImage(team.getId(), trip.getId()).ifPresent(tripImage -> this.broadcast(team, content, tripImage.getPath()));
+                        } else {
+                            this.broadcast(team, content, null);
+                        }
+
+                    })
+            );
+
+        } catch (Exception e) {
+            log.error("Error in event " + Queues.TRIP_PUBLISHED_FACEBOOK, e);
         }
-
-        log.info("Publish trip {} to facebook", trip.getId());
-
-        StringBuilder sb = new StringBuilder();
-        sb.append(trip.getTitle()).append("\n");
-        sb.append("Du ").append(Dates.frenchDateFormat(trip.getStartDate())).append(" au ").append(Dates.frenchDateFormat(trip.getEndDate())).append("\n");
-        sb.append("Toutes les infos : ").append(urlService.getTripUrl(team, trip)).append("\n\n");
-        sb.append(trip.getDescription()).append("\n\n");
-
-        final String content = sb.toString();
-        if (trip.isImaged()) {
-            tripService.getImage(team.getId(), trip.getId()).ifPresent(tripImage -> this.broadcast(team, content, tripImage.getPath()));
-        } else {
-            this.broadcast(team, content, null);
-        }
-
     }
 
-    public void broadcast(Team team, Publication publication) {
+    @RabbitListener(queues = Queues.PUBLICATION_PUBLISHED_FACEBOOK)
+    public void consumePublicationPublished(TeamEntityDTO body) {
+        try {
 
-        if (!team.getIntegration().isFacebookPublishPublications()) {
-            return;
+            log.info("Received event on " + Queues.PUBLICATION_PUBLISHED_FACEBOOK);
+            teamService.get(body.teamId).ifPresent(team ->
+                    publicationService.get(body.teamId, body.id).ifPresent(publication -> {
+
+                        if (!team.getIntegration().isFacebookPublishPublications()) {
+                            return;
+                        }
+
+                        log.info("Publish publication {} to facebook", publication.getId());
+
+                        StringBuilder sb = new StringBuilder();
+                        sb.append(publication.getTitle()).append("\n");
+                        sb.append(urlService.getTeamUrl(team)).append("\n\n");
+                        sb.append(publication.getContent()).append("\n\n");
+
+                        final String content = sb.toString();
+                        if (publication.isImaged()) {
+                            publicationService.getImage(team.getId(), publication.getId()).ifPresent(pubImage -> this.broadcast(team, content, pubImage.getPath()));
+                        } else {
+                            this.broadcast(team, content, null);
+                        }
+
+                    })
+            );
+
+        } catch (Exception e) {
+            log.error("Error in event " + Queues.PUBLICATION_PUBLISHED_FACEBOOK, e);
         }
-
-        log.info("Publish publication {} to facebook", publication.getId());
-
-        StringBuilder sb = new StringBuilder();
-        sb.append(publication.getTitle()).append("\n");
-        sb.append(urlService.getTeamUrl(team)).append("\n\n");
-        sb.append(publication.getContent()).append("\n\n");
-
-        final String content = sb.toString();
-        if (publication.isImaged()) {
-            publicationService.getImage(team.getId(), publication.getId()).ifPresent(pubImage -> this.broadcast(team, content, pubImage.getPath()));
-        } else {
-            this.broadcast(team, content, null);
-        }
-
     }
+
 
     public Optional<String> getConnectedAccount() {
 

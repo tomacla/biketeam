@@ -1,19 +1,17 @@
 package info.tomacla.biketeam.service;
 
+import info.tomacla.biketeam.common.amqp.Exchanges;
 import info.tomacla.biketeam.domain.message.Message;
 import info.tomacla.biketeam.domain.message.MessageHolder;
 import info.tomacla.biketeam.domain.message.MessageRepository;
-import info.tomacla.biketeam.domain.message.MessageTargetType;
-import info.tomacla.biketeam.domain.notification.Notification;
-import info.tomacla.biketeam.domain.notification.NotificationType;
+import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.team.Team;
-import info.tomacla.biketeam.domain.userrole.Role;
-import info.tomacla.biketeam.service.mattermost.MattermostService;
+import info.tomacla.biketeam.domain.trip.Trip;
+import info.tomacla.biketeam.service.amqp.BrokerService;
+import info.tomacla.biketeam.service.amqp.dto.TeamEntityDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,10 +19,7 @@ import java.util.Optional;
 public class MessageService {
 
     @Autowired
-    private MattermostService mattermostService;
-
-    @Autowired
-    private NotificationService notificationService;
+    private BrokerService brokerService;
 
     @Autowired
     private MessageRepository messageRepository;
@@ -40,28 +35,14 @@ public class MessageService {
     public void save(Team team, MessageHolder holder, Message message) {
 
         messageRepository.save(message);
-        mattermostService.notify(team, message, holder);
 
-        final Message replyTo = message.getReplyToId() != null ? getMessage(message.getReplyToId()).orElse(null) : null;
-
-        team.getRoles().stream()
-                .filter(r -> ((replyTo != null && replyTo.getUser().equals(r.getUser())) || r.getRole().equals(Role.ADMIN)) && !r.getUser().getId().equals(message.getUser().getId()))
-                .forEach(role -> {
-
-                    Notification n = new Notification();
-                    n.setTeamId(team.getId());
-                    n.setElementId(holder.getId());
-                    n.setUser(role.getUser());
-                    if (holder.getMessageType().equals(MessageTargetType.TRIP)) {
-                        n.setType(NotificationType.NEW_TRIP_MESSAGE);
-                    } else {
-                        n.setType(NotificationType.NEW_RIDE_MESSAGE);
-                    }
-                    n.setViewed(false);
-                    n.setCreatedAt(ZonedDateTime.now(ZoneOffset.UTC));
-                    notificationService.save(n);
-
-                });
+        if (holder instanceof Ride) {
+            brokerService.sendToBroker(Exchanges.PUBLISH_RIDE_MESSAGE,
+                    TeamEntityDTO.valueOf(holder.getTeamId(), holder.getId()));
+        } else if (holder instanceof Trip) {
+            brokerService.sendToBroker(Exchanges.PUBLISH_TRIP_MESSAGE,
+                    TeamEntityDTO.valueOf(holder.getTeamId(), holder.getId()));
+        }
 
     }
 

@@ -21,16 +21,18 @@ public interface TripRepository extends PagingAndSortingRepository<Trip, String>
 
     Optional<Trip> findByPermalink(String permalink);
 
-    List<Trip> findAllByTeamIdAndPublishedStatusAndPublishedAtLessThan(String teamId, PublishedStatus publishedStatus, ZonedDateTime now);
+    List<Trip> findAllByDeletionAndTeamIdAndPublishedStatusAndPublishedAtLessThan(boolean deletion, String teamId, PublishedStatus publishedStatus, ZonedDateTime now);
 
-    Page<Trip> findAllByTeamIdInAndStartDateBetweenAndPublishedStatus(Set<String> teamIds, LocalDate from, LocalDate to, PublishedStatus publishedStatus, Pageable pageable);
+    Page<Trip> findAllByDeletionAndTeamIdInAndStartDateBetweenAndPublishedStatus(boolean deletion, Set<String> teamIds, LocalDate from, LocalDate to, PublishedStatus publishedStatus, Pageable pageable);
 
     // do not filter by published at (ADMIN)
-    List<TripIdTitleDateProjection> findAllByTeamIdOrderByStartDateDesc(String teamId);
+    List<TripIdTitleDateProjection> findAllByDeletionAndTeamIdOrderByStartDateDesc(boolean deletion, String teamId);
+
+    List<TripIdTitleDateProjection> findAllByDeletion(boolean deletion);
 
     @Transactional
     @Modifying
     @Query(value = "delete from trip_participant where user_id = :userId", nativeQuery = true)
-    void deleteByUserId(@Param("userId") String userId);
+    void removeParticipant(@Param("userId") String userId);
 
 }

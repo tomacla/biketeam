@@ -1286,4 +1286,24 @@
 
     </changeSet>
 
+    <changeSet id="async-entities-deletion" author="tomacla">
+
+        <addColumn tableName="ride">
+            <column name="deletion" type="BOOLEAN" />
+        </addColumn>
+
+        <addColumn tableName="trip">
+            <column name="deletion" type="BOOLEAN" />
+        </addColumn>
+
+        <addColumn tableName="team">
+            <column name="deletion" type="BOOLEAN" />
+        </addColumn>
+
+        <sql>update ride set deletion = FALSE</sql>
+        <sql>update trip set deletion = FALSE</sql>
+        <sql>update team set deletion = FALSE</sql>
+
+    </changeSet>
+
 </databaseChangeLog>

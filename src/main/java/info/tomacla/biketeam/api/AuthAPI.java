@@ -13,7 +13,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")

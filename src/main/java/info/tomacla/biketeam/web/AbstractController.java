@@ -24,7 +24,6 @@ import java.security.Principal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -154,7 +153,7 @@ public abstract class AbstractController {
     }
 
     protected ZoneId getZoneId(Team team) {
-        if(team == null) {
+        if (team == null) {
             return ZoneOffset.UTC;
         }
         return ZoneId.of(team.getConfiguration().getTimezone());
