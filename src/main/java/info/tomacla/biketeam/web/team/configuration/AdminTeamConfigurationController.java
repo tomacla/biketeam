@@ -252,10 +252,6 @@ public class AdminTeamConfigurationController extends AbstractController {
         final TeamIntegration teamIntegration = team.getIntegration();
 
         EditTeamIntegrationForm form = EditTeamIntegrationForm.builder()
-                .withFacebookGroupDetails(teamIntegration.isFacebookGroupDetails())
-                .withFacebookPublishPublications(teamIntegration.isFacebookPublishPublications())
-                .withFacebookPublishRides(teamIntegration.isFacebookPublishRides())
-                .withFacebookPublishTrips(teamIntegration.isFacebookPublishTrips())
                 .withMattermostApiEndpoint(teamIntegration.getMattermostApiEndpoint())
                 .withMattermostApiToken(teamIntegration.getMattermostApiToken())
                 .withMattermostChannelID(teamIntegration.getMattermostChannelID())
@@ -288,11 +284,6 @@ public class AdminTeamConfigurationController extends AbstractController {
         try {
 
             final EditTeamIntegrationForm.EditTeamIntegrationFormParser parser = form.parser();
-
-            teamIntegration.setFacebookGroupDetails(parser.isFacebookGroupDetails());
-            teamIntegration.setFacebookPublishRides(parser.isFacebookPublishRides());
-            teamIntegration.setFacebookPublishPublications(parser.isFacebookPublishPublications());
-            teamIntegration.setFacebookPublishTrips(parser.isFacebookPublishTrips());
             teamIntegration.setMattermostApiToken(parser.getMattermostApiToken());
             teamIntegration.setMattermostChannelID(parser.getMattermostChannelID());
             teamIntegration.setMattermostMessageChannelID(parser.getMattermostMessageChannelID());

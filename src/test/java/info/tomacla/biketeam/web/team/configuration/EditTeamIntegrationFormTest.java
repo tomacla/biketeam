@@ -14,16 +14,12 @@ public class EditTeamIntegrationFormTest {
                 .withMattermostPublishTrips(true)
                 .withMattermostPublishRides(true)
                 .withMattermostPublishPublications(true)
-                .withFacebookPublishTrips(true)
-                .withFacebookPublishRides(true)
-                .withFacebookPublishPublications(true)
                 .withHeatmapDisplay(true)
                 .withHeatmapCenter(new Point(10.0, 5.0))
                 .withMattermostChannelID("channelId")
                 .withMattermostMessageChannelID("mchannelId")
                 .withMattermostApiToken("apitoken")
                 .withMattermostApiEndpoint("endpoint")
-                .withFacebookGroupDetails(false)
                 .get();
 
         final EditTeamIntegrationForm.EditTeamIntegrationFormParser parser = form.parser();
@@ -31,10 +27,6 @@ public class EditTeamIntegrationFormTest {
         assertTrue(parser.isMattermostPublishPublications());
         assertTrue(parser.isMattermostPublishRides());
         assertTrue(parser.isMattermostPublishTrips());
-        assertTrue(parser.isFacebookPublishPublications());
-        assertTrue(parser.isFacebookPublishRides());
-        assertTrue(parser.isFacebookPublishTrips());
-        assertFalse(parser.isFacebookGroupDetails());
         assertEquals("channelId", parser.getMattermostChannelID());
         assertEquals("mchannelId", parser.getMattermostMessageChannelID());
         assertEquals("apitoken", parser.getMattermostApiToken());
@@ -55,10 +47,6 @@ public class EditTeamIntegrationFormTest {
         assertFalse(parser.isMattermostPublishPublications());
         assertFalse(parser.isMattermostPublishRides());
         assertFalse(parser.isMattermostPublishTrips());
-        assertFalse(parser.isFacebookPublishPublications());
-        assertFalse(parser.isFacebookPublishRides());
-        assertFalse(parser.isFacebookPublishTrips());
-        assertFalse(parser.isFacebookGroupDetails());
         assertNull(parser.getMattermostMessageChannelID());
         assertNull(parser.getMattermostApiEndpoint());
         assertNull(parser.getMattermostApiToken());

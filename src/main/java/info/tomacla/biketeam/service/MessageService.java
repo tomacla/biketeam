@@ -38,10 +38,10 @@ public class MessageService {
 
         if (holder instanceof Ride) {
             brokerService.sendToBroker(Exchanges.PUBLISH_RIDE_MESSAGE,
-                    TeamEntityDTO.valueOf(holder.getTeamId(), holder.getId()));
+                    TeamEntityDTO.valueOf(holder.getTeamId(), message.getId()));
         } else if (holder instanceof Trip) {
             brokerService.sendToBroker(Exchanges.PUBLISH_TRIP_MESSAGE,
-                    TeamEntityDTO.valueOf(holder.getTeamId(), holder.getId()));
+                    TeamEntityDTO.valueOf(holder.getTeamId(), message.getId()));
         }
 
     }

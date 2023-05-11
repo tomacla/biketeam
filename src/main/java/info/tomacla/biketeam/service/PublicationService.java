@@ -47,6 +47,10 @@ public class PublicationService {
     @Autowired
     private BrokerService brokerService;
 
+    @Autowired
+    private ReactionService reactionService;
+
+
     @Transactional
     public void save(Publication publication) {
         publicationRepository.save(publication);
@@ -82,6 +86,7 @@ public class PublicationService {
         if (optionalPublication.isPresent()) {
             final Publication publication = optionalPublication.get();
             deleteImage(publication.getTeamId(), publication.getId());
+            reactionService.deleteByTarget(publication.getId());
             publicationRepository.delete(publication);
         }
     }

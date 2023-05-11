@@ -1306,4 +1306,13 @@
 
     </changeSet>
 
+    <changeSet id="remove-facebook-publish-integration" author="thomas">
+        <dropColumn tableName="team_integration" columnName="facebook_page_id" />
+        <dropColumn tableName="team_integration" columnName="facebook_group_details" />
+        <dropColumn tableName="team_integration" columnName="facebook_publish_trips" />
+        <dropColumn tableName="team_integration" columnName="facebook_publish_rides" />
+        <dropColumn tableName="team_integration" columnName="facebook_publish_publications" />
+        <sql>delete from admin_parameters where name = 'FACEBOOK_TOKEN'</sql>
+    </changeSet>
+
 </databaseChangeLog>
