@@ -4,7 +4,6 @@ import info.tomacla.biketeam.domain.userrole.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,12 +13,12 @@ import java.util.Set;
 @Repository
 public interface TeamRepository extends PagingAndSortingRepository<Team, String>, JpaSpecificationExecutor<Team> {
 
-    List<Team> findAll();
+    List<Team> findAllByDeletion(boolean deletion);
 
-    Page<Team> findAll(Pageable pageable);
+    Page<Team> findAllByDeletion(boolean deletion, Pageable pageable);
 
-    Page<Team> findByVisibilityIn(List<Visibility> visibility, Pageable pageable);
+    Page<Team> findAllByDeletionAndVisibilityIn(boolean deletion, List<Visibility> visibility, Pageable pageable);
 
-    List<Team> findByRoles_UserIdAndRoles_RoleIn(String userId, Set<Role> roles);
+    List<Team> findAllByDeletionAndRoles_UserIdAndRoles_RoleIn(boolean deletion, String userId, Set<Role> roles);
 
 }

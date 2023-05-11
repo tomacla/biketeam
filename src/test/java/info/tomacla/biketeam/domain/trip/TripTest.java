@@ -32,7 +32,7 @@ public class TripTest extends AbstractDBTest {
     @Test
     public void tripTest() {
 
-        List<Trip> trips = tripRepository.findAllByTeamIdAndPublishedStatusAndPublishedAtLessThan("triptest-team",
+        List<Trip> trips = tripRepository.findAllByDeletionAndTeamIdAndPublishedStatusAndPublishedAtLessThan(false, "triptest-team",
                 PublishedStatus.PUBLISHED,
                 ZonedDateTime.now());
 
@@ -42,7 +42,7 @@ public class TripTest extends AbstractDBTest {
         createTrip(ZonedDateTime.now().minus(1, ChronoUnit.DAYS), PublishedStatus.UNPUBLISHED);
         createTrip(ZonedDateTime.now().plus(1, ChronoUnit.DAYS), PublishedStatus.PUBLISHED);
 
-        trips = tripRepository.findAllByTeamIdAndPublishedStatusAndPublishedAtLessThan("triptest-team",
+        trips = tripRepository.findAllByDeletionAndTeamIdAndPublishedStatusAndPublishedAtLessThan(false, "triptest-team",
                 PublishedStatus.PUBLISHED,
                 ZonedDateTime.now());
 

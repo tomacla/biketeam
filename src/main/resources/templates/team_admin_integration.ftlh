@@ -8,51 +8,6 @@
 
         <form name="form-integration" action="<@common.teamUrl team.id '/admin/integration' />" method="POST" class="border rounded p-4">
 
-            <h5>Facebook</h5>
-
-            <#if adminContact?? && !team.integration.facebookPageId??>
-                <p>La connexion avec Facebook permet d'envoyer les publications et les rides directement sur une page Facebook. Pour la configurer prenez contact avec ${adminContact}. La procédure est simple mais nécessite une intervention de votre part.</p>
-            </#if>
-
-            <#if team.integration.facebookPageId??>
-                <p>La connexion avec Facebook est <a href="https://www.facebook.com/${team.integration.facebookPageId}" target="_blank">activée</a>.</p>
-
-                <div class="row mb-3">
-
-                    <div class="col-4">
-                         <div class="form-check form-switch">
-                             <input class="form-check-input" name="facebookPublishRides" type="checkbox" id="form-configuration-fbrides"<#if formdata.facebookPublishRides?? && formdata.facebookPublishRides == 'on'> checked</#if>>
-                             <label class="form-check-label" for="form-configuration-fbrides">Publier les rides</label>
-                           </div>
-                    </div>
-
-                    <div class="col-4">
-                         <div class="form-check form-switch">
-                             <input class="form-check-input" name="facebookPublishTrips" type="checkbox" id="form-configuration-fbtrips"<#if formdata.facebookPublishTrips?? && formdata.facebookPublishTrips == 'on'> checked</#if>>
-                             <label class="form-check-label" for="form-configuration-fbtrips">Publier les trips</label>
-                           </div>
-                    </div>
-
-                    <div class="col-4">
-                         <div class="form-check form-switch">
-                             <input class="form-check-input" name="facebookPublishPublications" type="checkbox" id="form-configuration-fbpubs"<#if formdata.facebookPublishPublications?? && formdata.facebookPublishPublications == 'on'> checked</#if>>
-                             <label class="form-check-label" for="form-configuration-fbpubs">Publier les publications</label>
-                           </div>
-                    </div>
-
-                </div>
-
-                <div class="mb-3">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" name="facebookGroupDetails" type="checkbox" id="form-configuration-fbgroupdetails"<#if formdata.facebookGroupDetails?? && formdata.facebookGroupDetails == 'on'> checked</#if>>
-                        <label class="form-check-label" for="form-configuration-fbgroupdetails">Publier le détails des groupes de rides</label>
-                      </div>
-                 </div>
-
-            </#if>
-
-            <hr/>
-
             <div class="mb-3">
                 <h5>Mattermost</h5>
                 <div class="mb-3">

@@ -5,7 +5,6 @@ import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
-import info.tomacla.biketeam.domain.notification.NotificationRepository;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.Visibility;
 import info.tomacla.biketeam.domain.user.User;
@@ -21,8 +20,6 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -143,7 +140,7 @@ public class UserService {
 
     public boolean authorizeAuthenticatedPublicAccess(Authentication authentication, String teamId) {
 
-        if(!authentication.isAuthenticated() || authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ANONYMOUS"))) {
+        if (!authentication.isAuthenticated() || authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ANONYMOUS"))) {
             return false;
         }
 
@@ -279,8 +276,8 @@ public class UserService {
             reactionService.deleteByUser(user.getId());
             notificationService.deleteByUser(user.getId());
             userRoleService.deleteByUser(user.getId());
-            rideService.deleteByUser(user.getId());
-            tripService.deleteByUser(user.getId());
+            rideService.removeParticipant(user.getId());
+            tripService.removeParticipant(user.getId());
             messageService.deleteByUser(user.getId());
             // finaly delete the user
             userRepository.deleteById(user.getId());

@@ -2,7 +2,6 @@ package info.tomacla.biketeam.service;
 
 import info.tomacla.biketeam.common.amqp.Exchanges;
 import info.tomacla.biketeam.common.amqp.Queues;
-import info.tomacla.biketeam.common.amqp.RoutingKeys;
 import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.FileRepositories;
@@ -48,6 +47,10 @@ public class PublicationService {
     @Autowired
     private BrokerService brokerService;
 
+    @Autowired
+    private ReactionService reactionService;
+
+
     @Transactional
     public void save(Publication publication) {
         publicationRepository.save(publication);
@@ -83,6 +86,7 @@ public class PublicationService {
         if (optionalPublication.isPresent()) {
             final Publication publication = optionalPublication.get();
             deleteImage(publication.getTeamId(), publication.getId());
+            reactionService.deleteByTarget(publication.getId());
             publicationRepository.delete(publication);
         }
     }
@@ -130,7 +134,7 @@ public class PublicationService {
                     log.info("Publishing publication {}", pub.getId());
                     pub.setPublishedStatus(PublishedStatus.PUBLISHED);
                     publicationRepository.save(pub);
-                    brokerService.sendToBroker(Exchanges.EVENT, RoutingKeys.PUBLICATION_PUBLISHED,
+                    brokerService.sendToBroker(Exchanges.PUBLISH_PUBLICATION,
                             TeamEntityDTO.valueOf(pub.getTeamId(), pub.getId()));
                 })
         );

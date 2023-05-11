@@ -188,7 +188,7 @@
         </#if>
         <#if (!withTeam && team.configuration.reactionVisible) || (withTeam && (userTeams?filter(t -> t.id == trip.teamId))[0].configuration.reactionVisible)>
             <div class="card-footer d-flex justify-content-between">
-                <div class="d-flex flex-row reaction-holder" id="reaction-holder-${trip.id}" <#if _session??>data-reaction-session="${_session}"</#if> data-reaction-url="<@common.teamUrl trip.teamId '/trips/' + (trip.permalink!ride.id) + '/reactions' />">
+                <div class="d-flex flex-row reaction-holder" id="reaction-holder-${trip.id}" <#if _session??>data-reaction-session="${_session}"</#if> data-reaction-url="<@common.teamUrl trip.teamId '/trips/' + (trip.permalink!trip.id) + '/reactions' />">
                 </div>
                 <div><a href="<@common.teamUrl trip.teamId '/trips/'+ trip.permalink!trip.id />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye-fill"></i> Détails</a></div>
             </div>
