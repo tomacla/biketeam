@@ -66,9 +66,11 @@
        </div>
        </#if>
 
-    <div class="col-12 col-md-4 mb-4">
+    <div class="col-12 mb-2">
 
-        <div class="border rounded p-2">
+        <div class="row p-0 py-2 m-0 border rounded">
+
+            <div class="col-12 col-md-8">
 
             <#if trip.publishedStatus != 'PUBLISHED'>
                 <div class="p-1 alert alert-warning" role="alert">Ce trip n'est pas publié.<br/> <span class="small text-muted">Publication le ${trip.publishedAt.format(_date_formatter)} à ${trip.publishedAt.format(_time_formatter)} (UTC)</span></div>
@@ -76,10 +78,8 @@
 
             <h5 class="text-muted">${trip.startDate.format(_date_formatter)} <i class="bi bi-arrow-right-short"></i> ${trip.endDate.format(_date_formatter)}</h5>
 
-            <hr/>
-
             <ul class="list-unstyled">
-                <li >${trip.stages?size} étape<#if trip.stages?size gt 1>s</#if><span class="d-inline d-md-none"> - <a class="link-dark" href="#stage-section">Détails</a></span></li>
+                <li >${trip.stages?size} étape<#if trip.stages?size gt 1>s</#if> - <a class="link-dark" href="#stage-section">Détails</a></li>
                 <li>Départ à ${trip.meetingTime}<#if trip.startPlace??> - <a href="#" class="link-dark" data-bs-toggle="modal" data-bs-target="#placemodal">${trip.startPlace.name}</a></#if></li>
                 <#if trip.endPlace??>
                     <li>Arrivée : <a href="#" class="link-dark" data-bs-toggle="modal" data-bs-target="#placemodal">${trip.endPlace.name}</a></li>
@@ -126,9 +126,15 @@
 
             <p class="mt-4 wrap-content">${trip.description}</p>
 
+            </div>
+
+            <div class="col-12 col-md-4">
+
             <#if trip.imaged>
               <img src="<@common.teamUrl team.id '/trips/${trip.id}/image' />" class="d-block shadow rounded w-100 h-auto mx-auto" alt="${trip.id} image">
             </#if>
+
+         </div>
 
         </div>
 
@@ -154,12 +160,9 @@
           </#if>
        </#list>
 
-    <div class="col-12 col-md-8 mb-4">
+    <div class="col-12 col-md-4 mb-4">
 
-        <div class="border rounded p-2">
-
-
-            <div class="mb-4" id="stage-section">
+            <div id="stage-section">
 
                <#list trip.sortedStages as stage>
 
@@ -200,6 +203,12 @@
 
           </div>
 
+          </div>
+
+      <div class="col-12 col-md-8 mb-4">
+
+             <div class="border rounded">
+
             <div class="position-relative w-100" style="z-index:1; height:500px;" id="map-wrapper">
                 <div class="w-100 w-sm-100 w-md-40 position-absolute bg-white top end-0" style="z-index:2000; height:150px;">
                     <canvas class="w-100" style="height:150px;" id="chart-wrapper"></canvas>
@@ -208,9 +217,12 @@
 
 
 
-        </div>
+         </div>
 
-    </div>
+            </div>
+
+
+        </div>
 
     <#if stageMaps?size != 0>
 
