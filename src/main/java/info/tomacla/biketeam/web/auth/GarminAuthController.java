@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping
@@ -20,9 +21,10 @@ public class GarminAuthController {
     @RequestMapping(value = "/auth/garmin", method = RequestMethod.GET)
     public void fromGarmin(HttpServletRequest request,
                            HttpServletResponse response,
+                           HttpSession session,
                            @RequestParam("oauth_token") String oauthToken,
                            @RequestParam("oauth_verifier") String oauthVerifier) throws Exception {
-        garminAuthService.auth(request, response, oauthToken, oauthVerifier);
+        garminAuthService.auth(request, response, session, oauthToken, oauthVerifier);
     }
 
 }

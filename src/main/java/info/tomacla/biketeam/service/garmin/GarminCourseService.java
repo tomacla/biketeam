@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -58,6 +59,7 @@ public class GarminCourseService {
 
     public String upload(HttpServletRequest request,
                          HttpServletResponse response,
+                         HttpSession session,
                          GarminToken garminToken,
                          Path gpxFilePath,
                          Map map) throws Exception {
@@ -66,7 +68,7 @@ public class GarminCourseService {
         OAuthRequest oauthRequest = new OAuthRequest(Verb.POST, "https://apis.garmin.com/training-api/courses/v1/course");
         oauthRequest.setPayload(json);
         oauthRequest.addHeader("Content-Type", "application/json");
-        String body = garminAuthService.execute(request, response, garminToken, oauthRequest);
+        String body = garminAuthService.execute(request, response, session, garminToken, oauthRequest);
         if (body != null) {
             GarminCourse result = objectMapper.readValue(body, GarminCourse.class);
             return "https://connect.garmin.com/modern/course/" + result.getCourseId();

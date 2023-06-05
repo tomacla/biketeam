@@ -30,6 +30,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -247,15 +248,16 @@ public class MapController extends AbstractController {
     @RequestMapping(value = "/{mapId}/garmin", method = RequestMethod.GET)
     public void uploadMapGarmin(HttpServletRequest request,
                                 HttpServletResponse response,
+                                HttpSession session,
                                 @PathVariable("teamId") String teamId,
                                 @PathVariable("mapId") String mapId) throws Exception {
 
-        GarminToken token = garminAuthService.queryToken(request, response);
+        GarminToken token = garminAuthService.queryToken(request, response, session);
         if (token != null) {
             final Optional<Path> gpxFile = mapService.getGpxFile(teamId, mapId);
             final Optional<Map> map = mapService.get(teamId, mapId);
             if (gpxFile.isPresent() && map.isPresent()) {
-                String url = garminCourseService.upload(request, response, token, gpxFile.get(), map.get());
+                String url = garminCourseService.upload(request, response, session, token, gpxFile.get(), map.get());
                 if (url != null) {
                     response.sendRedirect(url);
                 }

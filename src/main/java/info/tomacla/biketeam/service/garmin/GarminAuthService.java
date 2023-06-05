@@ -1,7 +1,5 @@
 package info.tomacla.biketeam.service.garmin;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.scribejava.core.builder.ServiceBuilder;
 import com.github.scribejava.core.model.OAuth1AccessToken;
 import com.github.scribejava.core.model.OAuth1RequestToken;
@@ -19,11 +17,11 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.time.Duration;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -32,6 +30,9 @@ import java.util.Optional;
 @Service
 public class GarminAuthService {
 
+    public static final String GARMIN_ACCESS_TOKEN = "garmin_access_token";
+    public static final String GARMIN_REQUEST_TOKEN = "garmin_request_token";
+    public static final String GARMIN_URL = "garmin_url";
     @Value("${garmin.client.key}")
     private String clientKey;
 
@@ -46,16 +47,6 @@ public class GarminAuthService {
 
     private OAuth10aService service;
 
-    /**
-     * Cache des requêtes de token
-     */
-    private final Cache<String, OAuth1RequestToken> requestTokens = Caffeine.newBuilder().expireAfterWrite(Duration.ofMinutes(5)).build();
-
-    /**
-     * Access tokens pour les utilisateurs non connectés
-     */
-    private final Cache<String, GarminToken> accessTokens = Caffeine.newBuilder().expireAfterAccess(Duration.ofDays(365)).build();
-
     @PostConstruct
     protected void init() {
         service = new ServiceBuilder(clientKey)
@@ -64,8 +55,8 @@ public class GarminAuthService {
                 .build(new GarminOAuthApi());
     }
 
-    public GarminToken queryToken(HttpServletRequest request, HttpServletResponse response) throws GarminAuthException {
-        return queryToken(request, response, true);
+    public GarminToken queryToken(HttpServletRequest request, HttpServletResponse response, HttpSession httpSession) throws GarminAuthException {
+        return queryToken(request, response, httpSession, true);
     }
 
     /**
@@ -76,20 +67,16 @@ public class GarminAuthService {
      * @return null si l'utilisateur n'est pas authentifié, mais il a été redirigé vers Garmin
      * @throws GarminAuthException
      */
-    protected GarminToken queryToken(HttpServletRequest request, HttpServletResponse response, boolean saveUrl) throws GarminAuthException {
+    protected GarminToken queryToken(HttpServletRequest request, HttpServletResponse response, HttpSession httpSession, boolean saveUrl) throws GarminAuthException {
 
         // utilisateur connecté
         String userId = getUserId();
 
         if (userId == null) {
-            // l'utilisateur n'est pas connecté, retrouve l'access token depuis le cookie garmin_token
-            String garminToken = getCookieValue(request, "garmin_token");
-            if (garminToken != null) {
-                // recherche l'access token en cache
-                GarminToken token = accessTokens.getIfPresent(garminToken);
-                if (token != null) {
-                    return token;
-                }
+            // recherche l'access token en session
+            GarminToken token = (GarminToken) httpSession.getAttribute(GARMIN_ACCESS_TOKEN);
+            if (token != null) {
+                return token;
             }
         } else {
             // recherche le token depuis la base
@@ -109,7 +96,7 @@ public class GarminAuthService {
             throw new GarminAuthException(e);
         }
         // mise en cache
-        requestTokens.put(requestToken.getToken(), requestToken);
+        httpSession.setAttribute(GARMIN_REQUEST_TOKEN, requestToken);
 
         // sauvegarde de l'url actuelle
         if (saveUrl) {
@@ -119,10 +106,8 @@ public class GarminAuthService {
             } else {
                 url = request.getRequestURI();
             }
-            response.addCookie(createCookie("garmin_url", url));
+            httpSession.setAttribute(GARMIN_URL, url);
         }
-        // permettra de valider le retour de Garmin
-        response.addCookie(createCookie("garmin_token", requestToken.getToken()));
 
         // URL de connexion sur Garmin
         String authorizationUrl = service.getAuthorizationUrl(requestToken);
@@ -169,12 +154,12 @@ public class GarminAuthService {
         return null;
     }
 
-    public void auth(HttpServletRequest request, HttpServletResponse response, String oauthToken, String oauthVerifier) throws GarminAuthException {
+    public void auth(HttpServletRequest request, HttpServletResponse response, HttpSession httpSession, String oauthToken, String oauthVerifier) throws GarminAuthException {
         // récupère le request token
-        OAuth1RequestToken requestToken = requestTokens.getIfPresent(oauthToken);
-        if (requestToken == null) {
+        OAuth1RequestToken requestToken = (OAuth1RequestToken) httpSession.getAttribute(GARMIN_REQUEST_TOKEN);
+        if (requestToken == null || !Objects.equals(requestToken.getToken(), oauthToken)) {
             // pas de request token, on relance une authentification
-            queryToken(request, response, false);
+            queryToken(request, response, httpSession, false);
             return;
         }
         // récupère l'access token depuis Garmin
@@ -188,13 +173,13 @@ public class GarminAuthService {
         String userId = getUserId();
         if (userId == null) {
             // pas connecté, on stocke l'access token dans le cache
-            accessTokens.put(oauthToken, new GarminToken(null, accessToken));
+            httpSession.setAttribute(GARMIN_ACCESS_TOKEN, new GarminToken(null, accessToken));
         } else {
             // connecté, on stocke le token en base
             updateGarminToken(userId, accessToken);
         }
         // récupération de l'url sauvegardée
-        String garminUrl = getCookieValue(request, "garmin_url");
+        String garminUrl = (String) httpSession.getAttribute(GARMIN_URL);
         if (garminUrl != null) {
             try {
                 // redirection
@@ -220,7 +205,7 @@ public class GarminAuthService {
         }
     }
 
-    String execute(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, GarminToken garminToken, OAuthRequest oAuthRequest) throws GarminAuthException {
+    String execute(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, HttpSession httpSession, GarminToken garminToken, OAuthRequest oAuthRequest) throws GarminAuthException {
         try (Response garminResponse = doExecute(garminToken, oAuthRequest)) {
             // non authentifié/none authorisé
             if (garminResponse.getCode() == 401 || garminResponse.getCode() == 403) {
@@ -228,9 +213,9 @@ public class GarminAuthService {
                     // suppression de l'access token en base
                     updateGarminToken(garminToken.userId(), null);
                 } else {
-                    // FIXME supprimer l'access token du cache
+                    httpSession.removeAttribute(GARMIN_ACCESS_TOKEN);
                 }
-                queryToken(httpServletRequest, httpServletResponse, false);
+                queryToken(httpServletRequest, httpServletResponse, httpSession, false);
                 return null;
             } else {
                 return garminResponse.getBody();
@@ -251,24 +236,6 @@ public class GarminAuthService {
             throw new RuntimeException(e);
         }
         return response;
-    }
-
-    protected Cookie createCookie(String key, String value) {
-        Cookie cookie = new Cookie(key, value);
-        // cookie valide dès la racine
-        cookie.setPath("/");
-        return cookie;
-    }
-
-    protected String getCookieValue(HttpServletRequest request, String cookieName) {
-        String garminToken = null;
-        Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals(cookieName)) {
-                garminToken = cookie.getValue();
-            }
-        }
-        return garminToken;
     }
 
 }
