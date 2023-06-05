@@ -30,6 +30,16 @@ public class AdminTeamConfigurationController extends AbstractController {
     private String contactEmail;
 
     @GetMapping
+    public RedirectView getAdmin(@PathVariable("teamId") String teamId,
+                                 @ModelAttribute("error") String error,
+                                 Principal principal, Model model) {
+
+        final Team team = checkTeam(teamId);
+        return viewHandler.redirectView(team, "/admin/rides");
+
+    }
+
+    @GetMapping(value = "/general")
     public String getSiteGeneral(@PathVariable("teamId") String teamId,
                                  @ModelAttribute("error") String error,
                                  Principal principal, Model model) {
@@ -70,11 +80,11 @@ public class AdminTeamConfigurationController extends AbstractController {
             team.setVisibility(parser.getVisibility());
             teamService.save(team);
 
-            return viewHandler.redirectView(team, "/admin");
+            return viewHandler.redirectView(team, "/admin/general");
 
         } catch (Exception e) {
             attributes.addFlashAttribute("error", e.getMessage());
-            return viewHandler.redirectView(team, "/admin");
+            return viewHandler.redirectView(team, "/admin/general");
         }
 
     }

@@ -42,36 +42,42 @@
         </div>
     </#if>
 
-    <div class="col-12 col-md-4 mb-4">
+    <div class="col-12 mb-2">
 
-        <div class="border rounded p-2">
+        <div class="row p-0 py-2 m-0 border rounded">
 
-            <#if ride.publishedStatus != 'PUBLISHED'>
-                <div class="p-1 alert alert-warning" role="alert">Ce ride n'est pas publié.<br/> <span class="small text-muted">Publication le ${ride.publishedAt.format(_date_formatter)} à ${ride.publishedAt.format(_time_formatter)} (UTC)</span></div>
-            </#if>
-            <h5 class="text-muted">${ride.date.format(_date_formatter)}</h5>
+            <div class="col-12 col-md-8">
 
-
-
-            <ul class="list-unstyled">
-                <li>${ride.groups?size} groupe<#if ride.groups?size gt 1>s</#if><span class="d-inline d-md-none"> - <a class="link-dark" href="#group-section">Détails</a></span></li>
-                <#if ride.sortedGroups?first.meetingTime != ride.sortedGroups?last.meetingTime>
-                    <li>Départ de ${ride.sortedGroups?first.meetingTime} à ${ride.sortedGroups?last.meetingTime}<#if ride.startPlace??> - <a href="#" class="link-dark" data-bs-toggle="modal" data-bs-target="#placemodal">${ride.startPlace.name}</a></#if></li>
-                    <#else>
-                    <li>Départ à ${ride.sortedGroups?first.meetingTime}<#if ride.startPlace??> - ${ride.startPlace.name}</#if></li>
+                <#if ride.publishedStatus != 'PUBLISHED'>
+                    <div class="p-1 alert alert-warning" role="alert">Ce ride n'est pas publié.<br/> <span class="small text-muted">Publication le ${ride.publishedAt.format(_date_formatter)} à ${ride.publishedAt.format(_time_formatter)} (UTC)</span></div>
                 </#if>
-                <#if ride.endPlace??>
-                    <li>Arrivée : <a href="#" class="link-dark" data-bs-toggle="modal" data-bs-target="#placemodal">${ride.endPlace.name}</a></li>
-                </#if>
-            </ul>
+                <h5 class="text-muted">${ride.date.format(_date_formatter)}</h5>
 
-            <hr/>
+                <ul class="list-unstyled">
+                    <li>${ride.groups?size} groupe<#if ride.groups?size gt 1>s</#if> - <a class="link-dark" href="#group-section">Détails</a></li>
+                    <#if ride.sortedGroups?first.meetingTime != ride.sortedGroups?last.meetingTime>
+                        <li>Départ de ${ride.sortedGroups?first.meetingTime} à ${ride.sortedGroups?last.meetingTime}<#if ride.startPlace??> - <a href="#" class="link-dark" data-bs-toggle="modal" data-bs-target="#placemodal">${ride.startPlace.name}</a></#if></li>
+                        <#else>
+                        <li>Départ à ${ride.sortedGroups?first.meetingTime}<#if ride.startPlace??> - ${ride.startPlace.name}</#if></li>
+                    </#if>
+                    <#if ride.endPlace??>
+                        <li>Arrivée : <a href="#" class="link-dark" data-bs-toggle="modal" data-bs-target="#placemodal">${ride.endPlace.name}</a></li>
+                    </#if>
+                </ul>
 
-            <p class="wrap-content">${ride.description}</p>
+                <hr/>
 
-               <#if ride.imaged>
-                 <img src="<@common.teamUrl team.id '/rides/${ride.id}/image' />" class="d-block shadow rounded w-100 h-auto mx-auto" alt="${ride.id} image">
-             </#if>
+                <p class="wrap-content">${ride.description}</p>
+
+            </div>
+
+            <div class="col-12 col-md-4">
+
+                   <#if ride.imaged>
+                     <img src="<@common.teamUrl team.id '/rides/${ride.id}/image' />" class="d-block shadow rounded w-100 h-auto mx-auto" alt="${ride.id} image">
+                 </#if>
+
+            </div>
 
         </div>
 
@@ -123,9 +129,7 @@
 
    </#list>
 
-    <div class="col-12 col-md-8 mb-4">
-
-        <div class="border rounded p-2">
+    <div class="col-12 col-md-4 mb-4">
 
               <div id="group-section">
                 <#list ride.sortedGroups as group>
@@ -196,6 +200,12 @@
                     </div>
                 </#list>
               </div>
+
+       </div>
+
+        <div class="col-12 col-md-8 mb-4">
+
+               <div class="border rounded">
 
               <div class="position-relative w-100" style="z-index:1; height:500px;" id="map-wrapper">
                     <div class="w-100 w-sm-100 w-md-40 position-absolute bg-white top end-0" style="z-index:2000; height:150px;">
