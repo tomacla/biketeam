@@ -9,7 +9,6 @@ import info.tomacla.biketeam.domain.userrole.Role;
 import info.tomacla.biketeam.domain.userrole.UserRole;
 import info.tomacla.biketeam.security.Authorities;
 import info.tomacla.biketeam.service.*;
-import info.tomacla.biketeam.service.facebook.FacebookService;
 import info.tomacla.biketeam.web.team.NewTeamForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpSession;
 import java.security.Principal;
@@ -42,9 +40,6 @@ public class RootController extends AbstractController {
 
     @Autowired
     private TripService tripService;
-
-    @Autowired
-    private FacebookService facebookService;
 
     @Autowired
     private UserRoleService userRoleService;
@@ -185,19 +180,6 @@ public class RootController extends AbstractController {
         model.addAttribute("formdata", form);
 
         return "teams";
-
-    }
-
-    @GetMapping(value = "/integration/facebook/login")
-    public RedirectView facebookCallbackEndpoint(@RequestParam("code") String facebookCode,
-                                                 Principal principal,
-                                                 Model model) {
-
-        final String userAccessToken = facebookService.getUserAccessToken(facebookCode);
-        facebookService.storeToken(userAccessToken);
-
-        // do not use super function createRedirect in this particular case
-        return new RedirectView("/admin/facebook");
 
     }
 

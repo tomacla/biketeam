@@ -31,26 +31,35 @@ public class RideTest extends AbstractDBTest {
     @Test
     public void rideTest() {
 
-        List<Ride> rides = rideRepository.findAllByTeamIdAndPublishedStatusAndPublishedAtLessThan("ridetest-team",
+        List<Ride> rides = rideRepository.findAllByDeletionAndTeamIdAndPublishedStatusAndPublishedAtLessThan(false, "ridetest-team",
                 PublishedStatus.PUBLISHED,
                 ZonedDateTime.now());
 
         assertEquals(0, rides.size());
 
-        createRide(ZonedDateTime.now().minus(1, ChronoUnit.DAYS), PublishedStatus.PUBLISHED);
-        createRide(ZonedDateTime.now().minus(1, ChronoUnit.DAYS), PublishedStatus.UNPUBLISHED);
-        createRide(ZonedDateTime.now().plus(1, ChronoUnit.DAYS), PublishedStatus.PUBLISHED);
+        Ride r1 = createRide(ZonedDateTime.now().minus(1, ChronoUnit.DAYS), PublishedStatus.PUBLISHED);
+        Ride r2 = createRide(ZonedDateTime.now().minus(1, ChronoUnit.DAYS), PublishedStatus.UNPUBLISHED);
+        Ride r3 = createRide(ZonedDateTime.now().plus(1, ChronoUnit.DAYS), PublishedStatus.PUBLISHED);
 
-        rides = rideRepository.findAllByTeamIdAndPublishedStatusAndPublishedAtLessThan("ridetest-team",
+        rides = rideRepository.findAllByDeletionAndTeamIdAndPublishedStatusAndPublishedAtLessThan(false,"ridetest-team",
                 PublishedStatus.PUBLISHED,
                 ZonedDateTime.now());
 
         assertEquals(1, rides.size());
 
+        r1.setDeletion(true);
+        rideRepository.save(r1);
+
+        rides = rideRepository.findAllByDeletionAndTeamIdAndPublishedStatusAndPublishedAtLessThan(false,"ridetest-team",
+                PublishedStatus.PUBLISHED,
+                ZonedDateTime.now());
+
+        assertEquals(0, rides.size());
+
 
     }
 
-    private void createRide(ZonedDateTime publishedAt, PublishedStatus status) {
+    private Ride createRide(ZonedDateTime publishedAt, PublishedStatus status) {
         Ride ride = new Ride();
         ride.setTeamId("ridetest-team");
         ride.setTitle("test-ride");
@@ -60,6 +69,7 @@ public class RideTest extends AbstractDBTest {
         ride.setPublishedAt(publishedAt);
         ride.setPublishedStatus(status);
         rideRepository.save(ride);
+        return ride;
     }
 
     @BeforeAll

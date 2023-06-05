@@ -20,16 +20,6 @@ public class TeamIntegration {
     @JoinColumn(name = "team_id")
     private Team team;
 
-    @Column(name = "facebook_page_id")
-    private String facebookPageId;
-    @Column(name = "facebook_group_details")
-    private boolean facebookGroupDetails;
-    @Column(name = "facebook_publish_trips")
-    private boolean facebookPublishTrips;
-    @Column(name = "facebook_publish_rides")
-    private boolean facebookPublishRides;
-    @Column(name = "facebook_publish_publications")
-    private boolean facebookPublishPublications;
     @Column(name = "mattermost_api_token")
     private String mattermostApiToken;
     @Column(name = "mattermost_channel_id")
@@ -68,50 +58,6 @@ public class TeamIntegration {
     public void setTeam(Team team) {
         this.team = Objects.requireNonNull(team);
         this.teamId = team.getId();
-    }
-
-    public String getFacebookPageId() {
-        return facebookPageId;
-    }
-
-    public void setFacebookPageId(String facebookPageId) {
-        this.facebookPageId = Strings.requireNonBlankOrNull(facebookPageId);
-    }
-
-    public boolean isFacebookGroupDetails() {
-        return facebookGroupDetails;
-    }
-
-    public void setFacebookGroupDetails(boolean facebookGroupDetails) {
-        this.facebookGroupDetails = facebookGroupDetails;
-    }
-
-    public boolean isFacebookPublishTrips() {
-        return facebookPublishTrips;
-    }
-
-    public void setFacebookPublishTrips(boolean facebookPublishTrips) {
-        this.facebookPublishTrips = facebookPublishTrips;
-    }
-
-    public boolean isFacebookPublishRides() {
-        return facebookPublishRides;
-    }
-
-    public void setFacebookPublishRides(boolean facebookPublishRides) {
-        this.facebookPublishRides = facebookPublishRides;
-    }
-
-    public boolean isFacebookPublishPublications() {
-        return facebookPublishPublications;
-    }
-
-    public void setFacebookPublishPublications(boolean facebookPublishPublications) {
-        this.facebookPublishPublications = facebookPublishPublications;
-    }
-
-    public boolean isFacebookConfigured() {
-        return facebookPageId != null;
     }
 
     public boolean isMattermostConfigured() {

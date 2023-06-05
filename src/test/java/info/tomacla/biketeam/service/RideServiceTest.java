@@ -26,7 +26,7 @@ class RideServiceTest {
 
     @Test
     void getShortNameTest() {
-        RideService rideService = new RideService(null, null, null, null, null, null, null);
+        RideService rideService = new RideService(null, null, null, null, null);
 
         Assertions.assertEquals("RR122", rideService.getShortName(getRide("Raymond Ride #122")));
         Assertions.assertEquals("NP492", rideService.getShortName(getRide("N-Peloton #492")));
@@ -46,7 +46,7 @@ class RideServiceTest {
     void listMapsForNearestRidesNoRideTest() {
         TeamService teamService = mock(TeamService.class);
         RideRepository rideRepository = mock(RideRepository.class);
-        RideService rideService = new RideService(null, rideRepository, teamService, null, null, null, null);
+        RideService rideService = new RideService(null, rideRepository, teamService, null, null);
 
         Team team = new Team();
         TeamConfiguration teamConfiguration = new TeamConfiguration();
@@ -56,7 +56,7 @@ class RideServiceTest {
         when(teamService.get("teamId")).thenReturn(Optional.of(team));
 
         List<Ride> rides = new ArrayList<>();
-        when(rideRepository.findAllByTeamIdInAndDateBetweenAndPublishedStatus(eq(Set.of("teamId")), any(), any(), any(), any()))
+        when(rideRepository.findAllByDeletionAndTeamIdInAndDateBetweenAndPublishedStatus(eq(false), eq(Set.of("teamId")), any(), any(), any(), any()))
                 .thenReturn(new PageImpl<>(rides));
 
         List<RideGroup> rideGroups = rideService.listRideGroupsByStartProximity("teamId");
@@ -67,7 +67,7 @@ class RideServiceTest {
     void listMapsForNearestRidesTest() {
         TeamService teamService = mock(TeamService.class);
         RideRepository rideRepository = mock(RideRepository.class);
-        RideService rideService = new RideService(null, rideRepository, teamService, null, null, null, null);
+        RideService rideService = new RideService(null, rideRepository, teamService, null, null);
 
         Team team = new Team();
         TeamConfiguration teamConfiguration = new TeamConfiguration();
@@ -112,7 +112,7 @@ class RideServiceTest {
                 new TestGroup(5, true) // 16 - rank 13
         ));
 
-        when(rideRepository.findAllByTeamIdInAndDateBetweenAndPublishedStatus(eq(Set.of("teamId")), any(), any(), any(), any()))
+        when(rideRepository.findAllByDeletionAndTeamIdInAndDateBetweenAndPublishedStatus(eq(false), eq(Set.of("teamId")), any(), any(), any(), any()))
                 .thenReturn(new PageImpl<>(rides));
 
         List<RideGroup> rideGroups = rideService.listRideGroupsByStartProximity("teamId");

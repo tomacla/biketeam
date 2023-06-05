@@ -24,8 +24,8 @@ public class TeamTest extends AbstractDBTest {
     @Test
     public void teamTest() {
 
-        List<Team> teams = teamRepository.findAll();
-        Page<Team> teamsPublic = teamRepository.findByVisibilityIn(List.of(Visibility.PUBLIC), Pageable.unpaged());
+        List<Team> teams = teamRepository.findAllByDeletion(false);
+        Page<Team> teamsPublic = teamRepository.findAllByDeletionAndVisibilityIn(false, List.of(Visibility.PUBLIC), Pageable.unpaged());
 
         int before = teams.size();
         int beforePublic = teamsPublic.getSize();
@@ -35,8 +35,8 @@ public class TeamTest extends AbstractDBTest {
         createTeam("team3-test", Visibility.PUBLIC_UNLISTED);
 
 
-        teams = teamRepository.findAll();
-        teamsPublic = teamRepository.findByVisibilityIn(List.of(Visibility.PUBLIC), Pageable.unpaged());
+        teams = teamRepository.findAllByDeletion(false);
+        teamsPublic = teamRepository.findAllByDeletionAndVisibilityIn(false, List.of(Visibility.PUBLIC), Pageable.unpaged());
 
         assertEquals(before + 3, teams.size());
         assertEquals(beforePublic + 1, teamsPublic.getSize());

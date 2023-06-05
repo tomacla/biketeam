@@ -23,33 +23,40 @@ public class ScheduledTaskService {
     @Scheduled(fixedRate = 60000, initialDelay = 10000)
     public void publicationTask() {
         log.info("Executing scheduled publicationTask");
-        brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_PUBLISH_RIDES);
-        brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_PUBLISH_PUBLICATIONS);
-        brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_PUBLISH_TRIPS);
+        brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_PUBLISH_RIDES, null);
+        brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_PUBLISH_PUBLICATIONS, null);
+        brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_PUBLISH_TRIPS, null);
     }
 
     @Scheduled(cron = "0 30 3 * * 0")
     public void cleanTmpDirectory() {
         log.info("Executing scheduled cleanTmpDirectory");
-        brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_CLEAN_TMP_FILES);
+        brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_CLEAN_TMP_FILES, null);
     }
 
     @Scheduled(cron = "0 0 3 * * 0")
     public void cleanDeleteTeamsDirectory() {
         log.info("Executing scheduled cleanDeleteTeamsDirectory");
-        brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_CLEAN_TEAM_FILES);
+        brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_CLEAN_TEAM_FILES, null);
     }
 
     @Scheduled(cron = "0 0 2 * * 0")
     public void regenerateHeatmaps() {
         log.info("Executing scheduled regenerateHeatmaps");
-        brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_GENERATE_HEATMAPS);
+        brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_GENERATE_HEATMAPS, null);
     }
 
     @Scheduled(cron = "0 30 2 * * 0")
     public void cleanNotifications() {
         log.info("Executing scheduled cleanNotifications");
-        brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_CLEAN_NOTIFICATIONS);
+        brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_CLEAN_NOTIFICATIONS, null);
+    }
+
+    //@Scheduled(cron = "0 0 3 * * 0")
+    @Scheduled(fixedRate = 6000, initialDelay = 3000)
+    public void performDeletion() {
+        log.info("Executing scheduled performDeletion");
+        brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_PERFORM_DELETION, null);
     }
 
 }

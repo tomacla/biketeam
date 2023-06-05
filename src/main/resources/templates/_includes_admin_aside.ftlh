@@ -2,5 +2,4 @@
   <a href="<@common.teamUrl '' '/admin/teams' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri == '/admin/teams'> list-group-item-secondary</#if>">Groupes</a>
   <a href="<@common.teamUrl '' '/admin/users' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri == '/admin/users'> list-group-item-secondary</#if>">Utilisateurs</a>
   <a href="<@common.teamUrl '' '/admin/archives' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri == '/admin/archives'> list-group-item-secondary</#if>">Archives</a>
-  <a href="<@common.teamUrl '' '/admin/facebook' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri == '/admin/facebook'> list-group-item-secondary</#if>">Facebook</a>
 </ul>

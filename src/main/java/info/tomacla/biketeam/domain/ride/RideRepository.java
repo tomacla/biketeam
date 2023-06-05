@@ -21,16 +21,19 @@ public interface RideRepository extends PagingAndSortingRepository<Ride, String>
 
     Optional<Ride> findByPermalink(String permalink);
 
-    List<Ride> findAllByTeamIdAndPublishedStatusAndPublishedAtLessThan(String teamId, PublishedStatus publishedStatus, ZonedDateTime now);
 
-    Page<Ride> findAllByTeamIdInAndDateBetweenAndPublishedStatus(Set<String> teamIds, LocalDate from, LocalDate to, PublishedStatus publishedStatus, Pageable pageable);
+    List<Ride> findAllByDeletionAndTeamIdAndPublishedStatusAndPublishedAtLessThan(boolean deletion, String teamId, PublishedStatus publishedStatus, ZonedDateTime now);
+
+    Page<Ride> findAllByDeletionAndTeamIdInAndDateBetweenAndPublishedStatus(boolean deletion, Set<String> teamIds, LocalDate from, LocalDate to, PublishedStatus publishedStatus, Pageable pageable);
 
     // do not filter by published at (ADMIN)
-    List<RideProjection> findAllByTeamIdOrderByDateDesc(String teamId);
+    List<RideProjection> findAllByDeletionAndTeamIdOrderByDateDesc(boolean deletion, String teamId);
+
+    List<RideProjection> findAllByDeletion(boolean deletion);
 
     @Transactional
     @Modifying
     @Query(value = "delete from ride_group_participant where user_id = :userId", nativeQuery = true)
-    void deleteByUserId(@Param("userId") String userId);
+    void removeParticipant(@Param("userId") String userId);
 
 }

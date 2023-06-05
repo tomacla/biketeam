@@ -89,12 +89,12 @@ public class RideController extends AbstractController {
 
     @GetMapping(value = "/{rideId}/add-reaction/{content}")
     public String addReaction(@PathVariable("teamId") String teamId,
-                            @PathVariable("rideId") String rideId,
-                            @PathVariable("content") String content,
-                            @ModelAttribute("error") String error,
-                            HttpSession session,
-                            Model model,
-                            Principal principal) {
+                              @PathVariable("rideId") String rideId,
+                              @PathVariable("content") String content,
+                              @ModelAttribute("error") String error,
+                              HttpSession session,
+                              Model model,
+                              Principal principal) {
 
         final Team team = checkTeam(teamId);
 
@@ -133,11 +133,11 @@ public class RideController extends AbstractController {
 
     @GetMapping(value = "/{rideId}/remove-reaction")
     public String removeReaction(@PathVariable("teamId") String teamId,
-                               @PathVariable("rideId") String rideId,
-                               @ModelAttribute("error") String error,
-                               HttpSession session,
-                               Model model,
-                               Principal principal) {
+                                 @PathVariable("rideId") String rideId,
+                                 @ModelAttribute("error") String error,
+                                 HttpSession session,
+                                 Model model,
+                                 Principal principal) {
 
         final Team team = checkTeam(teamId);
 

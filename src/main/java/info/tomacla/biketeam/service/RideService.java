@@ -2,7 +2,6 @@ package info.tomacla.biketeam.service;
 
 import info.tomacla.biketeam.common.amqp.Exchanges;
 import info.tomacla.biketeam.common.amqp.Queues;
-import info.tomacla.biketeam.common.amqp.RoutingKeys;
 import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.data.Timezone;
 import info.tomacla.biketeam.common.file.FileExtension;
@@ -52,21 +51,15 @@ public class RideService extends AbstractPermalinkService {
 
     private final BrokerService brokerService;
 
-    private final MessageService messageService;
-
     private final ReactionService reactionService;
 
-    private final NotificationService notificationService;
-
     @Autowired
-    public RideService(FileService fileService, RideRepository rideRepository, TeamService teamService, BrokerService brokerService, MessageService messageService, ReactionService reactionService, NotificationService notificationService) {
+    public RideService(FileService fileService, RideRepository rideRepository, TeamService teamService, BrokerService brokerService, ReactionService reactionService) {
         this.fileService = fileService;
         this.rideRepository = rideRepository;
         this.teamService = teamService;
         this.brokerService = brokerService;
-        this.messageService = messageService;
         this.reactionService = reactionService;
-        this.notificationService = notificationService;
     }
 
     public Optional<ImageDescriptor> getImage(String teamId, String rideId) {
@@ -96,7 +89,8 @@ public class RideService extends AbstractPermalinkService {
     @RabbitListener(queues = Queues.TASK_PUBLISH_RIDES)
     public void publishRides() {
         teamService.list().forEach(team ->
-                rideRepository.findAllByTeamIdAndPublishedStatusAndPublishedAtLessThan(
+                rideRepository.findAllByDeletionAndTeamIdAndPublishedStatusAndPublishedAtLessThan(
+                        false,
                         team.getId(),
                         PublishedStatus.UNPUBLISHED,
                         ZonedDateTime.now(team.getZoneId())
@@ -104,7 +98,7 @@ public class RideService extends AbstractPermalinkService {
                     log.info("Publishing ride {} for team {}", ride.getId(), team.getId());
                     ride.setPublishedStatus(PublishedStatus.PUBLISHED);
                     save(ride);
-                    brokerService.sendToBroker(Exchanges.EVENT, RoutingKeys.RIDE_PUBLISHED,
+                    brokerService.sendToBroker(Exchanges.PUBLISH_RIDE,
                             TeamEntityDTO.valueOf(ride.getTeamId(), ride.getId()));
                 })
         );
@@ -117,7 +111,7 @@ public class RideService extends AbstractPermalinkService {
     }
 
     public List<RideProjection> listRides(String teamId) {
-        return rideRepository.findAllByTeamIdOrderByDateDesc(teamId);
+        return rideRepository.findAllByDeletionAndTeamIdOrderByDateDesc(false, teamId);
     }
 
     public Optional<Ride> get(String teamId, String rideId) {
@@ -136,24 +130,12 @@ public class RideService extends AbstractPermalinkService {
 
     }
 
-    @Transactional
-    public void delete(String teamId, String rideId) {
-        log.info("Request ride deletion {}", rideId);
-        final Optional<Ride> optionalRide = get(teamId, rideId);
-        if (optionalRide.isPresent()) {
-            final Ride ride = optionalRide.get();
-            messageService.deleteByTarget(rideId);
-            reactionService.deleteByTarget(rideId);
-            notificationService.deleteByElement(rideId);
-            deleteImage(ride.getTeamId(), ride.getId());
-            rideRepository.delete(ride);
-        }
-    }
 
     public Page<Ride> searchRides(Set<String> teamIds, int page, int pageSize,
                                   LocalDate from, LocalDate to) {
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by("date").descending());
-        return rideRepository.findAllByTeamIdInAndDateBetweenAndPublishedStatus(
+        return rideRepository.findAllByDeletionAndTeamIdInAndDateBetweenAndPublishedStatus(
+                false,
                 teamIds,
                 from,
                 to,
@@ -181,11 +163,19 @@ public class RideService extends AbstractPermalinkService {
     }
 
     public void deleteByTeam(String teamId) {
-        rideRepository.findAllByTeamIdOrderByDateDesc(teamId).stream().map(RideProjection::getId).forEach(rideRepository::deleteById);
+        rideRepository.findAllByDeletionAndTeamIdOrderByDateDesc(false, teamId).stream().map(RideProjection::getId).forEach(rideRepository::deleteById);
     }
 
-    public void deleteByUser(String userId) {
-        rideRepository.deleteByUserId(userId);
+    public void delete(String teamId, String rideId) {
+        log.info("Request ride deletion {}", rideId);
+        get(teamId, rideId).ifPresent(ride -> {
+            ride.setDeletion(true);
+            save(ride);
+        });
+    }
+
+    public void removeParticipant(String userId) {
+        rideRepository.removeParticipant(userId);
     }
 
     public List<ReactionSummary> getReactions(Ride ride, User user) {
@@ -260,7 +250,8 @@ public class RideService extends AbstractPermalinkService {
         // retrieve team zone id
         ZoneId zoneId = teamService.get(teamId).map(Team::getZoneId).orElse(ZoneId.of(Timezone.DEFAULT_TIMEZONE));
         // get rides
-        Page<Ride> rides = rideRepository.findAllByTeamIdInAndDateBetweenAndPublishedStatus(
+        Page<Ride> rides = rideRepository.findAllByDeletionAndTeamIdInAndDateBetweenAndPublishedStatus(
+                false,
                 Set.of(teamId),
                 LocalDate.now().minus(3, ChronoUnit.DAYS),
                 LocalDate.now().plus(7, ChronoUnit.DAYS),

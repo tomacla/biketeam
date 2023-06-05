@@ -10,6 +10,7 @@ import info.tomacla.biketeam.domain.feed.FeedOptions;
 import info.tomacla.biketeam.domain.feed.FeedSorter;
 import info.tomacla.biketeam.domain.team.*;
 import info.tomacla.biketeam.domain.userrole.Role;
+import info.tomacla.biketeam.service.amqp.BrokerService;
 import info.tomacla.biketeam.service.file.FileService;
 import info.tomacla.biketeam.service.heatmap.HeatmapService;
 import info.tomacla.biketeam.service.permalink.AbstractPermalinkService;
@@ -29,7 +30,10 @@ import java.nio.file.Path;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -68,7 +72,7 @@ public class TeamService extends AbstractPermalinkService {
     private PlaceService placeService;
 
     @Autowired
-    private MessageService messageService;
+    private BrokerService brokerService;
 
     public Optional<Team> get(String teamId) {
         return teamRepository.findById(teamId.toLowerCase());
@@ -87,7 +91,7 @@ public class TeamService extends AbstractPermalinkService {
     }
 
     public List<Team> getUserTeams(String userId) {
-        return teamRepository.findByRoles_UserIdAndRoles_RoleIn(userId, Set.of(Role.ADMIN, Role.MEMBER));
+        return teamRepository.findAllByDeletionAndRoles_UserIdAndRoles_RoleIn(false, userId, Set.of(Role.ADMIN, Role.MEMBER));
     }
 
     public List<FeedEntity> listFeed(Team team, FeedOptions options) {
@@ -140,11 +144,11 @@ public class TeamService extends AbstractPermalinkService {
     }
 
     public List<Team> list() {
-        return teamRepository.findAll();
+        return teamRepository.findAllByDeletion(false);
     }
 
     public List<Team> getLast4() {
-        return teamRepository.findByVisibilityIn(List.of(Visibility.PUBLIC, Visibility.PRIVATE),
+        return teamRepository.findAllByDeletionAndVisibilityIn(false, List.of(Visibility.PUBLIC, Visibility.PRIVATE),
                 PageRequest.of(0, 4, Sort.by("createdAt").descending())).getContent();
     }
 
@@ -208,30 +212,12 @@ public class TeamService extends AbstractPermalinkService {
     }
 
     public void delete(String teamId) {
-        get(teamId).ifPresent(this::delete);
+        get(teamId).ifPresent(team -> {
+            team.setDeletion(true);
+            save(team);
+        });
     }
 
-    @Transactional
-    public void delete(Team team) {
-        try {
-            log.info("Request team deletion {}", team.getId());
-            // delete all elements
-            messageService.deleteByTarget(team.getId());
-            rideTemplateService.deleteByTeam(team.getId());
-            rideService.deleteByTeam(team.getId());
-            publicationService.deleteByTeam(team.getId());
-            tripService.deleteByTeam(team.getId());
-            mapService.deleteByTeam(team.getId());
-            placeService.deleteByTeam(team.getId());
-            // remove all access to this team
-            userRoleService.deleteByTeam(team.getId());
-            // finaly delete the team
-            teamRepository.deleteById(team.getId());
-            log.info("Team deleted {}", team.getId());
-        } catch (Exception e) {
-            log.error("Unable to delete team " + team.getId(), e);
-        }
-    }
 
     @Override
     public boolean permalinkExists(String permalink) {

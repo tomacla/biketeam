@@ -71,6 +71,8 @@ public class Trip implements MessageHolder, ReactionHolder, FeedEntity {
     @Where(clause = "type = 'TRIP'")
     private Set<Reaction> reactions = new HashSet<>();
 
+    private boolean deletion;
+
     public String getId() {
         return id;
     }
@@ -260,6 +262,14 @@ public class Trip implements MessageHolder, ReactionHolder, FeedEntity {
 
     public Set<User> getParticipants() {
         return participants;
+    }
+
+    public boolean isDeletion() {
+        return deletion;
+    }
+
+    public void setDeletion(boolean deletion) {
+        this.deletion = deletion;
     }
 
     public List<User> getSortedParticipants() {

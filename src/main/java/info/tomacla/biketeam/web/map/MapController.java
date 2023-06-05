@@ -346,9 +346,9 @@ public class MapController extends AbstractController {
 
     @GetMapping(value = "/{mapId}/add-favorite")
     public RedirectView addMapFavorite(@PathVariable("teamId") String teamId,
-                                             @PathVariable("mapId") String mapId,
-                                             RedirectAttributes attributes,
-                                             Principal principal, Model model) {
+                                       @PathVariable("mapId") String mapId,
+                                       RedirectAttributes attributes,
+                                       Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
 
@@ -380,9 +380,9 @@ public class MapController extends AbstractController {
 
     @GetMapping(value = "/{mapId}/remove-favorite")
     public RedirectView removeFavorite(@PathVariable("teamId") String teamId,
-                                                  @PathVariable("mapId") String mapId,
-                                                  RedirectAttributes attributes,
-                                                  Principal principal, Model model) {
+                                       @PathVariable("mapId") String mapId,
+                                       RedirectAttributes attributes,
+                                       Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
 
@@ -395,7 +395,7 @@ public class MapController extends AbstractController {
             Map targetMap = optionalMap.get();
             Optional<User> optionalConnectedUser = getUserFromPrincipal(principal);
 
-            if (optionalConnectedUser.isPresent() ) {
+            if (optionalConnectedUser.isPresent()) {
 
                 User connectedUser = optionalConnectedUser.get();
 

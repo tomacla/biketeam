@@ -1,6 +1,7 @@
 package info.tomacla.biketeam;
 
 import info.tomacla.biketeam.common.amqp.DirectBindings;
+import info.tomacla.biketeam.common.amqp.FanoutBindings;
 import info.tomacla.biketeam.common.json.Json;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
@@ -70,6 +71,18 @@ public class RabbitMQConfig {
             admin.declareQueue(queue);
 
             admin.declareBinding(BindingBuilder.bind(queue).to(exchange).with(binding.getRoutingKey()));
+
+        }
+
+        for (FanoutBindings binding : FanoutBindings.values()) {
+
+            final FanoutExchange exchange = getFanoutExchange(binding.getExchange());
+            admin.declareExchange(exchange);
+
+            final Queue queue = getQueue(binding.getQueue());
+            admin.declareQueue(queue);
+
+            admin.declareBinding(BindingBuilder.bind(queue).to(exchange));
 
         }
 

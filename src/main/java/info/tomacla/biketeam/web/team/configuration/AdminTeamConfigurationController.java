@@ -30,6 +30,16 @@ public class AdminTeamConfigurationController extends AbstractController {
     private String contactEmail;
 
     @GetMapping
+    public RedirectView getAdmin(@PathVariable("teamId") String teamId,
+                                 @ModelAttribute("error") String error,
+                                 Principal principal, Model model) {
+
+        final Team team = checkTeam(teamId);
+        return viewHandler.redirectView(team, "/admin/rides");
+
+    }
+
+    @GetMapping(value = "/general")
     public String getSiteGeneral(@PathVariable("teamId") String teamId,
                                  @ModelAttribute("error") String error,
                                  Principal principal, Model model) {
@@ -70,11 +80,11 @@ public class AdminTeamConfigurationController extends AbstractController {
             team.setVisibility(parser.getVisibility());
             teamService.save(team);
 
-            return viewHandler.redirectView(team, "/admin");
+            return viewHandler.redirectView(team, "/admin/general");
 
         } catch (Exception e) {
             attributes.addFlashAttribute("error", e.getMessage());
-            return viewHandler.redirectView(team, "/admin");
+            return viewHandler.redirectView(team, "/admin/general");
         }
 
     }
@@ -252,10 +262,6 @@ public class AdminTeamConfigurationController extends AbstractController {
         final TeamIntegration teamIntegration = team.getIntegration();
 
         EditTeamIntegrationForm form = EditTeamIntegrationForm.builder()
-                .withFacebookGroupDetails(teamIntegration.isFacebookGroupDetails())
-                .withFacebookPublishPublications(teamIntegration.isFacebookPublishPublications())
-                .withFacebookPublishRides(teamIntegration.isFacebookPublishRides())
-                .withFacebookPublishTrips(teamIntegration.isFacebookPublishTrips())
                 .withMattermostApiEndpoint(teamIntegration.getMattermostApiEndpoint())
                 .withMattermostApiToken(teamIntegration.getMattermostApiToken())
                 .withMattermostChannelID(teamIntegration.getMattermostChannelID())
@@ -288,11 +294,6 @@ public class AdminTeamConfigurationController extends AbstractController {
         try {
 
             final EditTeamIntegrationForm.EditTeamIntegrationFormParser parser = form.parser();
-
-            teamIntegration.setFacebookGroupDetails(parser.isFacebookGroupDetails());
-            teamIntegration.setFacebookPublishRides(parser.isFacebookPublishRides());
-            teamIntegration.setFacebookPublishPublications(parser.isFacebookPublishPublications());
-            teamIntegration.setFacebookPublishTrips(parser.isFacebookPublishTrips());
             teamIntegration.setMattermostApiToken(parser.getMattermostApiToken());
             teamIntegration.setMattermostChannelID(parser.getMattermostChannelID());
             teamIntegration.setMattermostMessageChannelID(parser.getMattermostMessageChannelID());

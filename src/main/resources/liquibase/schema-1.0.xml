@@ -1286,4 +1286,33 @@
 
     </changeSet>
 
+    <changeSet id="async-entities-deletion" author="tomacla">
+
+        <addColumn tableName="ride">
+            <column name="deletion" type="BOOLEAN" />
+        </addColumn>
+
+        <addColumn tableName="trip">
+            <column name="deletion" type="BOOLEAN" />
+        </addColumn>
+
+        <addColumn tableName="team">
+            <column name="deletion" type="BOOLEAN" />
+        </addColumn>
+
+        <sql>update ride set deletion = FALSE</sql>
+        <sql>update trip set deletion = FALSE</sql>
+        <sql>update team set deletion = FALSE</sql>
+
+    </changeSet>
+
+    <changeSet id="remove-facebook-publish-integration" author="thomas">
+        <dropColumn tableName="team_integration" columnName="facebook_page_id" />
+        <dropColumn tableName="team_integration" columnName="facebook_group_details" />
+        <dropColumn tableName="team_integration" columnName="facebook_publish_trips" />
+        <dropColumn tableName="team_integration" columnName="facebook_publish_rides" />
+        <dropColumn tableName="team_integration" columnName="facebook_publish_publications" />
+        <sql>delete from admin_parameters where name = 'FACEBOOK_TOKEN'</sql>
+    </changeSet>
+
 </databaseChangeLog>

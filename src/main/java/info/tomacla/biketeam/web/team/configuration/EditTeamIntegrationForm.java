@@ -6,10 +6,6 @@ import org.springframework.util.ObjectUtils;
 
 public class EditTeamIntegrationForm {
 
-    private String facebookGroupDetails = null;
-    private String facebookPublishTrips = null;
-    private String facebookPublishRides = null;
-    private String facebookPublishPublications = null;
     private String mattermostApiToken = "";
     private String mattermostChannelID = "";
     private String mattermostMessageChannelID = "";
@@ -23,38 +19,6 @@ public class EditTeamIntegrationForm {
 
     public static EditTeamIntegrationFormBuilder builder() {
         return new EditTeamIntegrationFormBuilder();
-    }
-
-    public String getFacebookGroupDetails() {
-        return facebookGroupDetails;
-    }
-
-    public void setFacebookGroupDetails(String facebookGroupDetails) {
-        this.facebookGroupDetails = facebookGroupDetails;
-    }
-
-    public String getFacebookPublishTrips() {
-        return facebookPublishTrips;
-    }
-
-    public void setFacebookPublishTrips(String facebookPublishTrips) {
-        this.facebookPublishTrips = facebookPublishTrips;
-    }
-
-    public String getFacebookPublishRides() {
-        return facebookPublishRides;
-    }
-
-    public void setFacebookPublishRides(String facebookPublishRides) {
-        this.facebookPublishRides = facebookPublishRides;
-    }
-
-    public String getFacebookPublishPublications() {
-        return facebookPublishPublications;
-    }
-
-    public void setFacebookPublishPublications(String facebookPublishPublications) {
-        this.facebookPublishPublications = facebookPublishPublications;
     }
 
     public String getMattermostApiToken() {
@@ -150,22 +114,6 @@ public class EditTeamIntegrationForm {
             this.form = form;
         }
 
-        public boolean isFacebookGroupDetails() {
-            return form.getFacebookGroupDetails() != null && form.getFacebookGroupDetails().equals("on");
-        }
-
-        public boolean isFacebookPublishRides() {
-            return form.getFacebookPublishRides() != null && form.getFacebookPublishRides().equals("on");
-        }
-
-        public boolean isFacebookPublishTrips() {
-            return form.getFacebookPublishTrips() != null && form.getFacebookPublishTrips().equals("on");
-        }
-
-        public boolean isFacebookPublishPublications() {
-            return form.getFacebookPublishPublications() != null && form.getFacebookPublishPublications().equals("on");
-        }
-
         public String getMattermostApiToken() {
             return Strings.requireNonBlankOrNull(form.getMattermostApiToken());
         }
@@ -214,26 +162,6 @@ public class EditTeamIntegrationForm {
 
         public EditTeamIntegrationFormBuilder() {
             this.form = new EditTeamIntegrationForm();
-        }
-
-        public EditTeamIntegrationFormBuilder withFacebookGroupDetails(boolean facebookGroupDetails) {
-            form.setFacebookGroupDetails(facebookGroupDetails ? "on" : null);
-            return this;
-        }
-
-        public EditTeamIntegrationFormBuilder withFacebookPublishRides(boolean facebookPublishRides) {
-            form.setFacebookPublishRides(facebookPublishRides ? "on" : null);
-            return this;
-        }
-
-        public EditTeamIntegrationFormBuilder withFacebookPublishTrips(boolean facebookPublishTrips) {
-            form.setFacebookPublishTrips(facebookPublishTrips ? "on" : null);
-            return this;
-        }
-
-        public EditTeamIntegrationFormBuilder withFacebookPublishPublications(boolean facebookPublishPublications) {
-            form.setFacebookPublishPublications(facebookPublishPublications ? "on" : null);
-            return this;
         }
 
         public EditTeamIntegrationFormBuilder withMattermostApiToken(String mattermostApiToken) {

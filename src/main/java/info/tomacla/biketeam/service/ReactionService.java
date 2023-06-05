@@ -3,7 +3,6 @@ package info.tomacla.biketeam.service;
 import info.tomacla.biketeam.domain.reaction.Reaction;
 import info.tomacla.biketeam.domain.reaction.ReactionHolder;
 import info.tomacla.biketeam.domain.reaction.ReactionRepository;
-import info.tomacla.biketeam.domain.team.Team;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

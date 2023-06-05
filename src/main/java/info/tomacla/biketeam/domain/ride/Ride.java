@@ -60,6 +60,8 @@ public class Ride implements MessageHolder, ReactionHolder, FeedEntity {
     @Where(clause = "type = 'RIDE'")
     private Set<Reaction> reactions = new HashSet<>();
 
+    private boolean deletion;
+
     public String getId() {
         return id;
     }
@@ -232,6 +234,14 @@ public class Ride implements MessageHolder, ReactionHolder, FeedEntity {
         return false;
     }
 
+    public boolean isDeletion() {
+        return deletion;
+    }
+
+    public void setDeletion(boolean deletion) {
+        this.deletion = deletion;
+    }
+
     @Override
     public MessageTargetType getMessageType() {
         return MessageTargetType.RIDE;
@@ -246,6 +256,7 @@ public class Ride implements MessageHolder, ReactionHolder, FeedEntity {
     public FeedType getFeedType() {
         return FeedType.RIDE;
     }
+
 
     @Override
     public boolean equals(Object o) {

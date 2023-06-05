@@ -2,7 +2,6 @@ package info.tomacla.biketeam.service;
 
 import info.tomacla.biketeam.common.amqp.Exchanges;
 import info.tomacla.biketeam.common.amqp.Queues;
-import info.tomacla.biketeam.common.amqp.RoutingKeys;
 import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.FileRepositories;
@@ -51,13 +50,7 @@ public class TripService extends AbstractPermalinkService {
     private BrokerService brokerService;
 
     @Autowired
-    private MessageService messageService;
-
-    @Autowired
     private ReactionService reactionService;
-
-    @Autowired
-    private NotificationService notificationService;
 
     public Optional<Trip> get(String teamId, String tripId) {
         Optional<Trip> optionalTrip = tripRepository.findById(tripId);
@@ -102,7 +95,8 @@ public class TripService extends AbstractPermalinkService {
     @RabbitListener(queues = Queues.TASK_PUBLISH_TRIPS)
     public void publishTrips() {
         teamService.list().forEach(team ->
-                tripRepository.findAllByTeamIdAndPublishedStatusAndPublishedAtLessThan(
+                tripRepository.findAllByDeletionAndTeamIdAndPublishedStatusAndPublishedAtLessThan(
+                        false,
                         team.getId(),
                         PublishedStatus.UNPUBLISHED,
                         ZonedDateTime.now(team.getZoneId())
@@ -110,7 +104,7 @@ public class TripService extends AbstractPermalinkService {
                     log.info("Publishing trip {} for team {}", trip.getId(), team.getId());
                     trip.setPublishedStatus(PublishedStatus.PUBLISHED);
                     save(trip);
-                    brokerService.sendToBroker(Exchanges.EVENT, RoutingKeys.TRIP_PUBLISHED,
+                    brokerService.sendToBroker(Exchanges.PUBLISH_TRIP,
                             TeamEntityDTO.valueOf(trip.getTeamId(), trip.getId()));
                 })
         );
@@ -123,27 +117,15 @@ public class TripService extends AbstractPermalinkService {
     }
 
     public List<TripIdTitleDateProjection> listTrips(String teamId) {
-        return tripRepository.findAllByTeamIdOrderByStartDateDesc(teamId);
+        return tripRepository.findAllByDeletionAndTeamIdOrderByStartDateDesc(false, teamId);
     }
 
-    @Transactional
-    public void delete(String teamId, String tripId) {
-        log.info("Request trip deletion {}", tripId);
-        final Optional<Trip> optionalTrip = get(teamId, tripId);
-        if (optionalTrip.isPresent()) {
-            messageService.deleteByTarget(tripId);
-            reactionService.deleteByTarget(tripId);
-            notificationService.deleteByElement(tripId);
-            final Trip trip = optionalTrip.get();
-            deleteImage(trip.getTeamId(), trip.getId());
-            tripRepository.delete(trip);
-        }
-    }
 
     public Page<Trip> searchTrips(Set<String> teamIds, int page, int pageSize,
                                   LocalDate from, LocalDate to) {
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by("startDate").descending());
-        return tripRepository.findAllByTeamIdInAndStartDateBetweenAndPublishedStatus(
+        return tripRepository.findAllByDeletionAndTeamIdInAndStartDateBetweenAndPublishedStatus(
+                false,
                 teamIds,
                 from,
                 to,
@@ -171,10 +153,19 @@ public class TripService extends AbstractPermalinkService {
     }
 
     public void deleteByTeam(String teamId) {
-        tripRepository.findAllByTeamIdOrderByStartDateDesc(teamId).stream().map(TripIdTitleDateProjection::getId).forEach(tripRepository::deleteById);
+        tripRepository.findAllByDeletionAndTeamIdOrderByStartDateDesc(false, teamId).stream().map(TripIdTitleDateProjection::getId).forEach(tripRepository::deleteById);
     }
 
-    public void deleteByUser(String userId) {
-        tripRepository.deleteByUserId(userId);
+    public void removeParticipant(String userId) {
+        tripRepository.removeParticipant(userId);
     }
+
+    public void delete(String teamId, String tripId) {
+        log.info("Request trip deletion {}", tripId);
+        get(teamId, tripId).ifPresent(trip -> {
+            trip.setDeletion(true);
+            save(trip);
+        });
+    }
+
 }
