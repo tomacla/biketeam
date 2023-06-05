@@ -66,6 +66,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             auth.antMatchers("/login/**").permitAll();
             auth.antMatchers("/logout").permitAll();
 
+            // Garmin auth
+            auth.antMatchers("/auth/**").permitAll();
+
             // api public endpoints
             auth.antMatchers("/api/data/**").permitAll();
             auth.antMatchers("/api/auth/**").permitAll();

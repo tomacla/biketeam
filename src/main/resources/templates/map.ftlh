@@ -35,6 +35,7 @@
                     </#if>
                     <a download="${map.name}.gpx" href="<@common.teamUrl team.id '/maps/${map.id}/gpx' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-download"></i> GPX</a>
                     <a download="${map.name}.fit" href="<@common.teamUrl team.id '/maps/${map.id}/fit' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-download"></i> FIT</a>
+                    <a href="<@common.teamUrl team.id '/maps/${map.id}/garmin' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-download"></i> Garmin</a>
                     <button id="toggle-track-button" onclick="toggleTrack();" class="btn btn-outline-secondary" role="button"><i class="bi bi-eye-slash-fill"></i> Masquer</button>
                 </div>
              </#if>
