@@ -190,6 +190,7 @@
                                <div class="btn-group">
                                     <#if stage.map??>
                                        <a class="btn btn-sm btn-link link-dark py-0 px-2" download="${trip.title}-${stage.name}.gpx" href="<@common.teamUrl team.id '/maps/${stage.map.id}/gpx' />"><i class="bi bi-download"></i></a>
+                                       <a class="btn btn-sm btn-link link-dark py-0 px-2" href="<@common.teamUrl team.id '/maps/${stage.map.id}/garmin' />"><i class="bi bi-download"></i></a>
                                        <a class="btn btn-sm btn-link link-dark py-0 px-2" href="<@common.teamUrl team.id '/maps/${stage.map.permalink!stage.map.id}' />"><i class="bi bi-map"></i></a>
                                     </#if>
                                </div>

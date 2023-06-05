@@ -1315,4 +1315,13 @@
         <sql>delete from admin_parameters where name = 'FACEBOOK_TOKEN'</sql>
     </changeSet>
 
+    <changeSet id="github-188-garmin-upload" author="glandais">
+
+        <addColumn tableName="user_account">
+            <column name="garmin_token" type="VARCHAR(255)" />
+            <column name="garmin_token_secret" type="VARCHAR(255)" />
+        </addColumn>
+
+    </changeSet>
+
 </databaseChangeLog>
