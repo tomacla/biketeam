@@ -7,9 +7,6 @@ html {
     font-size:1.35rem;
 }
 
-
-
-
 .navbar-no-expand .navbar-nav {
     flex-direction: row;
 }
@@ -42,7 +39,17 @@ html {
     z-index:9999;
 }
 
+.short-label {
+    max-width:40vw;
+    text-overflow:ellipsis;
+}
+
 @media (min-width: 768px) {
+
+    .short-label {
+        max-width:10vw;
+        text-overflow:ellipsis;
+    }
 
     .navbar-no-expand .nav-item {
         padding: 0px 8px;

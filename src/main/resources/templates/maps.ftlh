@@ -128,6 +128,7 @@
                             <div class="btn-group" role="group">
                                 <a download="${map.name}.gpx" href="<@common.teamUrl team.id '/maps/${map.id}/gpx' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-download"></i> GPX</a>
                                 <a download="${map.name}.fit" href="<@common.teamUrl team.id '/maps/${map.id}/fit' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-download"></i> FIT</a>
+                                <a href="<@common.teamUrl team.id '/maps/${map.id}/garmin' />" class="btn btn-outline-secondary btn-sm" role="button"><img style="vertical-align: text-top;" width="15" src="<@common.teamUrl '' '/img/garminconnect.png' />" alt="Garmin" /> Garmin</a>
                                 <a href="<@common.teamUrl team.id '/maps/${map.permalink!map.id}' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-map"></i> Voir</a>
                             </div>
                         </div>

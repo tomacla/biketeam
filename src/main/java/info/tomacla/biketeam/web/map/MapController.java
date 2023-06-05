@@ -8,6 +8,9 @@ import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.service.RideService;
 import info.tomacla.biketeam.service.file.ThumbnailService;
+import info.tomacla.biketeam.service.garmin.GarminAuthService;
+import info.tomacla.biketeam.service.garmin.GarminCourseService;
+import info.tomacla.biketeam.service.garmin.GarminToken;
 import info.tomacla.biketeam.service.url.UrlService;
 import info.tomacla.biketeam.web.AbstractController;
 import info.tomacla.biketeam.web.ride.dto.AndroidMapDTO;
@@ -25,6 +28,9 @@ import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,6 +54,12 @@ public class MapController extends AbstractController {
 
     @Autowired
     private ThumbnailService thumbnailService;
+
+    @Autowired
+    private GarminAuthService garminAuthService;
+
+    @Autowired
+    private GarminCourseService garminCourseService;
 
     @Value("${mapbox.api-key}")
     private String mapBoxAPIKey;
@@ -231,6 +243,26 @@ public class MapController extends AbstractController {
             }
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to find gpx : " + mapId);
+    }
+
+    @RequestMapping(value = "/{mapId}/garmin", method = RequestMethod.GET)
+    public void uploadMapGarmin(HttpServletRequest request,
+                                HttpServletResponse response,
+                                HttpSession session,
+                                @PathVariable("teamId") String teamId,
+                                @PathVariable("mapId") String mapId) throws Exception {
+
+        GarminToken token = garminAuthService.queryToken(request, response, session);
+        if (token != null) {
+            final Optional<Path> gpxFile = mapService.getGpxFile(teamId, mapId);
+            final Optional<Map> map = mapService.get(teamId, mapId);
+            if (gpxFile.isPresent() && map.isPresent()) {
+                String url = garminCourseService.upload(request, response, session, token, gpxFile.get(), map.get());
+                if (url != null) {
+                    response.sendRedirect(url);
+                }
+            }
+        }
     }
 
     @ResponseBody

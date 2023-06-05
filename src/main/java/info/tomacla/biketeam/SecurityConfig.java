@@ -59,12 +59,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             // static
             auth.antMatchers("/css/**").permitAll();
             auth.antMatchers("/js/**").permitAll();
+            auth.antMatchers("/img/**").permitAll();
             auth.antMatchers("/*/image").permitAll();
             auth.antMatchers("/legal-mentions").permitAll();
 
             // spring security endpoints
             auth.antMatchers("/login/**").permitAll();
             auth.antMatchers("/logout").permitAll();
+
+            // Garmin auth
+            auth.antMatchers("/auth/**").permitAll();
 
             // api public endpoints
             auth.antMatchers("/api/data/**").permitAll();
