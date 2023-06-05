@@ -171,7 +171,7 @@
                        <div class="d-flex flex-column flex-grow-1 gap-1">
                            <div class="gap-2 d-flex flex-row justify-content-start align-items-center">
                                 <span>${stage.date.format(_date_short_formatter)}</span>
-                               <span>${stage.name}</span>
+                               <span class="short-label text-nowrap text-truncate">${stage.name}</span>
                            </div>
 
                            <div class="d-flex flex-row justify-content-start align-items-center small gap-1 gap-md-3">
@@ -190,7 +190,7 @@
                                <div class="btn-group">
                                     <#if stage.map??>
                                        <a class="btn btn-sm btn-link link-dark py-0 px-2" download="${trip.title}-${stage.name}.gpx" href="<@common.teamUrl team.id '/maps/${stage.map.id}/gpx' />"><i class="bi bi-download"></i></a>
-                                       <a class="btn btn-sm btn-link link-dark py-0 px-2" href="<@common.teamUrl team.id '/maps/${stage.map.id}/garmin' />"><i class="bi bi-download"></i></a>
+                                       <a class="btn btn-sm btn-link link-dark py-0 px-2" href="<@common.teamUrl team.id '/maps/${stage.map.id}/garmin' />"><img style="vertical-align: text-top;" width="15" src="<@common.teamUrl '' '/img/garminconnect.png' />" alt="Garmin" /></a>
                                        <a class="btn btn-sm btn-link link-dark py-0 px-2" href="<@common.teamUrl team.id '/maps/${stage.map.permalink!stage.map.id}' />"><i class="bi bi-map"></i></a>
                                     </#if>
                                </div>
