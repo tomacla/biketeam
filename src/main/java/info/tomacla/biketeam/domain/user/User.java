@@ -25,6 +25,10 @@ public class User {
     private String googleId;
     @Column(name = "strava_user_name", unique = true)
     private String stravaUserName;
+    @Column(name = "garmin_token")
+    private String garminToken;
+    @Column(name = "garmin_token_secret")
+    private String garminTokenSecret;
     @Column(name = "first_name")
     private String firstName = "Inconnu";
     @Column(name = "last_name")
@@ -179,6 +183,22 @@ public class User {
 
     public void setMapFavorites(Set<Map> mapFavorites) {
         this.mapFavorites = mapFavorites;
+    }
+
+    public String getGarminToken() {
+        return garminToken;
+    }
+
+    public String getGarminTokenSecret() {
+        return garminTokenSecret;
+    }
+
+    public void setGarminToken(String garminToken) {
+        this.garminToken = garminToken;
+    }
+
+    public void setGarminTokenSecret(String garminTokenSecret) {
+        this.garminTokenSecret = garminTokenSecret;
     }
 
     @Override
