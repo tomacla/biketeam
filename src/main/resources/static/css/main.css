@@ -395,3 +395,29 @@ html {
   -o-transform: rotate(-45deg);
   transform: rotate(-45deg);
 }
+
+#gpxtool #map-container {
+    position:relative;
+}
+
+#gpxtool #map-container .overlay {
+    position:absolute;
+    z-index: 314159;
+    pointer-events: none;
+}
+
+#gpxtool #map-container .overlay .btn {
+    pointer-events: initial;
+}
+
+#gpxtool .overlay.top-center {
+    top:0;
+    left: 50%;
+    transform: translate(-50%, 0);
+}
+
+#gpxtool .overlay.bottom-center {
+    bottom:0;
+    left: 50%;
+    transform: translate(-50%, 0);
+}

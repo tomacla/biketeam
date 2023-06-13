@@ -4,7 +4,7 @@
 
     <div class="col-12 border-bottom pb-4">
 
-        <h1 class="my-4 pb-4 border-bottom text-center">Un site unique pour les groupes de vélo</h1>
+        <h1 class="my-4 pb-4 border-bottom text-center">Un site unique pour les cyclistes</h1>
 
         <ul class="mt-4 lead text-center list-unstyled">
             <li>Rassemblez votre communauté</li>

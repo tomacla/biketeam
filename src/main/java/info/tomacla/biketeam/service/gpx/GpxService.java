@@ -2,6 +2,7 @@ package info.tomacla.biketeam.service.gpx;
 
 import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.common.geo.Vector;
+import info.tomacla.biketeam.common.json.Json;
 import info.tomacla.biketeam.common.math.Rounder;
 import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.map.MapType;
@@ -18,6 +19,7 @@ import io.github.glandais.io.GPXFileWriter;
 import io.github.glandais.io.GPXParser;
 import io.github.glandais.map.TileMapImage;
 import io.github.glandais.map.TileMapProducer;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +28,14 @@ import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class GpxService {
@@ -83,6 +89,47 @@ public class GpxService {
 
         prepareMap(gpx, map.getName(), map, team);
         return map;
+    }
+
+    public String parseAndStoreStandalone(Path gpx) {
+
+        String defaultName = UUID.randomUUID().toString();
+
+        GPXPath gpxPath = getGPXPath(gpx, defaultName);
+        gpxPath.setName(defaultName);
+        gpxPathEnhancer.virtualize(gpxPath);
+        GPXFilter.filterPointsDouglasPeucker(gpxPath);
+
+        Path toStoreGpx = getGpx(gpxPath);
+
+        fileService.storeFile(toStoreGpx, FileRepositories.GPXTOOLVIEWER, defaultName + ".gpx");
+
+        return defaultName;
+
+    }
+
+    public Optional<StandaloneGpx> getStandalone(String uuid) {
+        try {
+            if (fileService.fileExists(FileRepositories.GPXTOOLVIEWER, uuid + ".gpx")) {
+
+                Path file = fileService.getFile(FileRepositories.GPXTOOLVIEWER, uuid + ".gpx");
+                GPXPath gpxPath = getGPXPath(file, uuid);
+
+                Path asGeoJson = getAsGeoJson(file);
+
+                return Optional.of(
+                        new StandaloneGpx(Rounder.round2Decimals(Math.round(10.0 * gpxPath.getDist()) / 10000.0),
+                                Rounder.round1Decimal(gpxPath.getTotalElevation()),
+                                Rounder.round1Decimal(gpxPath.getTotalElevationNegative()),
+                                Json.serialize(getElevationProfile(gpxPath)),
+                                FileUtils.readFileToString(asGeoJson.toFile(), StandardCharsets.UTF_8))
+                );
+
+            }
+            return Optional.empty();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private GPXPath prepareMap(final Path gpx, final String defaultName, final Map map, final Team team) {
@@ -170,7 +217,15 @@ public class GpxService {
 
     public List<java.util.Map<String, Object>> getElevationProfile(Path gpx) {
         try {
-            GPXPath gpxPath = getGPXPath(gpx);
+            return getElevationProfile(getGPXPath(gpx));
+        } catch (Exception e) {
+            log.error("Error while calculating GEOJSON", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<java.util.Map<String, Object>> getElevationProfile(GPXPath gpxPath) {
+        try {
             List<java.util.Map<String, Object>> result = new ArrayList<>();
             for (int i = 0; i < gpxPath.getPoints().size(); i++) {
                 Point point = gpxPath.getPoints().get(i);

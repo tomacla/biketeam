@@ -6,12 +6,10 @@ import org.mockito.Mockito;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CustomSessionIdResolverTest {
-
 
 
     @Test

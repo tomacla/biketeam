@@ -64,6 +64,7 @@ public abstract class AbstractController {
         model.addAttribute("_team_member", false);
         model.addAttribute("_siteUrl", urlService.getSiteUrl());
         model.addAttribute("_embed", false);
+        model.addAttribute("_fullSize", false);
         model.addAttribute("_reactions", ReactionContent.values());
 
         if (session != null && session.getId() != null) {

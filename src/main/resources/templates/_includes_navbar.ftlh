@@ -6,6 +6,11 @@
         <a class="navbar-brand order-0" href="<@common.teamUrl team.id '' />">
             ${team.name}
         </a>
+    <#elseif springMacroRequestContext.requestUri?contains('gpxtool')>
+        <a class="nav-link link-secondary px-1" href="<@common.teamUrl '' '/' />"><i class="bi bi-house-door"></i><i class="bi bi-chevron-right"></i></a>
+        <a class="navbar-brand order-0" href="<@common.teamUrl '' '/gpxtool' />">
+            GPX Tool
+        </a>
     <#else>
         <a class="navbar-brand order-0" href="<@common.teamUrl '' '/' />">
             BIKETEAM
