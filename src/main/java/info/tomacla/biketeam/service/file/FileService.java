@@ -188,9 +188,13 @@ public class FileService {
 
     @RabbitListener(queues = Queues.TASK_CLEAN_TMP_FILES)
     public void cleanTmpDirectory() {
+        cleanDirectory(getTmpDirectory(), System.currentTimeMillis() - (2 * 24 * 60 * 60 * 1000));
+        cleanDirectory(Path.of(fileRepository, FileRepositories.GPXTOOLVIEWER), System.currentTimeMillis() - (30 * 24 * 60 * 60 * 1000));
+    }
+
+    private void cleanDirectory(final Path directory, final long cutOff) {
         try {
-            long cutOff = System.currentTimeMillis() - (2 * 24 * 60 * 60 * 1000);
-            Files.list(getTmpDirectory())
+            Files.list(directory)
                     .filter(path -> {
                         try {
                             return Files.isRegularFile(path) && Files.getLastModifiedTime(path).to(TimeUnit.MILLISECONDS) < cutOff;
