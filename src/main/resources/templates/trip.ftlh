@@ -160,7 +160,7 @@
           </#if>
        </#list>
 
-    <div class="col-12 col-md-4 mb-4">
+    <div class="col-12 col-xl-4 mb-4">
 
             <div id="stage-section">
 
@@ -174,7 +174,7 @@
                                <span class="short-label text-nowrap text-truncate">${stage.name}</span>
                            </div>
 
-                           <div class="d-flex flex-row justify-content-start align-items-center small gap-1 gap-md-3">
+                           <div class="d-flex flex-row justify-content-start align-items-center small gap-1 gap-md-2 gap-xxl-3">
                                <#if stage.map??>
                                    <span style="color: ${textColors[stageMaps?seq_index_of(stage.map.id)%10]}; background-color: ${colors[stageMaps?seq_index_of(stage.map.id)%10]};" class="text-nowrap badge border px-1 py-1"><@common.displayMapType stage.map.type /></span>
                                    <span class="text-nowrap"><i class="bi bi-arrow-left-right d-none d-md-inline-block"></i> ${stage.map.length?floor}km</span>
@@ -206,7 +206,7 @@
 
           </div>
 
-      <div class="col-12 col-md-8 mb-4">
+      <div class="col-12 col-xl-8 mb-4">
 
              <div class="border rounded">
 

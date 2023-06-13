@@ -40,16 +40,21 @@ html {
 }
 
 .short-label {
-    max-width:40vw;
+    max-width:35vw;
     text-overflow:ellipsis;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1200px) {
 
     .short-label {
         max-width:10vw;
         text-overflow:ellipsis;
     }
+
+}
+
+@media (min-width: 768px) {
+
 
     .navbar-no-expand .nav-item {
         padding: 0px 8px;
