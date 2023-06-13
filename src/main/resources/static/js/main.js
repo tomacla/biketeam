@@ -415,3 +415,12 @@ function removeReaction(targetId, url, session = null) {
     }
     xmlHttp.send(null);
 }
+
+function copyURLtoClipboard() {
+    copyToClipboard(window.location.href);
+}
+
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text);
+  alert(text + ' a été copié dans le presse papier.');
+}

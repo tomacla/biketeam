@@ -11,6 +11,7 @@ public interface FileRepositories {
     String GPX_FILES = "gpx";
     String MISC_IMAGES = "misc";
     String USER_IMAGES = "user-images";
+    String GPXTOOLVIEWER = "gpx-tool-viewer";
 
     static List<String> list() {
         return List.of(RIDE_IMAGES,

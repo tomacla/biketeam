@@ -41,7 +41,7 @@ public class RideTest extends AbstractDBTest {
         Ride r2 = createRide(ZonedDateTime.now().minus(1, ChronoUnit.DAYS), PublishedStatus.UNPUBLISHED);
         Ride r3 = createRide(ZonedDateTime.now().plus(1, ChronoUnit.DAYS), PublishedStatus.PUBLISHED);
 
-        rides = rideRepository.findAllByDeletionAndTeamIdAndPublishedStatusAndPublishedAtLessThan(false,"ridetest-team",
+        rides = rideRepository.findAllByDeletionAndTeamIdAndPublishedStatusAndPublishedAtLessThan(false, "ridetest-team",
                 PublishedStatus.PUBLISHED,
                 ZonedDateTime.now());
 
@@ -50,7 +50,7 @@ public class RideTest extends AbstractDBTest {
         r1.setDeletion(true);
         rideRepository.save(r1);
 
-        rides = rideRepository.findAllByDeletionAndTeamIdAndPublishedStatusAndPublishedAtLessThan(false,"ridetest-team",
+        rides = rideRepository.findAllByDeletionAndTeamIdAndPublishedStatusAndPublishedAtLessThan(false, "ridetest-team",
                 PublishedStatus.PUBLISHED,
                 ZonedDateTime.now());
 

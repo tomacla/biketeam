@@ -2,12 +2,18 @@
   <div class="container">
 
     <#if team??>
+        <a class="nav-link link-secondary px-1" href="<@common.teamUrl '' '/' />"><i class="bi bi-house-door"></i><i class="bi bi-chevron-right"></i></a>
         <a class="navbar-brand order-0" href="<@common.teamUrl team.id '' />">
             ${team.name}
         </a>
+    <#elseif springMacroRequestContext.requestUri?contains('gpxtool')>
+        <a class="nav-link link-secondary px-1" href="<@common.teamUrl '' '/' />"><i class="bi bi-house-door"></i><i class="bi bi-chevron-right"></i></a>
+        <a class="navbar-brand order-0" href="<@common.teamUrl '' '/gpxtool' />">
+            GPX Tool
+        </a>
     <#else>
         <a class="navbar-brand order-0" href="<@common.teamUrl '' '/' />">
-            <i class="bi bi-bicycle"></i> BIKETEAM
+            BIKETEAM
         </a>
     </#if>
 
@@ -73,20 +79,10 @@
                     <a class="nav-link<#if springMacroRequestContext.requestUri?starts_with('/admin')> active</#if>" href="<@common.teamUrl '' '/admin/teams' />"><i class="bi bi-gear"></i></a>
                 </li>
             </#if>
-            <#if team??>
-                <li class="nav-item">
-                    <a class="nav-link" href="<@common.teamUrl '' '/' />"><i class="bi bi-house-door"></i></a>
-                </li>
-            </#if>
         <#else>
             <li class="nav-item">
                 <a class="nav-link" href="<@common.teamUrl '' '/login' />">Connexion</a>
             </li>
-            <#if team??>
-                <li class="nav-item border-start ps-1">
-                    <a class="nav-link" href="<@common.teamUrl '' '/' />"><i class="bi bi-house-door"></i></a>
-                </li>
-            </#if>
         </#if>
     </ul>
   </div>

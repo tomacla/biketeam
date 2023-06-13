@@ -129,7 +129,7 @@
 
    </#list>
 
-    <div class="col-12 col-md-4 mb-4">
+    <div class="col-12 col-xl-4 mb-4">
 
               <div id="group-section">
                 <#list ride.sortedGroups as group>
@@ -143,7 +143,7 @@
                                 <span class="short-label text-nowrap text-truncate">${group.name}</span>
                             </div>
 
-                            <div class="d-flex flex-row justify-content-start align-items-center small gap-1 gap-md-3">
+                            <div class="d-flex flex-row justify-content-start align-items-center small gap-1 gap-md-2 gap-xxl-3">
                                 <#if group.map??>
                                        <span style="color: ${textColors[groupMaps?seq_index_of(group.map.id)%10]}; background-color: ${colors[groupMaps?seq_index_of(group.map.id)%10]};" class="text-nowrap badge border px-1 py-1"><@common.displayMapType group.map.type /></span>
                                 </#if>
@@ -190,7 +190,7 @@
                                 <div class="btn-group">
                                      <#if group.map??>
                                         <a class="btn btn-sm btn-link link-dark py-0 px-2" download="${ride.title}-${group.name}.gpx" href="<@common.teamUrl team.id '/maps/${group.map.id}/gpx' />"><i class="bi bi-download"></i></a>
-                                        <a class="btn btn-sm btn-link link-dark py-0 px-2" href="<@common.teamUrl team.id '/maps/${group.map.id}/garmin' />"><img style="vertical-align: text-top;" width="15" src="<@common.teamUrl '' '/img/garminconnect.png' />" alt="Garmin" /></a>
+                                        <a class="btn btn-sm btn-link link-dark py-0 px-2" href="<@common.teamUrl team.id '/maps/${group.map.id}/garmin' />"><i class="bi bi-triangle-fill"></i></a>
                                         <a class="btn btn-sm btn-link link-dark py-0 px-2" href="<@common.teamUrl team.id '/maps/${group.map.permalink!group.map.id}' />"><i class="bi bi-map"></i></a>
                                      </#if>
                                 </div>
@@ -204,7 +204,7 @@
 
        </div>
 
-        <div class="col-12 col-md-8 mb-4">
+        <div class="col-12 col-xl-8 mb-4">
 
                <div class="border rounded">
 

@@ -117,18 +117,18 @@
                         <a href="<@common.teamUrl team.id '/maps/${map.permalink!map.id}' />"><img src="<@common.teamUrl team.id '/maps/${map.id}/image?width=450' />" class="card-img-top" alt="${map.id} image"></a>
                         <div class="card-body">
                           <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl team.id '/maps/${map.permalink!map.id}' />">${map.name}</a></h5>
+                          <h6 class="card-subtitle mb-2 text-muted">${map.postedAt.format(_date_formatter)}</h6>
                           <p class="card-text">
                             <i class="bi bi-arrow-left-right"></i> ${map.length}km
                             <i class="bi bi-arrow-up"></i> ${map.positiveElevation}m
                             <i class="bi bi-arrow-down"></i> ${map.negativeElevation}m
                           </p>
                         </div>
-                        <div class="card-footer d-flex justify-content-between align-items-center">
-                            <span class="small text-muted">${map.postedAt.format(_date_formatter)}</span>
+                        <div class="card-footer d-flex justify-content-center align-items-center">
                             <div class="btn-group" role="group">
                                 <a download="${map.name}.gpx" href="<@common.teamUrl team.id '/maps/${map.id}/gpx' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-download"></i> GPX</a>
                                 <a download="${map.name}.fit" href="<@common.teamUrl team.id '/maps/${map.id}/fit' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-download"></i> FIT</a>
-                                <a href="<@common.teamUrl team.id '/maps/${map.id}/garmin' />" class="btn btn-outline-secondary btn-sm" role="button"><img style="vertical-align: text-top;" width="15" src="<@common.teamUrl '' '/img/garminconnect.png' />" alt="Garmin" /> Garmin</a>
+                                <a href="<@common.teamUrl team.id '/maps/${map.id}/garmin' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-triangle-fill"></i> Garmin</a>
                                 <a href="<@common.teamUrl team.id '/maps/${map.permalink!map.id}' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-map"></i> Voir</a>
                             </div>
                         </div>
