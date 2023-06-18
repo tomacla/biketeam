@@ -21,7 +21,7 @@
 
     <div class="col-12">
 
-        <h5 class="text-center lead mt-4">Déjà sur Biketeam</h5>
+        <h5 class="text-center lead mt-4">Groupes déjà créés</h5>
         <h6 class="text-center text-muted mb-4"><a class="link-secondary" href="<@common.teamUrl '' '/teams' />">Explorer les groupes</a></h6>
 
         <div class="row row-cols-1 row-cols-md-4 g-4">

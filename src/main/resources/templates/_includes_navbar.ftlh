@@ -13,7 +13,7 @@
         </a>
     <#else>
         <a class="navbar-brand order-0" href="<@common.teamUrl '' '/' />">
-            BIKETEAM
+            ${_sitename}
         </a>
     </#if>
 

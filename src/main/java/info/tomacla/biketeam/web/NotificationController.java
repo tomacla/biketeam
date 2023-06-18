@@ -79,9 +79,9 @@ public class NotificationController extends AbstractController {
                     } else if (notification.getType().equals(NotificationType.TRIP_PUBLISHED)) {
                         tripService.get(team.getId(), notification.getElementId()).ifPresent(trip -> redirectUrl.set(viewHandler.redirect(team, "/trips/" + trip.getId())));
                     } else if (notification.getType().equals(NotificationType.NEW_RIDE_MESSAGE)) {
-                        rideService.get(team.getId(), notification.getElementId()).ifPresent(ride -> redirectUrl.set(viewHandler.redirect(team, "/messages")));
+                        rideService.get(team.getId(), notification.getElementId()).ifPresent(ride -> redirectUrl.set(viewHandler.redirect(team, "/rides/" + ride.getId() + "/messages")));
                     } else if (notification.getType().equals(NotificationType.NEW_TRIP_MESSAGE)) {
-                        tripService.get(team.getId(), notification.getElementId()).ifPresent(trip -> redirectUrl.set(viewHandler.redirect(team, "/messages")));
+                        tripService.get(team.getId(), notification.getElementId()).ifPresent(trip -> redirectUrl.set(viewHandler.redirect(team, "/trips/" + trip.getId() + "/trips")));
                     }
 
                 }
