@@ -41,6 +41,9 @@ public abstract class AbstractController {
     @Value("${rememberme.key}")
     private String rememberMeKey;
 
+    @Value("${site.name}")
+    private String siteName;
+
     @Autowired
     private UrlService urlService;
 
@@ -53,7 +56,8 @@ public abstract class AbstractController {
     // TODO do this automatically with annotation or other way
     protected void addGlobalValues(Principal principal, Model model, String pageTitle, Team team, HttpSession session) {
 
-        model.addAttribute("_pagetitle", pageTitle);
+        model.addAttribute("_pagetitle", pageTitle == null ? siteName : pageTitle);
+        model.addAttribute("_sitename", siteName);
         model.addAttribute("_date_formatter", Dates.frenchFormatter);
         model.addAttribute("_date_short_formatter", Dates.frenchShortFormatter);
         model.addAttribute("_time_formatter", Dates.timeFormatter);

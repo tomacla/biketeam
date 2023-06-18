@@ -10,7 +10,7 @@
 
            <div class="text-center my-4">
                <div class="btn-group mx-auto" role="group">
-                   <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/gpxtool' />"><i class="bi bi-plus-circle"></i> Visualiser un GPX</a>
+                   <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/gpxtool' />"><i class="bi bi-eye-fill"></i> Visualiser un GPX</a>
                </div>
            </div>
 

@@ -71,7 +71,7 @@ public class RootController extends AbstractController {
             // TODO should be user time zone and not UTC
             final List<FeedEntity> feeds = teamService.listFeed(teams.stream().map(Team::getId).collect(Collectors.toSet()), ZoneOffset.UTC, new FeedOptions());
 
-            addGlobalValues(principal, model, "Biketeam", null, session);
+            addGlobalValues(principal, model, null, null, session);
             if (error != null) {
                 model.addAttribute("errors", List.of(error));
             }
@@ -80,7 +80,7 @@ public class RootController extends AbstractController {
             model.addAttribute("userTeams", teams);
             return "root_auth";
         } else {
-            addGlobalValues(principal, model, "Biketeam", null);
+            addGlobalValues(principal, model, null, null);
             if (error != null) {
                 model.addAttribute("errors", List.of(error));
             }
