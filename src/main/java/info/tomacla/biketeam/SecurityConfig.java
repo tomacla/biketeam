@@ -64,7 +64,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             auth.antMatchers("/legal-mentions").permitAll();
 
             // GPX tools
-            auth.antMatchers("/gpxtool").permitAll();
+            auth.antMatchers("/gpxtool/**").permitAll();
 
             // spring security endpoints
             auth.antMatchers("/login/**").permitAll();
