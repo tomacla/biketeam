@@ -6,7 +6,7 @@
         <div class="card text-center">
           <h5 class="card-header">Connexion</h5>
           <div class="card-body">
-            <p class="lead">Utiliser votre compte Strava, Facebook ou Google pour vous connecter à Biketeam et accéder à toutes les fonctionnalités.</p>
+            <p class="lead">Utiliser votre compte Strava, Facebook ou Google pour vous connecter au service et accéder à toutes les fonctionnalités.</p>
             <a class="mx-auto mb-3 d-flex flex-row justify-content-between" style="padding:10px; text-decoration:none; font-weight:bold; background-color:#ffffff; color:#fb5304; border:1px solid #fb5304; border-radius:5px; width:275px;" href="<@common.teamUrl '' '/oauth2/authorization/strava' />" role="button">
                 <img src="<@common.teamUrl '' '/css/stravalogo.jpg' />" width="25" alt="Strava logo">
                 <span>Connexion avec Strava</span>

@@ -10,10 +10,16 @@
 
            <div class="text-center my-4">
                <div class="btn-group mx-auto" role="group">
-                   <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/new' />"><i class="bi bi-plus-circle"></i> Créer un groupe</a>
-                   <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/teams' />"><i class="bi bi-search"></i> Explorer les groupes</a>
+                   <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/gpxtool' />"><i class="bi bi-eye-fill"></i> Visualiser un GPX</a>
                </div>
            </div>
+
+           <div class="text-center my-4">
+                  <div class="btn-group mx-auto" role="group">
+                      <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/new' />"><i class="bi bi-plus-circle"></i> Créer un groupe</a>
+                      <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/teams' />"><i class="bi bi-search"></i> Explorer les groupes</a>
+                  </div>
+              </div>
 
             <#if userTeams?size != 0>
                 <div class="list-group">

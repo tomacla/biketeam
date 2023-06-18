@@ -24,7 +24,7 @@
         <meta name="description" content="${team.description.description}">
     <#else>
         <link rel="shortcut icon" href="<@common.teamUrl '' '/css/biketeam-logo.png' />">
-        <meta name="application-name" content="Biketeam">
+        <meta name="application-name" content="${_sitename}">
         <meta name="description" content="Un site pour les groupes de vélo">
     </#if>
 
@@ -49,7 +49,7 @@
 
 
 </head>
-<body>
+<body<#if _fullSize> class="h-100 w-100"</#if>>
 
     <#if !_embed>
         <#include "_includes_navbar.ftlh">
@@ -91,6 +91,6 @@
       </div>
     </div>
 
-    <div class="container">
+    <div class="container<#if _fullSize>-fluid w-100 p-0 m-0" style="height:calc(100% - 59px)</#if>">
 
     <#include "_includes_errors.ftlh">

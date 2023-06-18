@@ -1,13 +1,6 @@
 package info.tomacla.biketeam.domain.notification;
 
-import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.domain.AbstractDBTest;
-import info.tomacla.biketeam.domain.reaction.Reaction;
-import info.tomacla.biketeam.domain.reaction.ReactionRepository;
-import info.tomacla.biketeam.domain.reaction.ReactionTargetType;
-import info.tomacla.biketeam.domain.ride.Ride;
-import info.tomacla.biketeam.domain.ride.RideRepository;
-import info.tomacla.biketeam.domain.ride.RideType;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.TeamRepository;
 import info.tomacla.biketeam.domain.user.User;
@@ -19,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
