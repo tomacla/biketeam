@@ -112,6 +112,28 @@
                  </div>
             </#if>
             <#list maps as map>
+
+                <div class="modal fade" id="modal-map-${map.id}" tabindex="-1">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title">${map.name}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <div class="d-grid gap-2 col-6 mx-auto">
+                                <a download="${map.name}.gpx" href="<@common.teamUrl team.id '/maps/${map.id}/gpx' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-file-earmark-arrow-down"></i> GPX</a>
+                                <a download="${map.name}.fit" href="<@common.teamUrl team.id '/maps/${map.id}/fit' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-file-earmark-arrow-down"></i> FIT</a>
+                                <a href="<@common.teamUrl team.id '/maps/${map.id}/garmin' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-triangle-fill"></i> Garmin</a>
+                            </div>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                   <div class="col-12 col-md-4">
                     <div class="card">
                         <a href="<@common.teamUrl team.id '/maps/${map.permalink!map.id}' />"><img src="<@common.teamUrl team.id '/maps/${map.id}/image?width=450' />" class="card-img-top" alt="${map.id} image"></a>
@@ -126,9 +148,7 @@
                         </div>
                         <div class="card-footer d-flex justify-content-center align-items-center">
                             <div class="btn-group" role="group">
-                                <a download="${map.name}.gpx" href="<@common.teamUrl team.id '/maps/${map.id}/gpx' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-download"></i> GPX</a>
-                                <a download="${map.name}.fit" href="<@common.teamUrl team.id '/maps/${map.id}/fit' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-download"></i> FIT</a>
-                                <a href="<@common.teamUrl team.id '/maps/${map.id}/garmin' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-triangle-fill"></i> Garmin</a>
+                                <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#modal-map-${map.id}"><i class="bi bi-download"></i> Télécharger</button>
                                 <a href="<@common.teamUrl team.id '/maps/${map.permalink!map.id}' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-map"></i> Voir</a>
                             </div>
                         </div>
