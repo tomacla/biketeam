@@ -100,6 +100,26 @@
           <#if groupMaps?seq_contains(mapId)>
           <#else>
             <#assign groupMaps = groupMaps + [mapId]>
+            <div class="modal fade" id="modal-map-${group.map.id}" tabindex="-1">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">${group.map.name}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="d-grid gap-2 col-6 mx-auto">
+                        <a download="${group.map.name}.gpx" href="<@common.teamUrl team.id '/maps/${group.map.id}/gpx' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-file-earmark-arrow-down"></i> GPX</a>
+                        <a download="${group.map.name}.fit" href="<@common.teamUrl team.id '/maps/${group.map.id}/fit' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-file-earmark-arrow-down"></i> FIT</a>
+                        <a href="<@common.teamUrl team.id '/maps/${group.map.id}/garmin' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-triangle-fill"></i> Garmin</a>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </#if>
       </#if>
 
@@ -189,8 +209,7 @@
                             <div>
                                 <div class="btn-group">
                                      <#if group.map??>
-                                        <a class="btn btn-sm btn-link link-dark py-0 px-2" download="${ride.title}-${group.name}.gpx" href="<@common.teamUrl team.id '/maps/${group.map.id}/gpx' />"><i class="bi bi-download"></i></a>
-                                        <a class="btn btn-sm btn-link link-dark py-0 px-2" href="<@common.teamUrl team.id '/maps/${group.map.id}/garmin' />"><i class="bi bi-triangle-fill"></i></a>
+                                        <button class="btn btn-sm btn-link link-dark py-0 px-2" type="button" data-bs-toggle="modal" data-bs-target="#modal-map-${group.map.id}"><i class="bi bi-download"></i></button>
                                         <a class="btn btn-sm btn-link link-dark py-0 px-2" href="<@common.teamUrl team.id '/maps/${group.map.permalink!group.map.id}' />"><i class="bi bi-map"></i></a>
                                      </#if>
                                 </div>
