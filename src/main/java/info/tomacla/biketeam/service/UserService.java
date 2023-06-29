@@ -130,7 +130,7 @@ public class UserService {
         }
 
         final Team team = teamService.get(teamId).orElseThrow(() -> new IllegalArgumentException("Unknown team " + teamId));
-        if (team.getVisibility().equals(Visibility.PUBLIC) || team.getVisibility().equals(Visibility.PUBLIC_UNLISTED)) {
+        if (team.isPublic()) {
             return true;
         }
 
@@ -150,7 +150,7 @@ public class UserService {
         }
 
         final Team team = teamService.get(teamId).orElseThrow(() -> new IllegalArgumentException("Unknown team " + teamId));
-        if (team.getVisibility().equals(Visibility.PUBLIC) || team.getVisibility().equals(Visibility.PUBLIC_UNLISTED)) {
+        if (team.isPublic()) {
             return true;
         }
 

@@ -121,6 +121,7 @@ public class AdminTeamRideController extends AbstractController {
                 .withDescription(ride.getDescription())
                 .withType(ride.getType())
                 .withPublishedAt(ride.getPublishedAt(), team.getZoneId())
+                .withListedInFeed(ride.isListedInFeed())
                 .withTitle(ride.getTitle())
                 .withGroups(ride.getSortedGroups())
                 .withStartPlace(ride.getStartPlace())
@@ -163,15 +164,10 @@ public class AdminTeamRideController extends AbstractController {
                     return viewHandler.redirectView(team, "/admin/rides");
                 }
                 target = optionalRide.get();
-                target.setDate(parser.getDate());
                 if (target.getPublishedStatus().equals(PublishedStatus.UNPUBLISHED)) {
                     // do not change published date if already published
                     target.setPublishedAt(parser.getPublishedAt(timezone));
                 }
-                target.setTitle(parser.getTitle());
-                target.setDescription(parser.getDescription());
-                target.setPermalink(parser.getPermalink());
-                target.setType(parser.getType());
 
                 target.addOrReplaceGroups(parser.getGroups(teamId, mapService));
 
@@ -179,22 +175,23 @@ public class AdminTeamRideController extends AbstractController {
 
                 target = new Ride();
                 target.setTeamId(team.getId());
-                target.setPermalink(parser.getPermalink());
-                target.setType(parser.getType());
-                target.setDate(parser.getDate());
-                target.setPublishedAt(parser.getPublishedAt(timezone));
-                target.setTitle(parser.getTitle());
-                target.setDescription(parser.getDescription());
-                target.setImaged(parser.getFile().isPresent());
 
+                target.setPublishedAt(parser.getPublishedAt(timezone));
 
                 if (parser.getTemplateId() != null) {
                     rideTemplateService.increment(team.getId(), parser.getTemplateId());
                 }
                 // new group so just add all groups
                 parser.getGroups(team.getId(), mapService).forEach(target::addGroup);
+
             }
 
+            target.setListedInFeed(parser.isListedInFeed());
+            target.setDescription(parser.getDescription());
+            target.setTitle(parser.getTitle());
+            target.setPermalink(parser.getPermalink());
+            target.setType(parser.getType());
+            target.setDate(parser.getDate());
             target.setStartPlace(parser.getStartPlace(teamId, placeService));
             target.setEndPlace(parser.getEndPlace(teamId, placeService));
 

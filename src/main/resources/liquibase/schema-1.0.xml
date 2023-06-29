@@ -1324,4 +1324,19 @@
 
     </changeSet>
 
+    <changeSet id="add-listed-parameter-on-ridetrip" author="tomacla">
+
+        <addColumn tableName="ride">
+            <column name="listed_in_feed" type="BOOLEAN" />
+        </addColumn>
+
+        <addColumn tableName="trip">
+            <column name="listed_in_feed" type="BOOLEAN" />
+        </addColumn>
+
+        <sql>update ride set listed_in_feed = TRUE</sql>
+        <sql>update trip set listed_in_feed = TRUE</sql>
+
+    </changeSet>
+
 </databaseChangeLog>

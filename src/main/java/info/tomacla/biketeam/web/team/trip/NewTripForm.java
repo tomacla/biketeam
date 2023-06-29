@@ -8,6 +8,7 @@ import info.tomacla.biketeam.domain.place.Place;
 import info.tomacla.biketeam.domain.trip.TripStage;
 import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.service.PlaceService;
+import info.tomacla.biketeam.web.team.configuration.EditTeamConfigurationForm;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.*;
@@ -30,9 +31,9 @@ public class NewTripForm {
     private String title = "";
     private String description = "";
     private String meetingTime = "08:00";
-
     private String startPlaceId = "";
     private String endPlaceId = "";
+    private String listedInFeed = null;
     private MultipartFile file;
     private List<NewTripStageForm> stages = new ArrayList<>();
 
@@ -167,6 +168,14 @@ public class NewTripForm {
         this.stages = Objects.requireNonNullElse(stages, new ArrayList<>());
     }
 
+    public String getListedInFeed() {
+        return listedInFeed;
+    }
+
+    public void setListedInFeed(String listedInFeed) {
+        this.listedInFeed = listedInFeed;
+    }
+
     public NewTripFormParser parser() {
         return new NewTripFormParser(this);
     }
@@ -259,6 +268,10 @@ public class NewTripForm {
             }).collect(Collectors.toList());
         }
 
+        public boolean isListedInFeed() {
+            return form.getListedInFeed() != null && form.getListedInFeed().equals("on");
+        }
+
     }
 
     public static class NewTripFormBuilder {
@@ -267,6 +280,7 @@ public class NewTripForm {
 
         public NewTripFormBuilder(ZonedDateTime defaultDate, ZoneId timezone) {
             this.form = new NewTripForm(defaultDate);
+            withListedInFeed(true);
             withPublishedAt(defaultDate, timezone);
             withStartDate(defaultDate.toLocalDate());
             withEndDate(defaultDate.plus(1, ChronoUnit.DAYS).toLocalDate());
@@ -355,6 +369,11 @@ public class NewTripForm {
                             .get();
                 }).collect(Collectors.toList()));
             }
+            return this;
+        }
+
+        public NewTripFormBuilder withListedInFeed(boolean listedInFeed) {
+            form.setListedInFeed(listedInFeed ? "on" : null);
             return this;
         }
 

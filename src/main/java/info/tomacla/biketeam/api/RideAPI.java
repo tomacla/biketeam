@@ -56,7 +56,8 @@ public class RideAPI extends AbstractAPI {
                 parser.getPage(),
                 parser.getPageSize(),
                 parser.getFrom(),
-                parser.getTo()
+                parser.getTo(),
+                true
         );
 
         HttpHeaders responseHeaders = new HttpHeaders();

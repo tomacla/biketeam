@@ -34,6 +34,7 @@ public class TeamAdminUserController extends AbstractController {
         addGlobalValues(principal, model, "Administration - Utilisateurs", team);
         model.addAttribute("roles", team.getRoles()
                 .stream()
+                .filter(r -> team.isPrivate() || r.getRole().equals(Role.ADMIN))
                 .sorted((r1, r2) -> {
                     if (r1.getRole().equals(Role.ADMIN) && !r2.getRole().equals(Role.ADMIN)) {
                         return -1;
@@ -84,7 +85,16 @@ public class TeamAdminUserController extends AbstractController {
 
             if (target != null) {
                 userService.save(target);
-                if (!team.isMember(target)) {
+                if (team.isPublic()) {
+                    final Optional<UserRole> existingUserRole = userRoleService.get(team, target);
+                    if (existingUserRole.isPresent()) {
+                        final UserRole userRole = existingUserRole.get();
+                        userRole.setRole(Role.ADMIN);
+                        userRoleService.save(userRole);
+                    } else {
+                        userRoleService.save(new UserRole(team, target, Role.ADMIN));
+                    }
+                } else {
                     userRoleService.save(new UserRole(team, target, Role.MEMBER));
                 }
             }

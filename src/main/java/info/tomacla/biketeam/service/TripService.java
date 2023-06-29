@@ -104,8 +104,9 @@ public class TripService extends AbstractPermalinkService {
                     log.info("Publishing trip {} for team {}", trip.getId(), team.getId());
                     trip.setPublishedStatus(PublishedStatus.PUBLISHED);
                     save(trip);
-                    brokerService.sendToBroker(Exchanges.PUBLISH_TRIP,
-                            TeamEntityDTO.valueOf(trip.getTeamId(), trip.getId()));
+                    if (trip.isListedInFeed()) {
+                        brokerService.sendToBroker(Exchanges.PUBLISH_TRIP, TeamEntityDTO.valueOf(trip.getTeamId(), trip.getId()));
+                    }
                 })
         );
 
@@ -122,10 +123,11 @@ public class TripService extends AbstractPermalinkService {
 
 
     public Page<Trip> searchTrips(Set<String> teamIds, int page, int pageSize,
-                                  LocalDate from, LocalDate to) {
+                                  LocalDate from, LocalDate to, boolean listedInFeed) {
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by("startDate").descending());
-        return tripRepository.findAllByDeletionAndTeamIdInAndStartDateBetweenAndPublishedStatus(
+        return tripRepository.findAllByDeletionAndListedInFeedAndTeamIdInAndStartDateBetweenAndPublishedStatus(
                 false,
+                listedInFeed,
                 teamIds,
                 from,
                 to,

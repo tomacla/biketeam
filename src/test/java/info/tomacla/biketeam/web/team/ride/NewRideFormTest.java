@@ -10,8 +10,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class NewRideFormTest {
 
@@ -24,6 +23,7 @@ public class NewRideFormTest {
                 .withId("id")
                 .withTitle("title")
                 .withType(RideType.RACE)
+                .withListedInFeed(true)
                 .withDescription("desc ride")
                 .get();
 
@@ -37,6 +37,7 @@ public class NewRideFormTest {
         assertEquals(LocalDate.parse("2021-01-01"), parser.getDate());
         assertEquals(1, parser.getGroups("t1", null).size());
         assertEquals("2021-01-05T12:10Z", parser.getPublishedAt(ZoneOffset.UTC).toString());
+        assertTrue(parser.isListedInFeed());
 
     }
 

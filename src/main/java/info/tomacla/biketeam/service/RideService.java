@@ -98,8 +98,9 @@ public class RideService extends AbstractPermalinkService {
                     log.info("Publishing ride {} for team {}", ride.getId(), team.getId());
                     ride.setPublishedStatus(PublishedStatus.PUBLISHED);
                     save(ride);
-                    brokerService.sendToBroker(Exchanges.PUBLISH_RIDE,
-                            TeamEntityDTO.valueOf(ride.getTeamId(), ride.getId()));
+                    if(ride.isListedInFeed()) {
+                        brokerService.sendToBroker(Exchanges.PUBLISH_RIDE, TeamEntityDTO.valueOf(ride.getTeamId(), ride.getId()));
+                    }
                 })
         );
 
@@ -132,10 +133,11 @@ public class RideService extends AbstractPermalinkService {
 
 
     public Page<Ride> searchRides(Set<String> teamIds, int page, int pageSize,
-                                  LocalDate from, LocalDate to) {
+                                  LocalDate from, LocalDate to, boolean listedInFeeded) {
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by("date").descending());
-        return rideRepository.findAllByDeletionAndTeamIdInAndDateBetweenAndPublishedStatus(
+        return rideRepository.findAllByDeletionAndListedInFeedAndTeamIdInAndDateBetweenAndPublishedStatus(
                 false,
+                listedInFeeded,
                 teamIds,
                 from,
                 to,
