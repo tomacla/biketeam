@@ -2,18 +2,18 @@
   <div class="container">
 
     <#if team??>
-        <a class="nav-link link-secondary px-1" href="<@common.teamUrl '' '/' />"><i class="bi bi-house-door"></i><i class="bi bi-chevron-right"></i></a>
+        <a class="nav-link link-secondary px-1" href="<@common.teamUrl '' '/' />"><img height="25" src="<@common.teamUrl '' '/misc/home.png' />" alt="prendlaroue" /><i class="bi bi-chevron-right"></i></a>
         <a class="navbar-brand order-0" href="<@common.teamUrl team.id '' />">
             ${team.name}
         </a>
     <#elseif springMacroRequestContext.requestUri?contains('gpxtool')>
-        <a class="nav-link link-secondary px-1" href="<@common.teamUrl '' '/' />"><i class="bi bi-house-door"></i><i class="bi bi-chevron-right"></i></a>
+        <a class="nav-link link-secondary px-1" href="<@common.teamUrl '' '/' />"><img height="25" src="<@common.teamUrl '' '/misc/home.png' />" alt="prendlaroue" /><i class="bi bi-chevron-right"></i></a>
         <a class="navbar-brand order-0" href="<@common.teamUrl '' '/gpxtool' />">
             GPX Tool
         </a>
     <#else>
-        <a class="navbar-brand order-0" href="<@common.teamUrl '' '/' />">
-            ${_sitename}
+        <a class="navbar-brand order-0 p-0" href="<@common.teamUrl '' '/' />">
+            <img height="42" src="<@common.teamUrl '' '/misc/logo.png' />" alt="Prendslaroue">
         </a>
     </#if>
 

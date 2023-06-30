@@ -153,7 +153,7 @@ public class TeamService extends AbstractPermalinkService {
     }
 
     public void initTeamImage(Team newTeam) {
-        fileService.storeFile(getClass().getResourceAsStream("/static/css/biketeam-logo.png"),
+        fileService.storeFile(getClass().getResourceAsStream("/default-images/empty.png"),
                 FileRepositories.MISC_IMAGES,
                 newTeam.getId(),
                 "logo.png"

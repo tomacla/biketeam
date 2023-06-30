@@ -98,7 +98,7 @@ public class RideService extends AbstractPermalinkService {
                     log.info("Publishing ride {} for team {}", ride.getId(), team.getId());
                     ride.setPublishedStatus(PublishedStatus.PUBLISHED);
                     save(ride);
-                    if(ride.isListedInFeed()) {
+                    if (ride.isListedInFeed()) {
                         brokerService.sendToBroker(Exchanges.PUBLISH_RIDE, TeamEntityDTO.valueOf(ride.getTeamId(), ride.getId()));
                     }
                 })

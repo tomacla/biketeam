@@ -158,6 +158,16 @@ public class FileService {
         }
     }
 
+    public void storeFile(InputStream file, String directory, String fileName) {
+        try {
+            Files.createDirectories(Path.of(fileRepository, directory));
+            Files.copy(file, Path.of(fileRepository, directory, fileName), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            log.error("Unable to store file : " + fileName, e);
+            throw new RuntimeException("Unable to store file : " + file.toString(), e);
+        }
+    }
+
     public Path getTempFile(String prefix, String suffix) {
         try {
             return Files.createTempFile(getTmpDirectory(), prefix, suffix);
@@ -241,6 +251,28 @@ public class FileService {
             Files.createDirectories(Path.of(fileRepository, subDirectory));
         }
         Files.createDirectories(getTmpDirectory());
+
+        if (!fileExists(FileRepositories.MISC_IMAGES, "favicon.png")) {
+            storeFile(getClass().getResourceAsStream("/default-images/favicon.png"),
+                    FileRepositories.MISC_IMAGES,
+                    "favicon.png"
+            );
+        }
+
+        if (!fileExists(FileRepositories.MISC_IMAGES, "home.png")) {
+            storeFile(getClass().getResourceAsStream("/default-images/home.png"),
+                    FileRepositories.MISC_IMAGES,
+                    "home.png"
+            );
+        }
+
+        if (!fileExists(FileRepositories.MISC_IMAGES, "logo.png")) {
+            storeFile(getClass().getResourceAsStream("/default-images/logo.png"),
+                    FileRepositories.MISC_IMAGES,
+                    "logo.png"
+            );
+        }
+
 
     }
 

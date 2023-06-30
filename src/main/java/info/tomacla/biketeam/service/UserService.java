@@ -6,7 +6,6 @@ import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
 import info.tomacla.biketeam.domain.team.Team;
-import info.tomacla.biketeam.domain.team.Visibility;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.user.UserRepository;
 import info.tomacla.biketeam.domain.userrole.Role;

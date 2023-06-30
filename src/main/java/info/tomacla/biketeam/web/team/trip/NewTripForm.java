@@ -8,7 +8,6 @@ import info.tomacla.biketeam.domain.place.Place;
 import info.tomacla.biketeam.domain.trip.TripStage;
 import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.service.PlaceService;
-import info.tomacla.biketeam.web.team.configuration.EditTeamConfigurationForm;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.*;

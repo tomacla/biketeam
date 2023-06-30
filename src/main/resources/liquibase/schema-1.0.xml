@@ -1339,4 +1339,8 @@
 
     </changeSet>
 
+    <changeSet id="change-admin-parameter-type" author="tomacla">
+        <modifyDataType tableName="admin_parameters" columnName="value" newDataType="TEXT"/>
+    </changeSet>
+
 </databaseChangeLog>
