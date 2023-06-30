@@ -103,6 +103,16 @@
                 </div>
 
                 <div class="row">
+                    <div class="col-12 mb-3">
+                        <div class="border rounded p-2">
+                            <div class="form-check form-switch">
+                             <input class="form-check-input" name="listedInFeed" type="checkbox" id="form-ride-listedInFeed"<#if formdata.listedInFeed?? && formdata.listedInFeed == 'on'> checked</#if>>
+                             <label class="form-check-label" for="form-ride-listedInFeed">Ride visible dans le flux des abonnés</label>
+                           </div>
+                           <div id="form-ride-listedInFeed-help" class="form-text">Si l'option est désactivée, le ride est toujours visible aux utilisateurs ayant accès au groupe et disposant de l'URL.</div>
+                       </div>
+                    </div>
+
                     <div class="col-6 mb-3">
                       <label for="form-ride-title" class="form-label">Titre</label>
                       <input data-element="rides" data-target-id-field="form-ride-permalink" autocomplete="off" required value="${formdata.title}" name="title" type="text" class="form-control form-unique-id" id="form-ride-title" placeholder="Ride du mercredi">
@@ -111,6 +121,7 @@
                       <label for="form-ride-date" class="form-label">Date</label>
                       <input autocomplete="off" required value="${formdata.date}" name="date" type="date" class="form-control" id="form-ride-date">
                     </div>
+
                     <div class="col-6 mb-3">
                       <label for="form-ride-type" class="form-label">Type</label>
                       <select required name="type" class="form-select" id="form-ride-type">

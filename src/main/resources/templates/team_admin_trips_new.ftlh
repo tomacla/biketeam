@@ -96,6 +96,17 @@
                 </div>
 
                 <div class="row">
+
+                    <div class="col-12 mb-3">
+                        <div class="border rounded p-2">
+                            <div class="form-check form-switch">
+                             <input class="form-check-input" name="listedInFeed" type="checkbox" id="form-trip-listedInFeed"<#if formdata.listedInFeed?? && formdata.listedInFeed == 'on'> checked</#if>>
+                             <label class="form-check-label" for="form-trip-listedInFeed">Trip visible dans le flux des abonnés</label>
+                           </div>
+                           <div id="form-trip-listedInFeed-help" class="form-text">Si l'option est désactivée, le trip est toujours visible aux utilisateurs ayant accès au groupe et disposant de l'URL.</div>
+                       </div>
+                    </div>
+
                     <div class="col-6 mb-3">
                       <label for="form-trip-title" class="form-label">Titre</label>
                       <input data-element="trips" data-target-id-field="form-trip-permalink" autocomplete="off" required value="${formdata.title}" name="title" type="text" class="form-control form-unique-id" id="form-trip-title" placeholder="Voyage AR">

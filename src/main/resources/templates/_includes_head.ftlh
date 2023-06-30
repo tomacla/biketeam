@@ -23,7 +23,7 @@
         <meta name="application-name" content="${team.name}">
         <meta name="description" content="${team.description.description}">
     <#else>
-        <link rel="shortcut icon" href="<@common.teamUrl '' '/css/biketeam-logo.png' />">
+        <link rel="shortcut icon" href="<@common.teamUrl '' '/misc/favicon.png' />">
         <meta name="application-name" content="${_sitename}">
         <meta name="description" content="Un site pour les groupes de vélo">
     </#if>

@@ -8,18 +8,11 @@
                 <img class="d-block mt-2 mx-auto rounded" src="<@common.teamUrl '' '/users/${_user.id}/image' />" alt="profile">
             <h5 class="text-center mt-2 pb-2">${user.identity}</h5>
 
-           <div class="text-center my-4">
-               <div class="btn-group mx-auto" role="group">
-                   <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/gpxtool' />"><i class="bi bi-eye-fill"></i> Visualiser un GPX</a>
-               </div>
-           </div>
-
-           <div class="text-center my-4">
-                  <div class="btn-group mx-auto" role="group">
-                      <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/new' />"><i class="bi bi-plus-circle"></i> Créer un groupe</a>
-                      <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/teams' />"><i class="bi bi-search"></i> Explorer les groupes</a>
-                  </div>
-              </div>
+            <div class="list-group my-4">
+                <a class="list-group-item" href="<@common.teamUrl '' '/new' />"><i class="bi bi-plus-circle"></i> Créer un groupe</a>
+                <a class="list-group-item" href="<@common.teamUrl '' '/teams' />"><i class="bi bi-search"></i> Explorer les groupes</a>
+                <a class="list-group-item" href="<@common.teamUrl '' '/gpxtool' />"><i class="bi bi-eye-fill"></i> Visualiser un GPX</a>
+            </div>
 
             <#if userTeams?size != 0>
                 <div class="list-group">
@@ -40,11 +33,11 @@
 
     <div class="col-12 col-md-8">
 
-
             <div class="d-block d-md-none my-4 text-center">
                 <div class="btn-group mx-auto" role="group">
-                   <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/new' />">Créer un groupe</a>
-                   <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/teams' />">Explorer les groupes</a>
+                   <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/new' />"><i class="bi bi-plus-circle"></i> Créer</a>
+                   <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/teams' />"><i class="bi bi-search"></i> Explorer</a>
+                   <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/gpxtool' />"><i class="bi bi-eye-fill"></i> GPX</a>
                </div>
             </div>
 

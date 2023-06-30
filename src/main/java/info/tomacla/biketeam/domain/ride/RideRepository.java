@@ -21,8 +21,9 @@ public interface RideRepository extends PagingAndSortingRepository<Ride, String>
 
     Optional<Ride> findByPermalink(String permalink);
 
-
     List<Ride> findAllByDeletionAndTeamIdAndPublishedStatusAndPublishedAtLessThan(boolean deletion, String teamId, PublishedStatus publishedStatus, ZonedDateTime now);
+
+    Page<Ride> findAllByDeletionAndListedInFeedAndTeamIdInAndDateBetweenAndPublishedStatus(boolean deletion, boolean listedInFeed, Set<String> teamIds, LocalDate from, LocalDate to, PublishedStatus publishedStatus, Pageable pageable);
 
     Page<Ride> findAllByDeletionAndTeamIdInAndDateBetweenAndPublishedStatus(boolean deletion, Set<String> teamIds, LocalDate from, LocalDate to, PublishedStatus publishedStatus, Pageable pageable);
 

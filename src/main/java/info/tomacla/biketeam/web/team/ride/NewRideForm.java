@@ -34,6 +34,7 @@ public class NewRideForm {
     private String templateId = "";
     private String startPlaceId = "";
     private String endPlaceId = "";
+    private String listedInFeed = null;
     private MultipartFile file = null;
     private List<NewRideGroupForm> groups = new ArrayList<>();
 
@@ -120,6 +121,14 @@ public class NewRideForm {
 
     public void setPublishedAtTime(String publishedAtTime) {
         this.publishedAtTime = Strings.requireNonBlankOrDefault(publishedAtTime, "12:00");
+    }
+
+    public String getListedInFeed() {
+        return listedInFeed;
+    }
+
+    public void setListedInFeed(String listedInFeed) {
+        this.listedInFeed = listedInFeed;
     }
 
     public String getTitle() {
@@ -272,6 +281,10 @@ public class NewRideForm {
             }).collect(Collectors.toList());
         }
 
+        public boolean isListedInFeed() {
+            return form.getListedInFeed() != null && form.getListedInFeed().equals("on");
+        }
+
     }
 
     public static class NewRideFormBuilder {
@@ -282,6 +295,7 @@ public class NewRideForm {
             this.form = new NewRideForm(numberOfGroups);
             withPublishedAt(defaultDate, timezone);
             withDate(defaultDate.toLocalDate());
+            withListedInFeed(true);
         }
 
         public NewRideFormBuilder(RideTemplate template, ZonedDateTime defaultDate, ZoneId timezone) {
@@ -290,6 +304,7 @@ public class NewRideForm {
             withDate(defaultDate.toLocalDate());
             withStartPlace(template.getStartPlace());
             withEndPlace(template.getEndPlace());
+            withListedInFeed(true);
         }
 
         public NewRideFormBuilder withId(String id) {
@@ -363,6 +378,11 @@ public class NewRideForm {
                             .get();
                 }).collect(Collectors.toList()));
             }
+            return this;
+        }
+
+        public NewRideFormBuilder withListedInFeed(boolean listedInFeed) {
+            form.setListedInFeed(listedInFeed ? "on" : null);
             return this;
         }
 

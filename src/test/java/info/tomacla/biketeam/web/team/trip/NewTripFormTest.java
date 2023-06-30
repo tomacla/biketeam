@@ -8,8 +8,7 @@ import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class NewTripFormTest {
 
@@ -25,6 +24,7 @@ public class NewTripFormTest {
                 .withType(MapType.ROAD)
                 .withDescription("desc ride")
                 .withMeetingTime(LocalTime.parse("16:30"))
+                .withListedInFeed(true)
                 .get();
 
         final NewTripForm.NewTripFormParser parser = form.parser();
@@ -39,6 +39,7 @@ public class NewTripFormTest {
         assertEquals(LocalDate.parse("2021-01-05"), parser.getEndDate());
         assertEquals(2, parser.getStages("t1", null).size());
         assertEquals("2021-01-05T12:10Z", parser.getPublishedAt(ZoneOffset.UTC).toString());
+        assertTrue(parser.isListedInFeed());
 
     }
 

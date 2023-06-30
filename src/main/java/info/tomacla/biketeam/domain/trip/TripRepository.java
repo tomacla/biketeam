@@ -23,6 +23,8 @@ public interface TripRepository extends PagingAndSortingRepository<Trip, String>
 
     List<Trip> findAllByDeletionAndTeamIdAndPublishedStatusAndPublishedAtLessThan(boolean deletion, String teamId, PublishedStatus publishedStatus, ZonedDateTime now);
 
+    Page<Trip> findAllByDeletionAndListedInFeedAndTeamIdInAndStartDateBetweenAndPublishedStatus(boolean deletion, boolean listedInFeed, Set<String> teamIds, LocalDate from, LocalDate to, PublishedStatus publishedStatus, Pageable pageable);
+
     Page<Trip> findAllByDeletionAndTeamIdInAndStartDateBetweenAndPublishedStatus(boolean deletion, Set<String> teamIds, LocalDate from, LocalDate to, PublishedStatus publishedStatus, Pageable pageable);
 
     // do not filter by published at (ADMIN)

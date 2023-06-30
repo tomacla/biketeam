@@ -1,8 +1,5 @@
 package info.tomacla.biketeam.service.gpx;
 
-import java.util.List;
-import java.util.Map;
-
 public class StandaloneGpx {
 
     private final double length;

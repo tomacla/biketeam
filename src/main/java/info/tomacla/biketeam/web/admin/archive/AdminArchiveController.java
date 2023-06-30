@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.security.Principal;
 
 @Controller
-@RequestMapping(value = "/admin")
+@RequestMapping(value = "/admin/archives")
 public class AdminArchiveController extends AbstractController {
 
     @Autowired
     private ArchiveService archiveService;
 
-    @GetMapping(value = "/archives")
+    @GetMapping
     public String listArchives(@RequestParam(value = "archive", required = false) String archive,
                                Principal principal, Model model) {
 

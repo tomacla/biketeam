@@ -110,10 +110,10 @@ public class TeamService extends AbstractPermalinkService {
             ).getContent());
         }
         if (options.isIncludeRides()) {
-            result.addAll(rideService.searchRides(teamIds, 0, 10, options.getFrom(), options.getTo()).getContent());
+            result.addAll(rideService.searchRides(teamIds, 0, 10, options.getFrom(), options.getTo(), true).getContent());
         }
         if (options.isIncludeTrips()) {
-            result.addAll(tripService.searchTrips(teamIds, 0, 10, options.getFrom(), options.getTo()).getContent());
+            result.addAll(tripService.searchTrips(teamIds, 0, 10, options.getFrom(), options.getTo(), true).getContent());
         }
 
         result = result.stream().sorted(FeedSorter.get(zoneId)).collect(Collectors.toList());
@@ -153,7 +153,7 @@ public class TeamService extends AbstractPermalinkService {
     }
 
     public void initTeamImage(Team newTeam) {
-        fileService.storeFile(getClass().getResourceAsStream("/static/css/biketeam-logo.png"),
+        fileService.storeFile(getClass().getResourceAsStream("/default-images/empty.png"),
                 FileRepositories.MISC_IMAGES,
                 newTeam.getId(),
                 "logo.png"
