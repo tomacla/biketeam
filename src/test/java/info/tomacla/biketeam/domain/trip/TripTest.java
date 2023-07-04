@@ -42,7 +42,7 @@ public class TripTest extends AbstractDBTest {
         createTrip(ZonedDateTime.now().minus(1, ChronoUnit.DAYS), PublishedStatus.UNPUBLISHED);
         createTrip(ZonedDateTime.now().plus(1, ChronoUnit.DAYS), PublishedStatus.PUBLISHED);
 
-        trips = tripRepository.findAllByDeletionAndTeamIdAndPublishedStatusAndPublishedAtLessThan(false, "triptest-team",
+        trips = tripRepository.findAllByDeletionAndTeamIdAndPublishedStatusAndPublishedAtLessThan(false,  "triptest-team",
                 PublishedStatus.PUBLISHED,
                 ZonedDateTime.now());
 
@@ -54,6 +54,7 @@ public class TripTest extends AbstractDBTest {
     private void createTrip(ZonedDateTime publishedAt, PublishedStatus status) {
         Trip trip = new Trip();
         trip.setTeamId("triptest-team");
+        trip.setListedInFeed(true);
         trip.setTitle("test-trip");
         trip.setStartDate(LocalDate.now());
         trip.setEndDate(LocalDate.now().plus(1, ChronoUnit.DAYS));

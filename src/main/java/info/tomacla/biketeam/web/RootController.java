@@ -1,23 +1,32 @@
 package info.tomacla.biketeam.web;
 
 import info.tomacla.biketeam.common.data.Country;
+import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.domain.feed.FeedEntity;
 import info.tomacla.biketeam.domain.feed.FeedOptions;
+import info.tomacla.biketeam.domain.parameter.Parameter;
+import info.tomacla.biketeam.domain.parameter.ParameterRepository;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.userrole.Role;
 import info.tomacla.biketeam.domain.userrole.UserRole;
 import info.tomacla.biketeam.security.Authorities;
 import info.tomacla.biketeam.service.*;
+import info.tomacla.biketeam.service.file.FileService;
 import info.tomacla.biketeam.web.team.NewTeamForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.Principal;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -43,6 +52,12 @@ public class RootController extends AbstractController {
 
     @Autowired
     private UserRoleService userRoleService;
+
+    @Autowired
+    private ParameterRepository parameterRepository;
+
+    @Autowired
+    private FileService fileService;
 
     @GetMapping
     public String getRoot(@RequestParam(required = false, name = "error") String error,
@@ -225,8 +240,41 @@ public class RootController extends AbstractController {
 
     @RequestMapping(value = "/legal-mentions", method = RequestMethod.GET)
     public String termsOfService(Principal principal, Model model) {
+
+        Optional<Parameter> optionalLegalMentions = parameterRepository.findById("LEGAL_MENTIONS");
+
+        model.addAttribute("content", optionalLegalMentions.isPresent() ? optionalLegalMentions.get().getValue() : "");
+
         addGlobalValues(principal, model, "Mentions légales", null);
         return "legal_mentions";
     }
+
+
+    @ResponseBody
+    @RequestMapping(value = "/misc/{imageName}", method = RequestMethod.GET)
+    public ResponseEntity<byte[]> getFavicon(@PathVariable("imageName") String imageName) {
+        return getStaticImage(imageName);
+    }
+
+    private ResponseEntity<byte[]> getStaticImage(String image) {
+        try {
+            Path file = fileService.getFile(FileRepositories.MISC_IMAGES, image);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Content-Type", MediaType.IMAGE_PNG_VALUE);
+            headers.setContentDisposition(ContentDisposition.builder("inline")
+                    .filename("favicon.png")
+                    .build());
+
+            return new ResponseEntity<>(
+                    Files.readAllBytes(file),
+                    headers,
+                    HttpStatus.OK
+            );
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+    }
+
 
 }

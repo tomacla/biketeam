@@ -62,6 +62,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             auth.antMatchers("/img/**").permitAll();
             auth.antMatchers("/*/image").permitAll();
             auth.antMatchers("/legal-mentions").permitAll();
+            auth.antMatchers("/robots.txt").permitAll();
+            auth.antMatchers("/misc/**").permitAll();
 
             // GPX tools
             auth.antMatchers("/gpxtool/**").permitAll();

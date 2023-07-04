@@ -101,6 +101,7 @@ public class AdminTeamTripController extends AbstractController {
                 .withPublishedAt(trip.getPublishedAt(), team.getZoneId())
                 .withTitle(trip.getTitle())
                 .withMeetingTime(trip.getMeetingTime())
+                .withListedInFeed(trip.isListedInFeed())
                 .withStages(trip.getSortedStages())
                 .withStartPlace(trip.getStartPlace())
                 .withEndPlace(trip.getEndPlace())
@@ -142,37 +143,31 @@ public class AdminTeamTripController extends AbstractController {
                     return viewHandler.redirectView(team, "/admin/trips");
                 }
                 target = optionalTrip.get();
-                target.setStartDate(parser.getStartDate());
-                target.setEndDate(parser.getEndDate());
+
                 if (target.getPublishedStatus().equals(PublishedStatus.UNPUBLISHED)) {
                     // do not change published date if already published
                     target.setPublishedAt(parser.getPublishedAt(timezone));
                 }
-                target.setTitle(parser.getTitle());
-                target.setDescription(parser.getDescription());
-                target.setType(parser.getType());
-                target.setMeetingTime(parser.getMeetingTime());
-                target.setPermalink(parser.getPermalink());
 
                 target.addOrReplaceStages(parser.getStages(teamId, mapService));
 
             } else {
                 target = new Trip();
                 target.setTeamId(team.getId());
-                target.setType(parser.getType());
-                target.setStartDate(parser.getStartDate());
-                target.setEndDate(parser.getEndDate());
                 target.setPublishedAt(parser.getPublishedAt(timezone));
-                target.setTitle(parser.getTitle());
-                target.setDescription(parser.getDescription());
-                target.setImaged(parser.getFile().isPresent());
-                target.setMeetingTime(parser.getMeetingTime());
-                target.setPermalink(parser.getPermalink());
 
                 // new group so just add all groups
                 parser.getStages(team.getId(), mapService).forEach(target::addStage);
             }
 
+            target.setTitle(parser.getTitle());
+            target.setDescription(parser.getDescription());
+            target.setType(parser.getType());
+            target.setMeetingTime(parser.getMeetingTime());
+            target.setPermalink(parser.getPermalink());
+            target.setStartDate(parser.getStartDate());
+            target.setEndDate(parser.getEndDate());
+            target.setListedInFeed(parser.isListedInFeed());
             target.setStartPlace(parser.getStartPlace(teamId, placeService));
             target.setEndPlace(parser.getEndPlace(teamId, placeService));
 

@@ -49,6 +49,8 @@ public class Trip implements MessageHolder, ReactionHolder, FeedEntity {
     @Column(length = 8000)
     private String description;
     private boolean imaged;
+    @Column(name = "listed_in_feed")
+    private boolean listedInFeed;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "start_place_id")
     private Place startPlace;
@@ -159,6 +161,14 @@ public class Trip implements MessageHolder, ReactionHolder, FeedEntity {
 
     public void setImaged(boolean imaged) {
         this.imaged = imaged;
+    }
+
+    public boolean isListedInFeed() {
+        return listedInFeed;
+    }
+
+    public void setListedInFeed(boolean listedInFeed) {
+        this.listedInFeed = listedInFeed;
     }
 
     public Place getStartPlace() {
