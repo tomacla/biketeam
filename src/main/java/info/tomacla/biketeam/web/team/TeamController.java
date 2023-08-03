@@ -86,7 +86,8 @@ public class TeamController extends AbstractController {
                 parser.getTo()
         );
 
-        List<FeedEntity> feed = teamService.listFeed(team, options);
+
+        List<FeedEntity> feed = teamService.listFeed(getUserFromPrincipal(principal).orElse(null), team, options);
 
         addGlobalValues(principal, model, team.getName(), team);
         model.addAttribute("feed", feed);

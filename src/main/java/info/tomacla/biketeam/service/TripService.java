@@ -9,6 +9,7 @@ import info.tomacla.biketeam.common.file.ImageDescriptor;
 import info.tomacla.biketeam.domain.trip.Trip;
 import info.tomacla.biketeam.domain.trip.TripIdTitleDateProjection;
 import info.tomacla.biketeam.domain.trip.TripRepository;
+import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.service.amqp.BrokerService;
 import info.tomacla.biketeam.service.amqp.dto.TeamEntityDTO;
 import info.tomacla.biketeam.service.file.FileService;
@@ -135,6 +136,15 @@ public class TripService extends AbstractPermalinkService {
                 pageable);
     }
 
+    public List<Trip> searchTripsByUser(User connectedUser, LocalDate from) {
+        return tripRepository.findAllByDeletionAndParticipants_IdAndEndDateGreaterThanAndPublishedStatus(
+                false,
+                connectedUser.getId(),
+                from,
+                PublishedStatus.PUBLISHED
+        );
+    }
+
     public void saveImage(String teamId, String tripId, InputStream is, String fileName) {
         Optional<FileExtension> optionalFileExtension = FileExtension.findByFileName(fileName);
         if (optionalFileExtension.isPresent()) {
@@ -169,5 +179,6 @@ public class TripService extends AbstractPermalinkService {
             save(trip);
         });
     }
+
 
 }

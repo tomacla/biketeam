@@ -14,10 +14,10 @@
                 <a class="list-group-item" href="<@common.teamUrl '' '/gpxtool' />"><i class="bi bi-eye-fill"></i> Visualiser un GPX</a>
             </div>
 
-            <#if userTeams?size != 0>
+            <#if _user_teams?size != 0>
                 <div class="list-group">
                     <div class="list-group-item list-group-item-secondary"><i class="bi bi-bookmarks"></i> Groupes suivis</div>
-                    <#list userTeams as userTeam>
+                    <#list _user_teams as userTeam>
                         <a href="<@common.teamUrl userTeam.id '' />" class="list-group-item list-group-item-action">
                             <img src="<@common.teamUrl userTeam.id '/image' />" height="18" alt="Team image"> ${userTeam.name}
                         </a>
@@ -33,12 +33,29 @@
 
     <div class="col-12 col-md-8">
 
-            <div class="d-block d-md-none my-4 text-center">
-                <div class="btn-group mx-auto" role="group">
-                   <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/new' />"><i class="bi bi-plus-circle"></i> Créer</a>
-                   <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/teams' />"><i class="bi bi-search"></i> Explorer</a>
-                   <a class="btn btn-sm btn-outline-secondary" href="<@common.teamUrl '' '/gpxtool' />"><i class="bi bi-eye-fill"></i> GPX</a>
-               </div>
+            <div class="d-flex d-row justify-content-center d-md-none mb-2">
+                <div class="btn-group me-2">
+                  <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    Groupes
+                  </button>
+
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="<@common.teamUrl '' '/new' />"><i class="bi bi-plus-circle"></i> Créer</a></li>
+                    <li><a class="dropdown-item" href="<@common.teamUrl '' '/teams' />"><i class="bi bi-search"></i> Explorer</a></li>
+                    <#if _user_teams?size != 0>
+                        <li><hr class="dropdown-divider"></li>
+                        <#list _user_teams as userTeam>
+                            <li><a href="<@common.teamUrl userTeam.id '' />" class="dropdown-item">
+                                <img src="<@common.teamUrl userTeam.id '/image' />" height="18" alt="Team image"> ${userTeam.name}
+                            </a></li>
+                        </#list>
+                    </#if>
+                  </ul>
+                </div>
+
+                <div>
+                <a class="btn btn-outline-secondary" href="<@common.teamUrl '' '/gpxtool' />"><i class="bi bi-eye-fill"></i> GPX</a>
+                </div>
             </div>
 
             <@common.displayFeed true />

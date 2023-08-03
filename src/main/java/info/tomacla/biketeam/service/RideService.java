@@ -145,6 +145,15 @@ public class RideService extends AbstractPermalinkService {
                 pageable);
     }
 
+    public List<Ride> searchRidesByUser(User connectedUser, LocalDate from) {
+        return rideRepository.findAllByDeletionAndGroups_Participants_IdAndDateGreaterThanAndPublishedStatus(
+                false,
+                connectedUser.getId(),
+                from,
+                PublishedStatus.PUBLISHED
+        );
+    }
+
     public void saveImage(String teamId, String rideId, InputStream is, String fileName) {
         Optional<FileExtension> optionalFileExtension = FileExtension.findByFileName(fileName);
         if (optionalFileExtension.isPresent()) {
@@ -244,6 +253,7 @@ public class RideService extends AbstractPermalinkService {
             return result.toString();
         }
     }
+
 
     record RideGroupStart(RideGroup rideGroup, Instant start) {
     }

@@ -77,10 +77,13 @@ public abstract class AbstractController {
 
         getUserFromPrincipal(principal).ifPresent(user -> {
 
+            final List<Team> teams = teamService.getUserTeams(user.getId());
+
             model.addAttribute("_authenticated", true);
             model.addAttribute("_user", user);
 
             model.addAttribute("_admin", user.isAdmin());
+            model.addAttribute("_user_teams", teams);
 
             if (team != null) {
                 model.addAttribute("_team_admin", team.isAdmin(user));
