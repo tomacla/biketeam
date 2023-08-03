@@ -13,6 +13,7 @@
                   <a download="${gpxuuid}.gpx" href="<@common.teamUrl '' '/gpxtool/${gpxuuid}/gpx' />" class="btn btn-secondary text-white" role="button"><i class="bi bi-file-arrow-down-fill"></i><span class="ps-1 d-none d-md-inline-block">Télécharger</span></a>
                   <button onclick="copyURLtoClipboard();" class="btn btn-secondary  text-white" role="button"><i class="bi bi-share-fill"></i><span class="ps-1 d-none d-md-inline-block">Partager</span></a>
                   <button id="toggle-track-button" onclick="toggleTrack();" class="d-none d-md-inline-block btn btn-secondary  text-white" role="button"><i class="bi bi-eye-slash-fill"></i><span class="ps-1 d-none d-md-inline-block">Masquer</span></a>
+                  <button onclick="displayPosition();" class="btn btn-secondary  text-white" role="button"><i class="bi bi-geo-fill"></i><span class="ps-1 d-none d-md-inline-block">Position</span></a>
                 </div>
             </div>
 
@@ -33,6 +34,9 @@
 
     <script type="text/javascript">
 
+            function displayPosition() {
+                activateLocation(targetMap);
+            }
 
             var trackDisplayed = true;
             function toggleTrack() {
