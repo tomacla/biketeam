@@ -67,7 +67,7 @@
                         <a class="link-dark text-decoration-none" href="<@common.teamUrl publication.teamId '' />"><img src="<@common.teamUrl publication.teamId '/image' />" height="50" alt="Team image"></a>
                     </div>
                     <div class="ms-3 d-flex flex-column align-items-start">
-                        <div><#if withTeam><a class="link-dark" href="<@common.teamUrl publication.teamId '' />"><#list userTeams?filter(t -> t.id == publication.teamId) as itemTeam>${itemTeam.name}</#list></a> - </#if>${publication.title}</div>
+                        <div><#if withTeam><a class="link-dark" href="<@common.teamUrl publication.teamId '' />"><#list _user_teams?filter(t -> t.id == publication.teamId) as itemTeam>${itemTeam.name}</#list></a> - </#if>${publication.title}</div>
                         <div class="small text-muted"><i class="bi bi-newspaper"></i> ${publication.publishedAt.format(_date_formatter)}</div>
                     </div>
                 </div>
@@ -82,7 +82,7 @@
                   </div>
               </#if>
             </div>
-            <#if (!withTeam && team.configuration.reactionVisible) || (withTeam && (userTeams?filter(t -> t.id == publication.teamId))[0].configuration.reactionVisible)>
+            <#if (!withTeam && team.configuration.reactionVisible) || (withTeam && (_user_teams?filter(t -> t.id == publication.teamId))[0].configuration.reactionVisible)>
                 <div class="card-footer d-flex justify-content-start">
                     <div class="d-flex flex-row reaction-holder" id="reaction-holder-${publication.id}" <#if _session??>data-reaction-session="${_session}"</#if> data-reaction-url="<@common.teamUrl publication.teamId '/publications/' + publication.id + '/reactions' />">
                     </div>
@@ -104,7 +104,7 @@
                         <a class="link-dark text-decoration-none" href="<@common.teamUrl ride.teamId '' />"><img src="<@common.teamUrl ride.teamId '/image' />" height="50" alt="Team image"></a>
                     </div>
                     <div class="ms-3 d-flex flex-column align-items-start">
-                        <div><#if withTeam><a class="link-dark" href="<@common.teamUrl ride.teamId '' />"><#list userTeams?filter(t -> t.id == ride.teamId) as itemTeam>${itemTeam.name}</#list></a> - </#if><a class="link-dark" href="<@common.teamUrl ride.teamId '/rides/'+ ride.permalink!ride.id />">${ride.title}</a></div>
+                        <div><#if withTeam><a class="link-dark" href="<@common.teamUrl ride.teamId '' />"><#list _user_teams?filter(t -> t.id == ride.teamId) as itemTeam>${itemTeam.name}</#list></a> - </#if><a class="link-dark" href="<@common.teamUrl ride.teamId '/rides/'+ ride.permalink!ride.id />">${ride.title}</a></div>
                         <div class="small text-muted"><i class="bi bi-bicycle"></i> ${ride.publishedAt.format(_date_formatter)}</div>
                     </div>
                 </div>
@@ -133,7 +133,7 @@
                   </div>
             </div>
             </#if>
-            <#if (!withTeam && team.configuration.reactionVisible) || (withTeam && (userTeams?filter(t -> t.id == ride.teamId))[0].configuration.reactionVisible)>
+            <#if (!withTeam && team.configuration.reactionVisible) || (withTeam && (_user_teams?filter(t -> t.id == ride.teamId))[0].configuration.reactionVisible)>
                 <div class="card-footer d-flex justify-content-between">
                     <div class="d-flex flex-row reaction-holder" id="reaction-holder-${ride.id}" <#if _session??>data-reaction-session="${_session}"</#if> data-reaction-url="<@common.teamUrl ride.teamId '/rides/' + (ride.permalink!ride.id) + '/reactions' />">
                     </div>
@@ -160,7 +160,7 @@
                     <a class="link-dark text-decoration-none" href="<@common.teamUrl trip.teamId '' />"><img src="<@common.teamUrl trip.teamId '/image' />" height="50" alt="Team image"></a>
                 </div>
                 <div class="ms-3 d-flex flex-column align-items-start">
-                    <div><#if withTeam><a class="link-dark" href="<@common.teamUrl trip.teamId '' />"><#list userTeams?filter(t -> t.id == trip.teamId) as itemTeam>${itemTeam.name}</#list></a> - </#if><a class="link-dark" href="<@common.teamUrl trip.teamId '/trips/'+ trip.permalink!trip.id />">${trip.title}</a></div>
+                    <div><#if withTeam><a class="link-dark" href="<@common.teamUrl trip.teamId '' />"><#list _user_teams?filter(t -> t.id == trip.teamId) as itemTeam>${itemTeam.name}</#list></a> - </#if><a class="link-dark" href="<@common.teamUrl trip.teamId '/trips/'+ trip.permalink!trip.id />">${trip.title}</a></div>
                     <div class="small text-muted"><i class="bi bi-signpost-2"></i> ${trip.publishedAt.format(_date_formatter)}</div>
                 </div>
             </div>
@@ -186,7 +186,7 @@
 
         </div>
         </#if>
-        <#if (!withTeam && team.configuration.reactionVisible) || (withTeam && (userTeams?filter(t -> t.id == trip.teamId))[0].configuration.reactionVisible)>
+        <#if (!withTeam && team.configuration.reactionVisible) || (withTeam && (_user_teams?filter(t -> t.id == trip.teamId))[0].configuration.reactionVisible)>
             <div class="card-footer d-flex justify-content-between">
                 <div class="d-flex flex-row reaction-holder" id="reaction-holder-${trip.id}" <#if _session??>data-reaction-session="${_session}"</#if> data-reaction-url="<@common.teamUrl trip.teamId '/trips/' + (trip.permalink!trip.id) + '/reactions' />">
                 </div>
