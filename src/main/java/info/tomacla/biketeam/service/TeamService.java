@@ -115,13 +115,13 @@ public class TeamService extends AbstractPermalinkService {
         if (options.isIncludeRides()) {
             result.addAll(rideService.searchRides(teamIds, 0, 10, options.getFrom(), options.getTo(), true).getContent());
             if (connectedUser != null) {
-                result.addAll(rideService.searchRidesByUser(connectedUser, LocalDate.now().minus(1, ChronoUnit.DAYS)));
+                result.addAll(rideService.searchRidesByUser(connectedUser, teamIds, LocalDate.now().minus(1, ChronoUnit.DAYS)));
             }
         }
         if (options.isIncludeTrips()) {
             result.addAll(tripService.searchTrips(teamIds, 0, 10, options.getFrom(), options.getTo(), true).getContent());
             if (connectedUser != null) {
-                result.addAll(tripService.searchTripsByUser(connectedUser, LocalDate.now().minus(1, ChronoUnit.DAYS)));
+                result.addAll(tripService.searchTripsByUser(connectedUser, teamIds, LocalDate.now().minus(1, ChronoUnit.DAYS)));
             }
         }
 
