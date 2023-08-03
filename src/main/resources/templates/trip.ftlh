@@ -66,6 +66,50 @@
        </div>
        </#if>
 
+    <#assign colors=["#566B13", "#1d32a8", "#732C7B", "#bdbd22", "#c90808", "#b81491", "#628de3", "#6dcc5c", "#c694d4", "#e3a209"]>
+   <#assign textColors=["#ffffff", "#ffffff", "#ffffff", "#000000", "#ffffff", "#ffffff", "#000000", "#000000", "#000000", "#000000"]>
+   <#assign stageMaps = []>
+   <#assign totalDistance = 0>
+   <#assign totalPositiveElevation = 0>
+   <#assign mapCenter = [0.0,0.0]>
+   <#if trip.startPlace?? && trip.startPlace.point??>
+        <#assign mapCenter = [trip.startPlace.point.lat,trip.startPlace.point.lng]>
+   </#if>
+   <#list trip.sortedStages as stage>
+      <#if stage.map??>
+        <#assign totalDistance = totalDistance + stage.map.length>
+        <#assign totalPositiveElevation = totalPositiveElevation + stage.map.positiveElevation>
+        <#if mapCenter[0] == 0.0>
+            <#assign mapCenter = [stage.map.startPoint.lat, stage.map.startPoint.lng]>
+        </#if>
+        <#assign mapId = stage.map.id>
+          <#if stageMaps?seq_contains(mapId)>
+          <#else>
+            <#assign stageMaps = stageMaps + [mapId]>
+            <div class="modal fade" id="modal-map-${stage.map.id}" tabindex="-1">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">${stage.map.name}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <div class="d-grid gap-2 col-6 mx-auto">
+                            <a download="${stage.map.name}.gpx" href="<@common.teamUrl team.id '/maps/${stage.map.id}/gpx' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-file-earmark-arrow-down"></i> GPX</a>
+                            <a download="${stage.map.name}.fit" href="<@common.teamUrl team.id '/maps/${stage.map.id}/fit' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-file-earmark-arrow-down"></i> FIT</a>
+                            <a href="<@common.teamUrl team.id '/maps/${stage.map.id}/garmin' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-triangle-fill"></i> Garmin</a>
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+          </#if>
+      </#if>
+   </#list>
+
     <div class="col-12 mb-2">
 
         <div class="row p-0 py-2 m-0 border rounded">
@@ -84,6 +128,14 @@
                 <#if trip.endPlace??>
                     <li>Arrivée : <a href="#" class="link-dark" data-bs-toggle="modal" data-bs-target="#placemodal">${trip.endPlace.name}</a></li>
                 </#if>
+
+                <#if totalDistance gt 0>
+                 <li><div class="d-flex flex-row justify-content-start align-items-center gap-1 gap-md-2 gap-xxl-3">
+                       <span class="text-nowrap"><i class="bi bi-arrow-left-right d-none d-md-inline-block"></i> ${totalDistance?floor}km</span>
+                       <span class="text-nowrap"><i class="bi bi-arrow-up d-none d-md-inline-block"></i> ${totalPositiveElevation?floor}m</span>
+                   </div></li>
+                 </#if>
+
             </ul>
 
             <div class="d-flex flex-row align-items-center justify-content-between">
@@ -140,45 +192,7 @@
 
     </div>
 
-    <#assign colors=["#566B13", "#1d32a8", "#732C7B", "#bdbd22", "#c90808", "#b81491", "#628de3", "#6dcc5c", "#c694d4", "#e3a209"]>
-       <#assign textColors=["#ffffff", "#ffffff", "#ffffff", "#000000", "#ffffff", "#ffffff", "#000000", "#000000", "#000000", "#000000"]>
-       <#assign stageMaps = []>
-       <#assign mapCenter = [0.0,0.0]>
-       <#if trip.startPlace?? && trip.startPlace.point??>
-            <#assign mapCenter = [trip.startPlace.point.lat,trip.startPlace.point.lng]>
-       </#if>
-       <#list trip.sortedStages as stage>
-          <#if stage.map??>
-            <#if mapCenter[0] == 0.0>
-                <#assign mapCenter = [stage.map.startPoint.lat, stage.map.startPoint.lng]>
-            </#if>
-            <#assign mapId = stage.map.id>
-              <#if stageMaps?seq_contains(mapId)>
-              <#else>
-                <#assign stageMaps = stageMaps + [mapId]>
-                <div class="modal fade" id="modal-map-${stage.map.id}" tabindex="-1">
-                      <div class="modal-dialog">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h5 class="modal-title">${stage.map.name}</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                          </div>
-                          <div class="modal-body">
-                            <div class="d-grid gap-2 col-6 mx-auto">
-                                <a download="${stage.map.name}.gpx" href="<@common.teamUrl team.id '/maps/${stage.map.id}/gpx' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-file-earmark-arrow-down"></i> GPX</a>
-                                <a download="${stage.map.name}.fit" href="<@common.teamUrl team.id '/maps/${stage.map.id}/fit' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-file-earmark-arrow-down"></i> FIT</a>
-                                <a href="<@common.teamUrl team.id '/maps/${stage.map.id}/garmin' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-triangle-fill"></i> Garmin</a>
-                            </div>
-                          </div>
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-              </#if>
-          </#if>
-       </#list>
+
 
     <div class="col-12 col-xl-4 mb-4">
 

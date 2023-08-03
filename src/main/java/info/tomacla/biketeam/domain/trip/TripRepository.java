@@ -37,4 +37,5 @@ public interface TripRepository extends PagingAndSortingRepository<Trip, String>
     @Query(value = "delete from trip_participant where user_id = :userId", nativeQuery = true)
     void removeParticipant(@Param("userId") String userId);
 
+    List<Trip> findAllByDeletionAndParticipants_IdAndEndDateGreaterThanAndPublishedStatus(boolean b, String id, LocalDate from, PublishedStatus publishedStatus);
 }

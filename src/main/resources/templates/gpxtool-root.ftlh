@@ -46,6 +46,10 @@
 
   </div>
 
+  <div class="col-12 text-center pb-4">
+      <a class="link-dark" href="<@common.teamUrl '' '/gpxtool/raw' />">Je veux juste voir une carte</a>
+  </div>
+
  <div class="row justify-content-center">
 
     <div class="col-12 col-md-6 text-center">

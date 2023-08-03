@@ -73,7 +73,7 @@ public class TeamAPI extends AbstractAPI {
 
         final Team team = checkTeam(teamId);
 
-        return ResponseEntity.ok().body(teamService.listFeed(team, new FeedOptions()).stream().map(f -> {
+        return ResponseEntity.ok().body(teamService.listFeed(null, team, new FeedOptions()).stream().map(f -> {
             if (f instanceof Publication) {
                 return PartialPublicationDTO.valueOf((Publication) f);
             } else if (f instanceof Ride) {
