@@ -62,7 +62,7 @@ public class GpxToolController extends AbstractController {
 
         try {
 
-            if(uuid.equals("raw")) {
+            if (uuid.equals("raw")) {
                 addGlobalValues(principal, model, "GPX Tool", null);
                 model.addAttribute("_fullSize", true);
                 model.addAttribute("gpxuuid", uuid);

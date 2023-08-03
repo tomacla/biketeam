@@ -9,6 +9,7 @@ import info.tomacla.biketeam.domain.feed.FeedEntity;
 import info.tomacla.biketeam.domain.feed.FeedOptions;
 import info.tomacla.biketeam.domain.feed.FeedSorter;
 import info.tomacla.biketeam.domain.team.*;
+import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.userrole.Role;
 import info.tomacla.biketeam.service.amqp.BrokerService;
 import info.tomacla.biketeam.service.file.FileService;
@@ -27,10 +28,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
+import java.time.temporal.ChronoUnit;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -94,13 +97,13 @@ public class TeamService extends AbstractPermalinkService {
         return teamRepository.findAllByDeletionAndRoles_UserIdAndRoles_RoleIn(false, userId, Set.of(Role.ADMIN, Role.MEMBER));
     }
 
-    public List<FeedEntity> listFeed(Team team, FeedOptions options) {
-        return this.listFeed(Set.of(team.getId()), ZoneId.of(team.getConfiguration().getTimezone()), options);
+    public List<FeedEntity> listFeed(User connectedUser, Team team, FeedOptions options) {
+        return this.listFeed(connectedUser, Set.of(team.getId()), ZoneId.of(team.getConfiguration().getTimezone()), options);
     }
 
-    public List<FeedEntity> listFeed(Set<String> teamIds, ZoneId zoneId, FeedOptions options) {
+    public List<FeedEntity> listFeed(User connectedUser, Set<String> teamIds, ZoneId zoneId, FeedOptions options) {
 
-        List<FeedEntity> result = new ArrayList<>();
+        Set<FeedEntity> result = new HashSet<>();
 
         // TODO parallel requests to database
         if (options.isIncludePublications()) {
@@ -111,14 +114,19 @@ public class TeamService extends AbstractPermalinkService {
         }
         if (options.isIncludeRides()) {
             result.addAll(rideService.searchRides(teamIds, 0, 10, options.getFrom(), options.getTo(), true).getContent());
+            if (connectedUser != null) {
+                result.addAll(rideService.searchRidesByUser(connectedUser, LocalDate.now().minus(1, ChronoUnit.DAYS)));
+            }
         }
         if (options.isIncludeTrips()) {
             result.addAll(tripService.searchTrips(teamIds, 0, 10, options.getFrom(), options.getTo(), true).getContent());
+            if (connectedUser != null) {
+                result.addAll(tripService.searchTripsByUser(connectedUser, LocalDate.now().minus(1, ChronoUnit.DAYS)));
+            }
         }
 
-        result = result.stream().sorted(FeedSorter.get(zoneId)).collect(Collectors.toList());
+        return result.stream().sorted(FeedSorter.get(zoneId)).collect(Collectors.toList());
 
-        return result;
     }
 
     public void save(Team team) {

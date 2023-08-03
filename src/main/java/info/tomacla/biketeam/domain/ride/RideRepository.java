@@ -32,6 +32,8 @@ public interface RideRepository extends PagingAndSortingRepository<Ride, String>
 
     List<RideProjection> findAllByDeletion(boolean deletion);
 
+    List<Ride> findAllByDeletionAndGroups_Participants_IdAndDateGreaterThanAndPublishedStatus(boolean deletion, String userId, LocalDate from, PublishedStatus publishedStatus);
+
     @Transactional
     @Modifying
     @Query(value = "delete from ride_group_participant where user_id = :userId", nativeQuery = true)
