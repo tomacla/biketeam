@@ -3,12 +3,25 @@ var mouseDownFlag = 0;
 function initMap(mapContainerId, lat, lng, zoom, defaultLayer, layersControl, zoomControl) {
     var newMap = L.map(mapContainerId, { zoomControl: false, layers: [layers[defaultLayer]] }).setView([lat, lng], zoom);
     if(layersControl) {
-        L.control.layers(layers, null, {position: 'bottomleft'}).addTo(newMap);
+        L.control.layers(layers, overlayLayers, {position: 'bottomleft'}).addTo(newMap);
     }
     if(zoomControl) {
         L.control.zoom({position: 'bottomright'}).addTo(newMap);
     }
     return newMap;
+}
+
+var overlayLayers = {
+    "Voies cyclables": L.tileLayer('https://tile.waymarkedtrails.org/cycling/{z}/{x}/{y}.png', {
+        maxNativeZoom: 18,
+        maxZoom: 24,
+        attribution: '&copy; <a href="https://www.waymarkedtrails.org" target="_blank">Waymarked Trails</a>'
+    }),
+    "Itinéraires VTT": L.tileLayer('https://tile.waymarkedtrails.org/mtb/{z}/{x}/{y}.png', {
+        maxNativeZoom: 18,
+        maxZoom: 24,
+        attribution: '&copy; <a href="https://www.waymarkedtrails.org" target="_blank">Waymarked Trails</a>'
+    })
 }
 
 var layers = {
@@ -17,6 +30,7 @@ var layers = {
         maxZoom: 17,
         attribution: '<a href="https://github.com/cyclosm/cyclosm-cartocss-style/releases" title="CyclOSM - Open Bicycle render">CyclOSM</a> | Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }),
+
     "ESRI Satellite": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
     }),
@@ -249,4 +263,20 @@ function updateChart(elevationProfile, color) {
      elevationChart.data.datasets[0].data = elevationProfile.map(function(e) { return e.y; });
      elevationChart.data.datasets[0].backgroundColor = color;
      elevationChart.update();
+}
+
+var currentCircleMarker = null;
+function activateLocation(currentMap) {
+    currentMap.locate({setView: true, maxZoom: 16});
+
+    targetMap.on('locationfound', function(e) {
+       var radius = e.accuracy;
+
+       if(currentCircleMarker !== null) {
+            targetMap.removeLayer(currentCircleMarker)
+       }
+
+       currentCircleMarker = L.circleMarker(e.latlng, 20).addTo(targetMap);
+   });
+
 }
