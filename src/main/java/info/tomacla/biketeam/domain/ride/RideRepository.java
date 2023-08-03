@@ -32,7 +32,7 @@ public interface RideRepository extends PagingAndSortingRepository<Ride, String>
 
     List<RideProjection> findAllByDeletion(boolean deletion);
 
-    List<Ride> findAllByDeletionAndGroups_Participants_IdAndDateGreaterThanAndPublishedStatus(boolean deletion, String userId, LocalDate from, PublishedStatus publishedStatus);
+    List<Ride> findAllByDeletionAndTeamIdInAndGroups_Participants_IdAndDateGreaterThanAndPublishedStatus(boolean deletion, Set<String> teamIds, String userId, LocalDate from, PublishedStatus publishedStatus);
 
     @Transactional
     @Modifying

@@ -145,9 +145,10 @@ public class RideService extends AbstractPermalinkService {
                 pageable);
     }
 
-    public List<Ride> searchRidesByUser(User connectedUser, LocalDate from) {
-        return rideRepository.findAllByDeletionAndGroups_Participants_IdAndDateGreaterThanAndPublishedStatus(
+    public List<Ride> searchRidesByUser(User connectedUser, Set<String> teamIds, LocalDate from) {
+        return rideRepository.findAllByDeletionAndTeamIdInAndGroups_Participants_IdAndDateGreaterThanAndPublishedStatus(
                 false,
+                teamIds,
                 connectedUser.getId(),
                 from,
                 PublishedStatus.PUBLISHED
