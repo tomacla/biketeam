@@ -136,9 +136,10 @@ public class TripService extends AbstractPermalinkService {
                 pageable);
     }
 
-    public List<Trip> searchTripsByUser(User connectedUser, LocalDate from) {
-        return tripRepository.findAllByDeletionAndParticipants_IdAndEndDateGreaterThanAndPublishedStatus(
+    public List<Trip> searchTripsByUser(User connectedUser, Set<String> teamIds, LocalDate from) {
+        return tripRepository.findAllByDeletionAndTeamIdInAndParticipants_IdAndEndDateGreaterThanAndPublishedStatus(
                 false,
+                teamIds,
                 connectedUser.getId(),
                 from,
                 PublishedStatus.PUBLISHED

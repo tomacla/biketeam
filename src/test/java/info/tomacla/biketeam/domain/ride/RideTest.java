@@ -61,11 +61,11 @@ public class RideTest extends AbstractDBTest {
                 ZonedDateTime.now());
 
         assertEquals(3, rides.size());
-        assertEquals(3, rideRepository.findAllByDeletionAndGroups_Participants_IdAndDateGreaterThanAndPublishedStatus(
-                false, "" + 2343L, ZonedDateTime.now().minus(1, ChronoUnit.DAYS).toLocalDate(), PublishedStatus.PUBLISHED
+        assertEquals(3, rideRepository.findAllByDeletionAndTeamIdInAndGroups_Participants_IdAndDateGreaterThanAndPublishedStatus(
+                false,  Set.of("ridetest-team"),""+2343L, ZonedDateTime.now().minus(1, ChronoUnit.DAYS).toLocalDate(), PublishedStatus.PUBLISHED
         ).size());
-        assertEquals(1, rideRepository.findAllByDeletionAndGroups_Participants_IdAndDateGreaterThanAndPublishedStatus(
-                false, "" + 2345L, ZonedDateTime.now().minus(1, ChronoUnit.DAYS).toLocalDate(), PublishedStatus.PUBLISHED
+        assertEquals(1, rideRepository.findAllByDeletionAndTeamIdInAndGroups_Participants_IdAndDateGreaterThanAndPublishedStatus(
+                false,  Set.of("ridetest-team"),""+2345L, ZonedDateTime.now().minus(1, ChronoUnit.DAYS).toLocalDate(), PublishedStatus.PUBLISHED
         ).size());
 
         r1.setDeletion(true);
@@ -115,11 +115,11 @@ public class RideTest extends AbstractDBTest {
 
     private User createUser(Long stravaId) {
         User user = new User();
-        user.setEmail("foo" + stravaId + "@bar.com");
+        user.setEmail("foo"+stravaId+"@bar.com");
         user.setStravaId(stravaId);
         user.setFirstName("foo");
         user.setLastName("bar");
-        user.setId("" + stravaId);
+        user.setId(""+stravaId);
         userRepository.save(user);
         return user;
     }
