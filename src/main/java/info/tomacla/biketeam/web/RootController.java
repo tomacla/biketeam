@@ -92,7 +92,7 @@ public class RootController extends AbstractController {
             }
             model.addAttribute("feed", feeds);
             model.addAttribute("user", user);
-            model.addAttribute("userTeams", teams);
+
             return "root_auth";
         } else {
             addGlobalValues(principal, model, null, null);
