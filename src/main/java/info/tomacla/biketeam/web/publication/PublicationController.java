@@ -7,12 +7,8 @@ import info.tomacla.biketeam.domain.publication.Publication;
 import info.tomacla.biketeam.domain.publication.PublicationRegistration;
 import info.tomacla.biketeam.domain.reaction.Reaction;
 import info.tomacla.biketeam.domain.reaction.ReactionContent;
-import info.tomacla.biketeam.domain.ride.Ride;
-import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
-import info.tomacla.biketeam.domain.userrole.Role;
-import info.tomacla.biketeam.domain.userrole.UserRole;
 import info.tomacla.biketeam.service.PublicationService;
 import info.tomacla.biketeam.service.ReactionService;
 import info.tomacla.biketeam.service.file.ThumbnailService;
@@ -50,6 +46,35 @@ public class PublicationController extends AbstractController {
 
     @Autowired
     private ReactionService reactionService;
+
+
+    @GetMapping(value = "/{publicationId}")
+    public String getPublication(@PathVariable("teamId") String teamId,
+                                 @PathVariable("publicationId") String publicationId,
+                                 @ModelAttribute("error") String error,
+                                 Principal principal,
+                                 Model model) {
+
+        final Team team = checkTeam(teamId);
+
+        Optional<Publication> optionalPublication = publicationService.get(team.getId(), publicationId);
+        if (optionalPublication.isEmpty()) {
+            return viewHandler.redirect(team, "/");
+        }
+
+        Publication publication = optionalPublication.get();
+
+        if (!publication.getPublishedStatus().equals(PublishedStatus.PUBLISHED) && !isAdmin(principal, team)) {
+            return viewHandler.redirect(team, "/");
+        }
+
+        addGlobalValues(principal, model, "Publication " + publication.getTitle(), team);
+        model.addAttribute("publication", publication);
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
+        return "publication";
+    }
 
     @ResponseBody
     @RequestMapping(value = "/{publicationId}/image", method = RequestMethod.GET)
@@ -207,13 +232,13 @@ public class PublicationController extends AbstractController {
     }
 
     @PostMapping(value = "/{publicationId}/register")
-    public RedirectView addParticipantToRide(@PathVariable("teamId") String teamId,
-                                             @PathVariable("publicationId") String publicationId,
-                                             @RequestParam("firstname") String firstname,
-                                             @RequestParam("lastname") String lastname,
-                                             @RequestParam("email") String email,
-                                             RedirectAttributes attributes,
-                                             Principal principal, Model model) {
+    public RedirectView registerToPub(@PathVariable("teamId") String teamId,
+                                      @PathVariable("publicationId") String publicationId,
+                                      @RequestParam("firstname") String firstname,
+                                      @RequestParam("lastname") String lastname,
+                                      @RequestParam("email") String email,
+                                      RedirectAttributes attributes,
+                                      Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
 
@@ -235,11 +260,11 @@ public class PublicationController extends AbstractController {
             publicationService.save(publication);
 
             attributes.addFlashAttribute("infos", List.of("Inscription enregistrée"));
-            return viewHandler.redirectView(team, "/");
+            return viewHandler.redirectView(team, "/publications/" + publicationId);
 
         } catch (Exception e) {
             attributes.addFlashAttribute("error", e.getMessage());
-            return viewHandler.redirectView(team, "/");
+            return viewHandler.redirectView(team, "/publications/" + publicationId);
         }
     }
 

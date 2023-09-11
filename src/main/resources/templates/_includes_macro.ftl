@@ -67,7 +67,7 @@
                         <a class="link-dark text-decoration-none" href="<@common.teamUrl publication.teamId '' />"><img src="<@common.teamUrl publication.teamId '/image' />" height="50" alt="Team image"></a>
                     </div>
                     <div class="ms-3 d-flex flex-column align-items-start">
-                        <div><#if withTeam><a class="link-dark" href="<@common.teamUrl publication.teamId '' />"><#list _user_teams?filter(t -> t.id == publication.teamId) as itemTeam>${itemTeam.name}</#list></a> - </#if>${publication.title}</div>
+                        <div><#if withTeam><a class="link-dark" href="<@common.teamUrl publication.teamId '' />"><#list _user_teams?filter(t -> t.id == publication.teamId) as itemTeam>${itemTeam.name}</#list></a> - </#if><a class="link-dark" href="<@common.teamUrl publication.teamId '/publications/'+ publication.id />">${publication.title}</a></div>
                         <div class="small text-muted"><i class="bi bi-newspaper"></i> ${publication.publishedAt.format(_date_formatter)}</div>
                     </div>
                 </div>
