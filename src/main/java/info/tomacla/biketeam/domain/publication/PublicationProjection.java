@@ -14,4 +14,6 @@ public interface PublicationProjection {
 
     PublishedStatus getPublishedStatus();
 
+    boolean isAllowRegistration();
+
 }

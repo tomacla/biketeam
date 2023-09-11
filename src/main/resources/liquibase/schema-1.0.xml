@@ -1343,4 +1343,35 @@
         <modifyDataType tableName="admin_parameters" columnName="value" newDataType="TEXT"/>
     </changeSet>
 
+    <changeSet id="add-registration-on-publication" author="thomas">
+
+        <addColumn tableName="publication">
+            <column name="allow_registration" type="BOOLEAN"/>
+        </addColumn>
+
+        <sql>update publication set allow_registration = FALSE</sql>
+
+        <createTable tableName="publication_registration">
+            <column name="id" type="VARCHAR(255)"/>
+            <column name="publication_id" type="VARCHAR(255)"/>
+            <column name="user_name" type="VARCHAR(255)"/>
+            <column name="user_email" type="VARCHAR(255)"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="publication_registration"
+                                 baseColumnNames="publication_id"
+                                 constraintName="fk_publication_registration_id"
+                                 referencedTableName="publication"
+                                 referencedColumnNames="id"/>
+
+        <addUniqueConstraint
+                columnNames="publication_id, user_email"
+                constraintName="user_email_registration_unique"
+                tableName="publication_registration"
+        />
+
+        <addPrimaryKey tableName="publication_registration" columnNames="id"/>
+
+    </changeSet>
+
 </databaseChangeLog>

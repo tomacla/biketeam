@@ -44,6 +44,16 @@
                     </div>
                 </div>
 
+            <div class="col-12 mb-3">
+                        <div class="border rounded p-2">
+                            <div class="form-check form-switch">
+                             <input class="form-check-input" name="allowRegistration" type="checkbox" id="form-publication-allowRegistration"<#if formdata.allowRegistration?? && formdata.allowRegistration == 'on'> checked</#if>>
+                             <label class="form-check-label" for="form-ride-allowRegistration">Permettre les inscriptions</label>
+                           </div>
+                           <div id="form-ride-allowRegistration-help" class="form-text">Si l'option est désactivée, vous pourrez récolter une liste d'inscrits (gestion d'événements).</div>
+                       </div>
+                    </div>
+
                 <div class="mb-3">
                   <label for="form-publication-title" class="form-label">Titre</label>
                   <input autocomplete="off" required value="${formdata.title}" name="title" type="text" class="form-control" id="form-publication-title" placeholder="Actualité de la semaine">
@@ -65,7 +75,31 @@
                 <button type="submit" class="btn btn-secondary">Enregistrer</button>
         </form>
 
+        <#if publication?? && publication.allowRegistration>
+            <div class="mt-4">
+            <h2>Liste des inscrits</h2>
+            <table class="table">
+            <thead>
+             <tr>
+                <th>Nom</th>
+                <th>Email</th>
+               </tr>
+            </thead>
+            <tbody>
+            <#list publication.registrations as registration>
+                   <tr>
+                    <td>${registration.userName}</td>
+                    <td>${registration.userEmail}</td>
+                   </tr>
+            </#list>
+            </tbody>
+            </table>
+            </div>
+            </#if>
+
     </div>
+
+
 
 </div>
 

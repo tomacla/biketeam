@@ -2,6 +2,7 @@ package info.tomacla.biketeam.web.team.publication;
 
 import info.tomacla.biketeam.common.datatype.Dates;
 import info.tomacla.biketeam.common.datatype.Strings;
+import info.tomacla.biketeam.web.team.ride.NewRideForm;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
@@ -16,6 +17,7 @@ public class NewPublicationForm {
     private String content = "";
     private String publishedAtDate = Dates.formatDate(LocalDate.now());
     private String publishedAtTime = "12:00";
+    private String allowRegistration = null;
     private MultipartFile file = null;
 
     public static NewPublicationFormBuilder builder(ZonedDateTime defaultPublishedAt, ZoneId timezone) {
@@ -60,6 +62,14 @@ public class NewPublicationForm {
 
     public void setPublishedAtTime(String publishedAtTime) {
         this.publishedAtTime = Strings.requireNonBlankOrDefault(publishedAtTime, "12:00");
+    }
+
+    public String getAllowRegistration() {
+        return allowRegistration;
+    }
+
+    public void setAllowRegistration(String allowRegistration) {
+        this.allowRegistration = allowRegistration;
     }
 
     public MultipartFile getFile() {
@@ -109,6 +119,10 @@ public class NewPublicationForm {
             return Optional.empty();
         }
 
+        public boolean isAllowRegistration() {
+            return form.getAllowRegistration() != null && form.getAllowRegistration().equals("on");
+        }
+
     }
 
     public static class NewPublicationFormBuilder {
@@ -138,6 +152,11 @@ public class NewPublicationForm {
         public NewPublicationFormBuilder withPublishedAt(ZonedDateTime publishedAt, ZoneId timezone) {
             form.setPublishedAtDate(Dates.formatZonedDateInTimezone(publishedAt, timezone));
             form.setPublishedAtTime(Dates.formatZonedTimeInTimezone(publishedAt, timezone));
+            return this;
+        }
+
+        public NewPublicationFormBuilder withAllowRegistration(boolean allowRegistration) {
+            form.setAllowRegistration(allowRegistration ? "on" : null);
             return this;
         }
 

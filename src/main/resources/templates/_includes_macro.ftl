@@ -60,7 +60,7 @@
 
 <#macro displayPublication publication withTeam>
     <div class="col-12">
-        <div class="card">
+        <div class="card" id="publication-${publication.id}">
             <div class="card-header p-1">
                 <div class="d-flex flex-row justify-content-start align-items-start p-0">
                     <div>
@@ -72,14 +72,41 @@
                     </div>
                 </div>
             </div>
+            <#if publication.imaged>
+            <img src="<@common.teamUrl publication.teamId '/publications/${publication.id}/image?width=500' />" class="card-img-top" alt="${publication.title} image">
+            </#if>
             <div class="card-body">
               <p class="card-text wrap-content">${publication.content}</p>
-              <#if publication.imaged>
-                  <div class="row justify-content-center">
-                    <div class="col-12 col-md-6">
-                      <img src="<@common.teamUrl publication.teamId '/publications/${publication.id}/image?width=500' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${publication.title} image">
+              <#if publication.allowRegistration>
+              <div class="accordion" id="publication-${publication.id}-accordion">
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="publication-${publication.id}-accordion-title">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#publication-${publication.id}-accordion-content" aria-expanded="true" aria-controls="publication-${publication.id}-accordion-content">
+                      Inscription (${publication.registrations?size} inscrit.e<#if publication.registrations?size gt 1>.s</#if>)
+                    </button>
+                  </h2>
+                  <div id="publication-${publication.id}-accordion-content" class="accordion-collapse collapse" aria-labelledby="publication-${publication.id}-accordion-title" data-bs-parent="#publication-${publication.id}-accordion">
+                <form action="<@common.teamUrl publication.teamId '/publications/${publication.id}/register' />" method="POST" class="p-2" id="publication-${publication.id}-registration">
+                    <input type="hidden" name="id" value="${publication.id}" />
+                    <div class="row mb-2">
+                      <div class="col-md-4">
+                          <label for="publication-${publication.id}-registration-name" class="form-label">Nom</label>
+                          <input name="firstname" required="true" min="1" type="text" class="form-control" id="publication-${publication.id}-registration-name">
+                        </div>
+                        <div class="col-md-4">
+                          <label for="publication-${publication.id}-registration-lastname" class="form-label">Prénom</label>
+                          <input name="lastname" required="true" min="1" type="text" class="form-control" id="publication-${publication.id}-registration-lastname">
+                        </div>
+                        <div class="col-md-4">
+                          <label for="publication-${publication.id}-registration-email" class="form-label">Email</label>
+                          <input name="email" required="true" type="email" class="form-control" id="publication-${publication.id}-registration-email">
+                        </div>
                     </div>
-                  </div>
+                    <button type="submit" class="btn btn-secondary">S'inscrire</button>
+                    </form>
+                    </div>
+                </div>
+                </div>
               </#if>
             </div>
             <#if (!withTeam && team.configuration.reactionVisible) || (withTeam && (_user_teams?filter(t -> t.id == publication.teamId))[0].configuration.reactionVisible)>
