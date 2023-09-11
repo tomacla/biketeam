@@ -7,6 +7,7 @@ import info.tomacla.biketeam.domain.feed.FeedType;
 import info.tomacla.biketeam.domain.reaction.Reaction;
 import info.tomacla.biketeam.domain.reaction.ReactionHolder;
 import info.tomacla.biketeam.domain.reaction.ReactionTargetType;
+import info.tomacla.biketeam.domain.userrole.UserRole;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
@@ -34,12 +35,17 @@ public class Publication implements ReactionHolder, FeedEntity {
     private ZonedDateTime publishedAt = ZonedDateTime.now(ZoneOffset.UTC);
     @Column(length = 8000)
     private String content;
+    @Column(name = "allow_registration")
+    private boolean allowRegistration;
     private boolean imaged;
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "target_id", referencedColumnName = "id")
     @Where(clause = "type = 'PUBLICATION'")
     private Set<Reaction> reactions = new HashSet<>();
+
+    @OneToMany(mappedBy = "publication", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private Set<PublicationRegistration> registrations = new HashSet<>();
 
     public String getId() {
         return id;
@@ -97,12 +103,28 @@ public class Publication implements ReactionHolder, FeedEntity {
         this.imaged = imaged;
     }
 
+    public boolean isAllowRegistration() {
+        return allowRegistration;
+    }
+
+    public void setAllowRegistration(boolean allowRegistration) {
+        this.allowRegistration = allowRegistration;
+    }
+
     public Set<Reaction> getReactions() {
         return reactions;
     }
 
     public void setReactions(Set<Reaction> reactions) {
         this.reactions = reactions;
+    }
+
+    public Set<PublicationRegistration> getRegistrations() {
+        return registrations;
+    }
+
+    public void setRegistrations(Set<PublicationRegistration> registrations) {
+        this.registrations = registrations;
     }
 
     @Override
@@ -119,6 +141,8 @@ public class Publication implements ReactionHolder, FeedEntity {
     public FeedType getFeedType() {
         return FeedType.PUBLICATION;
     }
+
+
 
     @Override
     public boolean equals(Object o) {

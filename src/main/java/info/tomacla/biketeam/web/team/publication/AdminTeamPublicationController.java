@@ -66,9 +66,13 @@ public class AdminTeamPublicationController extends AbstractController {
             builder.withContent(publication.getContent())
                     .withId(publication.getId())
                     .withTitle(publication.getTitle())
+                    .withAllowRegistration(publication.isAllowRegistration())
                     .withPublishedAt(publication.getPublishedAt(), team.getZoneId());
 
             published = publication.getPublishedStatus().equals(PublishedStatus.PUBLISHED);
+
+            model.addAttribute("publication", publication);
+
         }
 
         NewPublicationForm form = builder.get();
@@ -107,6 +111,7 @@ public class AdminTeamPublicationController extends AbstractController {
                 publication = optionalPublication.get();
                 publication.setContent(parser.getContent());
                 publication.setTitle(parser.getTitle());
+                publication.setAllowRegistration(parser.isAllowRegistration());
                 if (publication.getPublishedStatus().equals(PublishedStatus.UNPUBLISHED)) {
                     // do not change published date if already published
                     publication.setPublishedAt(parser.getPublishedAt(timezone));
@@ -117,6 +122,7 @@ public class AdminTeamPublicationController extends AbstractController {
                 publication.setTeamId(team.getId());
                 publication.setTitle(parser.getTitle());
                 publication.setContent(parser.getContent());
+                publication.setAllowRegistration(parser.isAllowRegistration());
                 publication.setPublishedAt(parser.getPublishedAt(timezone));
                 publication.setImaged(parser.getFile().isPresent());
             }
