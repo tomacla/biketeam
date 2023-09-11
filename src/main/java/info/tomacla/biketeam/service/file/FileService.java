@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -198,23 +199,22 @@ public class FileService {
 
     @RabbitListener(queues = Queues.TASK_CLEAN_TMP_FILES)
     public void cleanTmpDirectory() {
-        cleanDirectory(getTmpDirectory(), System.currentTimeMillis() - (2 * 24 * 60 * 60 * 1000));
-        cleanDirectory(Path.of(fileRepository, FileRepositories.GPXTOOLVIEWER), System.currentTimeMillis() - (30 * 24 * 60 * 60 * 1000));
+        cleanDirectory(getTmpDirectory(), 2);
+        cleanDirectory(Path.of(fileRepository, FileRepositories.GPXTOOLVIEWER), 30);
     }
 
-    private void cleanDirectory(final Path directory, final long cutOff) {
+    private void cleanDirectory(final Path directory, int cutOffDays) {
+
+        BigDecimal current = new BigDecimal(System.currentTimeMillis());
+        BigDecimal cutOff = current.subtract(new BigDecimal(cutOffDays * 24 * 60 * 60 * 1000L));
+
         try {
             Files.list(directory)
-                    .filter(path -> {
-                        try {
-                            return Files.isRegularFile(path) && Files.getLastModifiedTime(path).to(TimeUnit.MILLISECONDS) < cutOff;
-                        } catch (IOException ex) {
-                            return false;
-                        }
-                    })
                     .forEach(path -> {
                         try {
-                            Files.delete(path);
+                            if(Files.isRegularFile(path) && Files.getLastModifiedTime(path).to(TimeUnit.MILLISECONDS) < cutOff.longValue()) {
+                                Files.delete(path);
+                            }
                         } catch (IOException e) {
                             log.error("Unable to delete file " + path, e);
                         }
