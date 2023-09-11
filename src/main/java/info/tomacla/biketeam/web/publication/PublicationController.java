@@ -4,10 +4,15 @@ import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
 import info.tomacla.biketeam.domain.publication.Publication;
+import info.tomacla.biketeam.domain.publication.PublicationRegistration;
 import info.tomacla.biketeam.domain.reaction.Reaction;
 import info.tomacla.biketeam.domain.reaction.ReactionContent;
+import info.tomacla.biketeam.domain.ride.Ride;
+import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
+import info.tomacla.biketeam.domain.userrole.Role;
+import info.tomacla.biketeam.domain.userrole.UserRole;
 import info.tomacla.biketeam.service.PublicationService;
 import info.tomacla.biketeam.service.ReactionService;
 import info.tomacla.biketeam.service.file.ThumbnailService;
@@ -23,6 +28,8 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerErrorException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
@@ -197,6 +204,43 @@ public class PublicationController extends AbstractController {
 
         return "_fragment_reactions";
 
+    }
+
+    @PostMapping(value = "/{publicationId}/register")
+    public RedirectView addParticipantToRide(@PathVariable("teamId") String teamId,
+                                             @PathVariable("publicationId") String publicationId,
+                                             @RequestParam("firstname") String firstname,
+                                             @RequestParam("lastname") String lastname,
+                                             @RequestParam("email") String email,
+                                             RedirectAttributes attributes,
+                                             Principal principal, Model model) {
+
+        final Team team = checkTeam(teamId);
+
+        try {
+            Optional<Publication> optionalPublication = publicationService.get(team.getId(), publicationId);
+            if (optionalPublication.isEmpty()) {
+                return viewHandler.redirectView(team, "/");
+            }
+
+            Publication publication = optionalPublication.get();
+
+            PublicationRegistration registration = new PublicationRegistration();
+            registration.setUserEmail(email);
+            registration.setUserName(firstname + " " + lastname);
+            registration.setPublication(publication);
+
+            publication.getRegistrations().add(registration);
+
+            publicationService.save(publication);
+
+            attributes.addFlashAttribute("infos", List.of("Inscription enregistrée"));
+            return viewHandler.redirectView(team, "/");
+
+        } catch (Exception e) {
+            attributes.addFlashAttribute("error", e.getMessage());
+            return viewHandler.redirectView(team, "/");
+        }
     }
 
 }
