@@ -5,8 +5,10 @@
     <div class="d-none d-md-block col-4">
 
         <div class="border rounded p-2">
-                <img class="d-block mt-2 mx-auto rounded" src="<@common.teamUrl '' '/users/${_user.id}/image' />" alt="profile">
-            <h5 class="text-center mt-2 pb-2">${user.identity}</h5>
+
+            <img class="d-block mt-2 mx-auto rounded" src="<@common.teamUrl '' '/users/${_user.id}/image' />" alt="profile">
+            <h5 class="text-center mt-2">${_user.identity}</h5>
+            <div class="d-flex flex-row justify-content-center"><a class="link-secondary me-2" href="<@common.teamUrl '' '/users/me' />">Mon compte</a><a class="link-secondary" href="<@common.teamUrl '' '/users/space' />">Mon espace</a></div>
 
             <div class="list-group my-4">
                 <a class="list-group-item" href="<@common.teamUrl '' '/new' />"><i class="bi bi-plus-circle"></i> Créer un groupe</a>
@@ -23,8 +25,6 @@
                         </a>
                     </#list>
                 </div>
-            <#else>
-                <p class="text-muted">Vous n'avez rejoint aucun groupe.</p>
             </#if>
 
         </div>

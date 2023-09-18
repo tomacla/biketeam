@@ -50,13 +50,13 @@ public class MessageTest extends AbstractDBTest {
         m.setContent("test content");
         m.setUser(user);
 
-        assertEquals(0, messageRepository.findAllByTargetIdAndTypeOrderByPublishedAtAsc(ride.getId(), MessageTargetType.RIDE).size());
-        assertEquals(0, messageRepository.findAllByUserId(user.getId()).size());
+        assertEquals(0, messageRepository.findAll(new SearchMessageSpecification(ride.getId(), null, MessageTargetType.RIDE)).size());
+        assertEquals(0, messageRepository.findAll(new SearchMessageSpecification(null, user, null)).size());
 
         messageRepository.save(m);
 
-        assertEquals(1, messageRepository.findAllByTargetIdAndTypeOrderByPublishedAtAsc(ride.getId(), MessageTargetType.RIDE).size());
-        assertEquals(1, messageRepository.findAllByUserId(user.getId()).size());
+        assertEquals(1, messageRepository.findAll(new SearchMessageSpecification(ride.getId(), null, MessageTargetType.RIDE)).size());
+        assertEquals(1, messageRepository.findAll(new SearchMessageSpecification(null, user, null)).size());
 
     }
 

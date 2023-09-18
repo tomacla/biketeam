@@ -39,10 +39,10 @@ public class RideTest extends AbstractDBTest {
     @Test
     public void rideTest() {
 
-        List<Ride> rides = rideRepository.findAllByDeletionAndTeamIdAndPublishedStatusAndPublishedAtLessThan(false,
-                "ridetest-team",
-                PublishedStatus.PUBLISHED,
-                ZonedDateTime.now());
+        List<Ride> rides = rideRepository.findAll(new SearchRideSpecification(
+                false, null, null, null, null, Set.of("ridetest-team"), PublishedStatus.PUBLISHED,
+                null, ZonedDateTime.now(), null, null
+        ));
 
         assertEquals(0, rides.size());
 
@@ -55,26 +55,34 @@ public class RideTest extends AbstractDBTest {
         Ride r4 = createRide(ZonedDateTime.now().minus(1, ChronoUnit.DAYS), PublishedStatus.PUBLISHED, Set.of(u1, u2));
         Ride r5 = createRide(ZonedDateTime.now().minus(1, ChronoUnit.DAYS), PublishedStatus.PUBLISHED, Set.of(u1));
 
-        rides = rideRepository.findAllByDeletionAndTeamIdAndPublishedStatusAndPublishedAtLessThan(false,
-                "ridetest-team",
-                PublishedStatus.PUBLISHED,
-                ZonedDateTime.now());
+        rides = rideRepository.findAll(new SearchRideSpecification(
+                false, null, null, null, null, Set.of("ridetest-team"), PublishedStatus.PUBLISHED,
+                null, ZonedDateTime.now(), null, null
+        ));
 
         assertEquals(3, rides.size());
-        assertEquals(3, rideRepository.findAllByDeletionAndTeamIdInAndGroups_Participants_IdAndDateGreaterThanAndPublishedStatus(
-                false,  Set.of("ridetest-team"),""+2343L, ZonedDateTime.now().minus(1, ChronoUnit.DAYS).toLocalDate(), PublishedStatus.PUBLISHED
-        ).size());
-        assertEquals(1, rideRepository.findAllByDeletionAndTeamIdInAndGroups_Participants_IdAndDateGreaterThanAndPublishedStatus(
-                false,  Set.of("ridetest-team"),""+2345L, ZonedDateTime.now().minus(1, ChronoUnit.DAYS).toLocalDate(), PublishedStatus.PUBLISHED
-        ).size());
+
+        List<Ride> rides2 = rideRepository.findAll(new SearchRideSpecification(
+                false, null, null, null, u1, Set.of("ridetest-team"), PublishedStatus.PUBLISHED,
+                null, null, ZonedDateTime.now().minus(1, ChronoUnit.DAYS).toLocalDate(), null
+        ));
+
+        assertEquals(3, rides2.size());
+
+        List<Ride> rides3 = rideRepository.findAll(new SearchRideSpecification(
+                false, null, null, null, u2, Set.of("ridetest-team"), PublishedStatus.PUBLISHED,
+                null, null, ZonedDateTime.now().minus(1, ChronoUnit.DAYS).toLocalDate(), null
+        ));
+
+        assertEquals(1, rides3.size());
 
         r1.setDeletion(true);
         rideRepository.save(r1);
 
-        rides = rideRepository.findAllByDeletionAndTeamIdAndPublishedStatusAndPublishedAtLessThan(false,
-                "ridetest-team",
-                PublishedStatus.PUBLISHED,
-                ZonedDateTime.now());
+        rides = rideRepository.findAll(new SearchRideSpecification(
+                false, null, null, null, null, Set.of("ridetest-team"), PublishedStatus.PUBLISHED,
+                null, ZonedDateTime.now(), null, null
+        ));
 
         assertEquals(2, rides.size());
 
@@ -115,11 +123,11 @@ public class RideTest extends AbstractDBTest {
 
     private User createUser(Long stravaId) {
         User user = new User();
-        user.setEmail("foo"+stravaId+"@bar.com");
+        user.setEmail("foo" + stravaId + "@bar.com");
         user.setStravaId(stravaId);
         user.setFirstName("foo");
         user.setLastName("bar");
-        user.setId(""+stravaId);
+        user.setId("" + stravaId);
         userRepository.save(user);
         return user;
     }

@@ -1,13 +1,34 @@
 package info.tomacla.biketeam.service.deletion;
 
 import info.tomacla.biketeam.common.amqp.Queues;
+import info.tomacla.biketeam.common.file.FileRepositories;
+import info.tomacla.biketeam.domain.map.Map;
+import info.tomacla.biketeam.domain.map.MapRepository;
+import info.tomacla.biketeam.domain.map.SearchMapSpecification;
+import info.tomacla.biketeam.domain.message.MessageRepository;
+import info.tomacla.biketeam.domain.notification.NotificationRepository;
+import info.tomacla.biketeam.domain.place.PlaceRepository;
+import info.tomacla.biketeam.domain.place.SearchPlaceSpecification;
+import info.tomacla.biketeam.domain.publication.Publication;
+import info.tomacla.biketeam.domain.publication.PublicationRepository;
+import info.tomacla.biketeam.domain.publication.SearchPublicationSpecification;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideRepository;
+import info.tomacla.biketeam.domain.ride.SearchRideSpecification;
+import info.tomacla.biketeam.domain.team.SearchTeamSpecification;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.TeamRepository;
+import info.tomacla.biketeam.domain.template.RideTemplateRepository;
+import info.tomacla.biketeam.domain.template.SearchRideTemplateSpecification;
+import info.tomacla.biketeam.domain.trip.SearchTripSpecification;
 import info.tomacla.biketeam.domain.trip.Trip;
 import info.tomacla.biketeam.domain.trip.TripRepository;
-import info.tomacla.biketeam.service.*;
+import info.tomacla.biketeam.domain.user.SearchUserSpecification;
+import info.tomacla.biketeam.domain.user.User;
+import info.tomacla.biketeam.domain.user.UserRepository;
+import info.tomacla.biketeam.domain.userrole.UserRoleRepository;
+import info.tomacla.biketeam.service.file.FileService;
+import info.tomacla.biketeam.service.image.ImageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -16,11 +37,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class AsyncDeletionService {
 
     private static final Logger log = LoggerFactory.getLogger(AsyncDeletionService.class);
+
+    @Autowired
+    private FileService fileService;
 
     @Autowired
     private RideRepository rideRepository;
@@ -32,43 +57,60 @@ public class AsyncDeletionService {
     private TeamRepository teamRepository;
 
     @Autowired
-    private MessageService messageService;
+    private MessageRepository messageRepository;
+
 
     @Autowired
-    private ReactionService reactionService;
+    private MapRepository mapRepository;
 
     @Autowired
-    private MapService mapService;
+    private UserRoleRepository userRoleRepository;
 
     @Autowired
-    private UserRoleService userRoleService;
+    private PlaceRepository placeRepository;
 
     @Autowired
-    private PlaceService placeService;
+    private NotificationRepository notificationRepository;
 
     @Autowired
-    private NotificationService notificationService;
+    private RideTemplateRepository rideTemplateRepository;
 
     @Autowired
-    private RideTemplateService rideTemplateService;
+    private PublicationRepository publicationRepository;
 
     @Autowired
-    private PublicationService publicationService;
-
-    @Autowired
-    private RideService rideService;
-
-    @Autowired
-    private TripService tripService;
+    private UserRepository userRepository;
 
     @RabbitListener(queues = Queues.TASK_PERFORM_DELETION)
+    // ASYNC ENTITIES : map, publication, ride, team, trip, user
     public void performEffectiveDeletion() {
         try {
-            rideRepository.findAllByDeletion(true).forEach(ride -> this.deleteRide(ride.getId()));
-            tripRepository.findAllByDeletion(true).forEach(trip -> this.deleteTrip(trip.getId()));
-            teamRepository.findAllByDeletion(true).forEach(team -> this.deleteTeam(team.getId()));
+
+            mapRepository.findAll(SearchMapSpecification.readyForDeletion()).forEach(map -> this.deleteMap(map.getId()));
+            publicationRepository.findAll(SearchPublicationSpecification.readyForDeletion()).forEach(e -> this.deletePublication(e.getId()));
+            rideRepository.findAll(SearchRideSpecification.readyForDeletion()).forEach(ride -> this.deleteRide(ride.getId()));
+            tripRepository.findAll(SearchTripSpecification.readyForDeletion()).forEach(trip -> this.deleteTrip(trip.getId()));
+
+            teamRepository.findAll(SearchTeamSpecification.readyForDeletion()).forEach(team -> this.deleteTeam(team.getId()));
+
+            userRepository.findAll(SearchUserSpecification.readyForDeletion()).forEach(user -> this.deleteUser(user.getId()));
+
         } catch (Exception e) {
             log.error("Error in event " + Queues.TASK_PERFORM_DELETION, e);
+        }
+    }
+
+    @Transactional
+    public void deletePublication(String publicationId) {
+        log.info("Request publication deletion {}", publicationId);
+        final Optional<Publication> optionalPublication = publicationRepository.findById(publicationId);
+        if (optionalPublication.isPresent()) {
+            final Publication publication = optionalPublication.get();
+            ImageService imageService = new ImageService(FileRepositories.PUBLICATION_IMAGES, fileService);
+            messageRepository.deleteByTargetId(publicationId);
+            notificationRepository.deleteByElementId(publicationId);
+            imageService.delete(publication.getTeamId(), publication.getId());
+            publicationRepository.delete(publication);
         }
     }
 
@@ -78,10 +120,10 @@ public class AsyncDeletionService {
         final Optional<Ride> optionalRide = rideRepository.findById(rideId);
         if (optionalRide.isPresent()) {
             final Ride ride = optionalRide.get();
-            messageService.deleteByTarget(rideId);
-            reactionService.deleteByTarget(rideId);
-            notificationService.deleteByElement(rideId);
-            rideService.deleteImage(ride.getTeamId(), ride.getId());
+            ImageService imageService = new ImageService(FileRepositories.RIDE_IMAGES, fileService);
+            messageRepository.deleteByTargetId(rideId);
+            notificationRepository.deleteByElementId(rideId);
+            imageService.delete(ride.getTeamId(), ride.getId());
             rideRepository.delete(ride);
         }
     }
@@ -92,12 +134,27 @@ public class AsyncDeletionService {
         final Optional<Trip> optionalTrip = tripRepository.findById(tripId);
         if (optionalTrip.isPresent()) {
             final Trip trip = optionalTrip.get();
-            messageService.deleteByTarget(tripId);
-            reactionService.deleteByTarget(tripId);
-            notificationService.deleteByElement(tripId);
-            tripService.deleteImage(trip.getTeamId(), trip.getId());
+            ImageService imageService = new ImageService(FileRepositories.TRIP_IMAGES, fileService);
+            messageRepository.deleteByTargetId(tripId);
+            notificationRepository.deleteByElementId(tripId);
+            imageService.delete(trip.getTeamId(), trip.getId());
             tripRepository.delete(trip);
         }
+    }
+
+    @Transactional
+    public void deleteMap(String mapId) {
+        log.info("Request map deletion {}", mapId);
+        Optional<Map> optionalMap = mapRepository.findById(mapId);
+        if (optionalMap.isPresent()) {
+            final Map map = optionalMap.get();
+            mapRepository.removeMapIdInGroups(map.getId());
+            mapRepository.removeMapIdInStages(map.getId());
+            fileService.deleteFile(FileRepositories.GPX_FILES, map.getTeamId(), map.getId() + ".gpx");
+            fileService.deleteFile(FileRepositories.MAP_IMAGES, map.getTeamId(), map.getId() + ".png");
+            mapRepository.delete(map);
+        }
+        log.info("Map deleted {}", mapId);
     }
 
     @Transactional
@@ -106,21 +163,83 @@ public class AsyncDeletionService {
         log.info("Request team deletion {}", teamId);
         final Optional<Team> optionalTeam = teamRepository.findById(teamId);
         if (optionalTeam.isPresent()) {
+
             final Team team = optionalTeam.get();
-            // delete all elements
-            messageService.deleteByTarget(team.getId());
-            rideTemplateService.deleteByTeam(team.getId());
-            rideService.deleteByTeam(team.getId());
-            publicationService.deleteByTeam(team.getId());
-            tripService.deleteByTeam(team.getId());
-            mapService.deleteByTeam(team.getId());
-            placeService.deleteByTeam(team.getId());
-            // remove all access to this team
-            userRoleService.deleteByTeam(team.getId());
+
+            // delete nested elements
+
+            rideTemplateRepository.findAll(new SearchRideTemplateSpecification(teamId))
+                    .stream().forEach(rideTemplateRepository::delete);
+
+            placeRepository.findAll(new SearchPlaceSpecification(teamId))
+                    .stream().forEach(placeRepository::delete);
+
+
+            rideRepository.findAll(new SearchRideSpecification(
+                            null, null, null, null, null, Set.of(teamId), null, null, null, null, null
+                    ))
+                    .stream()
+                    .map(Ride::getId)
+                    .forEach(this::deleteRide);
+
+            tripRepository.findAll(new SearchTripSpecification(
+                            null, null, null, null, null, Set.of(teamId), null, null, null, null, null
+                    ))
+                    .stream()
+                    .map(Trip::getId)
+                    .forEach(this::deleteTrip);
+
+            publicationRepository.findAll(new SearchPublicationSpecification(
+                            null, Set.of(teamId), null, null, null, null
+                    ))
+                    .stream()
+                    .map(Publication::getId)
+                    .forEach(this::deletePublication);
+
+            mapRepository.findAll(new SearchMapSpecification(
+                            null, null, teamId, null, null, null, null, null, null, null, null
+                    ))
+                    .stream()
+                    .map(Map::getId)
+                    .forEach(this::deleteMap);
+
+            userRoleRepository.deleteByTeamId(teamId);
+
             // finaly delete the team
-            teamRepository.deleteById(team.getId());
+            teamRepository.delete(team);
         }
 
     }
+
+
+    @Transactional
+    public void deleteUser(String userId) {
+
+        log.info("Request user deletion {}", userId);
+        final Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isPresent()) {
+
+            User user = optionalUser.get();
+            String teamIdToDelete = user.getTeamId();
+
+            rideRepository.removeParticipant(user.getId());
+            tripRepository.removeParticipant(user.getId());
+
+            notificationRepository.deleteByUserId(user.getId());
+            messageRepository.deleteByUserId(user.getId());
+            userRoleRepository.deleteByUserId(user.getId());
+
+            // finaly delete the user
+            userRepository.delete(user);
+
+            // delete private team
+            if (teamIdToDelete != null) {
+                this.deleteTeam(teamIdToDelete);
+            }
+
+        }
+
+    }
+
 
 }

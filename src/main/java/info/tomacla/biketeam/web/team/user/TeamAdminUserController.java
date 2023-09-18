@@ -7,6 +7,7 @@ import info.tomacla.biketeam.domain.userrole.UserRole;
 import info.tomacla.biketeam.service.UserRoleService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ObjectUtils;
@@ -17,7 +18,6 @@ import org.springframework.web.servlet.view.RedirectView;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = "/{teamId}/admin/users")
@@ -29,21 +29,21 @@ public class TeamAdminUserController extends AbstractController {
     @GetMapping
     public String getUsers(@PathVariable("teamId") String teamId,
                            @ModelAttribute("error") String error,
+                           @RequestParam(value = "name", defaultValue = "", required = false) String name,
+                           @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+                           @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize,
                            Principal principal, Model model) {
         final Team team = checkTeam(teamId);
         addGlobalValues(principal, model, "Administration - Utilisateurs", team);
-        model.addAttribute("roles", team.getRoles()
-                .stream()
-                .filter(r -> team.isPrivate() || r.getRole().equals(Role.ADMIN))
-                .sorted((r1, r2) -> {
-                    if (r1.getRole().equals(Role.ADMIN) && !r2.getRole().equals(Role.ADMIN)) {
-                        return -1;
-                    }
-                    if (!r1.getRole().equals(Role.ADMIN) && r2.getRole().equals(Role.ADMIN)) {
-                        return 1;
-                    }
-                    return r1.getUser().getIdentity().compareTo(r2.getUser().getIdentity());
-                }).collect(Collectors.toList()));
+
+        Page<User> users = userService.listTeamUsers(team, name, page, pageSize);
+        model.addAttribute("users", users.getContent());
+        model.addAttribute("matches", users.getTotalElements());
+        model.addAttribute("pages", users.getTotalPages());
+        model.addAttribute("page", page);
+        model.addAttribute("name", name);
+        model.addAttribute("pageSize", pageSize);
+
         if (!ObjectUtils.isEmpty(error)) {
             model.addAttribute("errors", List.of(error));
         }
@@ -85,18 +85,12 @@ public class TeamAdminUserController extends AbstractController {
 
             if (target != null) {
                 userService.save(target);
-                if (team.isPublic()) {
-                    final Optional<UserRole> existingUserRole = userRoleService.get(team, target);
-                    if (existingUserRole.isPresent()) {
-                        final UserRole userRole = existingUserRole.get();
-                        userRole.setRole(Role.ADMIN);
-                        userRoleService.save(userRole);
-                    } else {
-                        userRoleService.save(new UserRole(team, target, Role.ADMIN));
-                    }
-                } else {
+
+                final Optional<UserRole> existingUserRole = userRoleService.get(team, target);
+                if (existingUserRole.isEmpty()) {
                     userRoleService.save(new UserRole(team, target, Role.MEMBER));
                 }
+
             }
 
             return viewHandler.redirectView(team, "/admin/users");
@@ -120,63 +114,6 @@ public class TeamAdminUserController extends AbstractController {
 
             final User user = userService.get(userId).orElseThrow(() -> new IllegalArgumentException("User unknown"));
             userRoleService.delete(team, user);
-
-            return viewHandler.redirectView(team, "/admin/users");
-
-        } catch (Exception e) {
-            attributes.addFlashAttribute("error", e.getMessage());
-            return viewHandler.redirectView(team, "/admin/users");
-        }
-
-    }
-
-    @GetMapping(value = "/promote/{userId}")
-    public RedirectView promoteUser(@PathVariable("teamId") String teamId, @PathVariable("userId") String userId,
-                                    RedirectAttributes attributes,
-                                    Principal principal,
-                                    Model model) {
-
-        final Team team = checkTeam(teamId);
-
-        try {
-            final User user = userService.get(userId).orElseThrow(() -> new IllegalArgumentException("User unknown"));
-            final Optional<UserRole> existingUserRole = userRoleService.get(team, user);
-            if (existingUserRole.isPresent()) {
-                final UserRole userRole = existingUserRole.get();
-                userRole.setRole(Role.ADMIN);
-                userRoleService.save(userRole);
-            } else {
-                userRoleService.save(new UserRole(team, user, Role.ADMIN));
-            }
-
-            return viewHandler.redirectView(team, "/admin/users");
-
-        } catch (Exception e) {
-            attributes.addFlashAttribute("error", e.getMessage());
-            return viewHandler.redirectView(team, "/admin/users");
-        }
-
-
-    }
-
-    @GetMapping(value = "/relegate/{userId}")
-    public RedirectView relegateUser(@PathVariable("teamId") String teamId, @PathVariable("userId") String userId,
-                                     RedirectAttributes attributes,
-                                     Principal principal,
-                                     Model model) {
-
-        final Team team = checkTeam(teamId);
-
-        try {
-            final User user = userService.get(userId).orElseThrow(() -> new IllegalArgumentException("User unknown"));
-            final Optional<UserRole> existingUserRole = userRoleService.get(team, user);
-            if (existingUserRole.isPresent()) {
-                final UserRole userRole = existingUserRole.get();
-                userRole.setRole(Role.MEMBER);
-                userRoleService.save(userRole);
-            } else {
-                userRoleService.save(new UserRole(team, user, Role.MEMBER));
-            }
 
             return viewHandler.redirectView(team, "/admin/users");
 

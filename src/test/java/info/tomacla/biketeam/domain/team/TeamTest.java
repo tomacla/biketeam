@@ -4,8 +4,6 @@ import info.tomacla.biketeam.domain.AbstractDBTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,22 +22,22 @@ public class TeamTest extends AbstractDBTest {
     @Test
     public void teamTest() {
 
-        List<Team> teams = teamRepository.findAllByDeletion(false);
-        Page<Team> teamsPublic = teamRepository.findAllByDeletionAndVisibilityIn(false, List.of(Visibility.PUBLIC), Pageable.unpaged());
+        List<Team> teams = teamRepository.findAll(SearchTeamSpecification.all());
+        List<Team> teamsPublic = teamRepository.findAll(SearchTeamSpecification.publiclyVisible());
 
         int before = teams.size();
-        int beforePublic = teamsPublic.getSize();
+        int beforePublic = teamsPublic.size();
 
         createTeam("team1-test", Visibility.PUBLIC);
         createTeam("team2-test", Visibility.PRIVATE);
         createTeam("team3-test", Visibility.PUBLIC_UNLISTED);
 
 
-        teams = teamRepository.findAllByDeletion(false);
-        teamsPublic = teamRepository.findAllByDeletionAndVisibilityIn(false, List.of(Visibility.PUBLIC), Pageable.unpaged());
+        teams = teamRepository.findAll(SearchTeamSpecification.all());
+        teamsPublic = teamRepository.findAll(SearchTeamSpecification.publiclyVisible());
 
         assertEquals(before + 3, teams.size());
-        assertEquals(beforePublic + 1, teamsPublic.getSize());
+        assertEquals(beforePublic + 1, teamsPublic.size());
 
 
     }

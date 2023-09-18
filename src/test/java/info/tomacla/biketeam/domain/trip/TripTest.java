@@ -16,6 +16,7 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -32,9 +33,9 @@ public class TripTest extends AbstractDBTest {
     @Test
     public void tripTest() {
 
-        List<Trip> trips = tripRepository.findAllByDeletionAndTeamIdAndPublishedStatusAndPublishedAtLessThan(false, "triptest-team",
-                PublishedStatus.PUBLISHED,
-                ZonedDateTime.now());
+        List<Trip> trips = tripRepository.findAll(new SearchTripSpecification(
+                false, null, null, null, null, Set.of("triptest-team"), PublishedStatus.PUBLISHED, null, ZonedDateTime.now(), null, null
+        ));
 
         assertEquals(0, trips.size());
 
@@ -42,9 +43,9 @@ public class TripTest extends AbstractDBTest {
         createTrip(ZonedDateTime.now().minus(1, ChronoUnit.DAYS), PublishedStatus.UNPUBLISHED);
         createTrip(ZonedDateTime.now().plus(1, ChronoUnit.DAYS), PublishedStatus.PUBLISHED);
 
-        trips = tripRepository.findAllByDeletionAndTeamIdAndPublishedStatusAndPublishedAtLessThan(false,  "triptest-team",
-                PublishedStatus.PUBLISHED,
-                ZonedDateTime.now());
+        trips = tripRepository.findAll(new SearchTripSpecification(
+                false, null, null, null, null, Set.of("triptest-team"), PublishedStatus.PUBLISHED, null, ZonedDateTime.now(), null, null
+        ));
 
         assertEquals(1, trips.size());
 

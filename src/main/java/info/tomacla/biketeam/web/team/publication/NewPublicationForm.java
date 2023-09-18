@@ -2,7 +2,6 @@ package info.tomacla.biketeam.web.team.publication;
 
 import info.tomacla.biketeam.common.datatype.Dates;
 import info.tomacla.biketeam.common.datatype.Strings;
-import info.tomacla.biketeam.web.team.ride.NewRideForm;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;

@@ -12,19 +12,23 @@ import java.util.Objects;
 
 public class SearchMapSpecification implements Specification<Map> {
 
+    private final Boolean deletion;
+    private final String permalink;
     private final String teamId;
     private final String name;
-    private final double lowerDistance;
-    private final double upperDistance;
+    private final Double lowerDistance;
+    private final Double upperDistance;
     private final MapType type;
-    private final double lowerPositiveElevation;
-    private final double upperPositiveElevation;
+    private final Double lowerPositiveElevation;
+    private final Double upperPositiveElevation;
     private final List<String> tags;
     private final WindDirection windDirection;
 
-    public SearchMapSpecification(String teamId, String name, double lowerDistance, double upperDistance,
-                                  MapType type, double lowerPositiveElevation, double upperPositiveElevation,
+    public SearchMapSpecification(Boolean deletion, String permalink, String teamId, String name, Double lowerDistance, Double upperDistance,
+                                  MapType type, Double lowerPositiveElevation, Double upperPositiveElevation,
                                   List<String> tags, WindDirection windDirection) {
+        this.deletion = deletion;
+        this.permalink = permalink;
         this.teamId = teamId;
         this.name = name;
         this.lowerDistance = lowerDistance;
@@ -40,18 +44,34 @@ public class SearchMapSpecification implements Specification<Map> {
     public Predicate toPredicate(Root<Map> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
 
         List<Predicate> predicates = new ArrayList<>();
-        predicates.add(criteriaBuilder.equal(root.get("teamId"), teamId));
-        predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("length"), lowerDistance));
-        predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("length"), upperDistance));
-        predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("positiveElevation"), lowerPositiveElevation));
-        predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("positiveElevation"), upperPositiveElevation));
-        if (name != null) {
+        if (deletion != null) {
+            predicates.add(criteriaBuilder.equal(root.get("deletion"), deletion.booleanValue()));
+        }
+        if (permalink != null && !permalink.isBlank()) {
+            predicates.add(criteriaBuilder.equal(root.get("permalink"), permalink));
+        }
+        if (teamId != null && !teamId.isBlank()) {
+            predicates.add(criteriaBuilder.equal(root.get("teamId"), teamId));
+        }
+        if (lowerDistance != null) {
+            predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("length"), lowerDistance));
+        }
+        if (upperDistance != null) {
+            predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("length"), upperDistance));
+        }
+        if (lowerPositiveElevation != null) {
+            predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("positiveElevation"), lowerPositiveElevation));
+        }
+        if (upperPositiveElevation != null) {
+            predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("positiveElevation"), upperPositiveElevation));
+        }
+        if (name != null && !name.isBlank()) {
             predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
         }
         if (type != null) {
             predicates.add(criteriaBuilder.equal(root.get("type"), type));
         }
-        if (!tags.isEmpty()) {
+        if (tags != null && !tags.isEmpty()) {
             predicates.add(root.join("tags").in(tags));
         }
         if (windDirection != null) {
@@ -59,6 +79,10 @@ public class SearchMapSpecification implements Specification<Map> {
         }
         criteriaQuery.distinct(true);
         return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+    }
+
+    public static SearchMapSpecification readyForDeletion() {
+        return new SearchMapSpecification(true, null, null, null, null, null, null, null, null, null, null);
     }
 
 }

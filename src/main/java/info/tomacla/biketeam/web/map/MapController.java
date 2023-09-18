@@ -1,7 +1,10 @@
 package info.tomacla.biketeam.web.map;
 
 import info.tomacla.biketeam.common.file.FileExtension;
-import info.tomacla.biketeam.domain.map.*;
+import info.tomacla.biketeam.domain.map.Map;
+import info.tomacla.biketeam.domain.map.MapSorterOption;
+import info.tomacla.biketeam.domain.map.MapType;
+import info.tomacla.biketeam.domain.map.WindDirection;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
@@ -162,10 +165,12 @@ public class MapController extends AbstractController {
     @ResponseBody
     @RequestMapping(value = "/autocomplete", method = RequestMethod.GET)
     public java.util.Map<String, String> autocompleteMaps(@PathVariable("teamId") String teamId,
-                                                          @RequestParam("q") String q) {
-        return mapService.searchMaps(teamId, q)
+                                                          @RequestParam("q") String q,
+                                                          @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+                                                          @RequestParam(value = "pageSize", defaultValue = "12", required = false) int pageSize) {
+        return mapService.searchMaps(teamId, page, pageSize, null, q, null, null, null, null, null, null, null)
                 .stream()
-                .collect(Collectors.toMap(MapProjection::getId, MapProjection::getName));
+                .collect(Collectors.toMap(Map::getId, Map::getName));
 
     }
 
@@ -175,7 +180,7 @@ public class MapController extends AbstractController {
 
         Team team = teamService.get(teamId).orElseThrow(() -> new IllegalArgumentException("Unknown team"));
 
-        return mapService.listMaps(teamId, 50).stream()
+        return mapService.listMaps(teamId, null, 0, 50).stream()
                 .map(m -> {
                     AndroidMapDTO dto = new AndroidMapDTO();
                     dto.setId(m.getPermalink());
@@ -208,7 +213,7 @@ public class MapController extends AbstractController {
                         return dto;
                     }).collect(Collectors.toList()));
         } else {
-            return java.util.Map.of("tracks", mapService.listMaps(teamId, 50).stream()
+            return java.util.Map.of("tracks", mapService.listMaps(teamId, null, 0, 50).stream()
                     .map(map -> {
                         GarminMapDTO dto = new GarminMapDTO();
                         dto.setTitle(map.getName());

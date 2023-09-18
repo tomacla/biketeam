@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -90,7 +91,7 @@ public class MapAPI extends AbstractAPI {
     }
 
     @GetMapping(path = "/tags", produces = "application/json")
-    public ResponseEntity<List<String>> getTags(@PathVariable String teamId) {
+    public ResponseEntity<Set<String>> getTags(@PathVariable String teamId) {
 
         checkTeam(teamId);
 

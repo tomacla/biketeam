@@ -3,16 +3,16 @@ package info.tomacla.biketeam.service;
 import info.tomacla.biketeam.common.amqp.Exchanges;
 import info.tomacla.biketeam.common.amqp.Queues;
 import info.tomacla.biketeam.common.data.PublishedStatus;
-import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
+import info.tomacla.biketeam.domain.trip.SearchTripSpecification;
 import info.tomacla.biketeam.domain.trip.Trip;
-import info.tomacla.biketeam.domain.trip.TripIdTitleDateProjection;
 import info.tomacla.biketeam.domain.trip.TripRepository;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.service.amqp.BrokerService;
 import info.tomacla.biketeam.service.amqp.dto.TeamEntityDTO;
 import info.tomacla.biketeam.service.file.FileService;
+import info.tomacla.biketeam.service.image.ImageService;
 import info.tomacla.biketeam.service.permalink.AbstractPermalinkService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
-import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -38,28 +37,29 @@ public class TripService extends AbstractPermalinkService {
 
     private static final Logger log = LoggerFactory.getLogger(TripService.class);
 
-    @Autowired
-    private FileService fileService;
-
-    @Autowired
     private TripRepository tripRepository;
 
-    @Autowired
     private TeamService teamService;
 
-    @Autowired
     private BrokerService brokerService;
+    private ImageService imageService;
 
     @Autowired
-    private ReactionService reactionService;
+    public TripService(FileService fileService, TripRepository tripRepository, TeamService teamService, BrokerService brokerService) {
+        this.tripRepository = tripRepository;
+        this.teamService = teamService;
+        this.brokerService = brokerService;
+        this.imageService = new ImageService(FileRepositories.TRIP_IMAGES, fileService);
+    }
 
-    public Optional<Trip> get(String teamId, String tripId) {
-        Optional<Trip> optionalTrip = tripRepository.findById(tripId);
+    public Optional<Trip> get(String teamId, String tripIdOrPermalink) {
+
+        Optional<Trip> optionalTrip = tripRepository.findById(tripIdOrPermalink);
         if (optionalTrip.isPresent() && optionalTrip.get().getTeamId().equals(teamId)) {
             return optionalTrip;
         }
 
-        optionalTrip = tripRepository.findByPermalink(tripId);
+        optionalTrip = findByPermalink(false, tripIdOrPermalink);
         if (optionalTrip.isPresent() && optionalTrip.get().getTeamId().equals(teamId)) {
             return optionalTrip;
         }
@@ -68,47 +68,26 @@ public class TripService extends AbstractPermalinkService {
         return Optional.empty();
     }
 
-    public Optional<ImageDescriptor> getImage(String teamId, String tripId) {
-
-        final Optional<Trip> optionalTrip = get(teamId, tripId);
-
-        if (optionalTrip.isPresent()) {
-
-            final Trip trip = optionalTrip.get();
-
-            Optional<FileExtension> fileExtensionExists = fileService.fileExists(FileRepositories.TRIP_IMAGES, teamId, trip.getId(), FileExtension.byPriority());
-
-            if (fileExtensionExists.isPresent()) {
-
-                final FileExtension extension = fileExtensionExists.get();
-                final Path path = fileService.getFile(FileRepositories.TRIP_IMAGES, teamId, trip.getId() + extension.getExtension());
-
-                return Optional.of(ImageDescriptor.of(extension, path));
-
-            }
-
-        }
-
-        return Optional.empty();
-
-    }
 
     @RabbitListener(queues = Queues.TASK_PUBLISH_TRIPS)
     public void publishTrips() {
-        teamService.list().forEach(team ->
-                tripRepository.findAllByDeletionAndTeamIdAndPublishedStatusAndPublishedAtLessThan(
-                        false,
-                        team.getId(),
-                        PublishedStatus.UNPUBLISHED,
-                        ZonedDateTime.now(team.getZoneId())
-                ).forEach(trip -> {
-                    log.info("Publishing trip {} for team {}", trip.getId(), team.getId());
-                    trip.setPublishedStatus(PublishedStatus.PUBLISHED);
-                    save(trip);
-                    if (trip.isListedInFeed()) {
-                        brokerService.sendToBroker(Exchanges.PUBLISH_TRIP, TeamEntityDTO.valueOf(trip.getTeamId(), trip.getId()));
-                    }
-                })
+        teamService.list().forEach(team -> {
+
+                    SearchTripSpecification spec = new SearchTripSpecification(
+                            false, null, null,
+                            null, null, Set.of(team.getId()),
+                            PublishedStatus.UNPUBLISHED, null, ZonedDateTime.now(team.getZoneId()),
+                            null, null);
+
+                    tripRepository.findAll(spec).forEach(trip -> {
+                        log.info("Publishing trip {} for team {}", trip.getId(), team.getId());
+                        trip.setPublishedStatus(PublishedStatus.PUBLISHED);
+                        save(trip);
+                        if (trip.isListedInFeed()) {
+                            brokerService.sendToBroker(Exchanges.PUBLISH_TRIP, TeamEntityDTO.valueOf(trip.getTeamId(), trip.getId()));
+                        }
+                    });
+                }
         );
 
     }
@@ -118,67 +97,79 @@ public class TripService extends AbstractPermalinkService {
         tripRepository.save(trip);
     }
 
-    public List<TripIdTitleDateProjection> listTrips(String teamId) {
-        return tripRepository.findAllByDeletionAndTeamIdOrderByStartDateDesc(false, teamId);
-    }
-
-
-    public Page<Trip> searchTrips(Set<String> teamIds, int page, int pageSize,
-                                  LocalDate from, LocalDate to, boolean listedInFeed) {
-        Pageable pageable = PageRequest.of(page, pageSize, Sort.by("startDate").descending());
-        return tripRepository.findAllByDeletionAndListedInFeedAndTeamIdInAndStartDateBetweenAndPublishedStatus(
-                false,
-                listedInFeed,
-                teamIds,
-                from,
-                to,
-                PublishedStatus.PUBLISHED,
-                pageable);
-    }
-
-    public List<Trip> searchTripsByUser(User connectedUser, Set<String> teamIds, LocalDate from) {
-        return tripRepository.findAllByDeletionAndTeamIdInAndParticipants_IdAndEndDateGreaterThanAndPublishedStatus(
-                false,
-                teamIds,
-                connectedUser.getId(),
-                from,
-                PublishedStatus.PUBLISHED
-        );
-    }
-
-    public void saveImage(String teamId, String tripId, InputStream is, String fileName) {
-        Optional<FileExtension> optionalFileExtension = FileExtension.findByFileName(fileName);
-        if (optionalFileExtension.isPresent()) {
-            this.deleteImage(teamId, tripId);
-            Path newImage = fileService.getTempFileFromInputStream(is);
-            fileService.storeFile(newImage, FileRepositories.TRIP_IMAGES, teamId, tripId + optionalFileExtension.get().getExtension());
-        }
-    }
-
-    public void deleteImage(String teamId, String tripId) {
-        getImage(teamId, tripId).ifPresent(image ->
-                fileService.deleteFile(FileRepositories.TRIP_IMAGES, teamId, tripId + image.getExtension().getExtension())
-        );
-    }
-
-    public boolean permalinkExists(String permalink) {
-        return tripRepository.findByPermalink(permalink).isPresent();
-    }
-
-    public void deleteByTeam(String teamId) {
-        tripRepository.findAllByDeletionAndTeamIdOrderByStartDateDesc(false, teamId).stream().map(TripIdTitleDateProjection::getId).forEach(tripRepository::deleteById);
-    }
-
-    public void removeParticipant(String userId) {
-        tripRepository.removeParticipant(userId);
-    }
-
+    @Transactional
     public void delete(String teamId, String tripId) {
         log.info("Request trip deletion {}", tripId);
         get(teamId, tripId).ifPresent(trip -> {
             trip.setDeletion(true);
             save(trip);
         });
+    }
+
+    public Page<Trip> listTrips(String teamId, String title, int page, int pageSize) {
+        SearchTripSpecification spec = new SearchTripSpecification(
+                false, null, title, null, null, Set.of(teamId), null, null, null,
+                null, null);
+        return tripRepository.findAll(spec, PageRequest.of(page, pageSize, Sort.by("publishedAt").descending()));
+    }
+
+
+    public Page<Trip> searchTrips(Set<String> teamIds, int page, int pageSize,
+                                  LocalDate from, LocalDate to, boolean listedInFeed) {
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by("startDate").descending());
+
+        SearchTripSpecification spec = new SearchTripSpecification(
+                false, null, null, listedInFeed, null, teamIds, null, null, null,
+                from, to);
+
+        return tripRepository.findAll(spec, pageable);
+    }
+
+    public List<Trip> searchUpcomingTripsByUser(User user, Set<String> teamIds, LocalDate from) {
+
+        Pageable pageable = PageRequest.of(0, 100, Sort.by("startDate").descending());
+
+        SearchTripSpecification spec = new SearchTripSpecification(
+                false, null, null, null, user, teamIds, PublishedStatus.PUBLISHED, null, null,
+                from, null);
+
+        return tripRepository.findAll(spec, pageable).getContent();
+
+    }
+
+    public Optional<ImageDescriptor> getImage(String teamId, String tripId) {
+        final Optional<Trip> optionalTrip = get(teamId, tripId);
+        if (optionalTrip.isPresent()) {
+            return imageService.get(teamId, tripId);
+        }
+        return Optional.empty();
+    }
+
+    public void saveImage(String teamId, String tripId, InputStream is, String fileName) {
+        imageService.save(teamId, tripId, is, fileName);
+    }
+
+    public void deleteImage(String teamId, String tripId) {
+        imageService.delete(teamId, tripId);
+    }
+
+    public Optional<Trip> findByPermalink(Boolean deletion, String permalink) {
+
+        SearchTripSpecification spec = new SearchTripSpecification(
+                deletion, permalink, null, null, null, null, null, null, null, null, null
+        );
+
+        return tripRepository.findOne(spec);
+
+    }
+
+    @Override
+    public boolean permalinkExists(String permalink) {
+        return findByPermalink(null, permalink).isPresent();
+    }
+
+    public void removeParticipant(String userId) {
+        tripRepository.removeParticipant(userId);
     }
 
 

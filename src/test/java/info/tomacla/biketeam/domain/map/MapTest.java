@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,12 +41,12 @@ public class MapTest extends AbstractDBTest {
         map.setEndPoint(new Point(53.0, 3.1));
 
         assertFalse(mapRepository.findById("map-id").isPresent());
-        assertFalse(mapRepository.findByPermalink("map-perma").isPresent());
+        assertFalse(mapRepository.findOne(new SearchMapSpecification(null, "map-perma", null, null, null, null, null, null, null, null, null)).isPresent());
 
         mapRepository.save(map);
 
         assertTrue(mapRepository.findById("mapRepositoryTU-id").isPresent());
-        assertTrue(mapRepository.findByPermalink("map-perma").isPresent());
+        assertTrue(mapRepository.findOne(new SearchMapSpecification(null, "map-perma", null, null, null, null, null, null, null, null, null)).isPresent());
 
         mapRepository.deleteAll();
 
@@ -91,8 +92,8 @@ public class MapTest extends AbstractDBTest {
         mapRepository.save(map3);
 
 
-        assertEquals(2, mapRepository.findAllByTeamIdOrderByPostedAtDesc("maptest-team").size());
-        assertEquals(1, mapRepository.findAllByTeamIdAndNameContainingIgnoreCaseOrderByPostedAtDesc("maptest-team", "GRAVEL").size());
+        assertEquals(2, mapRepository.findAll(new SearchMapSpecification(null, null, "maptest-team", null, null, null, null, null, null, null, null)).size());
+        assertEquals(1, mapRepository.findAll(new SearchMapSpecification(null, null, "maptest-team", "GRAVEL", null, null, null, null, null, null, null)).size());
 
         mapRepository.deleteAll();
 
@@ -141,8 +142,8 @@ public class MapTest extends AbstractDBTest {
         mapRepository.save(map3);
 
 
-        assertEquals(List.of("bikepack", "fondo", "gravel", "road", "trip"), mapRepository.findAllDistinctTags("maptest-team"));
-        assertEquals(List.of("gravel"), mapRepository.findDistinctTagsContaining("maptest-team", "rav"));
+        assertEquals(Set.of("bikepack", "fondo", "gravel", "road", "trip"), mapRepository.findAllDistinctTags("maptest-team"));
+        assertEquals(Set.of("gravel"), mapRepository.findDistinctTagsContaining("maptest-team", "rav"));
 
         mapRepository.deleteAll();
 
@@ -152,6 +153,8 @@ public class MapTest extends AbstractDBTest {
     public void mapRepositoryTU_search() {
 
         SearchMapSpecification spec = new SearchMapSpecification(
+                null,
+                null,
                 "maptest-team",
                 null,
                 3.0,

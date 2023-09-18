@@ -10,6 +10,7 @@ import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.userrole.Role;
 import info.tomacla.biketeam.domain.userrole.UserRole;
 import info.tomacla.biketeam.service.UserRoleService;
+import info.tomacla.biketeam.service.feed.FeedService;
 import info.tomacla.biketeam.service.file.ThumbnailService;
 import info.tomacla.biketeam.service.heatmap.HeatmapService;
 import info.tomacla.biketeam.web.AbstractController;
@@ -50,6 +51,9 @@ public class TeamController extends AbstractController {
     @Autowired
     private UserRoleService userRoleService;
 
+    @Autowired
+    private FeedService feedService;
+
     @GetMapping
     public String getFeed(@PathVariable("teamId") String teamId,
                           @RequestParam(value = "includeTrips", required = false, defaultValue = "true") boolean includeTrips,
@@ -87,7 +91,7 @@ public class TeamController extends AbstractController {
         );
 
 
-        List<FeedEntity> feed = teamService.listFeed(getUserFromPrincipal(principal).orElse(null), team, options);
+        List<FeedEntity> feed = feedService.listFeed(getUserFromPrincipal(principal).orElse(null), team, options);
 
         addGlobalValues(principal, model, team.getName(), team);
         model.addAttribute("feed", feed);

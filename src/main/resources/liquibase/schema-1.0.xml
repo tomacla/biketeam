@@ -1374,4 +1374,43 @@
 
     </changeSet>
 
+    <changeSet id="github-232-owner-teams" author="thomas">
+
+        <addColumn tableName="user_account">
+            <column name="team_id" type="VARCHAR(20)"/>
+        </addColumn>
+
+        <addForeignKeyConstraint baseTableName="user_account"
+                                 baseColumnNames="team_id"
+                                 constraintName="fk_team_id_owner"
+                                 referencedTableName="team"
+                                 referencedColumnNames="id"/>
+
+    </changeSet>
+
+    <changeSet id="async-entities-deletion-2" author="tomacla">
+
+        <addColumn tableName="user_account">
+            <column name="deletion" type="BOOLEAN" />
+        </addColumn>
+
+        <addColumn tableName="publication">
+            <column name="deletion" type="BOOLEAN" />
+        </addColumn>
+
+        <addColumn tableName="map">
+            <column name="deletion" type="BOOLEAN" />
+        </addColumn>
+
+        <sql>update user_account set deletion = FALSE</sql>
+        <sql>update publication set deletion = FALSE</sql>
+        <sql>update map set deletion = FALSE</sql>
+
+    </changeSet>
+
+    <changeSet id="delete-reaction" author="tomacla">
+        <dropTable tableName="reaction" />
+        <dropColumn tableName="team_configuration" columnName="reaction_visible" />
+    </changeSet>
+
 </databaseChangeLog>

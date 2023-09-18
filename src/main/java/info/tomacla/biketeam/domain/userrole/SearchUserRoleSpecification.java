@@ -1,0 +1,30 @@
+package info.tomacla.biketeam.domain.userrole;
+
+import org.springframework.data.jpa.domain.Specification;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
+import java.util.List;
+
+public class SearchUserRoleSpecification implements Specification<UserRole> {
+
+    private final String teamId;
+
+    public SearchUserRoleSpecification(String teamId) {
+        this.teamId = teamId;
+    }
+
+    @Override
+    public Predicate toPredicate(Root<UserRole> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
+        List<Predicate> predicates = new ArrayList<>();
+        if (teamId != null && !teamId.isBlank()) {
+            predicates.add(criteriaBuilder.equal(root.get("teamId"), teamId));
+        }
+        criteriaQuery.distinct(true);
+        return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+    }
+
+}

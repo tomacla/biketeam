@@ -1,20 +1,16 @@
 package info.tomacla.biketeam.domain.notification;
 
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
-import java.util.List;
 
 @Repository
-public interface NotificationRepository extends CrudRepository<Notification, String> {
-
-    List<Notification> findAll();
-
-    List<Notification> findAllByUserIdAndViewedOrderByCreatedAtDesc(String userId, boolean viewed);
+public interface NotificationRepository extends PagingAndSortingRepository<Notification, String>, JpaSpecificationExecutor<Notification> {
 
     @Transactional
     @Modifying
@@ -28,12 +24,7 @@ public interface NotificationRepository extends CrudRepository<Notification, Str
 
     @Transactional
     @Modifying
-    @Query(value = "delete from notification where viewed = true and created_at < (NOW() - interval '2 months')", nativeQuery = true)
-    void deleteOldRead();
-
-    @Transactional
-    @Modifying
-    @Query(value = "delete from notification where created_at < (NOW() - interval '6 months')", nativeQuery = true)
+    @Query(value = "delete from notification where (viewed = true and created_at < (NOW() - interval '2 months')) OR (viewed = false AND created_at < (NOW() - interval '6 months'))", nativeQuery = true)
     void deleteOld();
 
 }
