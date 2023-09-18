@@ -167,7 +167,7 @@ public class RootController extends AbstractController {
                               @RequestParam(value = "country", required = false) Country country,
                               @RequestParam(value = "city", required = false) String city,
                               @RequestParam(value = "page", defaultValue = "0", required = false) int page,
-                              @RequestParam(value = "pageSize", defaultValue = "12", required = false) int pageSize,
+                              @RequestParam(value = "pageSize", defaultValue = "100", required = false) int pageSize,
                               Principal principal,
                               Model model) {
 
