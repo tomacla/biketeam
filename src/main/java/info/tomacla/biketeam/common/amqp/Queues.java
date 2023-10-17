@@ -5,6 +5,7 @@ public interface Queues {
     String QUEUE_PREFIX = "biketeam.";
     String PUBLICATION_PUBLISHED_MAIL = QUEUE_PREFIX + "publication_published_mail";
     String PUBLICATION_PUBLISHED_MATTERMOST = QUEUE_PREFIX + "publication_published_mattermost";
+    String PUBLICATION_PUBLISHED_WEBHOOK = QUEUE_PREFIX + "publication_published_webhook";
     String RIDE_MESSAGE_PUBLISHED_NOTIFICATION = QUEUE_PREFIX + "ride_message_published_notification";
     String RIDE_MESSAGE_PUBLISHED_MATTERMOST = QUEUE_PREFIX + "ride_message_published_mattermost";
     String TRIP_MESSAGE_PUBLISHED_NOTIFICATION = QUEUE_PREFIX + "trip_message_published_notification";
@@ -12,8 +13,10 @@ public interface Queues {
     String RIDE_PUBLISHED_NOTIFICATION = QUEUE_PREFIX + "ride_published_notification";
     String RIDE_PUBLISHED_MAIL = QUEUE_PREFIX + "ride_published_mail";
     String RIDE_PUBLISHED_MATTERMOST = QUEUE_PREFIX + "ride_published_mattermost";
+    String RIDE_PUBLISHED_WEBHOOK = QUEUE_PREFIX + "ride_published_webhook";
     String TRIP_PUBLISHED_MAIL = QUEUE_PREFIX + "trip_published_mail";
     String TRIP_PUBLISHED_NOTIFICATION = QUEUE_PREFIX + "trip_published_notification";
+    String TRIP_PUBLISHED_WEBHOOK = QUEUE_PREFIX + "trip_published_webhook";
     String TRIP_PUBLISHED_MATTERMOST = QUEUE_PREFIX + "trip_published_mattermost";
     String TASK_PUBLISH_RIDES = QUEUE_PREFIX + RoutingKeys.TASK_PUBLISH_RIDES;
     String TASK_PUBLISH_TRIPS = QUEUE_PREFIX + RoutingKeys.TASK_PUBLISH_TRIPS;

@@ -1413,4 +1413,14 @@
         <dropColumn tableName="team_configuration" columnName="reaction_visible" />
     </changeSet>
 
+    <changeSet id="GITHUB-211-add-webhook-support" author="tomacla">
+
+        <addColumn tableName="team_integration">
+            <column name="webhook_ride" type="VARCHAR(300)" />
+            <column name="webhook_trip" type="VARCHAR(300)" />
+            <column name="webhook_publication" type="VARCHAR(300)" />
+        </addColumn>
+
+    </changeSet>
+
 </databaseChangeLog>

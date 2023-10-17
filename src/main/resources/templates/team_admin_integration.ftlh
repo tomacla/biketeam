@@ -50,6 +50,31 @@
 
             <hr/>
 
+            <h5>Webhook</h5>
+
+            <div class="alert alert-info" role="alert">Si les webhooks sont configurés, les détails des rides/trips/publications seront envoyés en POST sur l'url saisie au moment de la publication.</div>
+
+            <div class="mb-3">
+
+                <div class="mb-3">
+                  <label for="form-integration-webhookRide" class="form-label">Ride endpoint</label>
+                  <input autocomplete="off" name="webhookRide" value="${formdata.webhookRide}" type="text" class="form-control" id="form-integration-webhookRide">
+                </div>
+
+                <div class="mb-3">
+                  <label for="form-integration-webhookTrip" class="form-label">Trip endpoint</label>
+                  <input autocomplete="off" name="webhookTrip" value="${formdata.webhookTrip}" type="text" class="form-control" id="form-integration-webhookTrip">
+                </div>
+
+                <div class="mb-3">
+                  <label for="form-integration-webhookPublication" class="form-label">Publication endpoint</label>
+                  <input autocomplete="off" name="webhookPublication" value="${formdata.webhookPublication}" type="text" class="form-control" id="form-integration-webhookPublication">
+                </div>
+
+            </div>
+
+            <hr/>
+
             <div class="mb-3">
                 <h5>Heatmap</h5>
                 <div class="alert alert-info" role="alert">Pour activer la heatmap, renseignez les coordonnées du centre à utiliser pour la générer.</div>
