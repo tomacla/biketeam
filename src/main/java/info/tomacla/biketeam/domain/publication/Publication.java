@@ -4,11 +4,6 @@ import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.domain.feed.FeedEntity;
 import info.tomacla.biketeam.domain.feed.FeedType;
-import info.tomacla.biketeam.domain.reaction.Reaction;
-import info.tomacla.biketeam.domain.reaction.ReactionHolder;
-import info.tomacla.biketeam.domain.reaction.ReactionTargetType;
-import info.tomacla.biketeam.domain.userrole.UserRole;
-import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -21,7 +16,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "publication")
-public class Publication implements ReactionHolder, FeedEntity {
+public class Publication implements FeedEntity {
 
     @Id
     private String id = UUID.randomUUID().toString();
@@ -39,13 +34,10 @@ public class Publication implements ReactionHolder, FeedEntity {
     private boolean allowRegistration;
     private boolean imaged;
 
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "target_id", referencedColumnName = "id")
-    @Where(clause = "type = 'PUBLICATION'")
-    private Set<Reaction> reactions = new HashSet<>();
-
     @OneToMany(mappedBy = "publication", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<PublicationRegistration> registrations = new HashSet<>();
+
+    private boolean deletion;
 
     public String getId() {
         return id;
@@ -111,14 +103,6 @@ public class Publication implements ReactionHolder, FeedEntity {
         this.allowRegistration = allowRegistration;
     }
 
-    public Set<Reaction> getReactions() {
-        return reactions;
-    }
-
-    public void setReactions(Set<Reaction> reactions) {
-        this.reactions = reactions;
-    }
-
     public Set<PublicationRegistration> getRegistrations() {
         return registrations;
     }
@@ -127,9 +111,12 @@ public class Publication implements ReactionHolder, FeedEntity {
         this.registrations = registrations;
     }
 
-    @Override
-    public ReactionTargetType getReactionType() {
-        return ReactionTargetType.PUBLICATION;
+    public boolean isDeletion() {
+        return deletion;
+    }
+
+    public void setDeletion(boolean deletion) {
+        this.deletion = deletion;
     }
 
     @Override
@@ -141,7 +128,6 @@ public class Publication implements ReactionHolder, FeedEntity {
     public FeedType getFeedType() {
         return FeedType.PUBLICATION;
     }
-
 
 
     @Override

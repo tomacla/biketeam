@@ -1,6 +1,5 @@
 package info.tomacla.biketeam.web;
 
-import info.tomacla.biketeam.common.data.Country;
 import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.domain.feed.FeedEntity;
 import info.tomacla.biketeam.domain.feed.FeedOptions;
@@ -11,7 +10,8 @@ import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.userrole.Role;
 import info.tomacla.biketeam.domain.userrole.UserRole;
 import info.tomacla.biketeam.security.Authorities;
-import info.tomacla.biketeam.service.*;
+import info.tomacla.biketeam.service.UserRoleService;
+import info.tomacla.biketeam.service.feed.FeedService;
 import info.tomacla.biketeam.service.file.FileService;
 import info.tomacla.biketeam.web.team.NewTeamForm;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,18 +39,6 @@ import java.util.stream.Collectors;
 public class RootController extends AbstractController {
 
     @Autowired
-    protected TeamService teamService;
-
-    @Autowired
-    private MapService mapService;
-
-    @Autowired
-    private RideService rideService;
-
-    @Autowired
-    private TripService tripService;
-
-    @Autowired
     private UserRoleService userRoleService;
 
     @Autowired
@@ -59,6 +47,9 @@ public class RootController extends AbstractController {
     @Autowired
     private FileService fileService;
 
+    @Autowired
+    private FeedService feedService;
+
     @GetMapping
     public String getRoot(@RequestParam(required = false, name = "error") String error,
                           @ModelAttribute(name = "error") String modelError,
@@ -66,55 +57,63 @@ public class RootController extends AbstractController {
                           Principal principal,
                           Model model) {
 
-        List<String> errors = new ArrayList<>();
-        if (!ObjectUtils.isEmpty(error)) {
-            errors.add(error);
-        }
-        if (!ObjectUtils.isEmpty(modelError)) {
-            errors.add(modelError);
-        }
-        if (!errors.isEmpty()) {
-            model.addAttribute("errors", errors);
-        }
+        handleErrors(error, modelError, model);
 
         final Optional<User> userFromPrincipal = getUserFromPrincipal(principal);
         if (userFromPrincipal.isPresent()) {
+
             final User user = userFromPrincipal.get();
 
-            final List<Team> teams = teamService.getUserTeams(user.getId());
+            final List<Team> teams = teamService.getUserTeams(user);
 
             // TODO should be user time zone and not UTC
-            final List<FeedEntity> feeds = teamService.listFeed(user, teams.stream().map(Team::getId).collect(Collectors.toSet()), ZoneOffset.UTC, new FeedOptions());
+            final List<FeedEntity> feeds = feedService.listFeed(user, teams.stream().map(Team::getId).collect(Collectors.toSet()), ZoneOffset.UTC, new FeedOptions());
 
             addGlobalValues(principal, model, null, null, session);
-            if (error != null) {
-                model.addAttribute("errors", List.of(error));
-            }
             model.addAttribute("feed", feeds);
-            model.addAttribute("user", user);
 
             return "root_auth";
+
         } else {
             addGlobalValues(principal, model, null, null);
             if (error != null) {
                 model.addAttribute("errors", List.of(error));
             }
             model.addAttribute("teams", teamService.getLast4());
+            model.addAttribute("teamCount", teamService.count());
             return "root";
         }
 
     }
 
-    @GetMapping(value = "login")
-    public String loginPage(@RequestParam(value = "requestUri", required = false) final String referer, Principal principal, Model model) {
-        addGlobalValues(principal, model, "Connexion", null);
-        model.addAttribute("referer", referer == null ? "/" : referer);
-        return "login";
+    @GetMapping("/teams")
+    public String getTeams(@RequestParam(value = "name", defaultValue = "", required = false) String name,
+                           @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+                           @RequestParam(value = "pageSize", defaultValue = "12", required = false) int pageSize,
+                           Principal principal,
+                           Model model) {
+
+        Page<Team> teams = teamService.searchTeams(
+                page,
+                pageSize,
+                name
+        );
+
+        addGlobalValues(principal, model, "Groupes", null);
+        model.addAttribute("teams", teams.getContent());
+        model.addAttribute("matches", teams.getTotalElements());
+        model.addAttribute("pages", teams.getTotalPages());
+        model.addAttribute("name", name);
+        model.addAttribute("page", page);
+        model.addAttribute("pageSize", pageSize);
+
+        return "teams";
+
     }
 
     @GetMapping(value = "new")
     public String newTeam(Principal principal, Model model) {
-        addGlobalValues(principal, model, "Créer une team", null);
+        addGlobalValues(principal, model, "Créer un groupe", null);
         model.addAttribute("formdata", NewTeamForm.builder().get());
         model.addAttribute("timezones", getAllAvailableTimeZones());
         return "new";
@@ -162,80 +161,11 @@ public class RootController extends AbstractController {
 
     }
 
-    @GetMapping("/teams")
-    public String searchTeams(@RequestParam(value = "name", required = false) String name,
-                              @RequestParam(value = "country", required = false) Country country,
-                              @RequestParam(value = "city", required = false) String city,
-                              @RequestParam(value = "page", defaultValue = "0", required = false) int page,
-                              @RequestParam(value = "pageSize", defaultValue = "12", required = false) int pageSize,
-                              Principal principal,
-                              Model model) {
 
-        SearchTeamForm form = SearchTeamForm.builder()
-                .withName(name)
-                .withCity(city)
-                .withCountry(country)
-                .withPage(page)
-                .withPageSize(pageSize)
-                .get();
-
-        final SearchTeamForm.SearchTeamFormParser parser = form.parser();
-
-        Page<Team> teams = teamService.searchTeams(
-                parser.getPage(),
-                parser.getPageSize(),
-                parser.getName(),
-                parser.getCity(),
-                parser.getCountry()
-        );
-
-        addGlobalValues(principal, model, "Groupes", null);
-        model.addAttribute("teams", teams.getContent());
-        model.addAttribute("pages", teams.getTotalPages());
-        model.addAttribute("formdata", form);
-
-        return "teams";
-
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/autocomplete/permalink/teams", method = RequestMethod.GET)
-    public String autocompleteTeamPermalink(@RequestParam("title") String title,
-                                            @RequestParam(required = false, defaultValue = "20") int maxSize) {
-        return teamService.getPermalink(title, maxSize, true);
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/autocomplete/permalink/maps", method = RequestMethod.GET)
-    public String autocompleteMapPermalink(@RequestParam("title") String title,
-                                           @RequestParam(required = false, defaultValue = "100") int maxSize) {
-        return mapService.getPermalink(title, maxSize, false);
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/autocomplete/permalink/rides", method = RequestMethod.GET)
-    public String autocompleteRidePermalink(@RequestParam("title") String title,
-                                            @RequestParam(required = false, defaultValue = "100") int maxSize) {
-        return rideService.getPermalink(title, maxSize, false);
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/autocomplete/permalink/trips", method = RequestMethod.GET)
-    public String autocompleteTripPermalink(@RequestParam("title") String title,
-                                            @RequestParam(required = false, defaultValue = "100") int maxSize) {
-        return tripService.getPermalink(title, maxSize, false);
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/robots.txt", method = RequestMethod.GET)
-    public String robotsTxt() {
-
-        String robotsTxt = """
-                User-agent: *
-                Disallow: /admin
-                """;
-
-        return robotsTxt;
+    @GetMapping(value = "login")
+    public String loginPage(@RequestParam(value = "requestUri", required = false) final String referer, Principal principal, Model model) {
+        addGlobalValues(principal, model, "Connexion", null);
+        return "login";
     }
 
     @RequestMapping(value = "/legal-mentions", method = RequestMethod.GET)
@@ -252,7 +182,7 @@ public class RootController extends AbstractController {
 
     @ResponseBody
     @RequestMapping(value = "/misc/{imageName}", method = RequestMethod.GET)
-    public ResponseEntity<byte[]> getFavicon(@PathVariable("imageName") String imageName) {
+    public ResponseEntity<byte[]> getMiscImage(@PathVariable("imageName") String imageName) {
         return getStaticImage(imageName);
     }
 
@@ -263,7 +193,7 @@ public class RootController extends AbstractController {
             HttpHeaders headers = new HttpHeaders();
             headers.add("Content-Type", MediaType.IMAGE_PNG_VALUE);
             headers.setContentDisposition(ContentDisposition.builder("inline")
-                    .filename("favicon.png")
+                    .filename(image)
                     .build());
 
             return new ResponseEntity<>(
@@ -276,5 +206,29 @@ public class RootController extends AbstractController {
         }
     }
 
+    @ResponseBody
+    @RequestMapping(value = "/robots.txt", method = RequestMethod.GET)
+    public String robotsTxt() {
+
+        String robotsTxt = """
+                User-agent: *
+                Disallow: /admin
+                """;
+
+        return robotsTxt;
+    }
+
+    private static void handleErrors(String error, String modelError, Model model) {
+        List<String> errors = new ArrayList<>();
+        if (!ObjectUtils.isEmpty(error)) {
+            errors.add(error);
+        }
+        if (!ObjectUtils.isEmpty(modelError)) {
+            errors.add(modelError);
+        }
+        if (!errors.isEmpty()) {
+            model.addAttribute("errors", errors);
+        }
+    }
 
 }

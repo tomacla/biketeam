@@ -85,7 +85,6 @@ public class GpxService {
     }
 
     public Map parseAndReplace(Team team, Map map, Path gpx) {
-
         prepareMap(gpx, map.getName(), map, team);
         return map;
     }

@@ -6,6 +6,7 @@ import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
 import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.domain.user.SearchUserSpecification;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.user.UserRepository;
 import info.tomacla.biketeam.domain.userrole.Role;
@@ -18,6 +19,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
@@ -66,25 +70,22 @@ public class UserService {
     private NotificationService notificationService;
 
     @Autowired
-    private ReactionService reactionService;
-
-    @Autowired
     private FileService fileService;
 
     public Optional<User> getByStravaId(Long stravaId) {
-        return userRepository.findByStravaId(stravaId);
+        return userRepository.findOne(SearchUserSpecification.byStravaId(stravaId));
     }
 
     public Optional<User> getByFacebookId(String facebookId) {
-        return userRepository.findByFacebookId(facebookId);
+        return userRepository.findOne(SearchUserSpecification.byFacebookId(facebookId));
     }
 
     public Optional<User> getByGoogleId(String googleId) {
-        return userRepository.findByGoogleId(googleId);
+        return userRepository.findOne(SearchUserSpecification.byGoogleId(googleId));
     }
 
     public Optional<User> getByEmail(String email) {
-        return userRepository.findByEmail(email.toLowerCase());
+        return userRepository.findOne(SearchUserSpecification.byEmail(email));
     }
 
     @Transactional
@@ -96,10 +97,25 @@ public class UserService {
         return userRepository.findById(userId);
     }
 
-    public List<User> listUsers() {
-        return userRepository.findAllByOrderByAdminDescLastNameAscFirstNameAsc();
+    public List<User> listAdmins() {
+        return userRepository.findAll(SearchUserSpecification.admins(), Sort.by(Sort.Order.asc("firstName").ignoreCase()));
     }
 
+    public Page<User> listUsers(String name, int page, int pageSize) {
+        PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by(Sort.Order.asc("firstName").ignoreCase()));
+        return userRepository.findAll(SearchUserSpecification.byName(name), pageRequest);
+    }
+
+    public Page<User> listTeamUsers(Team team, String name, int page, int pageSize) {
+        PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by(Sort.Order.asc("firstName").ignoreCase()));
+        return userRepository.findAll(SearchUserSpecification.byNameInTeam(name, team), pageRequest);
+    }
+
+    public List<User> listUsersWithMailActivated(Team team) {
+        return userRepository.findAll(SearchUserSpecification.withEmailInTeam(team), Sort.by(Sort.Order.asc("firstName").ignoreCase()));
+    }
+
+    @Transactional
     public void promote(String userId) {
         log.info("Request user promotion to admin {}", userId);
         get(userId).ifPresent(user -> {
@@ -108,6 +124,7 @@ public class UserService {
         });
     }
 
+    @Transactional
     public void relegate(String userId) {
         log.info("Request user relegation {}", userId);
         get(userId).ifPresent(user -> {
@@ -116,13 +133,16 @@ public class UserService {
         });
     }
 
+
     public boolean authorizeAdminAccess(Authentication authentication, String teamId) {
+        // used in spring security config
         return authentication.getAuthorities().contains(Authorities.admin())
                 || authentication.getAuthorities().contains(Authorities.teamAdmin(teamId));
     }
 
     public boolean authorizePublicAccess(Authentication authentication, String teamId) {
 
+        // used in spring security config
         if (authentication.getAuthorities().contains(Authorities.admin())
                 || authentication.getAuthorities().contains(Authorities.teamAdmin(teamId))) {
             return true;
@@ -139,6 +159,7 @@ public class UserService {
 
     public boolean authorizeAuthenticatedPublicAccess(Authentication authentication, String teamId) {
 
+        // used in spring security config
         if (!authentication.isAuthenticated() || authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ANONYMOUS"))) {
             return false;
         }
@@ -157,10 +178,6 @@ public class UserService {
 
     }
 
-    public List<User> listUsersWithMailActivated(Team team) {
-        return userRepository.findByEmailNotNullAndRoles_Team(team);
-    }
-
     public Optional<ImageDescriptor> getImage(String userId) {
 
         Optional<FileExtension> fileExtensionExists = fileService.fileExists(FileRepositories.USER_IMAGES, userId, FileExtension.byPriority());
@@ -177,6 +194,7 @@ public class UserService {
         return Optional.empty();
 
     }
+
 
     @RabbitListener(queues = Queues.TASK_DOWNLOAD_PROFILE_IMAGE)
     public void downloadUserImage(UserProfileImageDTO dto) {
@@ -256,7 +274,7 @@ public class UserService {
 
             source.getRoles().clear();
 
-            this.delete(source);
+            this.delete(source.getId());
             this.save(target);
 
             // TODO copy participations in trips and rides
@@ -268,22 +286,12 @@ public class UserService {
     }
 
     @Transactional
-    public void delete(User user) {
-        try {
-            log.info("Request user deletion {}", user.getId());
-            // remove all access to this user
-            reactionService.deleteByUser(user.getId());
-            notificationService.deleteByUser(user.getId());
-            userRoleService.deleteByUser(user.getId());
-            rideService.removeParticipant(user.getId());
-            tripService.removeParticipant(user.getId());
-            messageService.deleteByUser(user.getId());
-            // finaly delete the user
-            userRepository.deleteById(user.getId());
-            log.info("User deleted {}", user.getId());
-        } catch (Exception e) {
-            log.error("Unable to delete user " + user.getId(), e);
-        }
+    public void delete(String userId) {
+        log.info("Request user deletion {}", userId);
+        get(userId).ifPresent(user -> {
+            user.setDeletion(true);
+            save(user);
+        });
     }
 
     @PostConstruct
@@ -302,5 +310,6 @@ public class UserService {
         }
 
     }
+
 
 }

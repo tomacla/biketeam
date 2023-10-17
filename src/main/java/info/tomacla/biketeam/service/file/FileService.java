@@ -212,7 +212,7 @@ public class FileService {
             Files.list(directory)
                     .forEach(path -> {
                         try {
-                            if(Files.isRegularFile(path) && Files.getLastModifiedTime(path).to(TimeUnit.MILLISECONDS) < cutOff.longValue()) {
+                            if (Files.isRegularFile(path) && Files.getLastModifiedTime(path).to(TimeUnit.MILLISECONDS) < cutOff.longValue()) {
                                 Files.delete(path);
                             }
                         } catch (IOException e) {

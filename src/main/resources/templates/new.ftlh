@@ -4,7 +4,7 @@
 
     <div class="col-12 col-md-6">
 
-        <h2 class="border-bottom pb-2 mb-4">Créer mon groupe</h2>
+        <h2 class="border-bottom pb-2 mb-4">Créer un groupe</h2>
 
         <form method="POST" action="<@common.teamUrl '' '/new' />">
             <div class="mb-3 ">

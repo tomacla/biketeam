@@ -42,6 +42,12 @@ public class TeamIntegration {
     private Point heatmapCenter;
     @Column(name = "heatmap_display")
     private boolean heatmapDisplay;
+    @Column(name = "webhook_ride")
+    private String webhookRide;
+    @Column(name = "webhook_trip")
+    private String webhookTrip;
+    @Column(name = "webhook_publication")
+    private String webhookPublication;
 
     public String getTeamId() {
         return teamId;
@@ -138,6 +144,30 @@ public class TeamIntegration {
 
     public boolean isHeatmapConfigured() {
         return this.heatmapCenter != null;
+    }
+
+    public String getWebhookRide() {
+        return webhookRide;
+    }
+
+    public void setWebhookRide(String webhookRide) {
+        this.webhookRide = Strings.requireNonBlankOrNull(webhookRide);
+    }
+
+    public String getWebhookTrip() {
+        return webhookTrip;
+    }
+
+    public void setWebhookTrip(String webhookTrip) {
+        this.webhookTrip = Strings.requireNonBlankOrNull(webhookTrip);
+    }
+
+    public String getWebhookPublication() {
+        return webhookPublication;
+    }
+
+    public void setWebhookPublication(String webhookPublication) {
+        this.webhookPublication = Strings.requireNonBlankOrNull(webhookPublication);
     }
 
     @Override

@@ -5,13 +5,14 @@ import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.ride.RideRepository;
+import info.tomacla.biketeam.domain.ride.SearchRideSpecification;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.TeamConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.PageImpl;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -26,7 +27,8 @@ class RideServiceTest {
 
     @Test
     void getShortNameTest() {
-        RideService rideService = new RideService(null, null, null, null, null);
+
+        RideService rideService = new RideService(null, null, null, null);
 
         Assertions.assertEquals("RR122", rideService.getShortName(getRide("Raymond Ride #122")));
         Assertions.assertEquals("NP492", rideService.getShortName(getRide("N-Peloton #492")));
@@ -46,7 +48,7 @@ class RideServiceTest {
     void listMapsForNearestRidesNoRideTest() {
         TeamService teamService = mock(TeamService.class);
         RideRepository rideRepository = mock(RideRepository.class);
-        RideService rideService = new RideService(null, rideRepository, teamService, null, null);
+        RideService rideService = new RideService(null, rideRepository, teamService, null);
 
         Team team = new Team();
         TeamConfiguration teamConfiguration = new TeamConfiguration();
@@ -56,8 +58,12 @@ class RideServiceTest {
         when(teamService.get("teamId")).thenReturn(Optional.of(team));
 
         List<Ride> rides = new ArrayList<>();
-        when(rideRepository.findAllByDeletionAndTeamIdInAndDateBetweenAndPublishedStatus(eq(false), eq(Set.of("teamId")), any(), any(), any(), any()))
-                .thenReturn(new PageImpl<>(rides));
+
+        SearchRideSpecification spec = new SearchRideSpecification(false, null, null, null, null, Set.of("teamId"), PublishedStatus.PUBLISHED, null, null, LocalDate.now().minus(3, ChronoUnit.DAYS),
+                LocalDate.now().plus(7, ChronoUnit.DAYS));
+
+        when(rideRepository.findAll(eq(spec)))
+                .thenReturn(rides);
 
         List<RideGroup> rideGroups = rideService.listRideGroupsByStartProximity("teamId");
         Assertions.assertTrue(rideGroups.isEmpty());
@@ -67,7 +73,7 @@ class RideServiceTest {
     void listMapsForNearestRidesTest() {
         TeamService teamService = mock(TeamService.class);
         RideRepository rideRepository = mock(RideRepository.class);
-        RideService rideService = new RideService(null, rideRepository, teamService, null, null);
+        RideService rideService = new RideService(null, rideRepository, teamService, null);
 
         Team team = new Team();
         TeamConfiguration teamConfiguration = new TeamConfiguration();
@@ -112,8 +118,11 @@ class RideServiceTest {
                 new TestGroup(5, true) // 16 - rank 13
         ));
 
-        when(rideRepository.findAllByDeletionAndTeamIdInAndDateBetweenAndPublishedStatus(eq(false), eq(Set.of("teamId")), any(), any(), any(), any()))
-                .thenReturn(new PageImpl<>(rides));
+        SearchRideSpecification spec = new SearchRideSpecification(false, null, null, null, null, Set.of("teamId"), PublishedStatus.PUBLISHED, null, null, LocalDate.now().minus(3, ChronoUnit.DAYS),
+                LocalDate.now().plus(7, ChronoUnit.DAYS));
+
+        when(rideRepository.findAll(eq(spec)))
+                .thenReturn(rides);
 
         List<RideGroup> rideGroups = rideService.listRideGroupsByStartProximity("teamId");
         List<String> actualMapIds = rideGroups.stream().map(RideGroup::getMap).map(Map::getId).toList();

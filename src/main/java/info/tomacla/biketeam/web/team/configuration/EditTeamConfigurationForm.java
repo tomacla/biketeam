@@ -11,7 +11,6 @@ public class EditTeamConfigurationForm {
     private String timezone = Timezone.DEFAULT_TIMEZONE;
     private List<String> defaultSearchTags = new ArrayList<>();
     private String feedVisible = null;
-    private String reactionVisible = null;
 
     public static EditTeamConfigurationFormBuilder builder() {
         return new EditTeamConfigurationFormBuilder();
@@ -42,13 +41,6 @@ public class EditTeamConfigurationForm {
         this.feedVisible = feedVisible;
     }
 
-    public String getReactionVisible() {
-        return reactionVisible;
-    }
-
-    public void setReactionVisible(String reactionVisible) {
-        this.reactionVisible = reactionVisible;
-    }
 
     public EditTeamConfigurationFormParser parser() {
         return new EditTeamConfigurationFormParser(this);
@@ -75,11 +67,6 @@ public class EditTeamConfigurationForm {
             return form.getFeedVisible() != null && form.getFeedVisible().equals("on");
         }
 
-        public boolean isReactionVisible() {
-            return form.getReactionVisible() != null && form.getReactionVisible().equals("on");
-        }
-
-
     }
 
     public static class EditTeamConfigurationFormBuilder {
@@ -104,11 +91,6 @@ public class EditTeamConfigurationForm {
 
         public EditTeamConfigurationFormBuilder withFeedVisible(boolean feedVisible) {
             form.setFeedVisible(feedVisible ? "on" : null);
-            return this;
-        }
-
-        public EditTeamConfigurationFormBuilder withReactionVisible(boolean reactionVisible) {
-            form.setReactionVisible(reactionVisible ? "on" : null);
             return this;
         }
 

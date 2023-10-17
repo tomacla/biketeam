@@ -54,6 +54,8 @@ public class Map {
     private WindDirection windDirection = WindDirection.NORTH;
     private boolean crossing;
 
+    private boolean deletion;
+
     public String getId() {
         return id;
     }
@@ -164,6 +166,14 @@ public class Map {
 
     public void setCrossing(boolean crossing) {
         this.crossing = crossing;
+    }
+
+    public boolean isDeletion() {
+        return deletion;
+    }
+
+    public void setDeletion(boolean deletion) {
+        this.deletion = deletion;
     }
 
     @Override

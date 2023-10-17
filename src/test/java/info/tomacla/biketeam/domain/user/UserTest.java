@@ -20,13 +20,13 @@ public class UserTest extends AbstractDBTest {
     @Test
     public void userTest() {
 
-        assertFalse(userRepository.findByEmail("foo@bar.com").isPresent());
-        assertFalse(userRepository.findByStravaId(21212L).isPresent());
+        assertFalse(userRepository.findOne(new SearchUserSpecification(null, null, null, false, null, null, null, "foo@bar.com", null)).isPresent());
+        assertFalse(userRepository.findOne(new SearchUserSpecification(null, null, null, false, 21212L, null, null, null, null)).isPresent());
 
         createUser();
 
-        assertTrue(userRepository.findByEmail("foo@bar.com").isPresent());
-        assertTrue(userRepository.findByStravaId(21212L).isPresent());
+        assertTrue(userRepository.findOne(new SearchUserSpecification(null, null, null, false, null, null, null, "foo@bar.com", null)).isPresent());
+        assertTrue(userRepository.findOne(new SearchUserSpecification(null, null, null, false, 21212L, null, null, null, null)).isPresent());
 
 
     }

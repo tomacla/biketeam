@@ -52,8 +52,7 @@ public class ScheduledTaskService {
         brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_CLEAN_NOTIFICATIONS, null);
     }
 
-    //@Scheduled(cron = "0 0 3 * * 0")
-    @Scheduled(fixedRate = 6000, initialDelay = 3000)
+    @Scheduled(fixedRate = 30000, initialDelay = 3000)
     public void performDeletion() {
         log.info("Executing scheduled performDeletion");
         brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_PERFORM_DELETION, null);

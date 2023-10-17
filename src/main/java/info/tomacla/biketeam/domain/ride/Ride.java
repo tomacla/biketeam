@@ -8,10 +8,6 @@ import info.tomacla.biketeam.domain.feed.FeedType;
 import info.tomacla.biketeam.domain.message.MessageHolder;
 import info.tomacla.biketeam.domain.message.MessageTargetType;
 import info.tomacla.biketeam.domain.place.Place;
-import info.tomacla.biketeam.domain.reaction.Reaction;
-import info.tomacla.biketeam.domain.reaction.ReactionHolder;
-import info.tomacla.biketeam.domain.reaction.ReactionTargetType;
-import org.hibernate.annotations.Where;
 import org.springframework.util.ObjectUtils;
 
 import javax.persistence.*;
@@ -23,7 +19,7 @@ import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "ride")
-public class Ride implements MessageHolder, ReactionHolder, FeedEntity {
+public class Ride implements MessageHolder, FeedEntity {
     @Id
     private String id = UUID.randomUUID().toString();
     @Column(name = "team_id")
@@ -56,12 +52,6 @@ public class Ride implements MessageHolder, ReactionHolder, FeedEntity {
 
     @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<RideGroup> groups = new HashSet<>();
-
-
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "target_id", referencedColumnName = "id")
-    @Where(clause = "type = 'RIDE'")
-    private Set<Reaction> reactions = new HashSet<>();
 
     private boolean deletion;
 
@@ -169,14 +159,6 @@ public class Ride implements MessageHolder, ReactionHolder, FeedEntity {
         this.endPlace = endPlace;
     }
 
-    public Set<Reaction> getReactions() {
-        return reactions;
-    }
-
-    public void setReactions(Set<Reaction> reactions) {
-        this.reactions = reactions;
-    }
-
     public Set<RideGroup> getGroups() {
         return groups;
     }
@@ -256,11 +238,6 @@ public class Ride implements MessageHolder, ReactionHolder, FeedEntity {
     @Override
     public MessageTargetType getMessageType() {
         return MessageTargetType.RIDE;
-    }
-
-    @Override
-    public ReactionTargetType getReactionType() {
-        return ReactionTargetType.RIDE;
     }
 
     @Override

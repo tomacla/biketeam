@@ -11,6 +11,13 @@
       <a href="<@common.teamUrl team.id '/admin/places' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri?contains('/admin/places')> list-group-item-secondary</#if>">Lieux (départ/arrivée)</a>
     </ul>
 
+    <h6>Utilisateurs</h6>
+
+     <ul class="list-group mb-4">
+      <a href="<@common.teamUrl team.id '/admin/admins' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri?contains('/admin/admins')> list-group-item-secondary</#if>">Administrateurs</a>
+      <a href="<@common.teamUrl team.id '/admin/users' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri?contains('/admin/users')> list-group-item-secondary</#if>">Utilisateurs</a>
+    </ul>
+
     <h6>Administration</h6>
 
     <ul class="list-group mb-4">
@@ -20,7 +27,6 @@
       <a href="<@common.teamUrl team.id '/admin/faq' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri?ends_with('/admin/faq')> list-group-item-secondary</#if>">FAQ</a>
       <a href="<@common.teamUrl team.id '/admin/integration' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri?ends_with('/admin/integration')> list-group-item-secondary</#if>">Intégrations</a>
       <a href="<@common.teamUrl team.id '/admin/logo' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri?ends_with('/admin/logo')> list-group-item-secondary</#if>">Logo</a>
-      <a href="<@common.teamUrl team.id '/admin/users' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri?contains('/admin/users')> list-group-item-secondary</#if>">Membres</a>
     </ul>
 
 </div>

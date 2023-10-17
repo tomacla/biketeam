@@ -1,6 +1,7 @@
 package info.tomacla.biketeam.service.url;
 
 import info.tomacla.biketeam.domain.map.Map;
+import info.tomacla.biketeam.domain.publication.Publication;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.trip.Trip;
@@ -21,6 +22,10 @@ public class UrlService {
 
     public String getTripUrl(Team team, Trip trip) {
         return getTeamUrl(team) + "/trips/" + Optional.ofNullable(trip.getPermalink()).orElse(trip.getId());
+    }
+
+    public String getPublicationUrl(Team team, Publication publication) {
+        return getTeamUrl(team) + "/publications/" + publication.getId();
     }
 
     public String getMapUrl(Team team, Map map) {

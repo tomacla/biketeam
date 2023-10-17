@@ -9,11 +9,7 @@ import info.tomacla.biketeam.domain.map.MapType;
 import info.tomacla.biketeam.domain.message.MessageHolder;
 import info.tomacla.biketeam.domain.message.MessageTargetType;
 import info.tomacla.biketeam.domain.place.Place;
-import info.tomacla.biketeam.domain.reaction.Reaction;
-import info.tomacla.biketeam.domain.reaction.ReactionHolder;
-import info.tomacla.biketeam.domain.reaction.ReactionTargetType;
 import info.tomacla.biketeam.domain.user.User;
-import org.hibernate.annotations.Where;
 import org.springframework.util.ObjectUtils;
 
 import javax.persistence.*;
@@ -25,7 +21,7 @@ import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "trip")
-public class Trip implements MessageHolder, ReactionHolder, FeedEntity {
+public class Trip implements MessageHolder, FeedEntity {
 
     @Id
     private String id = UUID.randomUUID().toString();
@@ -67,11 +63,6 @@ public class Trip implements MessageHolder, ReactionHolder, FeedEntity {
             joinColumns = @JoinColumn(name = "trip_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> participants = new HashSet<>();
-
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "target_id", referencedColumnName = "id")
-    @Where(clause = "type = 'TRIP'")
-    private Set<Reaction> reactions = new HashSet<>();
 
     private boolean deletion;
 
@@ -195,14 +186,6 @@ public class Trip implements MessageHolder, ReactionHolder, FeedEntity {
         this.meetingTime = Objects.requireNonNull(meetingTime);
     }
 
-    public Set<Reaction> getReactions() {
-        return reactions;
-    }
-
-    public void setReactions(Set<Reaction> reactions) {
-        this.reactions = reactions;
-    }
-
     public Set<TripStage> getStages() {
         return stages;
     }
@@ -295,11 +278,6 @@ public class Trip implements MessageHolder, ReactionHolder, FeedEntity {
     @Override
     public MessageTargetType getMessageType() {
         return MessageTargetType.TRIP;
-    }
-
-    @Override
-    public ReactionTargetType getReactionType() {
-        return ReactionTargetType.TRIP;
     }
 
     @Override

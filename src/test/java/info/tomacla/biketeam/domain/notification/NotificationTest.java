@@ -42,11 +42,11 @@ public class NotificationTest extends AbstractDBTest {
         r.setType(NotificationType.NEW_RIDE_MESSAGE);
         r.setUser(user);
 
-        assertEquals(0, notificationRepository.findAllByUserIdAndViewedOrderByCreatedAtDesc(user.getId(), false).size());
+        assertEquals(0, notificationRepository.findAll(new SearchNotificationSpecification(false, user)).size());
 
         notificationRepository.save(r);
 
-        assertEquals(1, notificationRepository.findAllByUserIdAndViewedOrderByCreatedAtDesc(user.getId(), false).size());
+        assertEquals(1, notificationRepository.findAll(new SearchNotificationSpecification(false, user)).size());
 
     }
 

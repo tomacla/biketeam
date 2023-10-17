@@ -91,6 +91,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
             // web protected endpoints
             auth.antMatchers("/users/me/**").authenticated();
+            auth.antMatchers("/users/space/**").authenticated();
             auth.antMatchers("/new").authenticated();
             auth.antMatchers("/admin/**").hasRole("ADMIN");
             auth.antMatchers("/management/**").hasRole("ADMIN");

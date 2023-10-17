@@ -7,6 +7,7 @@ import info.tomacla.biketeam.common.file.ImageDescriptor;
 import info.tomacla.biketeam.common.geo.Point;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.service.TeamService;
+import info.tomacla.biketeam.service.amqp.dto.TeamDTO;
 import info.tomacla.biketeam.service.file.FileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,15 +50,22 @@ public class HeatmapService {
 
     @RabbitListener(queues = Queues.TASK_GENERATE_HEATMAPS)
     public void generateAll() {
-        teamService.list().forEach(this::generateHeatmap);
+        teamService.list().forEach(this::performGenerateHeatmap);
     }
 
-    public void generateHeatmap(Team team) {
-        if (isConfigured() && team.getIntegration().isHeatmapConfigured()) {
+    @RabbitListener(queues = Queues.TASK_GENERATE_HEATMAP)
+    public void generateHeatmap(TeamDTO team) {
+        if (isConfigured() && team != null) {
+            teamService.get(team.teamId).ifPresent(t -> performGenerateHeatmap(t));
+        }
+    }
+
+    private void performGenerateHeatmap(Team team) {
+        if (team.getIntegration().isHeatmapConfigured()) {
             log.info("Generating heatmap for team {}", team.getId());
             final Path gpxPath = fileService.getDirectory(FileRepositories.GPX_FILES, team.getId());
             final Path outputPath = fileService.getFile(FileRepositories.MISC_IMAGES, team.getId(), "heatmap.png");
-            executor.submit(new HeatmapService.GenerateHeatmap(heatmapPath, team.getId(), team.getIntegration().getHeatmapCenter(),
+            executor.submit(new GenerateHeatmap(heatmapPath, team.getId(), team.getIntegration().getHeatmapCenter(),
                     gpxPath.toAbsolutePath().toString(),
                     outputPath.toAbsolutePath().toString()));
         }
