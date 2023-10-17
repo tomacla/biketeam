@@ -30,8 +30,7 @@ public class MessageService {
     }
 
     public List<Message> listByTarget(MessageHolder holder) {
-        SearchMessageSpecification spec = new SearchMessageSpecification(holder.getId(), null, holder.getMessageType());
-        return messageRepository.findAll(spec);
+        return messageRepository.findAll(SearchMessageSpecification.byTargetAndType(holder.getId(), holder.getMessageType()));
     }
 
     @Transactional

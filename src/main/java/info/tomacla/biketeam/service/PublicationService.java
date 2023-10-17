@@ -53,20 +53,8 @@ public class PublicationService {
     }
 
     public Page<Publication> listPublications(String teamId, String title, int page, int pageSize) {
-
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by("publishedAt").descending());
-
-        SearchPublicationSpecification spec = new SearchPublicationSpecification(
-                false,
-                Set.of(teamId),
-                title,
-                null,
-                null,
-                null
-        );
-
-        return publicationRepository.findAll(spec, pageable);
-
+        return publicationRepository.findAll(SearchPublicationSpecification.byTitleInTeam(teamId, title), pageable);
     }
 
     public Optional<Publication> get(String teamId, String publicationId) {
@@ -77,8 +65,7 @@ public class PublicationService {
         return Optional.empty();
     }
 
-    public Page<Publication> searchPublications(Set<String> teamIds, int page, int pageSize,
-                                                ZonedDateTime from, ZonedDateTime to) {
+    public Page<Publication> searchPublications(Set<String> teamIds, ZonedDateTime from, ZonedDateTime to, int page, int pageSize) {
 
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by("publishedAt").descending());
 

@@ -85,4 +85,46 @@ public class SearchMapSpecification implements Specification<Map> {
         return new SearchMapSpecification(true, null, null, null, null, null, null, null, null, null, null);
     }
 
+    public static SearchMapSpecification allInTeam(String teamId) {
+        return new SearchMapSpecification(null, null, teamId, null, null, null, null, null, null, null, null);
+    }
+
+    public static SearchMapSpecification byPermalink(String permalink) {
+        return new SearchMapSpecification(false, permalink, null, null, null, null, null, null, null, null, null);
+    }
+
+    public static SearchMapSpecification byNameInTeam(String teamId, String name) {
+        return new SearchMapSpecification(
+                false,
+                null,
+                teamId,
+                name,
+                null,
+                null, null, null, null, null, null
+        );
+    }
+
+    public static SearchMapSpecification search(String teamId, String name) {
+        return new SearchMapSpecification(
+                false,
+                null,
+                teamId,
+                name,
+                null,
+                null, null, null, null, null, null
+        );
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SearchMapSpecification that = (SearchMapSpecification) o;
+        return Objects.equals(deletion, that.deletion) && Objects.equals(permalink, that.permalink) && Objects.equals(teamId, that.teamId) && Objects.equals(name, that.name) && Objects.equals(lowerDistance, that.lowerDistance) && Objects.equals(upperDistance, that.upperDistance) && type == that.type && Objects.equals(lowerPositiveElevation, that.lowerPositiveElevation) && Objects.equals(upperPositiveElevation, that.upperPositiveElevation) && Objects.equals(tags, that.tags) && windDirection == that.windDirection;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(deletion, permalink, teamId, name, lowerDistance, upperDistance, type, lowerPositiveElevation, upperPositiveElevation, tags, windDirection);
+    }
 }

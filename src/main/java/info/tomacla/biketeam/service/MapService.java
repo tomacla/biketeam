@@ -47,7 +47,7 @@ public class MapService extends AbstractPermalinkService {
             return optionalMap;
         }
 
-        optionalMap = findByPermalink(false, mapIdOrPermalink);
+        optionalMap = findByPermalink(mapIdOrPermalink);
         if (optionalMap.isPresent() && optionalMap.get().getTeamId().equals(teamId)) {
             return optionalMap;
         }
@@ -103,42 +103,23 @@ public class MapService extends AbstractPermalinkService {
         });
     }
 
-    public Optional<Map> findByPermalink(Boolean deletion, String permalink) {
-        SearchMapSpecification spec = new SearchMapSpecification(
-                deletion, permalink, null, null, null, null, null, null, null, null, null
-        );
-
-        return mapRepository.findOne(spec);
+    public Optional<Map> findByPermalink(String permalink) {
+        return mapRepository.findOne(SearchMapSpecification.byPermalink(permalink));
     }
 
     @Override
     public boolean permalinkExists(String permalink) {
-        return findByPermalink(null, permalink).isPresent();
+        return findByPermalink(permalink).isPresent();
     }
 
     public Page<Map> listMaps(String teamId, String name, int page, int pageSize) {
-        return this.searchMaps(teamId, name, page, pageSize, null);
+        return mapRepository.findAll(SearchMapSpecification.byNameInTeam(teamId, name), PageRequest.of(page, pageSize, getPageSort(null)));
     }
 
-    public Page<Map> searchMaps(String teamId, String name, int page, int pageSize, MapSorterOption sortOption) {
-
-        SearchMapSpecification spec = new SearchMapSpecification(
-                false,
-                null,
-                teamId,
-                name,
-                null,
-                null, null, null, null, null, null
-        );
-
-        return mapRepository.findAll(spec, PageRequest.of(page, pageSize, getPageSort(sortOption)));
-
-    }
-
-    public Page<Map> searchMaps(String teamId, int page, int pageSize, MapSorterOption sortOption,
-                                String name, Double lowerDistance, Double upperDistance, MapType type,
+    public Page<Map> searchMaps(String teamId, String name, Double lowerDistance, Double upperDistance, MapType type,
                                 Double lowerPositiveElevation, Double upperPositiveElevation,
-                                List<String> tags, WindDirection windDirection) {
+                                List<String> tags, WindDirection windDirection,
+                                int page, int pageSize, MapSorterOption sortOption) {
 
         Sort sort = getPageSort(sortOption);
         Pageable pageable = PageRequest.of(page, pageSize, sort);

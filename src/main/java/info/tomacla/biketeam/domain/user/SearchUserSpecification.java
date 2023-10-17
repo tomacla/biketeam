@@ -9,6 +9,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class SearchUserSpecification implements Specification<User> {
 
@@ -72,4 +73,48 @@ public class SearchUserSpecification implements Specification<User> {
         return new SearchUserSpecification(true, null, null, false, null, null, null, null, null);
     }
 
+    public static SearchUserSpecification byStravaId(Long stravaId) {
+        return new SearchUserSpecification(false, null, null, false, stravaId, null, null, null, null);
+    }
+
+    public static SearchUserSpecification byFacebookId(String facebookId) {
+        return new SearchUserSpecification(false, null, null, false, null, facebookId, null, null, null);
+    }
+
+    public static SearchUserSpecification byGoogleId(String googleId) {
+        return new SearchUserSpecification(false, null, null, false, null, null, googleId, null, null);
+    }
+
+    public static SearchUserSpecification byEmail(String email) {
+        return new SearchUserSpecification(false, null, null, false, null, null, null, email, null);
+    }
+
+    public static SearchUserSpecification admins() {
+        return new SearchUserSpecification(false, true, null, false, null, null, null, null, null);
+    }
+
+    public static SearchUserSpecification byName(String name) {
+        return new SearchUserSpecification(false, null, name, false, null, null, null, null, null);
+    }
+
+    public static SearchUserSpecification byNameInTeam(String name, Team team) {
+        return new SearchUserSpecification(false, null, name, false, null, null, null, null, team);
+    }
+
+    public static SearchUserSpecification withEmailInTeam(Team team) {
+        return new SearchUserSpecification(false, null, null, true, null, null, null, null, team);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SearchUserSpecification that = (SearchUserSpecification) o;
+        return emailNotNull == that.emailNotNull && Objects.equals(deletion, that.deletion) && Objects.equals(admin, that.admin) && Objects.equals(name, that.name) && Objects.equals(stravaId, that.stravaId) && Objects.equals(facebookId, that.facebookId) && Objects.equals(googleId, that.googleId) && Objects.equals(email, that.email) && Objects.equals(team, that.team);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(deletion, admin, name, emailNotNull, stravaId, facebookId, googleId, email, team);
+    }
 }

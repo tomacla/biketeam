@@ -37,7 +37,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class AsyncDeletionService {
@@ -90,9 +89,7 @@ public class AsyncDeletionService {
             publicationRepository.findAll(SearchPublicationSpecification.readyForDeletion()).forEach(e -> this.deletePublication(e.getId()));
             rideRepository.findAll(SearchRideSpecification.readyForDeletion()).forEach(ride -> this.deleteRide(ride.getId()));
             tripRepository.findAll(SearchTripSpecification.readyForDeletion()).forEach(trip -> this.deleteTrip(trip.getId()));
-
             teamRepository.findAll(SearchTeamSpecification.readyForDeletion()).forEach(team -> this.deleteTeam(team.getId()));
-
             userRepository.findAll(SearchUserSpecification.readyForDeletion()).forEach(user -> this.deleteUser(user.getId()));
 
         } catch (Exception e) {
@@ -168,37 +165,29 @@ public class AsyncDeletionService {
 
             // delete nested elements
 
-            rideTemplateRepository.findAll(new SearchRideTemplateSpecification(teamId))
+            rideTemplateRepository.findAll(SearchRideTemplateSpecification.allInTeam(teamId))
                     .stream().forEach(rideTemplateRepository::delete);
 
-            placeRepository.findAll(new SearchPlaceSpecification(teamId))
+            placeRepository.findAll(SearchPlaceSpecification.allInTeam(teamId))
                     .stream().forEach(placeRepository::delete);
 
 
-            rideRepository.findAll(new SearchRideSpecification(
-                            null, null, null, null, null, Set.of(teamId), null, null, null, null, null
-                    ))
+            rideRepository.findAll(SearchRideSpecification.allInTeam(teamId))
                     .stream()
                     .map(Ride::getId)
                     .forEach(this::deleteRide);
 
-            tripRepository.findAll(new SearchTripSpecification(
-                            null, null, null, null, null, Set.of(teamId), null, null, null, null, null
-                    ))
+            tripRepository.findAll(SearchTripSpecification.allInTeam(teamId))
                     .stream()
                     .map(Trip::getId)
                     .forEach(this::deleteTrip);
 
-            publicationRepository.findAll(new SearchPublicationSpecification(
-                            null, Set.of(teamId), null, null, null, null
-                    ))
+            publicationRepository.findAll(SearchPublicationSpecification.allInTeam(teamId))
                     .stream()
                     .map(Publication::getId)
                     .forEach(this::deletePublication);
 
-            mapRepository.findAll(new SearchMapSpecification(
-                            null, null, teamId, null, null, null, null, null, null, null, null
-                    ))
+            mapRepository.findAll(SearchMapSpecification.allInTeam(teamId))
                     .stream()
                     .map(Map::getId)
                     .forEach(this::deleteMap);

@@ -43,13 +43,7 @@ public class NotificationService {
     private MessageService messageService;
 
     public List<Notification> listUnviewedByUser(User user) {
-
-        SearchNotificationSpecification spec = new SearchNotificationSpecification(
-                false,
-                user
-        );
-
-        return notificationRepository.findAll(spec);
+        return notificationRepository.findAll(SearchNotificationSpecification.unviewedByUser(user));
     }
 
     public Optional<Notification> getNotification(String id) {

@@ -43,15 +43,7 @@ public class RideAPI extends AbstractAPI {
 
         final SearchRideForm.SearchRideFormParser parser = form.parser();
 
-        Page<Ride> rides = rideService.searchRides(
-                Set.of(team.getId()),
-                parser.getPage(),
-                parser.getPageSize(),
-                null,
-                parser.getFrom(),
-                parser.getTo(),
-                true
-        );
+        Page<Ride> rides = rideService.searchRides(Set.of(teamId), parser.getFrom(), parser.getTo(), true, parser.getPage(), parser.getPageSize());
 
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.set("X-Pages", String.valueOf(rides.getTotalPages()));

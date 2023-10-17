@@ -41,19 +41,19 @@ public class FeedService {
 
         // TODO parallel requests to database
         if (options.isIncludePublications()) {
-            result.addAll(publicationService.searchPublications(teamIds, 0, 10,
-                    ZonedDateTime.of(options.getFrom(), LocalTime.MIDNIGHT, zoneId),
-                    ZonedDateTime.of(options.getTo(), LocalTime.MIDNIGHT, zoneId)
+            result.addAll(publicationService.searchPublications(teamIds, ZonedDateTime.of(options.getFrom(), LocalTime.MIDNIGHT, zoneId),
+                    ZonedDateTime.of(options.getTo(), LocalTime.MIDNIGHT, zoneId), 0, 10
+
             ).getContent());
         }
         if (options.isIncludeRides()) {
-            result.addAll(rideService.searchRides(teamIds, 0, 10, null, options.getFrom(), options.getTo(), true).getContent());
+            result.addAll(rideService.searchRides(teamIds, options.getFrom(), options.getTo(), true, 0, 10).getContent());
             if (user != null) {
                 result.addAll(rideService.searchUpcomingRidesByUser(user, teamIds, LocalDate.now().minus(1, ChronoUnit.DAYS)));
             }
         }
         if (options.isIncludeTrips()) {
-            result.addAll(tripService.searchTrips(teamIds, 0, 10, options.getFrom(), options.getTo(), true).getContent());
+            result.addAll(tripService.searchTrips(teamIds, options.getFrom(), options.getTo(), true, 0, 10).getContent());
             if (user != null) {
                 result.addAll(tripService.searchUpcomingTripsByUser(user, teamIds, LocalDate.now().minus(1, ChronoUnit.DAYS)));
             }

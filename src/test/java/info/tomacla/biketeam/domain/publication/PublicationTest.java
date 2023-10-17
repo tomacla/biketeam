@@ -32,7 +32,7 @@ public class PublicationTest extends AbstractDBTest {
     public void publicationRepositoryTU() {
 
         List<Publication> publications = publicationRepository.findAll(new SearchPublicationSpecification(
-                null, Set.of("publicationtest-team"), null,PublishedStatus.PUBLISHED, null, ZonedDateTime.now()
+                null, Set.of("publicationtest-team"), null, PublishedStatus.PUBLISHED, null, ZonedDateTime.now()
         ));
 
         assertEquals(0, publications.size());
@@ -42,7 +42,7 @@ public class PublicationTest extends AbstractDBTest {
         createPublication(ZonedDateTime.now().plus(1, ChronoUnit.DAYS), PublishedStatus.PUBLISHED);
 
         publications = publicationRepository.findAll(new SearchPublicationSpecification(
-                null, Set.of("publicationtest-team"), null,PublishedStatus.PUBLISHED, null, ZonedDateTime.now()
+                null, Set.of("publicationtest-team"), null, PublishedStatus.PUBLISHED, null, ZonedDateTime.now()
         ));
 
         assertEquals(1, publications.size());

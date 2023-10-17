@@ -10,6 +10,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class SearchTeamSpecification implements Specification<Team> {
 
@@ -75,4 +76,16 @@ public class SearchTeamSpecification implements Specification<Team> {
         return new SearchTeamSpecification(false, null, null, null, null, null);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SearchTeamSpecification that = (SearchTeamSpecification) o;
+        return Objects.equals(deletion, that.deletion) && Objects.equals(name, that.name) && Objects.equals(city, that.city) && country == that.country && Objects.equals(visibilities, that.visibilities) && Objects.equals(user, that.user);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(deletion, name, city, country, visibilities, user);
+    }
 }

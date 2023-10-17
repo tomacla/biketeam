@@ -22,10 +22,7 @@ public class RideTemplateService {
     private RideTemplateRepository rideTemplateRepository;
 
     public List<RideTemplate> listTemplates(String teamId) {
-
-        SearchRideTemplateSpecification spec = new SearchRideTemplateSpecification(teamId);
-
-        return rideTemplateRepository.findAll(spec, Sort.by("name").ascending());
+        return rideTemplateRepository.findAll(SearchRideTemplateSpecification.allInTeam(teamId), Sort.by("name").ascending());
     }
 
     public Optional<RideTemplate> get(String teamId, String templateId) {

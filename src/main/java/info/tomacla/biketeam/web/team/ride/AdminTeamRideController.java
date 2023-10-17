@@ -24,7 +24,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
@@ -54,7 +53,7 @@ public class AdminTeamRideController extends AbstractController {
         final Team team = checkTeam(teamId);
 
         addGlobalValues(principal, model, "Administration - Rides", team);
-        Page<Ride> rides = rideService.searchRides(Set.of(team.getId()), page, pageSize, title, null, null, null);
+        Page<Ride> rides = rideService.listRides(team.getId(), title, page, pageSize);
         model.addAttribute("rides", rides.getContent());
         model.addAttribute("templates", rideTemplateService.listTemplates(team.getId()));
         model.addAttribute("matches", rides.getTotalElements());

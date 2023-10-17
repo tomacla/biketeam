@@ -38,10 +38,10 @@ public class PublicationApi extends AbstractAPI {
 
         Page<Publication> publications = publicationService.searchPublications(
                 Set.of(team.getId()),
-                page,
-                pageSize,
                 ZonedDateTime.of(from == null ? LocalDate.now().minus(1, ChronoUnit.MONTHS) : from, LocalTime.MIDNIGHT, ZoneOffset.UTC),
-                ZonedDateTime.of(to == null ? LocalDate.now().plus(1, ChronoUnit.MONTHS) : to, LocalTime.MIDNIGHT, ZoneOffset.UTC)
+                ZonedDateTime.of(to == null ? LocalDate.now().plus(1, ChronoUnit.MONTHS) : to, LocalTime.MIDNIGHT, ZoneOffset.UTC),
+                page,
+                pageSize
         );
 
         HttpHeaders responseHeaders = new HttpHeaders();

@@ -89,9 +89,30 @@ public class SearchRideSpecification implements Specification<Ride> {
     }
 
     public static SearchRideSpecification allInTeam(String teamId) {
-        return new SearchRideSpecification(false,
+        return new SearchRideSpecification(null,
                 null, null, null, null, Set.of(teamId), null,
                 null, null, null, null);
+    }
+
+    public static SearchRideSpecification byTitleInTeam(String teamId, String title) {
+        return new SearchRideSpecification(false,
+                null, title, null, null, Set.of(teamId), null,
+                null, null, null, null);
+    }
+
+    public static SearchRideSpecification upcomingRidesByUser(Set<String> teamIds, User user, LocalDate from) {
+        return new SearchRideSpecification(false,
+                null,
+                null,
+                null,
+                user,
+                teamIds,
+                PublishedStatus.PUBLISHED,
+                null, null, from, null);
+    }
+
+    public static SearchRideSpecification byPermalink(String permalink) {
+        return new SearchRideSpecification(false, permalink, null, null, null, null, null, null, null, null, null);
     }
 
     @Override
@@ -99,11 +120,11 @@ public class SearchRideSpecification implements Specification<Ride> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SearchRideSpecification that = (SearchRideSpecification) o;
-        return Objects.equals(deletion, that.deletion) && Objects.equals(permalink, that.permalink) && Objects.equals(listedInFeed, that.listedInFeed) && Objects.equals(user, that.user) && Objects.equals(teamIds, that.teamIds) && publishedStatus == that.publishedStatus && Objects.equals(minPublishedDate, that.minPublishedDate) && Objects.equals(maxPublishedDate, that.maxPublishedDate) && Objects.equals(minDate, that.minDate) && Objects.equals(maxDate, that.maxDate);
+        return Objects.equals(deletion, that.deletion) && Objects.equals(permalink, that.permalink) && Objects.equals(listedInFeed, that.listedInFeed) && Objects.equals(user, that.user) && Objects.equals(title, that.title) && Objects.equals(teamIds, that.teamIds) && publishedStatus == that.publishedStatus && Objects.equals(minPublishedDate, that.minPublishedDate) && Objects.equals(maxPublishedDate, that.maxPublishedDate) && Objects.equals(minDate, that.minDate) && Objects.equals(maxDate, that.maxDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(deletion, permalink, listedInFeed, user, teamIds, publishedStatus, minPublishedDate, maxPublishedDate, minDate, maxDate);
+        return Objects.hash(deletion, permalink, listedInFeed, user, title, teamIds, publishedStatus, minPublishedDate, maxPublishedDate, minDate, maxDate);
     }
 }

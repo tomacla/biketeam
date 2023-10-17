@@ -44,12 +44,11 @@ public class TripAPI extends AbstractAPI {
 
         Page<Trip> trips = tripService.searchTrips(
                 Set.of(team.getId()),
-                parser.getPage(),
-                parser.getPageSize(),
                 parser.getFrom(),
                 parser.getTo(),
-                true
-        );
+                true,
+                parser.getPage(),
+                parser.getPageSize());
 
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.set("X-Pages", String.valueOf(trips.getTotalPages()));

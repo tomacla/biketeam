@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 
@@ -86,5 +87,36 @@ public class SearchTripSpecification implements Specification<Trip> {
         return new SearchTripSpecification(true, null, null, null, null, null, null, null, null, null, null);
     }
 
+    public static SearchTripSpecification allInTeam(String teamId) {
+        return new SearchTripSpecification(null, null, null, null, null, Set.of(teamId), null, null, null, null, null);
+    }
 
+    public static SearchTripSpecification byTitleInTeam(String teamId, String title) {
+        return new SearchTripSpecification(false, null, title, null, null, Set.of(teamId), null, null, null, null, null);
+    }
+
+    public static SearchTripSpecification upcomingByUser(User user, Set<String> teamIds, LocalDate from) {
+        return new SearchTripSpecification(
+                false, null, null, null, user, teamIds, PublishedStatus.PUBLISHED, null, null,
+                from, null);
+    }
+
+    public static SearchTripSpecification byPermalink(String permalink) {
+        return new SearchTripSpecification(
+                false, permalink, null, null, null, null, null, null, null, null, null
+        );
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SearchTripSpecification that = (SearchTripSpecification) o;
+        return Objects.equals(deletion, that.deletion) && Objects.equals(permalink, that.permalink) && Objects.equals(listedInFeed, that.listedInFeed) && Objects.equals(user, that.user) && Objects.equals(teamIds, that.teamIds) && Objects.equals(title, that.title) && publishedStatus == that.publishedStatus && Objects.equals(minPublishedDate, that.minPublishedDate) && Objects.equals(maxPublishedDate, that.maxPublishedDate) && Objects.equals(minStartDate, that.minStartDate) && Objects.equals(maxStartDate, that.maxStartDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(deletion, permalink, listedInFeed, user, teamIds, title, publishedStatus, minPublishedDate, maxPublishedDate, minStartDate, maxStartDate);
+    }
 }

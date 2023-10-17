@@ -8,6 +8,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 public class SearchRideTemplateSpecification implements Specification<RideTemplate> {
@@ -27,4 +28,20 @@ public class SearchRideTemplateSpecification implements Specification<RideTempla
         return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
     }
 
+    public static SearchRideTemplateSpecification allInTeam(String teamId) {
+        return new SearchRideTemplateSpecification(teamId);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SearchRideTemplateSpecification that = (SearchRideTemplateSpecification) o;
+        return Objects.equals(teamId, that.teamId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(teamId);
+    }
 }

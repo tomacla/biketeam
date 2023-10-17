@@ -8,6 +8,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class SearchUserRoleSpecification implements Specification<UserRole> {
 
@@ -27,4 +28,16 @@ public class SearchUserRoleSpecification implements Specification<UserRole> {
         return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SearchUserRoleSpecification that = (SearchUserRoleSpecification) o;
+        return Objects.equals(teamId, that.teamId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(teamId);
+    }
 }

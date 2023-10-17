@@ -139,9 +139,6 @@ public class MapController extends AbstractController {
 
         Page<Map> maps = mapService.searchMaps(
                 team.getId(),
-                parser.getPage(),
-                parser.getPageSize(),
-                parser.getSort(),
                 parser.getName(),
                 parser.getLowerDistance(),
                 parser.getUpperDistance(),
@@ -149,7 +146,10 @@ public class MapController extends AbstractController {
                 parser.getLowerPositiveElevation(),
                 parser.getUpperPositiveElevation(),
                 parser.getTags(),
-                parser.getWindDirection());
+                parser.getWindDirection(),
+                parser.getPage(),
+                parser.getPageSize(),
+                parser.getSort());
 
         addGlobalValues(principal, model, "Maps", team);
         model.addAttribute("maps", maps.getContent());
@@ -168,7 +168,7 @@ public class MapController extends AbstractController {
                                                           @RequestParam("q") String q,
                                                           @RequestParam(value = "page", defaultValue = "0", required = false) int page,
                                                           @RequestParam(value = "pageSize", defaultValue = "12", required = false) int pageSize) {
-        return mapService.searchMaps(teamId, page, pageSize, null, q, null, null, null, null, null, null, null)
+        return mapService.listMaps(teamId, q, page, pageSize)
                 .stream()
                 .collect(Collectors.toMap(Map::getId, Map::getName));
 

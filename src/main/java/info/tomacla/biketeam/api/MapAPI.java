@@ -59,9 +59,6 @@ public class MapAPI extends AbstractAPI {
 
         Page<Map> maps = mapService.searchMaps(
                 team.getId(),
-                parser.getPage(),
-                parser.getPageSize(),
-                parser.getSort(),
                 parser.getName(),
                 parser.getLowerDistance(),
                 parser.getUpperDistance(),
@@ -69,7 +66,10 @@ public class MapAPI extends AbstractAPI {
                 parser.getLowerPositiveElevation(),
                 parser.getUpperPositiveElevation(),
                 parser.getTags(),
-                parser.getWindDirection());
+                parser.getWindDirection(),
+                parser.getPage(),
+                parser.getPageSize(),
+                parser.getSort());
 
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.set("X-Pages", String.valueOf(maps.getTotalPages()));

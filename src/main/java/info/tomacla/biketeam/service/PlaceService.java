@@ -29,8 +29,7 @@ public class PlaceService {
     }
 
     public List<Place> listPlaces(String teamId) {
-        SearchPlaceSpecification spec = new SearchPlaceSpecification(teamId);
-        return placeRepository.findAll(spec);
+        return placeRepository.findAll(SearchPlaceSpecification.allInTeam(teamId));
     }
 
     @Transactional

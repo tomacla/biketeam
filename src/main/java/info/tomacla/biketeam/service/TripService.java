@@ -59,7 +59,7 @@ public class TripService extends AbstractPermalinkService {
             return optionalTrip;
         }
 
-        optionalTrip = findByPermalink(false, tripIdOrPermalink);
+        optionalTrip = findByPermalink(tripIdOrPermalink);
         if (optionalTrip.isPresent() && optionalTrip.get().getTeamId().equals(teamId)) {
             return optionalTrip;
         }
@@ -107,32 +107,24 @@ public class TripService extends AbstractPermalinkService {
     }
 
     public Page<Trip> listTrips(String teamId, String title, int page, int pageSize) {
-        SearchTripSpecification spec = new SearchTripSpecification(
-                false, null, title, null, null, Set.of(teamId), null, null, null,
-                null, null);
-        return tripRepository.findAll(spec, PageRequest.of(page, pageSize, Sort.by("publishedAt").descending()));
+        return tripRepository.findAll(SearchTripSpecification.byTitleInTeam(teamId, title), PageRequest.of(page, pageSize, Sort.by("publishedAt").descending()));
     }
 
 
-    public Page<Trip> searchTrips(Set<String> teamIds, int page, int pageSize,
-                                  LocalDate from, LocalDate to, boolean listedInFeed) {
+    public Page<Trip> searchTrips(Set<String> teamIds, LocalDate from, LocalDate to, boolean listedInFeed, int page, int pageSize) {
+
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by("startDate").descending());
 
         SearchTripSpecification spec = new SearchTripSpecification(
-                false, null, null, listedInFeed, null, teamIds, null, null, null,
+                false, null, null, listedInFeed, null, teamIds, PublishedStatus.PUBLISHED, null, null,
                 from, to);
 
         return tripRepository.findAll(spec, pageable);
     }
 
     public List<Trip> searchUpcomingTripsByUser(User user, Set<String> teamIds, LocalDate from) {
-
         Pageable pageable = PageRequest.of(0, 100, Sort.by("startDate").descending());
-
-        SearchTripSpecification spec = new SearchTripSpecification(
-                false, null, null, null, user, teamIds, PublishedStatus.PUBLISHED, null, null,
-                from, null);
-
+        SearchTripSpecification spec = SearchTripSpecification.upcomingByUser(user, teamIds, from);
         return tripRepository.findAll(spec, pageable).getContent();
 
     }
@@ -153,19 +145,13 @@ public class TripService extends AbstractPermalinkService {
         imageService.delete(teamId, tripId);
     }
 
-    public Optional<Trip> findByPermalink(Boolean deletion, String permalink) {
-
-        SearchTripSpecification spec = new SearchTripSpecification(
-                deletion, permalink, null, null, null, null, null, null, null, null, null
-        );
-
-        return tripRepository.findOne(spec);
-
+    public Optional<Trip> findByPermalink(String permalink) {
+        return tripRepository.findOne(SearchTripSpecification.byPermalink(permalink));
     }
 
     @Override
     public boolean permalinkExists(String permalink) {
-        return findByPermalink(null, permalink).isPresent();
+        return findByPermalink(permalink).isPresent();
     }
 
     public void removeParticipant(String userId) {

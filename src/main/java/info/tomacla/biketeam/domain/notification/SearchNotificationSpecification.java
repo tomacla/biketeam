@@ -10,6 +10,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class SearchNotificationSpecification implements Specification<Notification> {
 
@@ -33,4 +34,22 @@ public class SearchNotificationSpecification implements Specification<Notificati
         return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
     }
 
+    public static SearchNotificationSpecification unviewedByUser(User user) {
+        return new SearchNotificationSpecification(
+                false, user
+        );
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SearchNotificationSpecification that = (SearchNotificationSpecification) o;
+        return Objects.equals(viewed, that.viewed) && Objects.equals(user, that.user);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(viewed, user);
+    }
 }

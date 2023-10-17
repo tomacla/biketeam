@@ -64,7 +64,7 @@ public class RideService extends AbstractPermalinkService {
             return optionalRide;
         }
 
-        optionalRide = findByPermalink(false, rideIdOrPermalink);
+        optionalRide = findByPermalink(rideIdOrPermalink);
         if (optionalRide.isPresent() && optionalRide.get().getTeamId().equals(teamId)) {
             return optionalRide;
         }
@@ -73,19 +73,13 @@ public class RideService extends AbstractPermalinkService {
 
     }
 
-    public Optional<Ride> findByPermalink(Boolean deletion, String permalink) {
-
-        SearchRideSpecification spec = new SearchRideSpecification(
-                deletion, permalink, null, null, null, null, null, null, null, null, null
-        );
-
-        return rideRepository.findOne(spec);
-
+    public Optional<Ride> findByPermalink(String permalink) {
+        return rideRepository.findOne(SearchRideSpecification.byPermalink(permalink));
     }
 
     @Override
     public boolean permalinkExists(String permalink) {
-        return findByPermalink(null, permalink).isPresent();
+        return findByPermalink(permalink).isPresent();
     }
 
     @Transactional
@@ -103,42 +97,31 @@ public class RideService extends AbstractPermalinkService {
     }
 
 
-    public Page<Ride> listRides(String teamId, int page, int pageSize) {
-        return rideRepository.findAll(SearchRideSpecification.allInTeam(teamId),
+    public Page<Ride> listRides(String teamId, String title, int page, int pageSize) {
+        return rideRepository.findAll(SearchRideSpecification.byTitleInTeam(teamId, title),
                 PageRequest.of(page, pageSize, Sort.by("date").descending()));
     }
 
-    public Page<Ride> searchRides(Set<String> teamIds, int page, int pageSize, String title,
-                                  LocalDate from, LocalDate to, Boolean listedInFeeded) {
-
-        SearchRideSpecification spec = new SearchRideSpecification(false,
-                null,
-                title,
-                listedInFeeded,
-                null,
-                teamIds,
-                PublishedStatus.PUBLISHED,
-                null, null, from, to);
-
-        Pageable pageable = PageRequest.of(page, pageSize, Sort.by("date").descending());
-        return rideRepository.findAll(spec, pageable);
-
+    public Page<Ride> searchRides(Set<String> teamIds, LocalDate from, LocalDate to, Boolean listedInFeed, int page, int pageSize) {
+        return rideRepository.findAll(
+                new SearchRideSpecification(
+                        false,
+                        null,
+                        null,
+                        listedInFeed,
+                        null,
+                        teamIds,
+                        PublishedStatus.PUBLISHED,
+                        null,
+                        null,
+                        from,
+                        to),
+                PageRequest.of(page, pageSize, Sort.by("date").descending()));
     }
 
     public List<Ride> searchUpcomingRidesByUser(User user, Set<String> teamIds, LocalDate from) {
-
-        SearchRideSpecification spec = new SearchRideSpecification(false,
-                null,
-                null,
-                null,
-                user,
-                teamIds,
-                PublishedStatus.PUBLISHED,
-                null, null, from, null);
-
         Pageable pageable = PageRequest.of(0, 100, Sort.by("date").descending());
-        return rideRepository.findAll(spec, pageable).getContent();
-
+        return rideRepository.findAll(SearchRideSpecification.upcomingRidesByUser(teamIds, user, from), pageable).getContent();
     }
 
     public List<RideGroup> listRideGroupsByStartProximity(String teamId) {

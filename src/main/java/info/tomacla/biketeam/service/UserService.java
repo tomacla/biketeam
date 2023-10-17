@@ -73,36 +73,19 @@ public class UserService {
     private FileService fileService;
 
     public Optional<User> getByStravaId(Long stravaId) {
-
-        SearchUserSpecification userSpecification = new SearchUserSpecification(
-                null, null, null, false, stravaId, null, null, null, null
-        );
-
-        return userRepository.findOne(userSpecification);
+        return userRepository.findOne(SearchUserSpecification.byStravaId(stravaId));
     }
 
     public Optional<User> getByFacebookId(String facebookId) {
-        SearchUserSpecification userSpecification = new SearchUserSpecification(
-                null, null, null, false, null, facebookId, null, null, null
-        );
-
-        return userRepository.findOne(userSpecification);
+        return userRepository.findOne(SearchUserSpecification.byFacebookId(facebookId));
     }
 
     public Optional<User> getByGoogleId(String googleId) {
-        SearchUserSpecification userSpecification = new SearchUserSpecification(
-                null, null, null, false, null, null, googleId, null, null
-        );
-
-        return userRepository.findOne(userSpecification);
+        return userRepository.findOne(SearchUserSpecification.byGoogleId(googleId));
     }
 
     public Optional<User> getByEmail(String email) {
-        SearchUserSpecification userSpecification = new SearchUserSpecification(
-                null, null, null, false, null, null, null, email, null
-        );
-
-        return userRepository.findOne(userSpecification);
+        return userRepository.findOne(SearchUserSpecification.byEmail(email));
     }
 
     @Transactional
@@ -115,46 +98,21 @@ public class UserService {
     }
 
     public List<User> listAdmins() {
-
-        SearchUserSpecification userSpecification = new SearchUserSpecification(
-                false, true, null, false, null, null, null, null, null
-        );
-
-        return userRepository.findAll(userSpecification, Sort.by(Sort.Order.asc("firstName").ignoreCase()));
-
+        return userRepository.findAll(SearchUserSpecification.admins(), Sort.by(Sort.Order.asc("firstName").ignoreCase()));
     }
 
     public Page<User> listUsers(String name, int page, int pageSize) {
-
         PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by(Sort.Order.asc("firstName").ignoreCase()));
-
-        SearchUserSpecification userSpecification = new SearchUserSpecification(
-                false, null, name, false, null, null, null, null, null
-        );
-
-        return userRepository.findAll(userSpecification, pageRequest);
-
+        return userRepository.findAll(SearchUserSpecification.byName(name), pageRequest);
     }
 
     public Page<User> listTeamUsers(Team team, String name, int page, int pageSize) {
-
         PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by(Sort.Order.asc("firstName").ignoreCase()));
-
-        SearchUserSpecification userSpecification = new SearchUserSpecification(
-                false, null, name, false, null, null, null, null, team
-        );
-
-        return userRepository.findAll(userSpecification, pageRequest);
-
+        return userRepository.findAll(SearchUserSpecification.byNameInTeam(name, team), pageRequest);
     }
 
     public List<User> listUsersWithMailActivated(Team team) {
-
-        SearchUserSpecification userSpecification = new SearchUserSpecification(
-                false, null, null, true, null, null, null, null, team
-        );
-
-        return userRepository.findAll(userSpecification, Sort.by(Sort.Order.asc("firstName").ignoreCase()));
+        return userRepository.findAll(SearchUserSpecification.withEmailInTeam(team), Sort.by(Sort.Order.asc("firstName").ignoreCase()));
     }
 
     @Transactional
