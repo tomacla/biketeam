@@ -276,7 +276,10 @@
 
         <#list groupMaps as map>
 
-            loadJsonContent('<@common.teamUrl team.id '/maps/${map}/geojson' />', function(geojsonFeature) {
+            loadJsonContent('<@common.teamUrl team.id '/maps/${map}/geojson' />', function(geojsonFeatures) {
+
+                var geojsonFeature = geojsonFeatures.features.find(f => f.geometry.type === 'LineString');
+
                 var layer = L.geoJSON(geojsonFeature,
                     {
                       interactive:true,
@@ -302,7 +305,7 @@
                         if(elevationChart === null) {
                             initChart(targetMap, 'chart-wrapper', elevationProfile, '${colors[map?index%10]}', function() {
                                 highlightMap(${map?index});
-                            });
+                            }, false);
                         }
                     </#if>
 
