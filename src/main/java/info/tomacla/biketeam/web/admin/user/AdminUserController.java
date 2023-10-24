@@ -2,6 +2,7 @@ package info.tomacla.biketeam.web.admin.user;
 
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.web.AbstractController;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -14,36 +15,21 @@ import java.util.List;
 public class AdminUserController extends AbstractController {
 
     @GetMapping
-    public String getUsers(Principal principal, Model model) {
+    public String getUsers(@RequestParam(value = "name", defaultValue = "", required = false) String name,
+                           @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+                           @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize,
+                           Principal principal,
+                           Model model) {
+
         addGlobalValues(principal, model, "Administration - Utilisateurs", null);
-        model.addAttribute("users", userService.listUsers());
+        Page<User> users = userService.listUsers(name, page, pageSize);
+        model.addAttribute("users", users.getContent());
+        model.addAttribute("matches", users.getTotalElements());
+        model.addAttribute("pages", users.getTotalPages());
+        model.addAttribute("name", name);
+        model.addAttribute("page", page);
+        model.addAttribute("pageSize", pageSize);
         return "admin_users";
-    }
-
-    @PostMapping
-    public String addUser(Principal principal, Model model,
-                          @RequestParam(value = "stravaId", required = false) Long stravaId,
-                          @RequestParam(value = "email", required = false) String email) {
-
-        User target = null;
-        if (stravaId != null) {
-            target = userService.getByStravaId(stravaId).orElseGet(() -> {
-                User u = new User();
-                u.setStravaId(stravaId);
-                return u;
-            });
-        } else if (email != null) {
-            target = userService.getByEmail(email.toLowerCase()).orElseGet(() -> {
-                User u = new User();
-                u.setEmail(email);
-                return u;
-            });
-        }
-
-        userService.save(target);
-
-        return "redirect:/admin/users";
-
     }
 
     @PostMapping(value = "/merge")
@@ -51,44 +37,31 @@ public class AdminUserController extends AbstractController {
                              @RequestParam("sourceId") String sourceId,
                              @RequestParam("targetId") String targetId) {
 
-        userService.merge(sourceId, targetId);
-
-        return "redirect:/admin/users";
-
-    }
-
-    @GetMapping(value = "/promote/{userId}")
-    public String promoteUser(@PathVariable("userId") String userId,
-                              Model model) {
-
         try {
-            userService.promote(userId);
+
+            User connectedUser = getUserFromPrincipal(principal).get();
+            if (!connectedUser.getId().equals(sourceId)) {
+                userService.merge(sourceId, targetId);
+            }
+
         } catch (Exception e) {
             model.addAttribute("errors", List.of(e.getMessage()));
         }
 
         return "redirect:/admin/users";
+
     }
 
-    @GetMapping(value = "/relegate/{userId}")
-    public String relegateUser(@PathVariable("userId") String userId,
-                               Model model) {
-
-        try {
-            userService.relegate(userId);
-        } catch (Exception e) {
-            model.addAttribute("errors", List.of(e.getMessage()));
-        }
-
-        return "redirect:/admin/users";
-    }
 
     @GetMapping(value = "/delete/{userId}")
-    public String deleteUser(@PathVariable("userId") String userId, Model model) {
+    public String deleteUser(@PathVariable("userId") String userId, Principal principal, Model model) {
 
         try {
 
-            userService.get(userId).ifPresent(user -> userService.delete(user));
+            User connectedUser = getUserFromPrincipal(principal).get();
+            if (!connectedUser.getId().equals(userId)) {
+                userService.get(userId).ifPresent(user -> userService.delete(user.getId()));
+            }
 
         } catch (Exception e) {
             model.addAttribute("errors", List.of(e.getMessage()));

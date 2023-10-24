@@ -5,7 +5,8 @@ import info.tomacla.biketeam.domain.message.Message;
 import info.tomacla.biketeam.domain.notification.Notification;
 import info.tomacla.biketeam.domain.notification.NotificationRepository;
 import info.tomacla.biketeam.domain.notification.NotificationType;
-import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.domain.notification.SearchNotificationSpecification;
+import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.userrole.Role;
 import info.tomacla.biketeam.domain.userrole.UserRole;
 import info.tomacla.biketeam.service.amqp.dto.TeamEntityDTO;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -29,9 +31,6 @@ public class NotificationService {
     private NotificationRepository notificationRepository;
 
     @Autowired
-    private UserRoleService userRoleService;
-
-    @Autowired
     private TeamService teamService;
 
     @Autowired
@@ -43,32 +42,29 @@ public class NotificationService {
     @Autowired
     private MessageService messageService;
 
-    public List<Notification> listUnviewedByUser(String userId) {
-        return notificationRepository.findAllByUserIdAndViewedOrderByCreatedAtDesc(userId, false);
+    public List<Notification> listUnviewedByUser(User user) {
+        return notificationRepository.findAll(SearchNotificationSpecification.unviewedByUser(user));
     }
 
     public Optional<Notification> getNotification(String id) {
         return notificationRepository.findById(id);
     }
 
+    public void markAllViewedForUser(User user) {
+        listUnviewedByUser(user).forEach(notification -> {
+            notification.setViewed(true);
+            save(notification);
+        });
+    }
+
+    @Transactional
     public void save(Notification notification) {
         notificationRepository.save(notification);
     }
 
+    @Transactional
     public void delete(String id) {
         getNotification(id).ifPresent(notificationRepository::delete);
-    }
-
-    public void deleteByUser(String userId) {
-        notificationRepository.deleteByUserId(userId);
-    }
-
-    public void deleteByElement(String elementId) {
-        notificationRepository.deleteByElementId(elementId);
-    }
-
-    public boolean isConfigured(Team team) {
-        return true;
     }
 
     @RabbitListener(queues = Queues.RIDE_PUBLISHED_NOTIFICATION)
@@ -123,12 +119,6 @@ public class NotificationService {
         } catch (Exception e) {
             log.error("Error in event " + Queues.TRIP_PUBLISHED_NOTIFICATION, e);
         }
-    }
-
-    @RabbitListener(queues = Queues.TASK_CLEAN_NOTIFICATIONS)
-    public void cleanOldNotifications() {
-        notificationRepository.deleteOld();
-        notificationRepository.deleteOldRead();
     }
 
     @RabbitListener(queues = Queues.RIDE_MESSAGE_PUBLISHED_NOTIFICATION)
@@ -197,11 +187,14 @@ public class NotificationService {
         }
     }
 
-
-    public void markAllViewedForUser(String userId) {
-        listUnviewedByUser(userId).forEach(notification -> {
-            notification.setViewed(true);
-            save(notification);
-        });
+    @RabbitListener(queues = Queues.TASK_CLEAN_NOTIFICATIONS)
+    public void cleanOldNotifications() {
+        try {
+            notificationRepository.deleteOld();
+        } catch (Exception e) {
+            log.error("Error while cleaning notification", e);
+        }
     }
+
+
 }

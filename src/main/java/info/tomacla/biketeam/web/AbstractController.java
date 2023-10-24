@@ -2,7 +2,6 @@ package info.tomacla.biketeam.web;
 
 
 import info.tomacla.biketeam.common.datatype.Dates;
-import info.tomacla.biketeam.domain.reaction.ReactionContent;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.security.OAuth2UserDetails;
@@ -69,7 +68,6 @@ public abstract class AbstractController {
         model.addAttribute("_siteUrl", urlService.getSiteUrl());
         model.addAttribute("_embed", false);
         model.addAttribute("_fullSize", false);
-        model.addAttribute("_reactions", ReactionContent.values());
 
         if (session != null && session.getId() != null) {
             model.addAttribute("_session", session.getId());
@@ -77,7 +75,7 @@ public abstract class AbstractController {
 
         getUserFromPrincipal(principal).ifPresent(user -> {
 
-            final List<Team> teams = teamService.getUserTeams(user.getId());
+            final List<Team> teams = teamService.getUserTeams(user);
 
             model.addAttribute("_authenticated", true);
             model.addAttribute("_user", user);
@@ -90,7 +88,7 @@ public abstract class AbstractController {
                 model.addAttribute("_team_member", team.isMember(user));
             }
 
-            model.addAttribute("_notifications", notificationService.listUnviewedByUser(user.getId()));
+            model.addAttribute("_notifications", notificationService.listUnviewedByUser(user));
 
         });
 

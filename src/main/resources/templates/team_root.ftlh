@@ -40,30 +40,6 @@
              </#if>
         </section>
 
-        <form id="feed-filter" action="<@common.teamUrl team.id '' />" method="GET" class="border rounded px-2 pt-2 mb-2">
-            <div class="mb-3">
-                <div class="d-flex flex-row mb-2 justify-content-center">
-                    <div class="pe-1"><label for="feed-filter-from" class="form-label small">Du</label></div>
-                    <div><input autocomplete="off" type="date" name="from" value="${formdata.from}" required class="form-control form-control-sm" id="feed-filter-from"></div>
-                    <div class="px-1"><label for="feed-filter-to" class="form-label small">Au</label></div>
-                    <div><input autocomplete="off" type="date" name="to" value="${formdata.to}" required class="form-control form-control-sm" id="feed-filter-to"></div>
-                </div>
-                <div class="d-flex flex-row mb-2 justify-content-center">
-                        <div class="me-1"><button tabindex="-1" role="button" aria-disabled="true" onclick="toggleVisibleButton('publications')" id="input-visible-publications-button" type="button" class="btn btn-sm <#if formdata.includePublications>btn-success<#else>btn-outline-success</#if>"><i class="bi bi-newspaper"></i> Publications</button></div>
-                        <div class="me-1"><button tabindex="-1" role="button" aria-disabled="true" onclick="toggleVisibleButton('rides')" id="input-visible-rides-button" type="button" class="btn btn-sm <#if formdata.includeRides>btn-success<#else>btn-outline-success</#if>"><i class="bi bi-bicycle"></i> Rides</button></div>
-                          <div class="me-1"><button tabindex="-1" role="button" aria-disabled="true" onclick="toggleVisibleButton('trips')" id="input-visible-trips-button" type="button" class="btn btn-sm <#if formdata.includeTrips>btn-success<#else>btn-outline-success</#if>"><i class="bi bi-signpost-2"></i> Trips</button></div>
-                </div>
-                <div class="d-flex flex-row justify-content-center">
-                    <button type="submit" id="feed-search-button" class="btn btn-secondary btn-sm"><i class="bi bi-search"></i> Rechercher</button>
-                </div>
-            </div>
-
-            <input type="hidden" id="input-visible-publications-field" value="${formdata.includePublications?c}" name="includePublications" />
-            <input type="hidden" id="input-visible-trips-field" value="${formdata.includeTrips?c}" name="includeTrips" />
-            <input type="hidden" id="input-visible-rides-field" value="${formdata.includeRides?c}" name="includeRides" />
-
-        </form>
-
         <#if hasHeatmap>
             <section class="border d-none d-md-block p-2 rounded">
                 <h5>Heatmap</h5>
@@ -75,32 +51,9 @@
 
 
     <div class="col-12 col-md-8 pb-4">
+
             <@common.displayFeed false />
     </div>
-
-    <script type="text/javascript">
-
-        function toggleVisibleButton(id) {
-
-            var fieldId = 'input-visible-'+id+'-field';
-            var buttonId = 'input-visible-'+id+'-button';
-
-            var field = document.getElementById(fieldId);
-            var button = document.getElementById(buttonId);
-
-            if(field.value === 'true') {
-                field.value = "false";
-                button.classList.remove('btn-success');
-                button.classList.add('btn-outline-success');
-            } else {
-                field.value = "true";
-                button.classList.remove('btn-outline-success');
-                button.classList.add('btn-success');
-            }
-
-        }
-
-    </script>
 
 </div>
 

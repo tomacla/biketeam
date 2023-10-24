@@ -5,6 +5,7 @@ import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ObjectUtils;
@@ -27,12 +28,21 @@ public class AdminTeamMapController extends AbstractController {
     @GetMapping
     public String getMaps(@PathVariable("teamId") String teamId,
                           @ModelAttribute("error") String error,
+                          @RequestParam(value = "name", defaultValue = "", required = false) String name,
+                          @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+                          @RequestParam(value = "pageSize", defaultValue = "12", required = false) int pageSize,
                           Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
 
         addGlobalValues(principal, model, "Administration - Maps", team);
-        model.addAttribute("maps", mapService.listMaps(team.getId()));
+        Page<Map> maps = mapService.listMaps(team.getId(), name, page, pageSize);
+        model.addAttribute("maps", maps.getContent());
+        model.addAttribute("matches", maps.getTotalElements());
+        model.addAttribute("pages", maps.getTotalPages());
+        model.addAttribute("page", page);
+        model.addAttribute("name", name);
+        model.addAttribute("pageSize", pageSize);
         if (!ObjectUtils.isEmpty(error)) {
             model.addAttribute("errors", List.of(error));
         }

@@ -163,7 +163,6 @@ public class AdminTeamConfigurationController extends AbstractController {
                 .withTimezone(teamConfiguration.getTimezone())
                 .withDefaultSearchTags(teamConfiguration.getDefaultSearchTags())
                 .withFeedVisible(teamConfiguration.isFeedVisible())
-                .withReactionVisible(teamConfiguration.isReactionVisible())
                 .get();
 
         addGlobalValues(principal, model, "Administration - Configuration", team);
@@ -194,7 +193,6 @@ public class AdminTeamConfigurationController extends AbstractController {
             teamConfiguration.setTimezone(parser.getTimezone());
             teamConfiguration.setDefaultSearchTags(parser.getDefaultSearchTags());
             teamConfiguration.setFeedVisible(parser.isFeedVisible());
-            teamConfiguration.setReactionVisible(parser.isReactionVisible());
             teamService.save(team);
 
             return viewHandler.redirectView(team, "/admin/configuration");
@@ -271,6 +269,9 @@ public class AdminTeamConfigurationController extends AbstractController {
                 .withMattermostPublishTrips(teamIntegration.isMattermostPublishTrips())
                 .withHeatmapCenter(teamIntegration.getHeatmapCenter())
                 .withHeatmapDisplay(teamIntegration.isHeatmapDisplay())
+                .withWebhookRide(teamIntegration.getWebhookRide())
+                .withWebhookTrip(teamIntegration.getWebhookTrip())
+                .withWebhookPublication(teamIntegration.getWebhookPublication())
                 .get();
 
         addGlobalValues(principal, model, "Administration - Intégrations", team);
@@ -303,6 +304,9 @@ public class AdminTeamConfigurationController extends AbstractController {
             teamIntegration.setMattermostPublishTrips(parser.isMattermostPublishTrips());
             teamIntegration.setHeatmapCenter(parser.getHeatmapCenter());
             teamIntegration.setHeatmapDisplay(parser.isHeatmapDisplay());
+            teamIntegration.setWebhookRide(parser.getWebhookRide());
+            teamIntegration.setWebhookTrip(parser.getWebhookTrip());
+            teamIntegration.setWebhookPublication(parser.getWebhookPublication());
             teamService.save(team);
 
             return viewHandler.redirectView(team, "/admin/integration");

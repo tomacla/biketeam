@@ -28,13 +28,13 @@ public class RideTemplateTest extends AbstractDBTest {
     @Test
     public void rideTest() {
 
-        List<RideTemplateProjection> templates = rideTemplateRepository.findAllByTeamIdOrderByNameAsc("ridetmptest-team");
+        List<RideTemplate> templates = rideTemplateRepository.findAll(new SearchRideTemplateSpecification("ridetmptest-team"));
 
         assertEquals(0, templates.size());
 
         createRidetemplate();
 
-        templates = rideTemplateRepository.findAllByTeamIdOrderByNameAsc("ridetmptest-team");
+        templates = rideTemplateRepository.findAll(new SearchRideTemplateSpecification("ridetmptest-team"));
 
         assertEquals(1, templates.size());
 

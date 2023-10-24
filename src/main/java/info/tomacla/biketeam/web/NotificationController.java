@@ -42,7 +42,7 @@ public class NotificationController extends AbstractController {
                           Principal principal,
                           Model model) {
 
-        getUserFromPrincipal(principal).ifPresent(user -> notificationService.markAllViewedForUser(user.getId()));
+        getUserFromPrincipal(principal).ifPresent(user -> notificationService.markAllViewedForUser(user));
 
         return "redirect:" + referer;
 

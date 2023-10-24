@@ -1,7 +1,6 @@
 package info.tomacla.biketeam.web.team.ride;
 
 import info.tomacla.biketeam.common.data.PublishedStatus;
-import info.tomacla.biketeam.domain.place.PlaceSorterOption;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.template.RideTemplate;
@@ -11,6 +10,7 @@ import info.tomacla.biketeam.service.RideService;
 import info.tomacla.biketeam.service.RideTemplateService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ObjectUtils;
@@ -24,6 +24,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = "/{teamId}/admin/rides")
@@ -44,13 +45,22 @@ public class AdminTeamRideController extends AbstractController {
     @GetMapping
     public String getRides(@PathVariable("teamId") String teamId,
                            @ModelAttribute("error") String error,
+                           @RequestParam(value = "title", defaultValue = "", required = false) String title,
+                           @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+                           @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize,
                            Principal principal, Model model) {
 
         final Team team = checkTeam(teamId);
 
         addGlobalValues(principal, model, "Administration - Rides", team);
-        model.addAttribute("rides", rideService.listRides(team.getId()));
+        Page<Ride> rides = rideService.listRides(team.getId(), title, page, pageSize);
+        model.addAttribute("rides", rides.getContent());
         model.addAttribute("templates", rideTemplateService.listTemplates(team.getId()));
+        model.addAttribute("matches", rides.getTotalElements());
+        model.addAttribute("pages", rides.getTotalPages());
+        model.addAttribute("page", page);
+        model.addAttribute("title", title);
+        model.addAttribute("pageSize", pageSize);
         if (!ObjectUtils.isEmpty(error)) {
             model.addAttribute("errors", List.of(error));
         }
@@ -87,8 +97,8 @@ public class AdminTeamRideController extends AbstractController {
 
         addGlobalValues(principal, model, "Administration - Nouveau ride", team);
         model.addAttribute("formdata", form);
-        model.addAttribute("startPlaces", placeService.listPlacesWithAppearances(teamId, PlaceSorterOption.RIDE_START));
-        model.addAttribute("endPlaces", placeService.listPlacesWithAppearances(teamId, PlaceSorterOption.RIDE_END));
+        model.addAttribute("startPlaces", placeService.listPlaces(teamId).stream().filter(p -> p.isStartPlace()).collect(Collectors.toList()));
+        model.addAttribute("endPlaces", placeService.listPlaces(teamId).stream().filter(p -> p.isEndPlace()).collect(Collectors.toList()));
         model.addAttribute("imaged", false);
         model.addAttribute("published", false);
         if (!ObjectUtils.isEmpty(error)) {
@@ -130,8 +140,8 @@ public class AdminTeamRideController extends AbstractController {
 
         addGlobalValues(principal, model, "Administration - Modifier le ride", team);
         model.addAttribute("formdata", form);
-        model.addAttribute("startPlaces", placeService.listPlacesWithAppearances(teamId, PlaceSorterOption.RIDE_START));
-        model.addAttribute("endPlaces", placeService.listPlacesWithAppearances(teamId, PlaceSorterOption.RIDE_END));
+        model.addAttribute("startPlaces", placeService.listPlaces(teamId).stream().filter(p -> p.isStartPlace()).collect(Collectors.toList()));
+        model.addAttribute("endPlaces", placeService.listPlaces(teamId).stream().filter(p -> p.isEndPlace()).collect(Collectors.toList()));
         model.addAttribute("imaged", ride.isImaged());
         model.addAttribute("published", ride.getPublishedStatus().equals(PublishedStatus.PUBLISHED));
         if (!ObjectUtils.isEmpty(error)) {

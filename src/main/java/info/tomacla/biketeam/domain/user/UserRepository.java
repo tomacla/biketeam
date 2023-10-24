@@ -1,26 +1,11 @@
 package info.tomacla.biketeam.domain.user;
 
-import info.tomacla.biketeam.domain.team.Team;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
-
 @Repository
-public interface UserRepository extends CrudRepository<User, String> {
-
-    List<User> findAllByOrderByAdminDescLastNameAscFirstNameAsc();
-
-    Optional<User> findByStravaId(Long stravaId);
-
-    Optional<User> findByEmail(String email);
-
-    Optional<User> findByFacebookId(String facebookId);
-
-    Optional<User> findByGoogleId(String googleId);
-
-    List<User> findByEmailNotNullAndRoles_Team(Team team);
+public interface UserRepository extends PagingAndSortingRepository<User, String>, JpaSpecificationExecutor<User> {
 
 
 }

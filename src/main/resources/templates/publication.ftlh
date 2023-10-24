@@ -40,7 +40,9 @@
              </#if>
         </section>
 
-        <a class="btn btn-sm btn-secondary" href="<@common.teamUrl team.id '/' />"><i class="bi bi-arrow-left-circle"></i> Retour à l'accueil</a>
+        <div class="d-none d-md-block">
+            <a class="btn btn-sm btn-secondary" href="<@common.teamUrl team.id '/' />"><i class="bi bi-arrow-left-circle"></i> Retour à l'accueil</a>
+        </div>
 
     </aside>
 

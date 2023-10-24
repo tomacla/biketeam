@@ -17,6 +17,9 @@ public class User {
     @Id
     private String id = UUID.randomUUID().toString();
     private boolean admin = false;
+
+    private boolean deletion;
+
     @Column(name = "strava_id", unique = true)
     private Long stravaId;
     @Column(name = "facebook_id", unique = true)
@@ -45,6 +48,9 @@ public class User {
     private boolean emailPublishPublications;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<UserRole> roles = new HashSet<>();
+
+    @Column(name = "team_id", unique = true)
+    private String teamId;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -199,6 +205,22 @@ public class User {
 
     public void setGarminTokenSecret(String garminTokenSecret) {
         this.garminTokenSecret = garminTokenSecret;
+    }
+
+    public String getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(String teamId) {
+        this.teamId = teamId;
+    }
+
+    public boolean isDeletion() {
+        return deletion;
+    }
+
+    public void setDeletion(boolean deletion) {
+        this.deletion = deletion;
     }
 
     @Override

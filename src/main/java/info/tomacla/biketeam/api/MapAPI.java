@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -58,9 +59,6 @@ public class MapAPI extends AbstractAPI {
 
         Page<Map> maps = mapService.searchMaps(
                 team.getId(),
-                parser.getPage(),
-                parser.getPageSize(),
-                parser.getSort(),
                 parser.getName(),
                 parser.getLowerDistance(),
                 parser.getUpperDistance(),
@@ -68,7 +66,10 @@ public class MapAPI extends AbstractAPI {
                 parser.getLowerPositiveElevation(),
                 parser.getUpperPositiveElevation(),
                 parser.getTags(),
-                parser.getWindDirection());
+                parser.getWindDirection(),
+                parser.getPage(),
+                parser.getPageSize(),
+                parser.getSort());
 
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.set("X-Pages", String.valueOf(maps.getTotalPages()));
@@ -90,7 +91,7 @@ public class MapAPI extends AbstractAPI {
     }
 
     @GetMapping(path = "/tags", produces = "application/json")
-    public ResponseEntity<List<String>> getTags(@PathVariable String teamId) {
+    public ResponseEntity<Set<String>> getTags(@PathVariable String teamId) {
 
         checkTeam(teamId);
 

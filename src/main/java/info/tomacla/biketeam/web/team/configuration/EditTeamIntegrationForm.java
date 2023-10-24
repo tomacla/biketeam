@@ -16,6 +16,9 @@ public class EditTeamIntegrationForm {
     private String heatmapCenterLat = "";
     private String heatmapCenterLng = "";
     private String heatmapDisplay = null;
+    private String webhookRide = "";
+    private String webhookTrip = "";
+    private String webhookPublication = "";
 
     public static EditTeamIntegrationFormBuilder builder() {
         return new EditTeamIntegrationFormBuilder();
@@ -101,6 +104,29 @@ public class EditTeamIntegrationForm {
         this.heatmapDisplay = heatmapDisplay;
     }
 
+    public String getWebhookRide() {
+        return webhookRide;
+    }
+
+    public void setWebhookRide(String webhookRide) {
+        this.webhookRide = Strings.requireNonBlankOrDefault(webhookRide, "");
+    }
+
+    public String getWebhookTrip() {
+        return webhookTrip;
+    }
+
+    public void setWebhookTrip(String webhookTrip) {
+        this.webhookTrip = Strings.requireNonBlankOrDefault(webhookTrip, "");
+    }
+
+    public String getWebhookPublication() {
+        return webhookPublication;
+    }
+
+    public void setWebhookPublication(String webhookPublication) {
+        this.webhookPublication = Strings.requireNonBlankOrDefault(webhookPublication, "");
+    }
 
     public EditTeamIntegrationFormParser parser() {
         return new EditTeamIntegrationFormParser(this);
@@ -151,6 +177,18 @@ public class EditTeamIntegrationForm {
 
         public boolean isHeatmapDisplay() {
             return form.getHeatmapDisplay() != null && form.getHeatmapDisplay().equals("on");
+        }
+
+        public String getWebhookRide() {
+            return Strings.requireNonBlankOrNull(form.getWebhookRide());
+        }
+
+        public String getWebhookTrip() {
+            return Strings.requireNonBlankOrNull(form.getWebhookTrip());
+        }
+
+        public String getWebhookPublication() {
+            return Strings.requireNonBlankOrNull(form.getWebhookPublication());
         }
 
 
@@ -209,6 +247,21 @@ public class EditTeamIntegrationForm {
 
         public EditTeamIntegrationFormBuilder withHeatmapDisplay(boolean heatmapDisplay) {
             form.setHeatmapDisplay(heatmapDisplay ? "on" : null);
+            return this;
+        }
+
+        public EditTeamIntegrationFormBuilder withWebhookRide(String webhookRide) {
+            form.setWebhookRide(webhookRide);
+            return this;
+        }
+
+        public EditTeamIntegrationFormBuilder withWebhookTrip(String webhookTrip) {
+            form.setWebhookTrip(webhookTrip);
+            return this;
+        }
+
+        public EditTeamIntegrationFormBuilder withWebhookPublication(String webhookPublication) {
+            form.setWebhookPublication(webhookPublication);
             return this;
         }
 

@@ -4,36 +4,43 @@
 
     <div class="col-12 mb-4">
 
-        <form id="teams-filter" action="<@common.teamUrl '' '/teams' />" method="GET" class="border rounded p-2">
+        <div class="row border rounded p-2">
 
-            <input type="hidden" id="teams-filter-page" name="page" value="${formdata.page}">
-            <input type="hidden" id="teams-filter-pageSize" name="pageSize" value="${formdata.pageSize}">
+            <div class="col-12 col-md-8">
 
-            <div class="row gy-2">
-                  <div class="col-12 col-md-3">
-                      <div class="input-group">
-                          <label class="input-group-text" for="teams-filter-name">Nom</label>
-                          <input autocomplete="off" type="text" value="${formdata.name}" name="name" class="form-control" id="teams-filter-name">
-                       </div>
+                <form id="teams-filter" action="<@common.teamUrl '' '/teams' />" method="GET">
+
+                    <input type="hidden" id="teams-filter-page" name="page" value="${page}">
+                    <input type="hidden" id="teams-filter-pageSize" name="pageSize" value="${pageSize}">
+
+                    <div class="row gy-2">
+
+                          <div class="col-8 col-md-6">
+                              <div class="input-group">
+                                  <label class="input-group-text" for="teams-filter-name">Nom</label>
+                                  <input autocomplete="off" type="text" value="${name}" name="name" class="form-control" id="teams-filter-name">
+                               </div>
+                            </div>
+
+                        <div class="col-4 col-md-2 text-center">
+                            <button type="submit" class="btn btn-secondary">Valider</button>
+                        </div>
+
                     </div>
-                  <div class="col-12 col-md-4">
-                    <div class="input-group">
-                        <label class="input-group-text" for="teams-filter-city">Ville</label>
-                        <input autocomplete="off" type="text" value="${formdata.city}" name="city" class="form-control" id="teams-filter-city">
-                     </div>
-                  </div>
-                  <div class="col-12 col-md-4">
-                    <div class="input-group">
-                        <label class="input-group-text" for="teams-filter-name">Pays</label>
-                        <@common.countrySelect formdata.country 'country' 'teams-filter-country' false />
-                     </div>
-                  </div>
-                <div class="col-12 col-md-1 text-center">
-                    <button type="submit" class="btn btn-secondary">Valider</button>
-                </div>
-            </div>
+                 </form>
 
-         </form>
+             </div>
+
+             <div class="col-12 col-md-4 mt-2 mt-md-0">
+                <div class="d-flex flew-row justify-content-center justify-content-md-end">
+                    <p class="lead m-0 me-2">${matches} groupe<#if matches gt 1>s</#if></p>
+                    <#if pages gt 1><div><@common.pagination page pages 'teams-filter-page' 'teams-filter' /></div></#if>
+                </div>
+             </div>
+
+         </div>
+
+
 
     </div>
 
@@ -41,7 +48,7 @@
 
         <#if teams?size == 0>
              <div class="alert alert-warning" role="alert">
-               Aucune team à afficher.
+               Aucun groupe à afficher.
              </div>
         <#else>
              <div class="row row-cols-1 row-cols-md-4 g-4">

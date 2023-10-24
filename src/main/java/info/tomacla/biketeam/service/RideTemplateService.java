@@ -1,11 +1,12 @@
 package info.tomacla.biketeam.service;
 
 import info.tomacla.biketeam.domain.template.RideTemplate;
-import info.tomacla.biketeam.domain.template.RideTemplateProjection;
 import info.tomacla.biketeam.domain.template.RideTemplateRepository;
+import info.tomacla.biketeam.domain.template.SearchRideTemplateSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,8 +21,8 @@ public class RideTemplateService {
     @Autowired
     private RideTemplateRepository rideTemplateRepository;
 
-    public List<RideTemplateProjection> listTemplates(String teamId) {
-        return rideTemplateRepository.findAllByTeamIdOrderByNameAsc(teamId);
+    public List<RideTemplate> listTemplates(String teamId) {
+        return rideTemplateRepository.findAll(SearchRideTemplateSpecification.allInTeam(teamId), Sort.by("name").ascending());
     }
 
     public Optional<RideTemplate> get(String teamId, String templateId) {
@@ -39,7 +40,7 @@ public class RideTemplateService {
 
     @Transactional
     public void delete(String teamId, String templateId) {
-        log.info("Request ride template deletion {}", templateId);
+        log.info("Request ride template deletion {} in team {}", templateId, teamId);
         get(teamId, templateId).ifPresent(template -> rideTemplateRepository.delete(template));
     }
 
@@ -54,7 +55,4 @@ public class RideTemplateService {
         });
     }
 
-    public void deleteByTeam(String teamId) {
-        rideTemplateRepository.findAllByTeamIdOrderByNameAsc(teamId).stream().map(RideTemplateProjection::getId).forEach(rideTemplateRepository::deleteById);
-    }
 }

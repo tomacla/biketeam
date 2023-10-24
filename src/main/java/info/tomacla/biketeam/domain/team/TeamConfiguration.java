@@ -33,8 +33,6 @@ public class TeamConfiguration {
     private String domain;
     @Column(name = "markdown_page")
     private String markdownPage;
-    @Column(name = "reaction_visible")
-    private boolean reactionVisible = false;
 
     public String getTeamId() {
         return teamId;
@@ -78,13 +76,6 @@ public class TeamConfiguration {
         this.feedVisible = feedVisible;
     }
 
-    public boolean isReactionVisible() {
-        return reactionVisible;
-    }
-
-    public void setReactionVisible(boolean reactionVisible) {
-        this.reactionVisible = reactionVisible;
-    }
 
     public String getDomain() {
         return domain;

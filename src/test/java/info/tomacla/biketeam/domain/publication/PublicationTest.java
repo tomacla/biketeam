@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -30,11 +31,9 @@ public class PublicationTest extends AbstractDBTest {
     @Test
     public void publicationRepositoryTU() {
 
-        List<Publication> publications = publicationRepository.findAllByTeamIdAndPublishedStatusAndPublishedAtLessThan(
-                "publicationtest-team",
-                PublishedStatus.PUBLISHED,
-                ZonedDateTime.now()
-        );
+        List<Publication> publications = publicationRepository.findAll(new SearchPublicationSpecification(
+                null, Set.of("publicationtest-team"), null, PublishedStatus.PUBLISHED, null, ZonedDateTime.now()
+        ));
 
         assertEquals(0, publications.size());
 
@@ -42,11 +41,9 @@ public class PublicationTest extends AbstractDBTest {
         createPublication(ZonedDateTime.now().minus(1, ChronoUnit.DAYS), PublishedStatus.UNPUBLISHED);
         createPublication(ZonedDateTime.now().plus(1, ChronoUnit.DAYS), PublishedStatus.PUBLISHED);
 
-        publications = publicationRepository.findAllByTeamIdAndPublishedStatusAndPublishedAtLessThan(
-                "publicationtest-team",
-                PublishedStatus.PUBLISHED,
-                ZonedDateTime.now()
-        );
+        publications = publicationRepository.findAll(new SearchPublicationSpecification(
+                null, Set.of("publicationtest-team"), null, PublishedStatus.PUBLISHED, null, ZonedDateTime.now()
+        ));
 
         assertEquals(1, publications.size());
 

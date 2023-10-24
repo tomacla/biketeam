@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class GpxService {
@@ -85,7 +86,6 @@ public class GpxService {
     }
 
     public Map parseAndReplace(Team team, Map map, Path gpx) {
-
         prepareMap(gpx, map.getName(), map, team);
         return map;
     }
@@ -223,9 +223,14 @@ public class GpxService {
         }
     }
 
+
+
     private List<java.util.Map<String, Object>> getElevationProfile(GPXPath gpxPath) {
         try {
             List<java.util.Map<String, Object>> result = new ArrayList<>();
+
+            GPXFilter.filterPointsDouglasPeucker(gpxPath, Math.min(30, gpxPath.getDist() / (gpxPath.getDist() / 10)));
+
             for (int i = 0; i < gpxPath.getPoints().size(); i++) {
                 Point point = gpxPath.getPoints().get(i);
                 result.add(
@@ -233,12 +238,13 @@ public class GpxService {
                                 "x", point.getDist(),
                                 "y", point.getEle(),
                                 "lat", point.getLatDeg(),
-                                "lng", point.getLonDeg())
+                                "lng", point.getLonDeg(),
+                                "grade", point.getGrade())
                 );
             }
             return result;
         } catch (Exception e) {
-            log.error("Error while calculating GEOJSON", e);
+            log.error("Error while calculating Elevation profile", e);
             throw new RuntimeException(e);
         }
     }

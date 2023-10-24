@@ -89,6 +89,14 @@ html {
     background-color: rgba(255, 255, 255, 1) !important;
 }
 
+.leaflet-tooltip-pane .circle-text {
+  color: black;
+  background: transparent;
+  border:0;
+  box-shadow: none;
+  font-size:0.8em;
+}
+
 .profile-images {
     align-items:center;
     display:flex;

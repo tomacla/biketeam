@@ -1,22 +1,16 @@
 package info.tomacla.biketeam.domain.message;
 
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
-import java.util.List;
 
 @Repository
-public interface MessageRepository extends CrudRepository<Message, String> {
-
-    List<Message> findAll();
-
-    List<Message> findAllByTargetIdAndTypeOrderByPublishedAtAsc(String targetId, MessageTargetType type);
-
-    List<Message> findAllByUserId(String userId);
+public interface MessageRepository extends PagingAndSortingRepository<Message, String>, JpaSpecificationExecutor<Message> {
 
     @Transactional
     @Modifying

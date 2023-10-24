@@ -10,6 +10,7 @@ import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.userrole.Role;
 import info.tomacla.biketeam.domain.userrole.UserRole;
 import info.tomacla.biketeam.service.UserRoleService;
+import info.tomacla.biketeam.service.feed.FeedService;
 import info.tomacla.biketeam.service.file.ThumbnailService;
 import info.tomacla.biketeam.service.heatmap.HeatmapService;
 import info.tomacla.biketeam.web.AbstractController;
@@ -50,13 +51,14 @@ public class TeamController extends AbstractController {
     @Autowired
     private UserRoleService userRoleService;
 
+    @Autowired
+    private FeedService feedService;
+
     @GetMapping
     public String getFeed(@PathVariable("teamId") String teamId,
-                          @RequestParam(value = "includeTrips", required = false, defaultValue = "true") boolean includeTrips,
-                          @RequestParam(value = "includeRides", required = false, defaultValue = "true") boolean includeRides,
-                          @RequestParam(value = "includePublications", required = false, defaultValue = "true") boolean includePublications,
                           @RequestParam(value = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
                           @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+                          @RequestParam(value = "onlyMyFeed", required = false, defaultValue = "false") boolean onlyMyFeed,
                           @ModelAttribute("error") String error,
                           Principal principal,
                           Model model) {
@@ -71,23 +73,19 @@ public class TeamController extends AbstractController {
         SearchFeedForm form = SearchFeedForm.builder()
                 .withFrom(from)
                 .withTo(to)
-                .withIncludeTrips(includeTrips)
-                .withIncludeRides(includeRides)
-                .withIncludePublications(includePublications)
+                .withOnlyMyFeed(onlyMyFeed)
                 .get();
 
         final SearchFeedForm.SearchFeedFormParser parser = form.parser();
 
         FeedOptions options = new FeedOptions(
-                parser.isIncludePublications(),
-                parser.isIncludeTrips(),
-                parser.isIncludeRides(),
                 parser.getFrom(),
-                parser.getTo()
+                parser.getTo(),
+                parser.isOnlyMyFeed()
         );
 
 
-        List<FeedEntity> feed = teamService.listFeed(getUserFromPrincipal(principal).orElse(null), team, options);
+        List<FeedEntity> feed = feedService.listFeed(getUserFromPrincipal(principal).orElse(null), team, options);
 
         addGlobalValues(principal, model, team.getName(), team);
         model.addAttribute("feed", feed);

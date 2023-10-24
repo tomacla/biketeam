@@ -112,23 +112,48 @@
                   interactive:false,
                   color: '#ff0000',
                   weight: 5,
-                  opacity: 0.8
+                  opacity: 0.8,
+                  pointToLayer: function (feature, latlng) {
+
+                    if(feature.properties.name === 'start') {
+                        return L.marker(latlng, {clickable: false, icon : L.divIcon({className: 'mapStartIcon'})})
+
+                    } else if(feature.properties.name === 'end') {
+                        return L.marker(latlng, {clickable: false, icon : L.divIcon({className: 'mapEndIcon'})});
+                     } else {
+
+                        var circle = L.circleMarker(latlng, {
+                             radius: 10,
+                             fillColor: "#ffffff",
+                             color: "#000000",
+                             weight: 1,
+                             opacity: 1,
+                             fillOpacity: 0.8
+                         });
+
+                        var text = L.tooltip({
+                                permanent: true,
+                                direction: 'center',
+                                className: 'circle-text'
+                            })
+                            .setContent(feature.properties.name)
+                            .setLatLng(latlng);
+                            text.addTo(targetMap);
+
+                            return circle;
+                      }
+
+                  }
                 });
 
             layer.addTo(targetMap);
 
             loadJsonContent('<@common.teamUrl team.id '/maps/${map.id}/elevation-profile' />', function(elevationProfile) {
                 geoJsonLayer = layer;
-                initChart(targetMap, 'chart-wrapper', elevationProfile, '#ff0000', null);
+                initChart(targetMap, 'chart-wrapper', elevationProfile, '#dbdbdb', null, true);
             });
 
-            var firstPoint = geojsonFeature.geometry.coordinates[0];
-            var lastPoint = geojsonFeature.geometry.coordinates[geojsonFeature.geometry.coordinates.length - 1];
-
-             targetMap.panTo(new L.LatLng(firstPoint[1], firstPoint[0]));
-             L.marker([firstPoint[1], firstPoint[0]], {clickable: false, icon : L.divIcon({className: 'mapStartIcon'})}).addTo(targetMap);
-
-             L.marker([lastPoint[1], lastPoint[0]], {clickable: false, icon : L.divIcon({className: 'mapEndIcon'})}).addTo(targetMap);
+            targetMap.panTo(layer.getBounds().getCenter());
 
 
         });
