@@ -188,7 +188,7 @@ public class Team implements MessageHolder {
     }
 
     public boolean isPublic() {
-        return getVisibility().equals(Visibility.PUBLIC) || getVisibility().equals(Visibility.PUBLIC_UNLISTED);
+        return getVisibility().equals(Visibility.PUBLIC) || getVisibility().equals(Visibility.PUBLIC_UNLISTED) || getVisibility().equals(Visibility.USER);
     }
 
     public boolean isPrivate() {

@@ -119,9 +119,9 @@ public class RideService extends AbstractPermalinkService {
                 PageRequest.of(page, pageSize, Sort.by("date").descending()));
     }
 
-    public List<Ride> searchUpcomingRidesByUser(User user, Set<String> teamIds, LocalDate from) {
+    public List<Ride> searchUpcomingRidesByUser(User user, Set<String> teamIds, LocalDate from, LocalDate to) {
         Pageable pageable = PageRequest.of(0, 100, Sort.by("date").descending());
-        return rideRepository.findAll(SearchRideSpecification.upcomingRidesByUser(teamIds, user, from), pageable).getContent();
+        return rideRepository.findAll(SearchRideSpecification.upcomingRidesByUser(teamIds, user, from, to), pageable).getContent();
     }
 
     public List<RideGroup> listRideGroupsByStartProximity(String teamId) {

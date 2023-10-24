@@ -35,6 +35,38 @@
 </#macro>
 
 <#macro displayFeed withTeam>
+    <div class="g-4 row">
+
+        <form id="feed-filter" action="<#if team??><@common.teamUrl team.id '' /><#else><@common.teamUrl '' '' /></#if>" method="GET" class="col-12 mb-2">
+
+            <div class="border rounded d-flex flex-row flex-wrap justify-content-center justify-content-md-around justify-content-md-start align-items-center p-2">
+
+          <div class="d-flex flex-row align-items-center justify-content-center mb-2 mb-md-0 me-0 me-md-2">
+              <div class="pe-1"><label for="feed-filter-from" class="form-label small">Du</label></div>
+              <div><input autocomplete="off" type="date" name="from" value="${formdata.from}" class="form-control form-control-sm" id="feed-filter-from"></div>
+              <div class="px-1"><label for="feed-filter-to" class="form-label small">Au</label></div>
+              <div><input autocomplete="off" type="date" name="to" value="${formdata.to}" class="form-control form-control-sm" id="feed-filter-to"></div>
+          </div>
+
+            <#if _authenticated>
+               <div class="form-check form-switch me-2">
+                <input onchange="toggleVisibleButton('input-onlymyfeed-field')" class="form-check-input" type="checkbox" id="input-onlymyfeed-button" <#if formdata.onlyMyFeed?? && formdata.onlyMyFeed> checked</#if>>
+                <label class="form-check-label" for="input-onlymyfeed-button">Mes activités</label>
+              </div>
+            </#if>
+
+           <#if _authenticated>
+            <input type="hidden" id="input-onlymyfeed-field" value="${formdata.onlyMyFeed?c}" name="onlyMyFeed" />
+           </#if>
+
+           <div>
+               <button type="submit" id="feed-search-button" class="btn btn-secondary btn-sm"><i class="bi bi-funnel"></i> Filtrer</button>
+           </div>
+
+         </div>
+
+        </form>
+    </div>
     <div class="row g-4">
         <#if feed?size != 0>
             <#list feed as feedItem>
@@ -56,6 +88,23 @@
              </div>
         </#if>
     </div>
+
+    <script type="text/javascript">
+
+        function toggleVisibleButton(fieldId) {
+
+            var field = document.getElementById(fieldId);
+
+            if(field.value === 'true') {
+                field.value = "false";
+            } else {
+                field.value = "true";
+            }
+
+        }
+
+    </script>
+
 </#macro>
 
 <#macro displayPublication publication withTeam>

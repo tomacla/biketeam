@@ -5,6 +5,7 @@ import info.tomacla.biketeam.common.amqp.Queues;
 import info.tomacla.biketeam.common.amqp.RoutingKeys;
 import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
+import info.tomacla.biketeam.domain.team.LastTeamData;
 import info.tomacla.biketeam.domain.team.SearchTeamSpecification;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.TeamRepository;
@@ -84,6 +85,10 @@ public class TeamService extends AbstractPermalinkService {
         Pageable pageable = PageRequest.of(0, 4, sort);
         SearchTeamSpecification spec = SearchTeamSpecification.publiclyVisible();
         return teamRepository.findAll(spec, pageable).getContent();
+    }
+
+    public List<LastTeamData> getLastTeamData(Set<String> teamIds) {
+        return teamRepository.findLastData(teamIds);
     }
 
     public List<Team> getUserTeams(User user) {

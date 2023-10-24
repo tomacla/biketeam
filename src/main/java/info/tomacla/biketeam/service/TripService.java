@@ -122,9 +122,9 @@ public class TripService extends AbstractPermalinkService {
         return tripRepository.findAll(spec, pageable);
     }
 
-    public List<Trip> searchUpcomingTripsByUser(User user, Set<String> teamIds, LocalDate from) {
+    public List<Trip> searchUpcomingTripsByUser(User user, Set<String> teamIds, LocalDate from, LocalDate to) {
         Pageable pageable = PageRequest.of(0, 100, Sort.by("startDate").descending());
-        SearchTripSpecification spec = SearchTripSpecification.upcomingByUser(user, teamIds, from);
+        SearchTripSpecification spec = SearchTripSpecification.upcomingByUser(user, teamIds, from, to);
         return tripRepository.findAll(spec, pageable).getContent();
 
     }

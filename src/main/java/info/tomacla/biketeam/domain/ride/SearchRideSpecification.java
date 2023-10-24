@@ -52,6 +52,9 @@ public class SearchRideSpecification implements Specification<Ride> {
         if (deletion != null) {
             predicates.add(criteriaBuilder.equal(root.get("deletion"), deletion.booleanValue()));
         }
+        if (permalink != null && !permalink.isBlank()) {
+            predicates.add(criteriaBuilder.equal(root.get("permalink"), permalink));
+        }
         if (listedInFeed != null) {
             predicates.add(criteriaBuilder.equal(root.get("listedInFeed"), listedInFeed.booleanValue()));
         }
@@ -100,7 +103,7 @@ public class SearchRideSpecification implements Specification<Ride> {
                 null, null, null, null);
     }
 
-    public static SearchRideSpecification upcomingRidesByUser(Set<String> teamIds, User user, LocalDate from) {
+    public static SearchRideSpecification upcomingRidesByUser(Set<String> teamIds, User user, LocalDate from, LocalDate to) {
         return new SearchRideSpecification(false,
                 null,
                 null,
@@ -108,7 +111,7 @@ public class SearchRideSpecification implements Specification<Ride> {
                 user,
                 teamIds,
                 PublishedStatus.PUBLISHED,
-                null, null, from, null);
+                null, null, from, to);
     }
 
     public static SearchRideSpecification byPermalink(String permalink) {

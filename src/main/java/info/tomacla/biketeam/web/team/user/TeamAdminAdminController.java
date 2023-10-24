@@ -1,6 +1,7 @@
 package info.tomacla.biketeam.web.team.user;
 
 import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.domain.team.Visibility;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.userrole.Role;
 import info.tomacla.biketeam.domain.userrole.UserRole;
@@ -32,6 +33,11 @@ public class TeamAdminAdminController extends AbstractController {
                             @ModelAttribute("error") String error,
                             Principal principal, Model model) {
         final Team team = checkTeam(teamId);
+
+        if(team.getVisibility().equals(Visibility.USER)) {
+            return viewHandler.redirect(team, "/admin/users");
+        }
+
         addGlobalValues(principal, model, "Administration - Administrateurs", team);
         model.addAttribute("roles", team.getRoles()
                 .stream()
@@ -51,6 +57,10 @@ public class TeamAdminAdminController extends AbstractController {
                                  @RequestParam(value = "email", required = false) String email) {
 
         final Team team = checkTeam(teamId);
+
+        if(team.getVisibility().equals(Visibility.USER)) {
+            return viewHandler.redirectView(team, "/admin/users");
+        }
 
         try {
 
@@ -99,6 +109,10 @@ public class TeamAdminAdminController extends AbstractController {
 
         final Team team = checkTeam(teamId);
 
+        if(team.getVisibility().equals(Visibility.USER)) {
+            return viewHandler.redirectView(team, "/admin/users");
+        }
+
         try {
             final User user = userService.get(userId).orElseThrow(() -> new IllegalArgumentException("User unknown"));
             final Optional<UserRole> existingUserRole = userRoleService.get(team, user);
@@ -127,6 +141,10 @@ public class TeamAdminAdminController extends AbstractController {
                                      Model model) {
 
         final Team team = checkTeam(teamId);
+
+        if(team.getVisibility().equals(Visibility.USER)) {
+            return viewHandler.redirectView(team, "/admin/users");
+        }
 
         try {
             final User user = userService.get(userId).orElseThrow(() -> new IllegalArgumentException("User unknown"));

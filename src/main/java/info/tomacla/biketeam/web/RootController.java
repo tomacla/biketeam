@@ -16,6 +16,7 @@ import info.tomacla.biketeam.service.file.FileService;
 import info.tomacla.biketeam.web.team.NewTeamForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +55,9 @@ public class RootController extends AbstractController {
     @GetMapping
     public String getRoot(@RequestParam(required = false, name = "error") String error,
                           @ModelAttribute(name = "error") String modelError,
+                          @RequestParam(value = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                          @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+                          @RequestParam(value = "onlyMyFeed", required = false, defaultValue = "false") boolean onlyMyFeed,
                           HttpSession session,
                           Principal principal,
                           Model model) {
@@ -66,11 +71,27 @@ public class RootController extends AbstractController {
 
             final List<Team> teams = teamService.getUserTeams(user);
 
+            SearchFeedForm form = SearchFeedForm.builder()
+                    .withFrom(from)
+                    .withTo(to)
+                    .withOnlyMyFeed(onlyMyFeed)
+                    .get();
+
+            final SearchFeedForm.SearchFeedFormParser parser = form.parser();
+
+            FeedOptions options = new FeedOptions(
+                    parser.getFrom(),
+                    parser.getTo(),
+                    parser.isOnlyMyFeed()
+            );
+
             // TODO should be user time zone and not UTC
-            final List<FeedEntity> feeds = feedService.listFeed(user, teams.stream().map(Team::getId).collect(Collectors.toSet()), ZoneOffset.UTC, new FeedOptions());
+            final List<FeedEntity> feeds = feedService.listFeed(user, teams.stream().map(Team::getId).collect(Collectors.toSet()), ZoneOffset.UTC,
+                    options);
 
             addGlobalValues(principal, model, null, null, session);
             model.addAttribute("feed", feeds);
+            model.addAttribute("formdata", form);
 
             return "root_auth";
 
