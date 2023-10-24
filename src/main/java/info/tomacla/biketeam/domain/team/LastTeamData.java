@@ -20,7 +20,7 @@ public interface LastTeamData {
                                         LocalDate minimalOrDefault) {
         LocalDate selected = dataset.stream()
                 .filter(d -> supplier.apply(d) != null)
-                .sorted(Comparator.comparing(supplier))
+                .sorted(Comparator.comparing(supplier).reversed())
                 .map(supplier)
                 .findFirst().orElse(minimalOrDefault);
 
