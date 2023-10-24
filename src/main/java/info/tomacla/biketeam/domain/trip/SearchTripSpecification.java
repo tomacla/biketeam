@@ -51,6 +51,9 @@ public class SearchTripSpecification implements Specification<Trip> {
         if (deletion != null) {
             predicates.add(criteriaBuilder.equal(root.get("deletion"), deletion.booleanValue()));
         }
+        if (permalink != null && !permalink.isBlank()) {
+            predicates.add(criteriaBuilder.equal(root.get("permalink"), permalink));
+        }
         if (listedInFeed != null) {
             predicates.add(criteriaBuilder.equal(root.get("listedInFeed"), listedInFeed.booleanValue()));
         }
@@ -95,10 +98,10 @@ public class SearchTripSpecification implements Specification<Trip> {
         return new SearchTripSpecification(false, null, title, null, null, Set.of(teamId), null, null, null, null, null);
     }
 
-    public static SearchTripSpecification upcomingByUser(User user, Set<String> teamIds, LocalDate from) {
+    public static SearchTripSpecification upcomingByUser(User user, Set<String> teamIds, LocalDate from, LocalDate to) {
         return new SearchTripSpecification(
                 false, null, null, null, user, teamIds, PublishedStatus.PUBLISHED, null, null,
-                from, null);
+                from, to);
     }
 
     public static SearchTripSpecification byPermalink(String permalink) {

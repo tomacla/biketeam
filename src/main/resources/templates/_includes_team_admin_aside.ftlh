@@ -14,7 +14,7 @@
     <h6>Utilisateurs</h6>
 
      <ul class="list-group mb-4">
-      <a href="<@common.teamUrl team.id '/admin/admins' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri?contains('/admin/admins')> list-group-item-secondary</#if>">Administrateurs</a>
+      <#if team.visibility != 'USER'><a href="<@common.teamUrl team.id '/admin/admins' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri?contains('/admin/admins')> list-group-item-secondary</#if>">Administrateurs</a></#if>
       <a href="<@common.teamUrl team.id '/admin/users' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri?contains('/admin/users')> list-group-item-secondary</#if>">Utilisateurs</a>
     </ul>
 

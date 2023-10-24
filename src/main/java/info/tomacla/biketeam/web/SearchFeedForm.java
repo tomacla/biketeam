@@ -8,14 +8,11 @@ import java.util.Objects;
 
 public class SearchFeedForm {
 
-    private String from = Dates.formatDate(LocalDate.now().minus(1, ChronoUnit.MONTHS));
-    private String to = Dates.formatDate(LocalDate.now().plus(1, ChronoUnit.YEARS));
+    private String from = "";
+    private String to = "";
 
-    private boolean includeTrips = true;
+    private boolean onlyMyFeed = true;
 
-    private boolean includeRides = true;
-
-    private boolean includePublications = true;
 
     public static SearchFeedFormBuilder builder() {
         return new SearchFeedFormBuilder();
@@ -26,7 +23,7 @@ public class SearchFeedForm {
     }
 
     public void setFrom(String from) {
-        this.from = Objects.requireNonNullElse(from, Dates.formatDate(LocalDate.now().minus(1, ChronoUnit.MONTHS)));
+        this.from = Objects.requireNonNullElse(from, "");
     }
 
     public String getTo() {
@@ -34,31 +31,15 @@ public class SearchFeedForm {
     }
 
     public void setTo(String to) {
-        this.to = Objects.requireNonNullElse(to, Dates.formatDate(LocalDate.now().plus(3, ChronoUnit.MONTHS)));
+        this.to = Objects.requireNonNullElse(to, "");
     }
 
-    public boolean getIncludeTrips() {
-        return includeTrips;
+    public boolean isOnlyMyFeed() {
+        return onlyMyFeed;
     }
 
-    public void setIncludeTrips(boolean includeTrips) {
-        this.includeTrips = includeTrips;
-    }
-
-    public boolean getIncludeRides() {
-        return includeRides;
-    }
-
-    public void setIncludeRides(boolean includeRides) {
-        this.includeRides = includeRides;
-    }
-
-    public boolean getIncludePublications() {
-        return includePublications;
-    }
-
-    public void setIncludePublications(boolean includePublications) {
-        this.includePublications = includePublications;
+    public void setOnlyMyFeed(boolean onlyMyFeed) {
+        this.onlyMyFeed = onlyMyFeed;
     }
 
     public SearchFeedFormParser parser() {
@@ -74,23 +55,21 @@ public class SearchFeedForm {
         }
 
         public LocalDate getFrom() {
+            if(form.getFrom() == null || form.getFrom().isBlank()) {
+                return null;
+            }
             return LocalDate.parse(form.getFrom());
         }
 
         public LocalDate getTo() {
+            if(form.getTo() == null || form.getTo().isBlank()) {
+                return null;
+            }
             return LocalDate.parse(form.getTo());
         }
 
-        public boolean isIncludePublications() {
-            return form.getIncludePublications();
-        }
-
-        public boolean isIncludeTrips() {
-            return form.getIncludeTrips();
-        }
-
-        public boolean isIncludeRides() {
-            return form.getIncludeRides();
+        public boolean isOnlyMyFeed() {
+            return form.isOnlyMyFeed();
         }
 
     }
@@ -118,18 +97,8 @@ public class SearchFeedForm {
             return this;
         }
 
-        public SearchFeedFormBuilder withIncludeTrips(boolean includeTrips) {
-            form.setIncludeTrips(includeTrips);
-            return this;
-        }
-
-        public SearchFeedFormBuilder withIncludeRides(boolean includeRides) {
-            form.setIncludeRides(includeRides);
-            return this;
-        }
-
-        public SearchFeedFormBuilder withIncludePublications(boolean includePublications) {
-            form.setIncludePublications(includePublications);
+        public SearchFeedFormBuilder withOnlyMyFeed(boolean onlyMyFeed) {
+            form.setOnlyMyFeed(onlyMyFeed);
             return this;
         }
 
