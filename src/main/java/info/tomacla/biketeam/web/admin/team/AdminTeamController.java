@@ -1,6 +1,7 @@
 package info.tomacla.biketeam.web.admin.team;
 
 import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.domain.team.Visibility;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -27,7 +28,8 @@ public class AdminTeamController extends AbstractController {
         Page<Team> teams = teamService.searchTeams(
                 page,
                 pageSize,
-                name
+                name,
+                null
         );
 
         addGlobalValues(principal, model, "Administration - Groupes", null);

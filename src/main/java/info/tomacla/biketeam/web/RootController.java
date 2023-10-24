@@ -6,6 +6,7 @@ import info.tomacla.biketeam.domain.feed.FeedOptions;
 import info.tomacla.biketeam.domain.parameter.Parameter;
 import info.tomacla.biketeam.domain.parameter.ParameterRepository;
 import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.domain.team.Visibility;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.userrole.Role;
 import info.tomacla.biketeam.domain.userrole.UserRole;
@@ -117,7 +118,8 @@ public class RootController extends AbstractController {
         Page<Team> teams = teamService.searchTeams(
                 page,
                 pageSize,
-                name
+                name,
+                List.of(Visibility.PUBLIC, Visibility.PRIVATE)
         );
 
         addGlobalValues(principal, model, "Groupes", null);

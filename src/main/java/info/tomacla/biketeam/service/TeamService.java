@@ -5,10 +5,7 @@ import info.tomacla.biketeam.common.amqp.Queues;
 import info.tomacla.biketeam.common.amqp.RoutingKeys;
 import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
-import info.tomacla.biketeam.domain.team.LastTeamData;
-import info.tomacla.biketeam.domain.team.SearchTeamSpecification;
-import info.tomacla.biketeam.domain.team.Team;
-import info.tomacla.biketeam.domain.team.TeamRepository;
+import info.tomacla.biketeam.domain.team.*;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.service.amqp.BrokerService;
 import info.tomacla.biketeam.service.amqp.dto.TeamDTO;
@@ -97,14 +94,14 @@ public class TeamService extends AbstractPermalinkService {
         return teamRepository.findAll(spec, sort);
     }
 
-    public Page<Team> searchTeams(int page, int pageSize, String name) {
-        return this.searchTeams(page, pageSize, name, Sort.Order.asc("name").ignoreCase());
+    public Page<Team> searchTeams(int page, int pageSize, String name, List<Visibility> visibilities) {
+        return this.searchTeams(page, pageSize, name, visibilities, Sort.Order.asc("name").ignoreCase());
     }
 
-    public Page<Team> searchTeams(int page, int pageSize, String name, Sort.Order sortOrder) {
+    public Page<Team> searchTeams(int page, int pageSize, String name, List<Visibility> visibilities, Sort.Order sortOrder) {
         Sort sort = Sort.by(sortOrder);
         Pageable pageable = PageRequest.of(page, pageSize, sort);
-        SearchTeamSpecification spec = SearchTeamSpecification.search(name);
+        SearchTeamSpecification spec = SearchTeamSpecification.search(name, visibilities);
         return teamRepository.findAll(spec, pageable);
     }
 
