@@ -172,10 +172,7 @@ function getElevationColor(grade) {
        if(grade > 0.01) {
            return 'rgb(250,190,40)';
        }
-       if(grade > 0) {
-           return 'rgb(136,193,0)';
-      }
-       return 'rgb(0,193,118)';
+       return 'rgb(136,193,0)';
 }
 
 var chartLoaded = false;
