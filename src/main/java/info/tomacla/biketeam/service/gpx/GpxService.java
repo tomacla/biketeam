@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class GpxService {
@@ -214,6 +213,40 @@ public class GpxService {
         }
     }
 
+    private List<Elevation> getElevations(GPXPath gpxPath) {
+
+        if (gpxPath.size() < 2) {
+            return new ArrayList<>();
+        }
+
+        List<Elevation> elevations = new ArrayList<>();
+        List<Point> currentElevation = new ArrayList<>();
+
+        for (int i = 1; i < gpxPath.getPoints().size(); i++) {
+
+            Point previous = gpxPath.getPoints().get(i - 1);
+            Point current = gpxPath.getPoints().get(i);
+
+            if (current.getEle() >= previous.getEle()) {
+                currentElevation.add(current);
+            } else {
+                if (!currentElevation.isEmpty()) {
+
+                    Elevation ele = new Elevation(currentElevation);
+                    if (ele.isRelevant()) {
+                        elevations.add(ele);
+                    }
+
+                    currentElevation = new ArrayList<>();
+                }
+            }
+
+        }
+
+        return elevations;
+
+    }
+
     public List<java.util.Map<String, Object>> getElevationProfile(Path gpx) {
         try {
             return getElevationProfile(getGPXPath(gpx));
@@ -224,12 +257,13 @@ public class GpxService {
     }
 
 
-
     private List<java.util.Map<String, Object>> getElevationProfile(GPXPath gpxPath) {
         try {
             List<java.util.Map<String, Object>> result = new ArrayList<>();
 
-            GPXFilter.filterPointsDouglasPeucker(gpxPath, Math.min(30, gpxPath.getDist() / (gpxPath.getDist() / 10)));
+            List<Elevation> elevations = getElevations(gpxPath);
+
+            GPXFilter.filterPointsDouglasPeucker(gpxPath, Math.min(20, gpxPath.getDist() / (gpxPath.getDist() / 10)));
 
             for (int i = 0; i < gpxPath.getPoints().size(); i++) {
                 Point point = gpxPath.getPoints().get(i);
@@ -239,7 +273,10 @@ public class GpxService {
                                 "y", point.getEle(),
                                 "lat", point.getLatDeg(),
                                 "lng", point.getLonDeg(),
-                                "grade", point.getGrade())
+                                "color", elevations.stream()
+                                        .filter(e -> e.isInside(point))
+                                        .map(Elevation::getColor)
+                                        .findFirst().orElse(Elevation.getDefaultColor()))
                 );
             }
             return result;

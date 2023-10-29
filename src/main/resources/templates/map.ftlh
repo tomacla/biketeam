@@ -104,7 +104,7 @@
 
         var targetMap = initMap('map-wrapper', 51.505, -0.09, 11, 'Cyclo OSM', true, true);
 
-        var geoJsonLayer = null;
+        var geoJsonLayer = L.layerGroup();
         loadJsonContent('<@common.teamUrl team.id '/maps/${map.id}/geojson' />', function(geojsonFeature) {
 
             var layer = L.geoJSON(geojsonFeature,
@@ -138,7 +138,7 @@
                             })
                             .setContent(feature.properties.name)
                             .setLatLng(latlng);
-                            text.addTo(targetMap);
+                            text.addTo(geoJsonLayer);
 
                             return circle;
                       }
@@ -146,14 +146,14 @@
                   }
                 });
 
-            layer.addTo(targetMap);
+            layer.addTo(geoJsonLayer);
+            geoJsonLayer.addTo(targetMap);
 
             loadJsonContent('<@common.teamUrl team.id '/maps/${map.id}/elevation-profile' />', function(elevationProfile) {
-                geoJsonLayer = layer;
                 initChart(targetMap, 'chart-wrapper', elevationProfile, '#dbdbdb', null, true);
             });
 
-            targetMap.panTo(layer.getBounds().getCenter());
+            targetMap.fitBounds(layer.getBounds());
 
 
         });

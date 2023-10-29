@@ -5,6 +5,7 @@ import info.tomacla.biketeam.domain.feed.FeedOptions;
 import info.tomacla.biketeam.domain.publication.Publication;
 import info.tomacla.biketeam.domain.ride.Ride;
 import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.domain.team.Visibility;
 import info.tomacla.biketeam.domain.trip.Trip;
 import info.tomacla.biketeam.service.PlaceService;
 import info.tomacla.biketeam.service.feed.FeedService;
@@ -37,6 +38,7 @@ public class TeamAPI extends AbstractAPI {
                 page,
                 pageSize,
                 name,
+                List.of(Visibility.PUBLIC, Visibility.PRIVATE),
                 Sort.Order.asc("name").ignoreCase()
         );
 

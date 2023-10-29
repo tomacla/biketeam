@@ -162,19 +162,6 @@ function chartCorsairPlugin(containingMap) {
     }
  }
 
-function getElevationColor(grade) {
-    if(grade > 0.1) {
-           return 'rgb(255,0,60)';
-       }
-       if(grade > 0.05) {
-           return 'rgb(255,138,0)';
-       }
-       if(grade > 0.01) {
-           return 'rgb(250,190,40)';
-       }
-       return 'rgb(136,193,0)';
-}
-
 var chartLoaded = false;
 function initChart(containingMap, chartContainerId, elevationProfile, color, callback = null, segmentColor = false) {
 
@@ -182,6 +169,10 @@ function initChart(containingMap, chartContainerId, elevationProfile, color, cal
      const labels = elevationProfile.map(function(e) {
          return Math.round(e.x / 1000);
      });
+
+     if(segmentColor === true) {
+        color = 'rgb(160,176,70)';
+     }
 
      const data = {
        labels: labels,
@@ -199,13 +190,13 @@ function initChart(containingMap, chartContainerId, elevationProfile, color, cal
          segment: {
             backgroundColor: function(ctx) {
                if(segmentColor) {
-                   return getElevationColor(elevationProfile[ctx.p1DataIndex].grade);
+                   return elevationProfile[ctx.p0DataIndex].color;
                }
                return undefined;
             },
              borderColor: function(ctx) {
                  if(segmentColor) {
-                       return getElevationColor(elevationProfile[ctx.p1DataIndex].grade);
+                        return elevationProfile[ctx.p0DataIndex].color;
                    }
                 return undefined;
              }

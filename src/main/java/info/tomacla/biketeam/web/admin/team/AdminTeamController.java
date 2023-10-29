@@ -27,7 +27,8 @@ public class AdminTeamController extends AbstractController {
         Page<Team> teams = teamService.searchTeams(
                 page,
                 pageSize,
-                name
+                name,
+                null
         );
 
         addGlobalValues(principal, model, "Administration - Groupes", null);

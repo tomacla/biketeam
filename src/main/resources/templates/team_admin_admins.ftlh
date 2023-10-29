@@ -37,11 +37,10 @@
                         <#if role.user.id != _user.id>
                             <div class="btn-group" role="group">
                                 <#if role.role == 'ADMIN'>
-                                    <a href="<@common.teamUrl team.id '/admin/users/relegate/${role.user.id}' />" class="btn btn-success btn-sm" role="button"><i class="bi bi-shield-fill"></i></a>
+                                    <a href="<@common.teamUrl team.id '/admin/admins/relegate/${role.user.id}' />" class="btn btn-success btn-sm" role="button"><i class="bi bi-shield-fill"></i></a>
                                 <#else>
-                                    <a href="<@common.teamUrl team.id '/admin/users/promote/${role.user.id}' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-shield"></i></a>
+                                    <a href="<@common.teamUrl team.id '/admin/admins/promote/${role.user.id}' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-shield"></i></a>
                                 </#if>
-                                <a href="<@common.teamUrl team.id '/admin/users/delete/${role.user.id}' />" class="btn btn-danger btn-sm" role="button"><i class="bi bi-trash"></i></a>
                             </div>
                         </#if>
                     </li>

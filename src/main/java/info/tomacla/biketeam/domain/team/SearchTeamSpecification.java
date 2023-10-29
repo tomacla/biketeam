@@ -68,8 +68,8 @@ public class SearchTeamSpecification implements Specification<Team> {
         return new SearchTeamSpecification(false, null, null, null, null, user);
     }
 
-    public static SearchTeamSpecification search(String name) {
-        return new SearchTeamSpecification(false, name, null, null, List.of(Visibility.PUBLIC, Visibility.PRIVATE), null);
+    public static SearchTeamSpecification search(String name, List<Visibility> visibilities) {
+        return new SearchTeamSpecification(false, name, null, null, visibilities, null);
     }
 
     public static SearchTeamSpecification all() {
