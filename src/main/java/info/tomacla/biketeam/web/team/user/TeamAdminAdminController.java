@@ -34,7 +34,7 @@ public class TeamAdminAdminController extends AbstractController {
                             Principal principal, Model model) {
         final Team team = checkTeam(teamId);
 
-        if(team.getVisibility().equals(Visibility.USER)) {
+        if (team.getVisibility().equals(Visibility.USER)) {
             return viewHandler.redirect(team, "/admin/users");
         }
 
@@ -58,7 +58,7 @@ public class TeamAdminAdminController extends AbstractController {
 
         final Team team = checkTeam(teamId);
 
-        if(team.getVisibility().equals(Visibility.USER)) {
+        if (team.getVisibility().equals(Visibility.USER)) {
             return viewHandler.redirectView(team, "/admin/users");
         }
 
@@ -109,7 +109,7 @@ public class TeamAdminAdminController extends AbstractController {
 
         final Team team = checkTeam(teamId);
 
-        if(team.getVisibility().equals(Visibility.USER)) {
+        if (team.getVisibility().equals(Visibility.USER)) {
             return viewHandler.redirectView(team, "/admin/users");
         }
 
@@ -142,7 +142,7 @@ public class TeamAdminAdminController extends AbstractController {
 
         final Team team = checkTeam(teamId);
 
-        if(team.getVisibility().equals(Visibility.USER)) {
+        if (team.getVisibility().equals(Visibility.USER)) {
             return viewHandler.redirectView(team, "/admin/users");
         }
 

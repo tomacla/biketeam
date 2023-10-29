@@ -274,6 +274,11 @@
             });
         }
 
+        var geoJsonLayerGroup = L.featureGroup();
+
+
+        var promisesCount = ${groupMaps?size};
+
         <#list groupMaps as map>
 
             loadJsonContent('<@common.teamUrl team.id '/maps/${map}/geojson' />', function(geojsonFeatures) {
@@ -290,7 +295,14 @@
                         highlightMap(${map?index});
                     });
 
-                layer.addTo(targetMap);
+                layer.addTo(geoJsonLayerGroup);
+                promisesCount--;
+
+                if(promisesCount === 0) {
+                    geoJsonLayerGroup.addTo(targetMap);
+                    targetMap.fitBounds(geoJsonLayerGroup.getBounds());
+                }
+
 
                 loadJsonContent('<@common.teamUrl team.id '/maps/${map}/elevation-profile' />', function(elevationProfile) {
 
@@ -316,8 +328,8 @@
                     var firstPoint = geojsonFeature.geometry.coordinates[0];
                     var lastPoint = geojsonFeature.geometry.coordinates[geojsonFeature.geometry.coordinates.length - 1];
 
-                     L.marker([firstPoint[1], firstPoint[0]], {clickable: false, icon : L.divIcon({className: 'mapStartIcon'})}).addTo(targetMap);
-                     L.marker([lastPoint[1], lastPoint[0]], {clickable: false, icon : L.divIcon({className: 'mapEndIcon'})}).addTo(targetMap);
+                     L.marker([firstPoint[1], firstPoint[0]], {clickable: false, icon : L.divIcon({className: 'mapStartIcon'})}).addTo(geoJsonLayerGroup);
+                     L.marker([lastPoint[1], lastPoint[0]], {clickable: false, icon : L.divIcon({className: 'mapEndIcon'})}).addTo(geoJsonLayerGroup);
 
                 </#if>
 

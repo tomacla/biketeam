@@ -36,6 +36,7 @@ import java.security.Principal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
@@ -68,6 +69,10 @@ public class TeamController extends AbstractController {
         final TeamConfiguration teamConfiguration = team.getConfiguration();
         if (!teamConfiguration.isFeedVisible()) {
             return viewHandler.redirect(team, "/maps");
+        }
+
+        if(from == null) {
+            from = feedService.getDefaultFrom(Set.of(teamId));
         }
 
         SearchFeedForm form = SearchFeedForm.builder()

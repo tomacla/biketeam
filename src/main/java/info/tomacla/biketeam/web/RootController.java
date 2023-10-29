@@ -5,6 +5,7 @@ import info.tomacla.biketeam.domain.feed.FeedEntity;
 import info.tomacla.biketeam.domain.feed.FeedOptions;
 import info.tomacla.biketeam.domain.parameter.Parameter;
 import info.tomacla.biketeam.domain.parameter.ParameterRepository;
+import info.tomacla.biketeam.domain.team.LastTeamData;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.Visibility;
 import info.tomacla.biketeam.domain.user.User;
@@ -32,9 +33,11 @@ import java.nio.file.Path;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
@@ -71,6 +74,11 @@ public class RootController extends AbstractController {
             final User user = userFromPrincipal.get();
 
             final List<Team> teams = teamService.getUserTeams(user);
+            Set<String> teamIds = teams.stream().map(Team::getId).collect(Collectors.toSet());
+
+            if(from == null) {
+                from = feedService.getDefaultFrom(teamIds);
+            }
 
             SearchFeedForm form = SearchFeedForm.builder()
                     .withFrom(from)
@@ -87,8 +95,7 @@ public class RootController extends AbstractController {
             );
 
             // TODO should be user time zone and not UTC
-            final List<FeedEntity> feeds = feedService.listFeed(user, teams.stream().map(Team::getId).collect(Collectors.toSet()), ZoneOffset.UTC,
-                    options);
+            final List<FeedEntity> feeds = feedService.listFeed(user, teamIds, ZoneOffset.UTC, options);
 
             addGlobalValues(principal, model, null, null, session);
             model.addAttribute("feed", feeds);
