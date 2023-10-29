@@ -70,7 +70,8 @@
                 var geojsonFeature = ${gpx.geojson?no_esc};
                 var elevationProfile = ${gpx.elevationProfile?no_esc};
 
-                var geoJsonLayer = L.geoJSON(geojsonFeature,
+                var geoJsonLayer = L.layerGroup();
+                var layer = L.geoJSON(geojsonFeature,
                     {
                       interactive:false,
                       color: '#ff0000',
@@ -101,7 +102,7 @@
                                   })
                                   .setContent(feature.properties.name)
                                   .setLatLng(latlng);
-                                  text.addTo(targetMap);
+                                  text.addTo(geoJsonLayer);
 
                                   return circle;
                             }
@@ -109,10 +110,11 @@
                         }
                     });
 
+                layer.addTo(geoJsonLayer);
                 geoJsonLayer.addTo(targetMap);
                 initChart(targetMap, 'chart-wrapper', elevationProfile, '#ff0000', null, true);
 
-                targetMap.panTo(geoJsonLayer.getBounds().getCenter());
+                targetMap.fitBounds(layer.getBounds());
 
              <#else>
 

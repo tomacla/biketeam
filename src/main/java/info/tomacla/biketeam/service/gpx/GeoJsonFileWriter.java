@@ -69,24 +69,24 @@ public class GeoJsonFileWriter {
 
     private List<java.util.Map<String, Object>> getDistanceMarkers(GPXPath gpxPath, int interval) {
 
-            int intervalInMeters = Math.round(interval * 1000);
-            int intervalCopy = intervalInMeters;
+        int intervalInMeters = Math.round(interval * 1000);
+        int intervalCopy = intervalInMeters;
 
-            List<java.util.Map<String, Object>> result = new ArrayList<>();
-            for (int i = 0; i < gpxPath.getPoints().size(); i++) {
-                Point point = gpxPath.getPoints().get(i);
-                if (point.getDist() >= intervalCopy) {
-                    result.add(
-                            java.util.Map.of("index", i,
-                                    "label", Math.round(intervalCopy / 1000),
-                                    "lat", point.getLatDeg(),
-                                    "lng", point.getLonDeg())
-                    );
+        List<java.util.Map<String, Object>> result = new ArrayList<>();
+        for (int i = 0; i < gpxPath.getPoints().size(); i++) {
+            Point point = gpxPath.getPoints().get(i);
+            if (point.getDist() >= intervalCopy) {
+                result.add(
+                        java.util.Map.of("index", i,
+                                "label", Math.round(intervalCopy / 1000),
+                                "lat", point.getLatDeg(),
+                                "lng", point.getLonDeg())
+                );
 
-                    intervalCopy += intervalInMeters;
-                }
+                intervalCopy += intervalInMeters;
             }
-            return result;
+        }
+        return result;
     }
 
     private String getCollectionHeader() {
@@ -112,7 +112,7 @@ public class GeoJsonFileWriter {
     private String getGeojsonPointHeader(String label) {
         return "{\n" +
                 "      \"type\": \"Feature\",\n" +
-                "      \"properties\": {\"name\": \""+label+"\"},\n" +
+                "      \"properties\": {\"name\": \"" + label + "\"},\n" +
                 "      \"geometry\": {\n" +
                 "        \"type\": \"Point\",\n" +
                 "        \"coordinates\": [\n";

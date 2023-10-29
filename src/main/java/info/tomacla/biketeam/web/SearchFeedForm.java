@@ -3,7 +3,6 @@ package info.tomacla.biketeam.web;
 import info.tomacla.biketeam.common.datatype.Dates;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 public class SearchFeedForm {
@@ -55,14 +54,14 @@ public class SearchFeedForm {
         }
 
         public LocalDate getFrom() {
-            if(form.getFrom() == null || form.getFrom().isBlank()) {
+            if (form.getFrom() == null || form.getFrom().isBlank()) {
                 return null;
             }
             return LocalDate.parse(form.getFrom());
         }
 
         public LocalDate getTo() {
-            if(form.getTo() == null || form.getTo().isBlank()) {
+            if (form.getTo() == null || form.getTo().isBlank()) {
                 return null;
             }
             return LocalDate.parse(form.getTo());
