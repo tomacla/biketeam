@@ -262,7 +262,7 @@
 
     <script type="text/javascript">
 
-            var targetMap = initMap('map-wrapper', ${mapCenter[0]?c} + 0.02, ${mapCenter[1]?c}, 11, "Carto", false, false);
+            var targetMap = initMap('map-wrapper', ${mapCenter[0]?c} + 0.02, ${mapCenter[1]?c}, 11, "Carto", false, false, false, false);
 
             var geoJsonLayers = [];
 

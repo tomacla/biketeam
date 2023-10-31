@@ -3,42 +3,6 @@ html {
     height: 100%;
 }
 
-.navbar-no-expand .navbar-brand {
-    font-size:1.35rem;
-}
-
-.navbar-no-expand .navbar-nav {
-    flex-direction: row;
-}
-
-.navbar-no-expand .nav-item {
-    padding: 0px 5px;
-}
-
-.navbar-no-expand .navbar-nav.order-2 {
-    justify-content:space-evenly;
-    width:100%;
-}
-
-.navbar-no-expand .navbar-nav .dropdown {
-    position: static;
-}
-
-.navbar-no-expand .navbar-nav .dropdown-toggle::after {
-    display:none;
-}
-
-.navbar-no-expand .navbar-nav .dropdown-menu {
-    position:absolute;
-    top:3rem;
-    right:5px;
-    left:auto;
-    bottom:auto;
-    width:auto;
-    max-width:70vw;
-    z-index:9999;
-}
-
 .short-label {
     max-width:35vw;
     text-overflow:ellipsis;
@@ -51,42 +15,6 @@ html {
         text-overflow:ellipsis;
     }
 
-}
-
-@media (min-width: 768px) {
-
-
-    .navbar-no-expand .nav-item {
-        padding: 0px 8px;
-    }
-
-    .navbar-no-expand .navbar-nav.order-2 {
-        justify-content:start;
-        width:auto;
-    }
-
-    .navbar-no-expand .navbar-nav .dropdown {
-        position: relative;
-    }
-
-    .navbar-no-expand .navbar-nav .dropdown-menu {
-        position:absolute;
-        top:3rem;
-        right:auto;
-        left:0;
-        bottom:auto;
-        width:auto;
-        max-width:250px;
-    }
-
-}
-
-.elevation-control .tooltip {
-    opacity:1 !important;
-}
-
-.elevation-control.elevation .background {
-    background-color: rgba(255, 255, 255, 1) !important;
 }
 
 .leaflet-tooltip-pane .circle-text {
@@ -159,273 +87,36 @@ html {
     border-radius:8px;
 }
 
-/* Small devices (landscape phones, 576px and up)*/
-@media (min-width: 576px) {
-    .w-sm-100 {
-        width:100%!important;
-    }
-    .w-sm-75 {
-        width:75%!important;
-    }
-    .w-sm-50 {
-        width:50%!important;
-    }
-    .w-sm-40 {
-        width:40%!important;
-    }
-    .w-sm-25 {
-        width:25%!important;
-    }
-    .h-sm-100 {
-        height:100%!important;
-    }
-    .h-sm-75 {
-        height:75%!important;
-    }
-    .h-sm-50 {
-        height:50%!important;
-    }
-    .h-sm-25 {
-        height:25%!important;
-    }
+.container-fluid-responsive {
+    height:calc(100% - 99px);
 }
+
+#map-wrapper {
+    height:calc(100% - 150px - 77px);
+}
+
+#gpxtoolmap-wrapper {
+    height:calc(100% - 150px - 48px);
+}
+
+#gpxtoolrawmap-wrapper {
+    height:100%;
+}
+
 
 /* Medium devices (tablets, 768px and up)*/
 @media (min-width: 768px) {
-    .w-md-100 {
-        width:100%!important;
+
+    .container-fluid-responsive {
+        height:calc(100% - 59px);
     }
-    .w-md-75 {
-        width:75%!important;
+
+    #map-wrapper {
+        height:calc(100% - 150px - 47px);
     }
-    .w-md-50 {
-        width:50%!important;
+
+    #gpxtoolmap-wrapper {
+        height:calc(100% - 150px - 50px);
     }
-    .w-md-40 {
-        width:40%!important;
-    }
-    .w-md-25 {
-        width:25%!important;
-    }
-    .h-md-100 {
-        height:100%!important;
-    }
-    .h-md-75 {
-        height:75%!important;
-    }
-    .h-md-50 {
-        height:50%!important;
-    }
-    .h-md-25 {
-        height:25%!important;
-    }
-}
 
-/* Large devices (desktops, 992px and up)*/
-@media (min-width: 992px) {
-    .w-lg-100 {
-        width:100%!important;
-    }
-    .w-lg-75 {
-        width:75%!important;
-    }
-    .w-lg-50 {
-        width:50%!important;
-    }
-    .w-lg-40 {
-        width:40%!important;
-    }
-    .w-lg-25 {
-        width:25%!important;
-    }
-    .h-lg-100 {
-        height:100%!important;
-    }
-    .h-lg-75 {
-        height:75%!important;
-    }
-    .h-lg-50 {
-        height:50%!important;
-    }
-    .h-lg-25 {
-        height:25%!important;
-    }
-}
-
-/* Extra large devices (large desktops, 1200px and up)*/
-@media (min-width: 1200px) {
-    .w-xl-100 {
-        width:100%!important;
-    }
-    .w-xl-75 {
-        width:75%!important;
-    }
-    .w-xl-50 {
-        width:50%!important;
-    }
-    .w-xl-40 {
-        width:40%!important;
-    }
-    .w-xl-25 {
-        width:25%!important;
-    }
-    .h-xl-100 {
-        height:100%!important;
-    }
-    .h-xl-75 {
-        height:75%!important;
-    }
-    .h-xl-50 {
-        height:50%!important;
-    }
-    .h-xl-25 {
-        height:25%!important;
-    }
-}
-
-.reaction-choices {
-    position:absolute;
-    top:100%;
-    display:none;
-    background-color:white;
-    border-radius:3px;
-    border:1px solid #dedede;
-}
-
-.reaction-choice-opener:hover .reaction-choices,
-.reaction-choices:hover {
-    display:flex;
-}
-
-
-
-.done-ribbon {
-  width: 8em;
-  height: 8em;
-  position: absolute;
-  overflow: hidden;
-  top: 0;
-  right: 0;
-  z-index: 9990;
-  pointer-events: none;
-  font-size: 13px;
-  text-decoration: none;
-  text-indent: -999999px;
-}
-
-.done-ribbon.fixed {
-  position: fixed;
-}
-
-.done-ribbon:hover, .done-ribbon:active {
-  background-color: rgba(0, 0, 0, 0.0);
-}
-
-.done-ribbon:before, .done-ribbon:after {
-  /* The right and left classes determine the side we attach our banner to */
-  position: absolute;
-  display: block;
-  width: 11.5em;
-  height: 1.54em;
-
-  top: 2em;
-  right: -3em;
-
-  -webkit-box-sizing: content-box;
-  -moz-box-sizing: content-box;
-  box-sizing: content-box;
-
-  -webkit-transform: rotate(45deg);
-  -moz-transform: rotate(45deg);
-  -ms-transform: rotate(45deg);
-  -o-transform: rotate(45deg);
-  transform: rotate(45deg);
-}
-
-.done-ribbon:before {
-  content: "";
-
-  /* Add a bit of padding to give some substance outside the "stitching" */
-  padding: .38em 0;
-
-  /* Set the base colour */
-  background-color: #aeaeae;
-
-  pointer-events: auto;
-}
-
-.done-ribbon:after {
-  /* Set the text from the data-ribbon attribute */
-  content: attr(data-ribbon);
-
-  /* Set the text properties */
-  color: #fff;
-  line-height: 1.54em;
-  text-decoration: none;
-  text-align: center;
-  text-indent: 0;
-
-  /* Set the layout properties */
-  padding: .15em 0;
-  margin: .15em 0;
-
-  /* Add "stitching" effect */
-  border-width: .08em 0;
-  border-style: dashed;
-  border-color: #fff;
-  border-color: rgba(255, 255, 255, 0.7);
-}
-
-.done-ribbon.left-top, .done-ribbon.left-bottom {
-  right: auto;
-  left: 0;
-}
-
-.done-ribbon.left-bottom, .done-ribbon.right-bottom {
-  top: auto;
-  bottom: 0;
-}
-
-.done-ribbon.left-top:before, .done-ribbon.left-top:after, .done-ribbon.left-bottom:before, .done-ribbon.left-bottom:after {
-  right: auto;
-  left: -3.23em;
-}
-
-.done-ribbon.left-bottom:before, .done-ribbon.left-bottom:after, .done-ribbon.right-bottom:before, .done-ribbon.right-bottom:after {
-  top: auto;
-  bottom: 3.23em;
-}
-
-.done-ribbon.left-top:before, .done-ribbon.left-top:after, .done-ribbon.right-bottom:before, .done-ribbon.right-bottom:after {
-  -webkit-transform: rotate(-45deg);
-  -moz-transform: rotate(-45deg);
-  -ms-transform: rotate(-45deg);
-  -o-transform: rotate(-45deg);
-  transform: rotate(-45deg);
-}
-
-#gpxtool #map-container {
-    position:relative;
-}
-
-#gpxtool #map-container .overlay {
-    position:absolute;
-    z-index: 314159;
-    pointer-events: none;
-}
-
-#gpxtool #map-container .overlay .btn {
-    pointer-events: initial;
-}
-
-#gpxtool .overlay.top-center {
-    top:0;
-    left: 50%;
-    transform: translate(-50%, 0);
-}
-
-#gpxtool .overlay.bottom-center {
-    bottom:0;
-    left: 50%;
-    transform: translate(-50%, 0);
 }
