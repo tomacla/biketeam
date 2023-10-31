@@ -1,6 +1,8 @@
 <#include "_includes_head.ftlh">
 
-<div class="row pt-2 justify-content-center">
+<div id="gpxtool" class="container-fluid w-100 h-100 p-0 m-0">
+
+<div class="row p-0 m-0 justify-content-center w-100 h-100">
 
     <div class="modal fade" id="modal-map-${map.id}" tabindex="-1">
       <div class="modal-dialog">
@@ -23,86 +25,64 @@
       </div>
     </div>
 
-    <div class="col-12 mb-4">
-
-        <div class="border rounded p-2">
-            <div class="d-flex flex-row justify-content-between">
-                <h4>${map.name}</h4>
+    <div id="map-toolbar" class="w-100 col-12 p-0 m-0">
+        <div class="d-flex flex-row justify-content-around w-100 h-100 align-items-center flex-wrap">
+            <div class="order-0 d-flex flex-column">
                 <div>
-                    <#if _team_admin && !_embed>
-                        <a href="<@common.teamUrl team.id '/admin/maps/${map.id}' />" class="btn btn-sm btn-secondary"><i class="bi-pencil bi"></i> Editer</a>
-                    </#if>
-                </div>
+                    <span>${map.name}</span>
+                    <div class="d-none d-md-inline-block">
+                    <#if map.tags?size gt 0>
+                         <#list map.tags as tag><span class="badge bg-secondary">${tag}</span><#if tag_has_next> </#if></#list>
+                     </#if>
+                     </div>
+                 </div>
+                <span class="small text-muted">${map.postedAt.format(_date_formatter)}</span>
             </div>
-            <h6><small class="text-muted">Ajoutée le ${map.postedAt.format(_date_formatter)}</small></h6>
-            <ul class="list-inline">
-                <li class="list-inline-item"><i class="bi bi-arrow-left-right"></i> ${map.length}km</li>
-                <li class="list-inline-item"><i class="bi bi-arrow-up"></i> ${map.positiveElevation}m</li>
-                <li class="list-inline-item"><i class="bi bi-arrow-down"></i> ${map.negativeElevation}m</li>
-            </ul>
-
-            <#if map.tags?size gt 0>
-                <p><strong>Tags</strong> : <#list map.tags as tag><span class="badge bg-secondary">${tag}</span><#if tag_has_next> </#if></#list></p>
-            </#if>
-
-             <#if !_embed>
-                <div class="btn-group btn-group-sm" role="group">
-                    <#if _authenticated>
-                        <#if _user.mapFavorites?filter(mp -> mp.id == map.id)?size == 0>
-                            <a href="<@common.teamUrl team.id '/maps/${map.id}/add-favorite' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-star"></i> Favori</a>
-                        <#else>
-                            <a href="<@common.teamUrl team.id '/maps/${map.id}/remove-favorite' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-star-fill"></i>  Favori</a>
-                        </#if>
+            <div class="order-2 order-md-1 d-flex flex-row my-1 my-md-0">
+                <span><i class="bi bi-arrow-left-right"></i> ${map.length}km</span>
+                <span><i class="bi bi-arrow-up"></i> ${map.positiveElevation}m</span>
+                <span><i class="bi bi-arrow-down"></i> ${map.negativeElevation}m</span>
+            </div>
+            <#if !_embed>
+            <div class="order-1 order-md-2 btn-group btn-group-sm" role="group">
+                <#if _authenticated>
+                    <#if _user.mapFavorites?filter(mp -> mp.id == map.id)?size == 0>
+                        <a href="<@common.teamUrl team.id '/maps/${map.id}/add-favorite' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-star"></i><span class="d-none d-md-inline"> Favori</span></a>
+                    <#else>
+                        <a href="<@common.teamUrl team.id '/maps/${map.id}/remove-favorite' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-star-fill"></i><span class="d-none d-md-inline">  Favori</span></a>
                     </#if>
-                    <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#modal-map-${map.id}"><i class="bi bi-download"></i> Télécharger</button>
-                    <button id="toggle-track-button" onclick="toggleTrack();" class="btn btn-outline-secondary" role="button"><i class="bi bi-eye-slash-fill"></i> Masquer</button>
-                    <button onclick="showLocation();" class="btn btn-outline-secondary" role="button"><i class="bi bi-geo-fill"></i> Position</button>
-                </div>
-             </#if>
+                </#if>
+                <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#modal-map-${map.id}"><i class="bi bi-download"></i><span class="d-none d-md-inline"> Télécharger</span></button>
+                <#if _team_admin>
+                    <a href="<@common.teamUrl team.id '/admin/maps/${map.id}' />" class="btn btn-sm btn-outline-secondary"><i class="bi-pencil bi"></i><span class="d-none d-md-inline"> Editer</span></a>
+                </#if>
+            </div>
+            </#if>
         </div>
-
     </div>
 
-    <div class="col-12">
-        <div style="width:100%; height:<#if !_embed>500px<#else>31vh</#if>;" id="map-wrapper"></div>
+    <div id="map-wrapper" class="col-12 p-0 m-0 w-100">
+        <div class="w-100 h-100" id="map-container"></div>
     </div>
 
-    <div class="col-12 mt-2 p-1 w-100" style="height:290px;">
-        <canvas class="w-100" style="height:290px;" id="chart-wrapper"></canvas>
-    </div>
+    <div id="chart-wrapper" style="height:150px" class="col-12 p-0 m-0">
+            <canvas class="w-100" style="height:150px;" id="chart-container"></canvas>
+       </div>
 
+</div>
 </div>
 
     <script type="text/javascript">
 
-
-        var trackDisplayed = true;
-
-        function showLocation() {
-
-            activateLocation(targetMap);
-
-
+        function showTrack() {
+            targetMap.addLayer(geoJsonLayer);
         }
 
-        function toggleTrack() {
-            if(trackDisplayed) {
-
-              targetMap.removeLayer(geoJsonLayer);
-
-              trackDisplayed = false;
-              document.getElementById('toggle-track-button').innerHTML = '<i class="bi bi-eye-fill"></i> Afficher';
-
-            } else {
-
-                targetMap.addLayer(geoJsonLayer);
-
-              trackDisplayed = true;
-              document.getElementById('toggle-track-button').innerHTML = '<i class="bi bi-eye-slash-fill"></i> Masquer';
-            }
+        function hideTrack() {
+            targetMap.removeLayer(geoJsonLayer);
         }
 
-        var targetMap = initMap('map-wrapper', 51.505, -0.09, 11, 'Cyclo OSM', true, true);
+        var targetMap = initMap('map-wrapper', 51.505, -0.09, 11, 'Cyclo OSM', true, true, true, false, [showTrack, hideTrack]);
 
         var geoJsonLayer = L.layerGroup();
         loadJsonContent('<@common.teamUrl team.id '/maps/${map.id}/geojson' />', function(geojsonFeature) {
@@ -150,7 +130,7 @@
             geoJsonLayer.addTo(targetMap);
 
             loadJsonContent('<@common.teamUrl team.id '/maps/${map.id}/elevation-profile' />', function(elevationProfile) {
-                initChart(targetMap, 'chart-wrapper', elevationProfile, '#dbdbdb', null, true);
+                initChart(targetMap, 'chart-container', elevationProfile, '#dbdbdb', null, true);
             });
 
             targetMap.fitBounds(layer.getBounds());

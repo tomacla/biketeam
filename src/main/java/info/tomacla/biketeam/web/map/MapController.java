@@ -94,6 +94,7 @@ public class MapController extends AbstractController {
         addGlobalValues(principal, model, "Map " + map.getName(), team);
         model.addAttribute("map", map);
         model.addAttribute("_embed", embed);
+        model.addAttribute("_fullSize", true);
         if (!ObjectUtils.isEmpty(error)) {
             model.addAttribute("errors", List.of(error));
         }

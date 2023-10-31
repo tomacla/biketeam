@@ -1,12 +1,40 @@
 var mouseDownFlag = 0;
 
-function initMap(mapContainerId, lat, lng, zoom, defaultLayer, layersControl, zoomControl) {
+function initMap(mapContainerId, lat, lng, zoom, defaultLayer, layersControl, zoomControl, positionControl, positionOnLoad, trackDisplayCallBacks) {
     var newMap = L.map(mapContainerId, { zoomControl: false, layers: [layers[defaultLayer]] }).setView([lat, lng], zoom);
     if(layersControl) {
         L.control.layers(layers, overlayLayers, {position: 'bottomleft'}).addTo(newMap);
     }
     if(zoomControl) {
         L.control.zoom({position: 'bottomright'}).addTo(newMap);
+    }
+    if(positionControl) {
+        var lc = L.control.locate({position: 'bottomright', drawCircle : false, showPopup : false}).addTo(newMap);
+        if(positionOnLoad) {
+            lc.start();
+        }
+    }
+    if(trackDisplayCallBacks) {
+        L.easyButton({
+            position:'bottomright',
+            states: [{
+                    stateName: 'button-hide-track',        // name the state
+                    icon:      'bi bi-eye-slash-fill',               // and define its properties
+                    title:     'Masquer',      // like its title
+                    onClick: function(btn, map) {       // and its callback
+                        trackDisplayCallBacks[1]();
+                        btn.state('button-show-track');    // change state on click!
+                    }
+                }, {
+                    stateName: 'button-show-track',
+                    icon:      'bi bi-eye-fill',
+                    title:     'Afficher',
+                    onClick: function(btn, map) {
+                        trackDisplayCallBacks[0]();
+                        btn.state('button-hide-track');
+                    }
+            }]
+        }).addTo( newMap );
     }
     return newMap;
 }
@@ -285,20 +313,4 @@ function updateChart(elevationProfile, color) {
      elevationChart.data.datasets[0].data = elevationProfile.map(function(e) { return e.y; });
      elevationChart.data.datasets[0].backgroundColor = color;
      elevationChart.update();
-}
-
-var currentCircleMarker = null;
-function activateLocation(currentMap) {
-    currentMap.locate({setView: true, maxZoom: 16});
-
-    targetMap.on('locationfound', function(e) {
-       var radius = e.accuracy;
-
-       if(currentCircleMarker !== null) {
-            targetMap.removeLayer(currentCircleMarker)
-       }
-
-       currentCircleMarker = L.circleMarker(e.latlng, 20).addTo(targetMap);
-   });
-
 }

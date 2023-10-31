@@ -1,0 +1,104 @@
+.done-ribbon {
+  width: 8em;
+  height: 8em;
+  position: absolute;
+  overflow: hidden;
+  top: 0;
+  right: 0;
+  z-index: 9990;
+  pointer-events: none;
+  font-size: 13px;
+  text-decoration: none;
+  text-indent: -999999px;
+}
+
+.done-ribbon.fixed {
+  position: fixed;
+}
+
+.done-ribbon:hover, .done-ribbon:active {
+  background-color: rgba(0, 0, 0, 0.0);
+}
+
+.done-ribbon:before, .done-ribbon:after {
+  /* The right and left classes determine the side we attach our banner to */
+  position: absolute;
+  display: block;
+  width: 11.5em;
+  height: 1.54em;
+
+  top: 2em;
+  right: -3em;
+
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+.done-ribbon:before {
+  content: "";
+
+  /* Add a bit of padding to give some substance outside the "stitching" */
+  padding: .38em 0;
+
+  /* Set the base colour */
+  background-color: #aeaeae;
+
+  pointer-events: auto;
+}
+
+.done-ribbon:after {
+  /* Set the text from the data-ribbon attribute */
+  content: attr(data-ribbon);
+
+  /* Set the text properties */
+  color: #fff;
+  line-height: 1.54em;
+  text-decoration: none;
+  text-align: center;
+  text-indent: 0;
+
+  /* Set the layout properties */
+  padding: .15em 0;
+  margin: .15em 0;
+
+  /* Add "stitching" effect */
+  border-width: .08em 0;
+  border-style: dashed;
+  border-color: #fff;
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+.done-ribbon.left-top, .done-ribbon.left-bottom {
+  right: auto;
+  left: 0;
+}
+
+.done-ribbon.left-bottom, .done-ribbon.right-bottom {
+  top: auto;
+  bottom: 0;
+}
+
+.done-ribbon.left-top:before, .done-ribbon.left-top:after, .done-ribbon.left-bottom:before, .done-ribbon.left-bottom:after {
+  right: auto;
+  left: -3.23em;
+}
+
+.done-ribbon.left-bottom:before, .done-ribbon.left-bottom:after, .done-ribbon.right-bottom:before, .done-ribbon.right-bottom:after {
+  top: auto;
+  bottom: 3.23em;
+}
+
+.done-ribbon.left-top:before, .done-ribbon.left-top:after, .done-ribbon.right-bottom:before, .done-ribbon.right-bottom:after {
+  -webkit-transform: rotate(-45deg);
+  -moz-transform: rotate(-45deg);
+  -ms-transform: rotate(-45deg);
+  -o-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+}
