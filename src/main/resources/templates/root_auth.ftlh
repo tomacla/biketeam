@@ -34,6 +34,18 @@
     <div class="col-12 col-md-8">
 
             <div class="d-flex d-row justify-content-center d-md-none mb-2">
+
+                <div class="btn-group me-2">
+                  <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    Moi
+                  </button>
+
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="<@common.teamUrl '' '/users/me' />">Mon compte</a></li>
+                    <li><a class="dropdown-item" href="<@common.teamUrl '' '/users/space' />">Mon espace</a></li>
+                  </ul>
+                </div>
+
                 <div class="btn-group me-2">
                   <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                     Groupes
@@ -54,7 +66,7 @@
                 </div>
 
                 <div>
-                <a class="btn btn-outline-secondary" href="<@common.teamUrl '' '/gpxtool' />"><i class="bi bi-eye-fill"></i> GPX</a>
+                    <a class="btn btn-outline-secondary" href="<@common.teamUrl '' '/gpxtool' />"><i class="bi bi-eye-fill"></i> GPX</a>
                 </div>
             </div>
 

@@ -1,0 +1,73 @@
+.navbar-no-expand .navbar-brand {
+    font-size:1.35rem;
+}
+
+.navbar-no-expand .navbar-nav {
+    flex-direction: row;
+}
+
+.navbar-no-expand .nav-item {
+    padding: 0px 5px;
+}
+
+.navbar-no-expand .navbar-nav.order-2 {
+    justify-content:space-evenly;
+    width:100%;
+}
+
+.navbar-no-expand .navbar-nav .dropdown {
+    position: static;
+}
+
+.navbar-no-expand .navbar-nav .dropdown-toggle::after {
+    display:none;
+}
+
+.navbar-no-expand .navbar-nav .dropdown-menu {
+    position:absolute;
+    top:3rem;
+    right:5px;
+    left:auto;
+    bottom:auto;
+    width:auto;
+    max-width:70vw;
+    z-index:9999;
+}
+
+.navbar-brand {
+    max-width:45vw;
+    text-overflow:ellipsis;
+    overflow:hidden;
+}
+
+@media (min-width: 768px) {
+
+    .navbar-no-expand .nav-item {
+        padding: 0px 8px;
+    }
+
+    .navbar-no-expand .navbar-nav.order-2 {
+        justify-content:start;
+        width:auto;
+    }
+
+    .navbar-no-expand .navbar-nav .dropdown {
+        position: relative;
+    }
+
+    .navbar-no-expand .navbar-nav .dropdown-menu {
+        position:absolute;
+        top:3rem;
+        right:auto;
+        left:0;
+        bottom:auto;
+        width:auto;
+        max-width:250px;
+    }
+
+    .short-label {
+        max-width:none;
+        text-overflow:clip;
+    }
+
+}
