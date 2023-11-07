@@ -33,7 +33,6 @@ marked.setOptions({
 document.addEventListener("DOMContentLoaded", function() {
     Array.from(document.getElementsByClassName('form-size-check')).forEach(initFormSizeCheck);
     Array.from(document.getElementsByClassName('form-input-geocode')).forEach(initGeoCode);
-    Array.from(document.getElementsByClassName('form-map-control')).forEach(initMapAutoComplete);
     Array.from(document.getElementsByClassName('wrap-content')).forEach(wrapContent);
     Array.from(document.getElementsByClassName('markdown-content')).forEach(markdownContent);
     Array.from(document.getElementsByClassName('markdown-content-toc')).forEach(markdownContentToc);
@@ -156,8 +155,8 @@ function initMapAutoComplete(input) {
 
     var autocompleteField = new Autocomplete(input, {
         data: [],
-        maximumItems: 10,
-        treshold: 2,
+        maximumItems: 12,
+        treshold: 1,
         highlightClass: 'text-warning',
         onSelectItem: (selected) => {
             var targetIdField = document.getElementById(input.getAttribute("data-target-id-field"));

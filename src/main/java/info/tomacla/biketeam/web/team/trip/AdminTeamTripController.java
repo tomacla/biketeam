@@ -76,6 +76,7 @@ public class AdminTeamTripController extends AbstractController {
         model.addAttribute("formdata", form);
         model.addAttribute("startPlaces", placeService.listPlaces(teamId).stream().filter(p -> p.isStartPlace()).collect(Collectors.toList()));
         model.addAttribute("endPlaces", placeService.listPlaces(teamId).stream().filter(p -> p.isEndPlace()).collect(Collectors.toList()));
+        model.addAttribute("lastMaps", mapService.listMaps(teamId, null, 0, 5).getContent());
         model.addAttribute("imaged", false);
         model.addAttribute("published", false);
         if (!ObjectUtils.isEmpty(error)) {
@@ -121,6 +122,7 @@ public class AdminTeamTripController extends AbstractController {
         model.addAttribute("formdata", form);
         model.addAttribute("startPlaces", placeService.listPlaces(teamId).stream().filter(p -> p.isStartPlace()).collect(Collectors.toList()));
         model.addAttribute("endPlaces", placeService.listPlaces(teamId).stream().filter(p -> p.isEndPlace()).collect(Collectors.toList()));
+        model.addAttribute("lastMaps", mapService.listMaps(teamId, null, 0, 5).getContent());
         model.addAttribute("imaged", trip.isImaged());
         model.addAttribute("published", trip.getPublishedStatus().equals(PublishedStatus.PUBLISHED));
         if (!ObjectUtils.isEmpty(error)) {
