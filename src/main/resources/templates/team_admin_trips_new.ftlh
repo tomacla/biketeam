@@ -19,12 +19,31 @@
         var groups = [...groupContainer.getElementsByClassName("form-trip-stage")];
         groups.forEach(function(group, index) {
 
+                [...group.getElementsByTagName("span")].forEach(function(span) {
+                        if(span.hasAttribute('data-target-id-field')) {
+
+                             span.onclick = function() {
+                                var targetIdField = document.getElementById(span.getAttribute("data-target-id-field"));
+                                var targetNameField = document.getElementById(span.getAttribute("data-target-name-field"));
+                                var sourceIdField = span.getAttribute("data-source-id");
+                                var sourceNameField = span.getAttribute("data-source-name");
+                                targetIdField.value = sourceIdField;
+                                targetNameField.value = sourceNameField;
+                             };
+
+                             span.setAttribute('data-target-id-field', span.getAttribute('data-target-id-field').replace(/-[0-9]+/, '-' + index  ));
+                             span.setAttribute('data-target-name-field', span.getAttribute('data-target-name-field').replace(/-[0-9]+/, '-' + index  ));
+                        }
+                    });
+
                 [...group.getElementsByTagName("input")].forEach(function(input) {
                     input.setAttribute('name', input.name.replace(/\[[0-9]+\]/, '[' + index  +']'));
                     input.setAttribute('id', input.id.replace(/-[0-9]+/, '-' + index  ));
 
                     if(input.hasAttribute('data-target-id-field')) {
-                         initMapAutoComplete(input);
+                         if(!input.hasAttribute('data-bs-toggle')) {
+                             initMapAutoComplete(input);
+                          }
                          input.setAttribute('data-target-id-field', input.getAttribute('data-target-id-field').replace(/-[0-9]+/, '-' + index  ));
                          input.setAttribute('data-target-name-field', input.getAttribute('data-target-name-field').replace(/-[0-9]+/, '-' + index  ));
                     }
@@ -58,6 +77,9 @@
         [...groupCopy.getElementsByTagName("input")].forEach(function(input) {
             if(input.hasAttribute('data-empty-on-copy')) {
                 input.value='';
+            }
+            if(input.hasAttribute('data-bs-toggle')) {
+               input.removeAttribute('data-bs-toggle');
             }
         });
         resetStageIndexes();
@@ -192,22 +214,33 @@
                               <input autocomplete="off" required value="${stage.date}" name="stages[${stage?index}].date" type="date" class="form-control" id="form-trip-stage-date-${stage?index}">
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="mb-3 col-6">
-                                <label for="form-trip-stage-map-${stage?index}" class="form-label">Map</label>
-                                <input id="search-map-field-${stage?index}" type="text" data-target-name-field="form-trip-stage-mapname-${stage?index}" data-team-id="<@common.teamUrlPrefix team.id />" data-target-id-field="form-trip-stage-mapid-${stage?index}" autocomplete="off" value="" class="form-control form-map-control">
-                            </div>
-                            <div class="mb-3 col-6">
-                                <label for="form-trip-stage-map-${stage?index}" class="form-label text-muted">&nbsp;</label>
-                                <div class="input-group mb-3">
-                                  <input placeholder="Aucune map sélectionnée" type="text" name="stages[${stage?index}].mapName" readonly class="form-control" id="form-trip-stage-mapname-${stage?index}" value="${stage.mapName}">
-                                  <button class="btn btn-outline-secondary" type="button" onclick="this.previousElementSibling.value=''; this.nextElementSibling.value='';"><i class="bi bi-x"></i></button>
+                        <div class="row border rounded mx-2">
+                            <div class="my-2 col-12 align-items-center d-flex flex-row justify-content-between">
+                                <h6 class="m-0">Map associée</h6>
+                                <div class="input-group m-0 w-50">
+                                  <input placeholder="Aucune map sélectionnée" type="text" name="stages[${stage?index}].mapName" readonly class="form-control form-control-sm" id="form-trip-stage-mapname-${stage?index}" value="${stage.mapName}">
                                   <input type="hidden" name="stages[${stage?index}].mapId" id="form-trip-stage-mapid-${stage?index}" value="${stage.mapId}">
+                                  <button class="btn btn-outline-danger btn-sm" type="button" onclick="this.previousElementSibling.previousElementSibling.value=''; this.previousElementSibling.value='';"><i class="bi bi-x"></i></button>
                                 </div>
                             </div>
+                            <div class="mb-2 col-12 align-items-center d-flex flex-row justify-content-start">
+                                <span>Rechercher</span>
+                                <div class="ms-2"><input placeholder="par nom" id="search-map-field-${stage?index}" type="text" data-target-name-field="form-trip-stage-mapname-${stage?index}" data-team-id="<@common.teamUrlPrefix team.id />" data-target-id-field="form-trip-stage-mapid-${stage?index}" autocomplete="off" value="" class="form-control form-control-sm form-map-control"></div>
+                            </div>
+                            <div class="mb-2 col-12 align-items-center d-flex flex-row justify-content-start">
+                                <span text-nowrap">Dernières</span>
+                                <div class="ms-2">
+                                    <#if lastMaps?? && lastMaps?size gt 0>
+                                        <#list lastMaps as lastMap>
+                                            <span data-source-id="${lastMap.id}" data-source-name="${lastMap.name}" data-target-name-field="form-trip-stage-mapname-${stage?index}" data-target-id-field="form-trip-stage-mapid-${stage?index}" role="button" class="badge bg-light text-dark border">${lastMap.name}</span>
+                                        </#list>
+                                    </#if>
+                                </div>
+                            </div>
+
                         </div>
-                        <div class="row">
-                            <div class="mb-3 col-4 align-self-end text-end">
+                        <div class="row mt-2">
+                            <div class="mb-2 col-4 align-self-end text-end">
                                 <button id="form-trip-stage-delete-${stage?index}" onclick="removeGroup(this);" type="button" class="btn btn-sm btn-secondary"><i class="bi bi-trash"></i> Supprimer</button>
                             </div>
                        </div>
@@ -222,6 +255,10 @@
         </form>
 
     </div>
+
+     <script type="text/javascript">
+            resetStageIndexes();
+        </script>
 
 </div>
 
