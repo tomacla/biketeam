@@ -25,7 +25,7 @@
         </form>
         <hr/>
 
-      <form id="users-filter" action="<@common.teamUrl team.id '/admin/maps' />" method="GET" class="mb-2">
+      <form id="users-filter" action="<@common.teamUrl team.id '/admin/users' />" method="GET" class="mb-2">
 
                 <input type="hidden" id="users-filter-page" name="page" value="${page}">
                 <input type="hidden" id="users-filter-pageSize" name="pageSize" value="${pageSize}">
