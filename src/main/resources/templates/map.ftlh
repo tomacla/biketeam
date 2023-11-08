@@ -82,7 +82,14 @@
             targetMap.removeLayer(geoJsonLayer);
         }
 
-        var targetMap = initMap('map-wrapper', 51.505, -0.09, 11, 'Cyclo OSM', true, true, true, false, [showTrack, hideTrack]);
+        var targetMap = initMap('map-wrapper', 51.505, -0.09, 11, 'Cyclo OSM', {
+            layersControl: true,
+            zoomControl: true,
+            positionControl: true,
+            positionOnLoad: false,
+            trackDisplayCallBacks: [showTrack, hideTrack],
+            streetViewControl: true
+        });
 
         var geoJsonLayer = L.layerGroup();
         loadJsonContent('<@common.teamUrl team.id '/maps/${map.id}/geojson' />', function(geojsonFeature) {
