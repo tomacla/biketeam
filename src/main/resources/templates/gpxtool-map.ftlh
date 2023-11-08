@@ -48,7 +48,15 @@
 
             </#if>
 
-            var targetMap = initMap('gpxtool<#if gpxuuid == 'raw'>raw</#if>map-wrapper', 51.505, -0.09, 11, 'Cyclo OSM', true, true, true, <#if gpxuuid != 'raw'>false<#else>true</#if>, <#if gpxuuid != 'raw'>[showTrack, hideTrack]<#else>false</#if>);
+            var targetMap = initMap('gpxtool<#if gpxuuid == 'raw'>raw</#if>map-wrapper', 51.505, -0.09, 11, 'Cyclo OSM',
+                {
+                     layersControl: true,
+                     zoomControl: true,
+                     positionControl: true,
+                     positionOnLoad: <#if gpxuuid != 'raw'>false<#else>true</#if>,
+                     trackDisplayCallBacks: <#if gpxuuid != 'raw'>[showTrack, hideTrack]<#else>false</#if>,
+                     streetViewControl: true
+                 });
 
              <#if gpxuuid != 'raw'>
                 var geojsonFeature = ${gpx.geojson?no_esc};

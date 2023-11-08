@@ -1,42 +1,83 @@
 var mouseDownFlag = 0;
 
-function initMap(mapContainerId, lat, lng, zoom, defaultLayer, layersControl, zoomControl, positionControl, positionOnLoad, trackDisplayCallBacks) {
+function initMap(mapContainerId, lat, lng, zoom, defaultLayer, providedOptions = {}) {
+
     var newMap = L.map(mapContainerId, { zoomControl: false, layers: [layers[defaultLayer]] }).setView([lat, lng], zoom);
-    if(layersControl) {
+
+    var options = {
+        layersControl: providedOptions.layersControl || false,
+        zoomControl: providedOptions.zoomControl || false,
+        positionControl: providedOptions.positionControl || false,
+        positionOnLoad: providedOptions.positionOnLoad || false,
+        trackDisplayCallBacks: providedOptions.trackDisplayCallBacks || false,
+        streetViewControl: providedOptions.streetViewControl || false
+    }
+
+    if(options.layersControl) {
         L.control.layers(layers, overlayLayers, {position: 'bottomleft'}).addTo(newMap);
     }
-    if(zoomControl) {
+    if(options.zoomControl) {
         L.control.zoom({position: 'bottomright'}).addTo(newMap);
     }
-    if(positionControl) {
+    if(options.positionControl) {
         var lc = L.control.locate({position: 'bottomright', drawCircle : false, showPopup : false}).addTo(newMap);
-        if(positionOnLoad) {
+        if(options.positionOnLoad) {
             lc.start();
         }
     }
-    if(trackDisplayCallBacks) {
+    if(options.trackDisplayCallBacks) {
         L.easyButton({
             position:'bottomright',
             states: [{
                     stateName: 'button-hide-track',        // name the state
-                    icon:      'bi bi-eye-slash-fill',               // and define its properties
+                    icon:      'bi bi-eye-slash-fill fs-6',               // and define its properties
                     title:     'Masquer',      // like its title
                     onClick: function(btn, map) {       // and its callback
-                        trackDisplayCallBacks[1]();
+                        options.trackDisplayCallBacks[1]();
                         btn.state('button-show-track');    // change state on click!
                     }
                 }, {
                     stateName: 'button-show-track',
-                    icon:      'bi bi-eye-fill',
+                    icon:      'bi bi-eye-fill fs-6',
                     title:     'Afficher',
                     onClick: function(btn, map) {
-                        trackDisplayCallBacks[0]();
+                        options.trackDisplayCallBacks[0]();
                         btn.state('button-hide-track');
                     }
             }]
         }).addTo( newMap );
     }
+
+    if(options.streetViewControl) {
+        L.easyButton({
+            position:'bottomright',
+            states: [{
+                    stateName: 'button-street-view-start',        // name the state
+                    icon:      'bi bi-person-walking fs-6',               // and define its properties
+                    title:     'Streetview',      // like its title
+                    onClick: function(btn, map) {       // and its callback
+                        newMap.on('click', activateStreetView);
+                        btn.button.style.color = 'orange';
+                        btn.state('button-street-view-stop');    // change state on click!
+                    }
+                }, {
+                    stateName: 'button-street-view-stop',
+                    icon:      'bi bi-person-walking fs-6',
+                    title:     'Streetview',
+                    onClick: function(btn, map) {
+                        newMap.off('click', activateStreetView);
+                        btn.button.style.color = 'black';
+                        btn.state('button-street-view-start');
+                    }
+            }]
+        }).addTo( newMap );
+    }
+
     return newMap;
+}
+
+function activateStreetView(e) {
+    window.open('http://maps.google.com/maps?q=&layer=c&cbll='+e.latlng.lat+','+e.latlng.lng+'&cbp=11,0,0,0,0', '_blank');
 }
 
 var overlayLayers = {
