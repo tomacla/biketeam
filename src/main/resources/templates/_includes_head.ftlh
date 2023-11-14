@@ -41,7 +41,6 @@
     <link rel="stylesheet" href="<@common.teamUrl '' '/css/done-ribbon.css' />" />
     <link rel="stylesheet" href="<@common.teamUrl '' '/css/main.css' />" />
 
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
     <script src="https://unpkg.com/marked@3.0.4/lib/marked.js" type="text/javascript"></script>
@@ -49,7 +48,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.79.0/dist/L.Control.Locate.min.js" charset="utf-8"></script>
     <script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>
+    <script src="https://unpkg.com/leaflet.vectorgrid@latest/dist/Leaflet.VectorGrid.bundled.js"></script>
 
+    <script src="<@common.teamUrl '' '/js-filtered/leaflet-layers.js' />"></script>
     <script src="<@common.teamUrl '' '/js/tags.js' />"></script>
     <script src="<@common.teamUrl '' '/js/autocomplete.js' />"></script>
     <script src="<@common.teamUrl '' '/js/leaflet-custom.js' />"></script>
