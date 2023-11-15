@@ -88,7 +88,8 @@
             positionControl: true,
             positionOnLoad: false,
             trackDisplayCallBacks: [showTrack, hideTrack],
-            streetViewControl: true
+            streetViewControl: true,
+            fullScreenControl: true
         });
 
         var geoJsonLayer = L.layerGroup();

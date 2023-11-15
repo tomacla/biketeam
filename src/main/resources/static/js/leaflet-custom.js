@@ -10,8 +10,11 @@ function initMap(mapContainerId, lat, lng, zoom, defaultLayer, providedOptions =
         positionControl: providedOptions.positionControl || false,
         positionOnLoad: providedOptions.positionOnLoad || false,
         trackDisplayCallBacks: providedOptions.trackDisplayCallBacks || false,
-        streetViewControl: providedOptions.streetViewControl || false
+        streetViewControl: providedOptions.streetViewControl || false,
+        fullScreenControl : providedOptions.streetViewControl || false,
     }
+
+
 
     if(options.layersControl) {
         L.control.layers(layers, overlayLayers, {position: 'bottomleft'}).addTo(newMap);
@@ -24,6 +27,14 @@ function initMap(mapContainerId, lat, lng, zoom, defaultLayer, providedOptions =
         if(options.positionOnLoad) {
             lc.start();
         }
+    }
+    if(options.fullScreenControl) {
+        newMap.addControl(new L.Control.Fullscreen({
+            title: {
+                'false': 'Plein écran',
+                'true': 'Sortie'
+            }
+        }));
     }
     if(options.trackDisplayCallBacks) {
         L.easyButton({
