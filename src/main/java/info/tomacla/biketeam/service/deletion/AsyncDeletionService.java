@@ -165,13 +165,6 @@ public class AsyncDeletionService {
 
             // delete nested elements
 
-            rideTemplateRepository.findAll(SearchRideTemplateSpecification.allInTeam(teamId))
-                    .stream().forEach(rideTemplateRepository::delete);
-
-            placeRepository.findAll(SearchPlaceSpecification.allInTeam(teamId))
-                    .stream().forEach(placeRepository::delete);
-
-
             rideRepository.findAll(SearchRideSpecification.allInTeam(teamId))
                     .stream()
                     .map(Ride::getId)
@@ -193,6 +186,12 @@ public class AsyncDeletionService {
                     .forEach(this::deleteMap);
 
             userRoleRepository.deleteByTeamId(teamId);
+
+            rideTemplateRepository.findAll(SearchRideTemplateSpecification.allInTeam(teamId))
+                    .stream().forEach(rideTemplateRepository::delete);
+
+            placeRepository.findAll(SearchPlaceSpecification.allInTeam(teamId))
+                    .stream().forEach(placeRepository::delete);
 
             // finaly delete the team
             teamRepository.delete(team);
