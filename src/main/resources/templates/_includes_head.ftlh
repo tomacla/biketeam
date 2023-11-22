@@ -36,6 +36,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.79.0/dist/L.Control.Locate.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css">
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css"  />
     <link rel="stylesheet" href="<@common.teamUrl '' '/css/sizing.css' />" />
     <link rel="stylesheet" href="<@common.teamUrl '' '/css/navbar.css' />" />
     <link rel="stylesheet" href="<@common.teamUrl '' '/css/done-ribbon.css' />" />
@@ -48,6 +49,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.79.0/dist/L.Control.Locate.min.js" charset="utf-8"></script>
     <script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>
+    <script src="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js"></script>
     <script src="https://unpkg.com/leaflet.vectorgrid@latest/dist/Leaflet.VectorGrid.bundled.js"></script>
 
     <script src="<@common.teamUrl '' '/js-filtered/leaflet-layers.js' />"></script>

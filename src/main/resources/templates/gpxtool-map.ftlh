@@ -55,7 +55,8 @@
                      positionControl: true,
                      positionOnLoad: <#if gpxuuid != 'raw'>false<#else>true</#if>,
                      trackDisplayCallBacks: <#if gpxuuid != 'raw'>[showTrack, hideTrack]<#else>false</#if>,
-                     streetViewControl: true
+                     streetViewControl: true,
+                     fullScreenControl: true
                  });
 
              <#if gpxuuid != 'raw'>
