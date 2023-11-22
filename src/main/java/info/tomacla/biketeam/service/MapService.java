@@ -145,7 +145,7 @@ public class MapService extends AbstractPermalinkService {
     public Optional<Path> getFitFile(String teamId, String mapId) {
         Optional<Path> gpxFile = getGpxFile(teamId, mapId);
         if (gpxFile.isPresent()) {
-            return Optional.of(gpxService.getAsFit(fileService.getFile(FileRepositories.GPX_FILES, teamId, getGpxName(mapId))));
+            return Optional.of(gpxService.getAsFit(gpxFile.get()));
         }
         return Optional.empty();
     }
@@ -153,7 +153,7 @@ public class MapService extends AbstractPermalinkService {
     public Optional<Path> getGeoJsonFile(String teamId, String mapId) {
         Optional<Path> gpxFile = getGpxFile(teamId, mapId);
         if (gpxFile.isPresent()) {
-            return Optional.of(gpxService.getAsGeoJson(fileService.getFile(FileRepositories.GPX_FILES, teamId, getGpxName(mapId))));
+            return Optional.of(gpxService.getAsGeoJson(gpxFile.get()));
         }
         return Optional.empty();
     }
@@ -161,7 +161,7 @@ public class MapService extends AbstractPermalinkService {
     public Optional<List<java.util.Map<String, Object>>> getElevationProfile(String teamId, String mapId) {
         Optional<Path> gpxFile = getGpxFile(teamId, mapId);
         if (gpxFile.isPresent()) {
-            return Optional.of(gpxService.getElevationProfile(fileService.getFile(FileRepositories.GPX_FILES, teamId, getGpxName(mapId))));
+            return Optional.of(gpxService.getElevationProfile(gpxFile.get()));
         }
         return Optional.empty();
     }
@@ -169,7 +169,7 @@ public class MapService extends AbstractPermalinkService {
     public Optional<Path> getGpxFile(String teamId, String mapId) {
         final Optional<Map> optionalMap = get(teamId, mapId);
         if (optionalMap.isPresent()) {
-            String gpxName = getGpxName(mapId);
+            String gpxName = getGpxName(optionalMap.get());
             if (fileService.fileExists(FileRepositories.GPX_FILES, teamId, gpxName)) {
                 return Optional.of(fileService.getFile(FileRepositories.GPX_FILES, teamId, gpxName));
             }
@@ -205,11 +205,7 @@ public class MapService extends AbstractPermalinkService {
     }
 
     private static String getGpxName(Map map) {
-        return getGpxName(map.getId());
-    }
-
-    private static String getGpxName(String mapId) {
-        return mapId + ".gpx";
+        return map.getId() + ".gpx";
     }
 
 }
