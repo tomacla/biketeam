@@ -13,7 +13,7 @@
             <div class="list-group my-4">
                 <a class="list-group-item" href="<@common.teamUrl '' '/new' />"><i class="bi bi-plus-circle"></i> Créer un groupe</a>
                 <a class="list-group-item" href="<@common.teamUrl '' '/teams' />"><i class="bi bi-search"></i> Explorer les groupes</a>
-                <a class="list-group-item" href="<@common.teamUrl '' '/gpxtool' />"><i class="bi bi-eye-fill"></i> Visualiser un GPX</a>
+                <a class="list-group-item" href="<@common.teamUrl '' '/gpxtool' />"><i class="bi bi-eye-fill"></i> Outils GPX</a>
             </div>
 
             <#if _user_teams?size != 0>
