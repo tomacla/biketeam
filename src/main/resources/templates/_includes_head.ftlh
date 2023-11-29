@@ -52,7 +52,7 @@
     <script src="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js"></script>
     <script src="https://unpkg.com/leaflet.vectorgrid@latest/dist/Leaflet.VectorGrid.bundled.js"></script>
 
-    <script src="<@common.teamUrl '' '/js-filtered/leaflet-layers.js' />"></script>
+    <script src="<@common.teamUrl '' '/jsf/leaflet-layers.js' />"></script>
     <script src="<@common.teamUrl '' '/js/tags.js' />"></script>
     <script src="<@common.teamUrl '' '/js/autocomplete.js' />"></script>
     <script src="<@common.teamUrl '' '/js/leaflet-custom.js' />"></script>
