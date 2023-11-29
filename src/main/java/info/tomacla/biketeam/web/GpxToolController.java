@@ -111,6 +111,28 @@ public class GpxToolController extends AbstractController {
 
     }
 
+    @PostMapping(value = "/merge")
+    public ModelAndView mergeGpx(Principal principal, Model model,
+                                 @RequestParam("file1") MultipartFile file1,
+                                 @RequestParam("file2") MultipartFile file2) {
+
+        try {
+
+            Path gpxPath1 = fileService.getTempFileFromInputStream(file1.getInputStream());
+            Path gpxPath2 = fileService.getTempFileFromInputStream(file2.getInputStream());
+
+            String uuid = gpxService.parseAndStoreStandalone(gpxPath1, gpxPath2);
+
+            return new ModelAndView(new RedirectView("/gpxtool/" + uuid, false, false, false));
+
+        } catch (Exception e) {
+            addGlobalValues(principal, model, "GPX Tool", null);
+            model.addAttribute("errors", List.of("Unable to parse GPX"));
+            return new ModelAndView("gpxtool-root", model.asMap());
+        }
+
+    }
+
     @ResponseBody
     @RequestMapping(value = "/{uuid}/gpx", method = RequestMethod.GET, produces = "application/gpx+xml")
     public ResponseEntity<byte[]> downloadGpx(@PathVariable("uuid") String uuid) {
