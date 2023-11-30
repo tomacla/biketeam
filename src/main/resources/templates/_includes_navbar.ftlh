@@ -9,7 +9,7 @@
     <#elseif springMacroRequestContext.requestUri?contains('gpxtool')>
         <a class="nav-link link-secondary px-1" href="<@common.teamUrl '' '/' />"><img height="25" src="<@common.teamUrl '' '/misc/home.png' />" alt="prendlaroue" /><i class="bi bi-chevron-right"></i></a>
         <a class="navbar-brand order-0" href="<@common.teamUrl '' '/gpxtool' />">
-            GPX Tool
+            GPX Tools
         </a>
     <#else>
         <a class="navbar-brand order-0 p-0" href="<@common.teamUrl '' '/' />">
