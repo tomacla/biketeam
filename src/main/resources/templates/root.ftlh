@@ -2,11 +2,13 @@
 
 <div class="row pt-2">
 
-    <div class="col-12 border-bottom pb-4">
+    <div class="col-12">
+        <h1 class="pb-4 border-bottom text-center">Un site unique pour les cyclistes</h1>
+    </div>
 
-        <h1 class="my-4 pb-4 border-bottom text-center">Un site unique pour les cyclistes</h1>
+    <div class="col-12 col-md-6 my-4">
 
-        <ul class="mt-4 lead text-center list-unstyled">
+        <ul class="lead text-center list-unstyled">
             <li>Rassemblez votre communauté</li>
             <li>Partagez vos maps</li>
             <li>Gérez vos rides</li>
@@ -19,7 +21,22 @@
 
     </div>
 
-    <div class="col-12">
+    <div class="col-12 col-md-6 my-4">
+
+        <ul class="lead text-center list-unstyled">
+            <li>Visualisez vos GPX</li>
+            <li>Partagez vos traces</li>
+            <li>Manipulez vos fichiers</li>
+            <li>Sans connexion requise</li>
+        </ul>
+
+        <div class="text-center">
+            <a href="<@common.teamUrl '' '/gpxtool' />" class="btn btn-outline-secondary">Outils GPX</a>
+        </div>
+
+    </div>
+
+    <div class="col-12 border-top">
 
         <h5 class="text-center lead mt-4">${teamCount} groupes déjà créés</h5>
         <h6 class="text-center text-muted mb-4"><a class="link-secondary" href="<@common.teamUrl '' '/teams' />">Explorer les groupes</a></h6>

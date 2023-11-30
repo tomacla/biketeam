@@ -15,6 +15,7 @@ import io.github.glandais.fit.FitFileWriter;
 import io.github.glandais.gpx.GPXPath;
 import io.github.glandais.gpx.Point;
 import io.github.glandais.gpx.filter.GPXFilter;
+import io.github.glandais.gpx.storage.ValueKind;
 import io.github.glandais.io.GPXFileWriter;
 import io.github.glandais.io.GPXParser;
 import io.github.glandais.map.TileMapImage;
@@ -89,11 +90,11 @@ public class GpxService {
         return map;
     }
 
-    public String parseAndStoreStandalone(Path gpx) {
+    public String parseAndStoreStandalone(Path... gpx) {
 
         String defaultName = UUID.randomUUID().toString();
 
-        GPXPath gpxPath = getGPXPath(gpx, defaultName);
+        GPXPath gpxPath = getGpxPathFromFiles(defaultName, gpx);
         gpxPath.setName(defaultName);
         gpxPathEnhancer.virtualize(gpxPath);
         GPXFilter.filterPointsDouglasPeucker(gpxPath);
@@ -103,6 +104,20 @@ public class GpxService {
         fileService.storeFile(toStoreGpx, FileRepositories.GPXTOOLVIEWER, defaultName + ".gpx");
 
         return defaultName;
+
+    }
+
+    private GPXPath getGpxPathFromFiles(String defaultName, Path... gpx) {
+
+        GPXPath gpxPath = getGPXPath(gpx[0], defaultName);
+        if(gpx.length > 1) {
+            for(int i = 1; i < gpx.length; i++) {
+                GPXPath tgpxPath = getGPXPath(gpx[i], defaultName);
+                gpxPath.getPoints().addAll(tgpxPath.getPoints());
+                gpxPath.computeArrays(ValueKind.source);
+            }
+        }
+        return gpxPath;
 
     }
 
