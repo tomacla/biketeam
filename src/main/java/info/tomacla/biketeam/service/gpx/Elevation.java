@@ -5,48 +5,64 @@ import io.github.glandais.gpx.Point;
 import java.util.List;
 
 public class Elevation {
+    private Point startPoint;
+    private Point endPoint;
+    private double positiveElevation;
 
-    final private List<Point> points;
 
-    public Elevation(List<Point> points) {
-        this.points = points;
+    public Elevation(Point startPoint, Point endPoint) {
+        this.startPoint = startPoint;
+        this.endPoint = endPoint;
+        this.positiveElevation = endPoint.getEle() - startPoint.getEle();
+
+    }
+
+    public Elevation(Point startPoint, Point endPoint, double positiveElevation) {
+        this.startPoint = startPoint;
+        this.endPoint = endPoint;
+        this.positiveElevation = positiveElevation;
+    }
+
+    public void add(Point p) {
+        this.positiveElevation += p.getEle() - this.endPoint.getEle();
+        this.endPoint = p;
     }
 
     public double getAverageGrade() {
-        return (getLastPoint().getEle() - getFirstPoint().getEle()) / getDist() * 100.0D;
+        return (this.positiveElevation / this.getDistance()) * 100.0D;
     }
 
-    public double getDist() {
-        return getLastPoint().getDist() - getFirstPoint().getDist();
+    public double getPositiveElevation() {
+        return positiveElevation;
     }
 
-    private Point getFirstPoint() {
-        return points.get(0);
-    }
-
-    private Point getLastPoint() {
-        return points.get(points.size() - 1);
+    public double getDistance() {
+        return endPoint.getDist() - startPoint.getDist();
     }
 
     public boolean isInside(Point p) {
-        return p.getDist() >= getFirstPoint().getDist() && p.getDist() <= getLastPoint().getDist();
+        return p.getDist() >= startPoint.getDist() && p.getDist() <= endPoint.getDist();
     }
 
     public boolean isRelevant() {
 
-        if (getAverageGrade() >= 4) {
+        if (getAverageGrade() >= 4.0D) {
             return true;
         }
 
-        if (getAverageGrade() >= 3 && getDist() >= 300.0D) {
+        if (getAverageGrade() >= 3.0D && getDistance() >= 300.0D) {
             return true;
         }
 
-        if (getAverageGrade() >= 2 && getDist() >= 500.0D) {
+        if (getAverageGrade() >= 2.0D && getDistance() >= 500.0D) {
             return true;
         }
 
-        if (getAverageGrade() >= 1 && getDist() >= 1000.0D) {
+        if (getAverageGrade() >= 1.0D && getDistance() >= 750.0D) {
+            return true;
+        }
+
+        if (getAverageGrade() >= 0.5D && getDistance() >= 1000.0D) {
             return true;
         }
 
@@ -59,11 +75,11 @@ public class Elevation {
             return "rgb(242,78,78)";
         }
 
-        if (getAverageGrade() >= 3.0D && getDist() >= 150.0D) {
+        if (getAverageGrade() >= 3.0D && getDistance() >= 150.0D) {
             return "rgb(247,129,69)";
         }
 
-        if (getAverageGrade() >= 2.0D && getDist() >= 350.0D || getAverageGrade() >= 1 && getDist() >= 600.0D) {
+        if (getAverageGrade() >= 2.0D && getDistance() >= 350.0D || getAverageGrade() >= 1 && getDistance() >= 600.0D) {
             return "rgb(252,223,62)";
         }
 
@@ -73,6 +89,42 @@ public class Elevation {
 
     public static String getDefaultColor() {
         return "rgb(160,176,70)";
+    }
+
+    public static List<Elevation> mergeIfNear(List<Elevation> elevations) {
+        boolean modified = true;
+        while(modified) {
+
+            modified = false;
+            for (int i = 1; i < elevations.size(); i++) {
+
+                Elevation previous = elevations.get(i - 1);
+                Elevation current = elevations.get(i);
+                if(Elevation.isNear(previous, current)) {
+                    elevations.set(i-1, Elevation.merge(previous, current));
+                    elevations.remove(i);
+                    modified = true;
+                    break;
+                }
+
+            }
+
+        }
+        return elevations;
+    }
+
+    public static boolean isNear(Elevation e1, Elevation e2) {
+        return e2.startPoint.getDist() - e1.endPoint.getDist() <= 50.0D;
+    }
+
+    public static Elevation merge(Elevation previous, Elevation current) {
+
+        return new Elevation(
+                previous.startPoint,
+                current.endPoint,
+                current.positiveElevation + previous.positiveElevation
+        );
+
     }
 
 }

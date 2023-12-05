@@ -1,7 +1,12 @@
 package info.tomacla.biketeam.web;
 
 import info.tomacla.biketeam.common.file.FileRepositories;
+import info.tomacla.biketeam.domain.map.MapType;
 import info.tomacla.biketeam.service.file.FileService;
+import info.tomacla.biketeam.service.garmin.GarminAuthService;
+import info.tomacla.biketeam.service.garmin.GarminCourseService;
+import info.tomacla.biketeam.service.garmin.GarminMapDescriptor;
+import info.tomacla.biketeam.service.garmin.GarminToken;
 import info.tomacla.biketeam.service.gpx.GpxDownloadClient;
 import info.tomacla.biketeam.service.gpx.GpxService;
 import info.tomacla.biketeam.service.gpx.StandaloneGpx;
@@ -20,6 +25,9 @@ import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,6 +44,12 @@ public class GpxToolController extends AbstractController {
 
     @Autowired
     private FileService fileService;
+
+    @Autowired
+    private GarminAuthService garminAuthService;
+
+    @Autowired
+    private GarminCourseService garminCourseService;
 
     @GetMapping
     public ModelAndView root(@RequestParam(name = "gpx", required = false) String gpx, Principal principal, Model model) {
@@ -160,6 +174,78 @@ public class GpxToolController extends AbstractController {
         }
 
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to find gpx : " + uuid);
+    }
+
+    @RequestMapping(value = "/{uuid}/garmin", method = RequestMethod.GET)
+    public void uploadMapGarmin(HttpServletRequest request,
+                                HttpServletResponse response,
+                                HttpSession session,
+                                @PathVariable("uuid") String uuid) throws Exception {
+
+        GarminToken token = garminAuthService.queryToken(request, response, session);
+        if (token != null) {
+            Optional<StandaloneGpx> standalone = gpxService.getStandalone(uuid);
+            if (standalone.isPresent()) {
+
+                try {
+                    Path file = fileService.getFile(FileRepositories.GPXTOOLVIEWER, uuid + ".gpx");
+
+                    StandaloneGpx standaloneGpx = standalone.get();
+
+                    GarminMapDescriptor descriptor = new GarminMapDescriptor(
+                            file,
+                            uuid,
+                            MapType.ROAD,
+                            standaloneGpx.getLength(),
+                            standaloneGpx.getPositiveElevation(),
+                            standaloneGpx.getNegativeElevation()
+                    );
+
+                    String url = garminCourseService.upload(request, response, session, token, descriptor);
+                    if (url != null) {
+                        response.sendRedirect(url);
+                    }
+
+
+                } catch (IOException e) {
+                    throw new ServerErrorException("Error while reading gpx : " + uuid, e);
+                }
+
+            }
+
+        }
+
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/{uuid}/fit", method = RequestMethod.GET, produces = "application/fit")
+    public ResponseEntity<byte[]> getFitFile(@PathVariable("uuid") String uuid) {
+
+        if (fileService.fileExists(FileRepositories.GPXTOOLVIEWER, uuid + ".gpx")) {
+            try {
+                Path file = fileService.getFile(FileRepositories.GPXTOOLVIEWER, uuid + ".gpx");
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.add("Content-Type", "application/vnd.ant.fit");
+                headers.setContentDisposition(ContentDisposition.builder("inline")
+                        .filename(uuid + ".fit")
+                        .build());
+
+                return new ResponseEntity<>(
+                        Files.readAllBytes(file),
+                        headers,
+                        HttpStatus.OK
+                );
+
+
+            } catch (IOException e) {
+                throw new ServerErrorException("Error while reading gpx : " + uuid, e);
+            }
+
+        }
+
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to find gpx : " + uuid);
+
     }
 
 }

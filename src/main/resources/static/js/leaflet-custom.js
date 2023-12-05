@@ -217,13 +217,13 @@ function initChart(containingMap, chartContainerId, elevationProfile, color, cal
          segment: {
             backgroundColor: function(ctx) {
                if(segmentColor) {
-                   return elevationProfile[ctx.p0DataIndex].color;
+                   return elevationProfile[ctx.p1DataIndex].color;
                }
                return undefined;
             },
              borderColor: function(ctx) {
                  if(segmentColor) {
-                        return elevationProfile[ctx.p0DataIndex].color;
+                        return elevationProfile[ctx.p1DataIndex].color;
                    }
                 return undefined;
              }
