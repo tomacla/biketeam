@@ -13,6 +13,7 @@ import info.tomacla.biketeam.service.RideService;
 import info.tomacla.biketeam.service.file.ThumbnailService;
 import info.tomacla.biketeam.service.garmin.GarminAuthService;
 import info.tomacla.biketeam.service.garmin.GarminCourseService;
+import info.tomacla.biketeam.service.garmin.GarminMapDescriptor;
 import info.tomacla.biketeam.service.garmin.GarminToken;
 import info.tomacla.biketeam.service.url.UrlService;
 import info.tomacla.biketeam.web.AbstractController;
@@ -261,9 +262,21 @@ public class MapController extends AbstractController {
         GarminToken token = garminAuthService.queryToken(request, response, session);
         if (token != null) {
             final Optional<Path> gpxFile = mapService.getGpxFile(teamId, mapId);
-            final Optional<Map> map = mapService.get(teamId, mapId);
-            if (gpxFile.isPresent() && map.isPresent()) {
-                String url = garminCourseService.upload(request, response, session, token, gpxFile.get(), map.get());
+            final Optional<Map> optionalMap = mapService.get(teamId, mapId);
+            if (gpxFile.isPresent() && optionalMap.isPresent()) {
+
+                Map map = optionalMap.get();
+
+                GarminMapDescriptor descriptor = new GarminMapDescriptor(
+                        gpxFile.get(),
+                        Optional.ofNullable(map.getPermalink()).orElse(map.getId()),
+                        map.getType(),
+                        map.getLength(),
+                        map.getPositiveElevation(),
+                        map.getNegativeElevation()
+                );
+
+                String url = garminCourseService.upload(request, response, session, token, descriptor);
                 if (url != null) {
                     response.sendRedirect(url);
                 }

@@ -11,7 +11,9 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Set;
 
@@ -26,8 +28,11 @@ public class MailSenderService {
     @Value("${spring.mail.username:undefined}")
     private String username;
 
-    @Value("${contact.email}")
+    @Value("${no.reply.email}")
     private String fromEmail;
+
+    @Value("${site.name}")
+    private String siteName;
 
     public void sendDirectly(Team team, Set<String> tos, String subject, String message, ImageDescriptor embedImage) {
         tos.forEach(to -> this.send(team, Set.of(to), null, null, subject, message, embedImage));
@@ -50,7 +55,7 @@ public class MailSenderService {
             MimeMessage mimeMessage = emailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
 
-            mimeMessage.setFrom(fromEmail);
+            mimeMessage.setFrom(new InternetAddress(fromEmail, siteName));
 
             if (tos != null && !tos.isEmpty()) {
                 helper.setTo(Arrays.copyOf(tos.toArray(), tos.size(), String[].class));
@@ -75,7 +80,7 @@ public class MailSenderService {
 
             emailSender.send(mimeMessage);
 
-        } catch (MessagingException e) {
+        } catch (MessagingException | UnsupportedEncodingException e) {
             log.error("Error while sending email : " + e.getMessage(), e);
             throw new RuntimeException("Unable to send email", e);
         }

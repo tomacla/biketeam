@@ -2,6 +2,27 @@
 
 <div id="gpxtool" class="container-fluid w-100 h-100 p-0 m-0">
 
+    <div class="modal fade" id="modal-map-${gpxuuid}" tabindex="-1">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Télécharger</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="d-grid gap-2 col-6 mx-auto">
+                    <a download="${gpxuuid}.gpx" href="<@common.teamUrl '' '/gpxtool/${gpxuuid}/gpx' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-file-earmark-arrow-down"></i> GPX</a>
+                    <a download="${gpxuuid}.fit" href="<@common.teamUrl '' '/gpxtool/${gpxuuid}/fit' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-file-earmark-arrow-down"></i> FIT</a>
+                    <a href="<@common.teamUrl '' '/gpxtool/${gpxuuid}/garmin' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-triangle-fill"></i> Garmin</a>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
 <div class="row p-0 m-0 justify-content-center w-100 h-100">
 
     <#if gpxuuid != 'raw'>
@@ -13,7 +34,7 @@
                     <span><i class="bi bi-arrow-down"></i> ${gpx.negativeElevation}m</span>
                 </div>
                 <div class="btn-group btn-group-sm" role="group">
-                    <a download="${gpxuuid}.gpx" href="<@common.teamUrl '' '/gpxtool/${gpxuuid}/gpx' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-download"></i><span class="ps-1 d-none d-md-inline-block">Télécharger</span></a>
+                    <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#modal-map-${gpxuuid}"><i class="bi bi-download"></i><span class="d-none d-md-inline"> Télécharger</span></button>
                     <button onclick="copyURLtoClipboard();" class="btn btn-outline-secondary" role="button"><i class="bi bi-share"></i><span class="ps-1 d-none d-md-inline-block">Partager</span></a>
                 </div>
             </div>

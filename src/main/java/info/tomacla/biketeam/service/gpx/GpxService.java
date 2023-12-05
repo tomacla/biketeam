@@ -234,8 +234,16 @@ public class GpxService {
             return new ArrayList<>();
         }
 
+        List<Elevation> elevations = getRawElevationList(gpxPath);
+        Elevation.mergeIfNear(elevations);
+        elevations.removeIf(e -> !e.isRelevant());
+        return elevations;
+
+    }
+
+    private static List<Elevation> getRawElevationList(GPXPath gpxPath) {
         List<Elevation> elevations = new ArrayList<>();
-        List<Point> currentElevation = new ArrayList<>();
+        Elevation currentElevation = null;
 
         for (int i = 1; i < gpxPath.getPoints().size(); i++) {
 
@@ -243,23 +251,20 @@ public class GpxService {
             Point current = gpxPath.getPoints().get(i);
 
             if (current.getEle() >= previous.getEle()) {
-                currentElevation.add(current);
+                if(currentElevation == null) {
+                    currentElevation = new Elevation(previous, current);
+                } else {
+                    currentElevation.add(current);
+                }
             } else {
-                if (!currentElevation.isEmpty()) {
-
-                    Elevation ele = new Elevation(currentElevation);
-                    if (ele.isRelevant()) {
-                        elevations.add(ele);
-                    }
-
-                    currentElevation = new ArrayList<>();
+                if (currentElevation != null) {
+                    elevations.add(currentElevation);
+                    currentElevation = null;
                 }
             }
 
         }
-
         return elevations;
-
     }
 
     public List<java.util.Map<String, Object>> getElevationProfile(Path gpx) {
@@ -278,7 +283,7 @@ public class GpxService {
 
             List<Elevation> elevations = getElevations(gpxPath);
 
-            GPXFilter.filterPointsDouglasPeucker(gpxPath, Math.min(20, gpxPath.getDist() / (gpxPath.getDist() / 10)));
+            GPXFilter.filterPointsDouglasPeucker(gpxPath, Math.min(15, gpxPath.getDist() / 100));
 
             for (int i = 0; i < gpxPath.getPoints().size(); i++) {
                 Point point = gpxPath.getPoints().get(i);

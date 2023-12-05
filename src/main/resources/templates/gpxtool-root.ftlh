@@ -8,7 +8,7 @@
 
     </div>
 
-    <div class="col-12 col-md-4">
+    <div class="col-12 col-md-4 mb-2">
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Visualiser un fichier</h5>
@@ -25,7 +25,7 @@
         </div>
     </div>
 
-    <div class="col-12 col-md-4">
+    <div class="col-12 col-md-4 mb-2">
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Visualiser une URL</h5>
@@ -42,7 +42,7 @@
         </div>
     </div>
 
-    <div class="col-12 col-md-4">
+    <div class="col-12 col-md-4 mb-2">
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Fusionner deux fichiers</h5>
@@ -62,7 +62,7 @@
         </div>
     </div>
 
-    <div class="col-12 col-md-4">
+    <div class="col-12 col-md-4 mb-2">
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Voir une carte</h5>
@@ -72,11 +72,32 @@
         </div>
     </div>
 
+    <div class="col-12 col-md-4 mb-2">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Import OpenRunner</h5>
+            <p class="card-text">Saisissez l'ID OpenRunner pour visualiser le GPX</p>
+            <form method="GET" action="<@common.teamUrl '' '/gpxtool' />" class="card-text">
+               <div>
+                   <input id="openrunner-source-field" autocomplete="off" required="true" name="gpxor" class="form-control" type="text"
+                        onkeyup="document.getElementById('openrunner-target-field').value='https://api.openrunner.com/api/v2/routes/'+document.getElementById('openrunner-source-field').value+'/export/gpx-track'">
+               </div>
+               <input type="hidden" id="openrunner-target-field" name="gpx" value="">
+              <div class="mt-2">
+                   <input type="submit" class="btn btn-secondary" value="Voir">
+               </div>
+           </form>
+          </div>
+        </div>
+    </div>
+
  <div class="row justify-content-center mt-4">
 
     <div class="col-12 col-md-6 text-center">
         <p>Tous les GPX seront stockés sur le serveur pour une durée de 1 mois. Ils seront ensuite supprimés. Pour stocker un GPX sans limite de temps, <a href="<@common.teamUrl '' '/new' />" class="link-dark">créer un groupe</a> et utiliser la fonctionnalité de téléchargement de map.</p>
     </div>
+
+</div>
 
 </div>
 
