@@ -41,6 +41,7 @@ import java.nio.file.Path;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
@@ -106,17 +107,17 @@ public class MapController extends AbstractController {
 
     @GetMapping
     public String getMaps(@PathVariable("teamId") String teamId,
-                          @RequestParam(value = "lowerDistance", required = false, defaultValue = "1") double lowerDistance,
-                          @RequestParam(value = "upperDistance", required = false, defaultValue = "1000") double upperDistance,
-                          @RequestParam(value = "lowerPositiveElevation", required = false, defaultValue = "0") double lowerPositiveElevation,
-                          @RequestParam(value = "upperPositiveElevation", required = false, defaultValue = "10000") double upperPositiveElevation,
+                          @RequestParam(value = "lowerDistance", required = false) Double lowerDistance,
+                          @RequestParam(value = "upperDistance", required = false) Double upperDistance,
+                          @RequestParam(value = "lowerPositiveElevation", required = false) Double lowerPositiveElevation,
+                          @RequestParam(value = "upperPositiveElevation", required = false) Double upperPositiveElevation,
                           @RequestParam(value = "sort", required = false) MapSorterOption sort,
                           @RequestParam(value = "windDirection", required = false) WindDirection windDirection,
                           @RequestParam(value = "type", required = false) MapType type,
                           @RequestParam(value = "name", required = false) String name,
                           @RequestParam(value = "tags", required = false) List<String> tags,
                           @RequestParam(value = "page", defaultValue = "0", required = false) int page,
-                          @RequestParam(value = "pageSize", defaultValue = "9", required = false) int pageSize,
+                          @RequestParam(value = "pageSize", defaultValue = "18", required = false) int pageSize,
                           @ModelAttribute("error") String error,
                           Principal principal,
                           Model model) {
@@ -140,7 +141,7 @@ public class MapController extends AbstractController {
         SearchMapForm.SearchMapFormParser parser = form.parser();
 
         Page<Map> maps = mapService.searchMaps(
-                team.getId(),
+                Set.of(team.getId()),
                 parser.getName(),
                 parser.getLowerDistance(),
                 parser.getUpperDistance(),

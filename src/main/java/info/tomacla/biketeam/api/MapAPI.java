@@ -58,7 +58,7 @@ public class MapAPI extends AbstractAPI {
         SearchMapForm.SearchMapFormParser parser = form.parser();
 
         Page<Map> maps = mapService.searchMaps(
-                team.getId(),
+                Set.of(team.getId()),
                 parser.getName(),
                 parser.getLowerDistance(),
                 parser.getUpperDistance(),
