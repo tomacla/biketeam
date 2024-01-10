@@ -13,6 +13,7 @@
             <div class="list-group my-4">
                 <a class="list-group-item" href="<@common.teamUrl '' '/new' />"><i class="bi bi-plus-circle"></i> Créer un groupe</a>
                 <a class="list-group-item" href="<@common.teamUrl '' '/teams' />"><i class="bi bi-search"></i> Explorer les groupes</a>
+                <a class="list-group-item" href="<@common.teamUrl '' '/maps' />"><i class="bi bi bi-map"></i> Maps</a>
                 <a class="list-group-item" href="<@common.teamUrl '' '/gpxtool' />"><i class="bi bi-eye-fill"></i> Outils GPX</a>
             </div>
 
@@ -37,12 +38,15 @@
 
                 <div class="btn-group me-2">
                   <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                    Moi
+                    <i class="bi bi-list"></i>
                   </button>
 
                   <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="<@common.teamUrl '' '/users/me' />">Mon compte</a></li>
                     <li><a class="dropdown-item" href="<@common.teamUrl '' '/users/space' />">Mon espace</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="<@common.teamUrl '' '/maps' />">Maps</a></li>
+                    <li><a class="dropdown-item" href="<@common.teamUrl '' '/gpxtool' />">Outils GPX</a></li>
                   </ul>
                 </div>
 
@@ -65,9 +69,7 @@
                   </ul>
                 </div>
 
-                <div>
-                    <a class="btn btn-outline-secondary" href="<@common.teamUrl '' '/gpxtool' />"><i class="bi bi-eye-fill"></i> GPX</a>
-                </div>
+
             </div>
 
             <@common.displayFeed true />

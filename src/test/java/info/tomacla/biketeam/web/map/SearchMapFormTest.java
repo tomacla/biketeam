@@ -16,16 +16,16 @@ public class SearchMapFormTest {
     public void test() {
 
         final SearchMapForm searchMapForm = SearchMapForm.builder()
-                .withLowerDistance(10)
-                .withUpperDistance(100)
+                .withLowerDistance(10.0)
+                .withUpperDistance(100.0)
                 .withPage(5)
                 .withPageSize(10)
                 .withSort(MapSorterOption.HILLY)
                 .withTags(List.of("toot", "taat"))
                 .withType(MapType.ROAD)
                 .withName("foo")
-                .withLowerPositiveElevation(100)
-                .withUpperPositiveElevation(200)
+                .withLowerPositiveElevation(100.0)
+                .withUpperPositiveElevation(200.0)
                 .withWindDirection(WindDirection.NORTH)
                 .get();
 
@@ -52,16 +52,16 @@ public class SearchMapFormTest {
 
         final SearchMapForm.SearchMapFormParser parser = searchMapForm.parser();
 
-        assertEquals(1, parser.getLowerDistance());
-        assertEquals(1000, parser.getUpperDistance());
+        assertEquals(null, parser.getLowerDistance());
+        assertEquals(null, parser.getUpperDistance());
         assertEquals(0, parser.getPage());
-        assertEquals(9, parser.getPageSize());
+        assertEquals(18, parser.getPageSize());
         assertNull(parser.getSort());
         assertEquals(0, parser.getTags().size());
         assertNull(parser.getType());
         assertNull(parser.getName());
-        assertEquals(0, parser.getLowerPositiveElevation());
-        assertEquals(10000, parser.getUpperPositiveElevation());
+        assertEquals(null, parser.getLowerPositiveElevation());
+        assertEquals(null, parser.getUpperPositiveElevation());
         assertNull(parser.getWindDirection());
 
     }

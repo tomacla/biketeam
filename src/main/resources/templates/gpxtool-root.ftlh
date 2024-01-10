@@ -2,12 +2,6 @@
 
 <div class="row pt-2">
 
-    <div class="col-12">
-
-        <h1 class="my-4 pb-4 border-bottom text-center">Outils GPX</h1>
-
-    </div>
-
     <div class="col-12 col-md-4 mb-2">
         <div class="card">
           <div class="card-body">

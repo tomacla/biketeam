@@ -11,11 +11,11 @@ import java.util.Objects;
 public class SearchMapForm {
 
     private int page = 0;
-    private int pageSize = 9;
-    private double lowerDistance = 1;
-    private double upperDistance = 1000;
-    private double lowerPositiveElevation = 0;
-    private double upperPositiveElevation = 10000;
+    private int pageSize = 18;
+    private String lowerDistance = "";
+    private String upperDistance = "";
+    private String lowerPositiveElevation = "";
+    private String upperPositiveElevation = "";
     private String sort = "";
     private String type = "";
     private String windDirection = "";
@@ -42,36 +42,40 @@ public class SearchMapForm {
         this.pageSize = pageSize;
     }
 
-    public double getLowerDistance() {
+    public String getLowerDistance() {
         return lowerDistance;
     }
 
-    public void setLowerDistance(double lowerDistance) {
-        this.lowerDistance = lowerDistance;
+    public void setLowerDistance(String lowerDistance) {
+        this.lowerDistance = Objects.requireNonNullElse(lowerDistance, "");
+        ;
     }
 
-    public double getUpperDistance() {
+    public String getUpperDistance() {
         return upperDistance;
     }
 
-    public void setUpperDistance(double upperDistance) {
-        this.upperDistance = upperDistance;
+    public void setUpperDistance(String upperDistance) {
+        this.upperDistance = Objects.requireNonNullElse(upperDistance, "");
+        ;
     }
 
-    public double getLowerPositiveElevation() {
+    public String getLowerPositiveElevation() {
         return lowerPositiveElevation;
     }
 
-    public void setLowerPositiveElevation(double lowerPositiveElevation) {
-        this.lowerPositiveElevation = lowerPositiveElevation;
+    public void setLowerPositiveElevation(String lowerPositiveElevation) {
+        this.lowerPositiveElevation = Objects.requireNonNullElse(lowerPositiveElevation, "");
+        ;
     }
 
-    public double getUpperPositiveElevation() {
+    public String getUpperPositiveElevation() {
         return upperPositiveElevation;
     }
 
-    public void setUpperPositiveElevation(double upperPositiveElevation) {
-        this.upperPositiveElevation = upperPositiveElevation;
+    public void setUpperPositiveElevation(String upperPositiveElevation) {
+        this.upperPositiveElevation = Objects.requireNonNullElse(upperPositiveElevation, "");
+        ;
     }
 
     public String getType() {
@@ -134,20 +138,32 @@ public class SearchMapForm {
             return form.getPageSize();
         }
 
-        public double getLowerDistance() {
-            return form.getLowerDistance();
+        public Double getLowerDistance() {
+            if (form.getLowerDistance() == null || form.getLowerDistance().isBlank()) {
+                return null;
+            }
+            return Double.parseDouble(form.getLowerDistance());
         }
 
-        public double getUpperDistance() {
-            return form.getUpperDistance();
+        public Double getUpperDistance() {
+            if (form.getUpperDistance() == null || form.getUpperDistance().isBlank()) {
+                return null;
+            }
+            return Double.parseDouble(form.getUpperDistance());
         }
 
-        public double getLowerPositiveElevation() {
-            return form.getLowerPositiveElevation();
+        public Double getLowerPositiveElevation() {
+            if (form.getLowerPositiveElevation() == null || form.getLowerPositiveElevation().isBlank()) {
+                return null;
+            }
+            return Double.parseDouble(form.getLowerPositiveElevation());
         }
 
-        public double getUpperPositiveElevation() {
-            return form.getUpperPositiveElevation();
+        public Double getUpperPositiveElevation() {
+            if (form.getUpperPositiveElevation() == null || form.getUpperPositiveElevation().isBlank()) {
+                return null;
+            }
+            return Double.parseDouble(form.getUpperPositiveElevation());
         }
 
         public MapSorterOption getSort() {
@@ -202,23 +218,31 @@ public class SearchMapForm {
             return this;
         }
 
-        public SearchMapFormBuilder withLowerDistance(double lowerDistance) {
-            form.setLowerDistance(lowerDistance);
+        public SearchMapFormBuilder withLowerDistance(Double lowerDistance) {
+            if (lowerDistance != null) {
+                form.setLowerDistance(String.valueOf(lowerDistance.intValue()));
+            }
             return this;
         }
 
-        public SearchMapFormBuilder withUpperDistance(double upperDistance) {
-            form.setUpperDistance(upperDistance);
+        public SearchMapFormBuilder withUpperDistance(Double upperDistance) {
+            if (upperDistance != null) {
+                form.setUpperDistance(String.valueOf(upperDistance.intValue()));
+            }
             return this;
         }
 
-        public SearchMapFormBuilder withLowerPositiveElevation(double positiveElevation) {
-            form.setLowerPositiveElevation(positiveElevation);
+        public SearchMapFormBuilder withLowerPositiveElevation(Double positiveElevation) {
+            if (positiveElevation != null) {
+                form.setLowerPositiveElevation(String.valueOf(positiveElevation.intValue()));
+            }
             return this;
         }
 
-        public SearchMapFormBuilder withUpperPositiveElevation(double positiveElevation) {
-            form.setUpperPositiveElevation(positiveElevation);
+        public SearchMapFormBuilder withUpperPositiveElevation(Double positiveElevation) {
+            if (positiveElevation != null) {
+                form.setUpperPositiveElevation(String.valueOf(positiveElevation.intValue()));
+            }
             return this;
         }
 

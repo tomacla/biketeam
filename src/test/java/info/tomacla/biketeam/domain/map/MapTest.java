@@ -92,8 +92,8 @@ public class MapTest extends AbstractDBTest {
         mapRepository.save(map3);
 
 
-        assertEquals(2, mapRepository.findAll(new SearchMapSpecification(null, null, "maptest-team", null, null, null, null, null, null, null, null)).size());
-        assertEquals(1, mapRepository.findAll(new SearchMapSpecification(null, null, "maptest-team", "GRAVEL", null, null, null, null, null, null, null)).size());
+        assertEquals(2, mapRepository.findAll(new SearchMapSpecification(null, null, Set.of("maptest-team"), null, null, null, null, null, null, null, null)).size());
+        assertEquals(1, mapRepository.findAll(new SearchMapSpecification(null, null, Set.of("maptest-team"), "GRAVEL", null, null, null, null, null, null, null)).size());
 
         mapRepository.deleteAll();
 
@@ -155,7 +155,7 @@ public class MapTest extends AbstractDBTest {
         SearchMapSpecification spec = new SearchMapSpecification(
                 null,
                 null,
-                "maptest-team",
+                Set.of("maptest-team"),
                 null,
                 3.0,
                 200.0,

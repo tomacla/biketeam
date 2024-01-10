@@ -114,20 +114,6 @@
               <button type="submit" class="btn btn-secondary">Enregistrer</button>
         </form>
 
-        <#if _user.mapFavorites?size != 0>
-            <div class="border rounded mt-2 p-4">
-                <h4>Maps favorites</h4>
-
-                <div>
-                    <#list _user.mapFavorites as favorite>
-                        <span class="text-nowrap me-2 mb-2"><img src="<@common.teamUrl favorite.teamId '/image' />" height="18" alt="Team image"> <a href="<@common.teamUrl favorite.teamId '/maps/${favorite.permalink!favorite.id}' />" class="link-dark" role="button"> ${favorite.name}</a></span>
-                    </#list>
-                </div>
-
-            </div>
-
-         </#if>
-
     </div>
 
 </div>

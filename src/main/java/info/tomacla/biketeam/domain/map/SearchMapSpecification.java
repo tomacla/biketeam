@@ -9,12 +9,13 @@ import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public class SearchMapSpecification implements Specification<Map> {
 
     private final Boolean deletion;
     private final String permalink;
-    private final String teamId;
+    private final Set<String> teamIds;
     private final String name;
     private final Double lowerDistance;
     private final Double upperDistance;
@@ -24,12 +25,12 @@ public class SearchMapSpecification implements Specification<Map> {
     private final List<String> tags;
     private final WindDirection windDirection;
 
-    public SearchMapSpecification(Boolean deletion, String permalink, String teamId, String name, Double lowerDistance, Double upperDistance,
+    public SearchMapSpecification(Boolean deletion, String permalink, Set<String> teamIds, String name, Double lowerDistance, Double upperDistance,
                                   MapType type, Double lowerPositiveElevation, Double upperPositiveElevation,
                                   List<String> tags, WindDirection windDirection) {
         this.deletion = deletion;
         this.permalink = permalink;
-        this.teamId = teamId;
+        this.teamIds = teamIds;
         this.name = name;
         this.lowerDistance = lowerDistance;
         this.upperDistance = upperDistance;
@@ -50,8 +51,10 @@ public class SearchMapSpecification implements Specification<Map> {
         if (permalink != null && !permalink.isBlank()) {
             predicates.add(criteriaBuilder.equal(root.get("permalink"), permalink));
         }
-        if (teamId != null && !teamId.isBlank()) {
-            predicates.add(criteriaBuilder.equal(root.get("teamId"), teamId));
+        if (teamIds != null && !teamIds.isEmpty()) {
+            final CriteriaBuilder.In<Object> teamId = criteriaBuilder.in(root.get("teamId"));
+            teamIds.forEach(teamId::value);
+            predicates.add(teamId);
         }
         if (lowerDistance != null) {
             predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("length"), lowerDistance));
@@ -86,7 +89,7 @@ public class SearchMapSpecification implements Specification<Map> {
     }
 
     public static SearchMapSpecification allInTeam(String teamId) {
-        return new SearchMapSpecification(null, null, teamId, null, null, null, null, null, null, null, null);
+        return new SearchMapSpecification(null, null, Set.of(teamId), null, null, null, null, null, null, null, null);
     }
 
     public static SearchMapSpecification byPermalink(String permalink) {
@@ -97,7 +100,7 @@ public class SearchMapSpecification implements Specification<Map> {
         return new SearchMapSpecification(
                 false,
                 null,
-                teamId,
+                Set.of(teamId),
                 name,
                 null,
                 null, null, null, null, null, null
@@ -108,7 +111,7 @@ public class SearchMapSpecification implements Specification<Map> {
         return new SearchMapSpecification(
                 false,
                 null,
-                teamId,
+                Set.of(teamId),
                 name,
                 null,
                 null, null, null, null, null, null
@@ -120,11 +123,11 @@ public class SearchMapSpecification implements Specification<Map> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SearchMapSpecification that = (SearchMapSpecification) o;
-        return Objects.equals(deletion, that.deletion) && Objects.equals(permalink, that.permalink) && Objects.equals(teamId, that.teamId) && Objects.equals(name, that.name) && Objects.equals(lowerDistance, that.lowerDistance) && Objects.equals(upperDistance, that.upperDistance) && type == that.type && Objects.equals(lowerPositiveElevation, that.lowerPositiveElevation) && Objects.equals(upperPositiveElevation, that.upperPositiveElevation) && Objects.equals(tags, that.tags) && windDirection == that.windDirection;
+        return Objects.equals(deletion, that.deletion) && Objects.equals(permalink, that.permalink) && Objects.equals(teamIds, that.teamIds) && Objects.equals(name, that.name) && Objects.equals(lowerDistance, that.lowerDistance) && Objects.equals(upperDistance, that.upperDistance) && type == that.type && Objects.equals(lowerPositiveElevation, that.lowerPositiveElevation) && Objects.equals(upperPositiveElevation, that.upperPositiveElevation) && Objects.equals(tags, that.tags) && windDirection == that.windDirection;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(deletion, permalink, teamId, name, lowerDistance, upperDistance, type, lowerPositiveElevation, upperPositiveElevation, tags, windDirection);
+        return Objects.hash(deletion, permalink, teamIds, name, lowerDistance, upperDistance, type, lowerPositiveElevation, upperPositiveElevation, tags, windDirection);
     }
 }

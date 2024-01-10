@@ -116,7 +116,7 @@ public class MapService extends AbstractPermalinkService {
         return mapRepository.findAll(SearchMapSpecification.byNameInTeam(teamId, name), PageRequest.of(page, pageSize, getPageSort(null)));
     }
 
-    public Page<Map> searchMaps(String teamId, String name, Double lowerDistance, Double upperDistance, MapType type,
+    public Page<Map> searchMaps(Set<String> teamIds, String name, Double lowerDistance, Double upperDistance, MapType type,
                                 Double lowerPositiveElevation, Double upperPositiveElevation,
                                 List<String> tags, WindDirection windDirection,
                                 int page, int pageSize, MapSorterOption sortOption) {
@@ -127,7 +127,7 @@ public class MapService extends AbstractPermalinkService {
         SearchMapSpecification spec = new SearchMapSpecification(
                 false,
                 null,
-                teamId,
+                teamIds,
                 name,
                 lowerDistance,
                 upperDistance,
