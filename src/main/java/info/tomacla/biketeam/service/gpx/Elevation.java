@@ -93,15 +93,15 @@ public class Elevation {
 
     public static List<Elevation> mergeIfNear(List<Elevation> elevations) {
         boolean modified = true;
-        while(modified) {
+        while (modified) {
 
             modified = false;
             for (int i = 1; i < elevations.size(); i++) {
 
                 Elevation previous = elevations.get(i - 1);
                 Elevation current = elevations.get(i);
-                if(Elevation.isNear(previous, current)) {
-                    elevations.set(i-1, Elevation.merge(previous, current));
+                if (Elevation.isNear(previous, current)) {
+                    elevations.set(i - 1, Elevation.merge(previous, current));
                     elevations.remove(i);
                     modified = true;
                     break;

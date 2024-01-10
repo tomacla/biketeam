@@ -71,7 +71,7 @@ public class TeamController extends AbstractController {
             return viewHandler.redirect(team, "/maps");
         }
 
-        if(from == null) {
+        if (from == null) {
             from = feedService.getDefaultFrom(Set.of(teamId));
         }
 

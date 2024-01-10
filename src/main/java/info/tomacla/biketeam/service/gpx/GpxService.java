@@ -110,8 +110,8 @@ public class GpxService {
     private GPXPath getGpxPathFromFiles(String defaultName, Path... gpx) {
 
         GPXPath gpxPath = getGPXPath(gpx[0], defaultName);
-        if(gpx.length > 1) {
-            for(int i = 1; i < gpx.length; i++) {
+        if (gpx.length > 1) {
+            for (int i = 1; i < gpx.length; i++) {
                 GPXPath tgpxPath = getGPXPath(gpx[i], defaultName);
                 gpxPath.getPoints().addAll(tgpxPath.getPoints());
                 gpxPath.computeArrays(ValueKind.source);
@@ -251,7 +251,7 @@ public class GpxService {
             Point current = gpxPath.getPoints().get(i);
 
             if (current.getEle() >= previous.getEle()) {
-                if(currentElevation == null) {
+                if (currentElevation == null) {
                     currentElevation = new Elevation(previous, current);
                 } else {
                     currentElevation.add(current);

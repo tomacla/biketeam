@@ -3,18 +3,23 @@ package info.tomacla.biketeam.web;
 import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.domain.feed.FeedEntity;
 import info.tomacla.biketeam.domain.feed.FeedOptions;
+import info.tomacla.biketeam.domain.map.Map;
+import info.tomacla.biketeam.domain.map.MapSorterOption;
+import info.tomacla.biketeam.domain.map.MapType;
+import info.tomacla.biketeam.domain.map.WindDirection;
 import info.tomacla.biketeam.domain.parameter.Parameter;
 import info.tomacla.biketeam.domain.parameter.ParameterRepository;
-import info.tomacla.biketeam.domain.team.LastTeamData;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.Visibility;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.userrole.Role;
 import info.tomacla.biketeam.domain.userrole.UserRole;
 import info.tomacla.biketeam.security.Authorities;
+import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.service.UserRoleService;
 import info.tomacla.biketeam.service.feed.FeedService;
 import info.tomacla.biketeam.service.file.FileService;
+import info.tomacla.biketeam.web.map.SearchMapForm;
 import info.tomacla.biketeam.web.team.NewTeamForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -33,7 +38,6 @@ import java.nio.file.Path;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -56,6 +60,9 @@ public class RootController extends AbstractController {
     @Autowired
     private FeedService feedService;
 
+    @Autowired
+    private MapService mapService;
+
     @GetMapping
     public String getRoot(@RequestParam(required = false, name = "error") String error,
                           @ModelAttribute(name = "error") String modelError,
@@ -76,7 +83,7 @@ public class RootController extends AbstractController {
             final List<Team> teams = teamService.getUserTeams(user);
             Set<String> teamIds = teams.stream().map(Team::getId).collect(Collectors.toSet());
 
-            if(from == null) {
+            if (from == null) {
                 from = feedService.getDefaultFrom(teamIds);
             }
 
@@ -112,6 +119,73 @@ public class RootController extends AbstractController {
             model.addAttribute("teamCount", teamService.count());
             return "root";
         }
+
+    }
+
+    @GetMapping("/maps")
+    public String getMaps(@RequestParam(value = "lowerDistance", required = false) Double lowerDistance,
+                          @RequestParam(value = "upperDistance", required = false) Double upperDistance,
+                          @RequestParam(value = "lowerPositiveElevation", required = false) Double lowerPositiveElevation,
+                          @RequestParam(value = "upperPositiveElevation", required = false) Double upperPositiveElevation,
+                          @RequestParam(value = "sort", required = false) MapSorterOption sort,
+                          @RequestParam(value = "windDirection", required = false) WindDirection windDirection,
+                          @RequestParam(value = "type", required = false) MapType type,
+                          @RequestParam(value = "name", required = false) String name,
+                          @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+                          @RequestParam(value = "pageSize", defaultValue = "18", required = false) int pageSize,
+                          @ModelAttribute("error") String error,
+                          Principal principal,
+                          Model model) {
+
+        final Optional<User> userFromPrincipal = getUserFromPrincipal(principal);
+        if (userFromPrincipal.isPresent()) {
+
+            final User user = userFromPrincipal.get();
+
+            final List<Team> teams = teamService.getUserTeams(user);
+            Set<String> teamIds = teams.stream().map(Team::getId).collect(Collectors.toSet());
+
+            SearchMapForm form = SearchMapForm.builder()
+                    .withSort(sort)
+                    .withWindDirection(windDirection)
+                    .withLowerDistance(lowerDistance)
+                    .withUpperDistance(upperDistance)
+                    .withLowerPositiveElevation(lowerPositiveElevation)
+                    .withUpperPositiveElevation(upperPositiveElevation)
+                    .withPage(page)
+                    .withPageSize(pageSize)
+                    .withType(type)
+                    .withName(name)
+                    .get();
+
+            SearchMapForm.SearchMapFormParser parser = form.parser();
+
+            Page<Map> maps = mapService.searchMaps(
+                    teamIds,
+                    parser.getName(),
+                    parser.getLowerDistance(),
+                    parser.getUpperDistance(),
+                    parser.getType(),
+                    parser.getLowerPositiveElevation(),
+                    parser.getUpperPositiveElevation(),
+                    parser.getTags(),
+                    parser.getWindDirection(),
+                    parser.getPage(),
+                    parser.getPageSize(),
+                    parser.getSort());
+
+            addGlobalValues(principal, model, "Maps", null);
+            model.addAttribute("maps", maps.getContent());
+            model.addAttribute("pages", maps.getTotalPages());
+            model.addAttribute("formdata", form);
+            if (!ObjectUtils.isEmpty(error)) {
+                model.addAttribute("errors", List.of(error));
+            }
+            return "root_maps";
+
+        }
+
+        return "redirect:/";
 
     }
 
