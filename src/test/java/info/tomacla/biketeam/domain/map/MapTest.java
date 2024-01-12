@@ -41,12 +41,12 @@ public class MapTest extends AbstractDBTest {
         map.setEndPoint(new Point(53.0, 3.1));
 
         assertFalse(mapRepository.findById("map-id").isPresent());
-        assertFalse(mapRepository.findOne(new SearchMapSpecification(null, "map-perma", null, null, null, null, null, null, null, null, null)).isPresent());
+        assertFalse(mapRepository.findOne(new SearchMapSpecification(null, "map-perma", null, null, null, null, null, null, null, null, null, null, null)).isPresent());
 
         mapRepository.save(map);
 
         assertTrue(mapRepository.findById("mapRepositoryTU-id").isPresent());
-        assertTrue(mapRepository.findOne(new SearchMapSpecification(null, "map-perma", null, null, null, null, null, null, null, null, null)).isPresent());
+        assertTrue(mapRepository.findOne(new SearchMapSpecification(null, "map-perma", null, null, null, null, null, null, null, null, null, null, null)).isPresent());
 
         mapRepository.deleteAll();
 
@@ -92,8 +92,8 @@ public class MapTest extends AbstractDBTest {
         mapRepository.save(map3);
 
 
-        assertEquals(2, mapRepository.findAll(new SearchMapSpecification(null, null, Set.of("maptest-team"), null, null, null, null, null, null, null, null)).size());
-        assertEquals(1, mapRepository.findAll(new SearchMapSpecification(null, null, Set.of("maptest-team"), "GRAVEL", null, null, null, null, null, null, null)).size());
+        assertEquals(2, mapRepository.findAll(new SearchMapSpecification(null, null, Set.of("maptest-team"), null, null, null, null, null, null, null, null, null, null)).size());
+        assertEquals(1, mapRepository.findAll(new SearchMapSpecification(null, null, Set.of("maptest-team"), "GRAVEL", null, null, null, null, null, null, null, null, null)).size());
 
         mapRepository.deleteAll();
 
@@ -163,7 +163,7 @@ public class MapTest extends AbstractDBTest {
                 0.0,
                 1000.0,
                 List.of("fondo"),
-                WindDirection.NORTH
+                WindDirection.NORTH, null, null
         );
 
         Map map1 = new Map();

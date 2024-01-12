@@ -116,6 +116,10 @@ function initGeoCode(input) {
                            input.value = geocodeResponse.label;
                            document.getElementById(input.id + '-lat').value = geocodeResponse.point.lat;
                            document.getElementById(input.id + '-lng').value = geocodeResponse.point.lng;
+                       } else {
+                            input.value = '';
+                            document.getElementById(input.id + '-lat').value = '';
+                            document.getElementById(input.id + '-lng').value = '';
                        }
                    });
                }, 1000);

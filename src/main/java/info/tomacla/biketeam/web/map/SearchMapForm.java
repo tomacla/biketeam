@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.web.map;
 
+import info.tomacla.biketeam.common.geo.Point;
 import info.tomacla.biketeam.domain.map.MapSorterOption;
 import info.tomacla.biketeam.domain.map.MapType;
 import info.tomacla.biketeam.domain.map.WindDirection;
@@ -21,6 +22,11 @@ public class SearchMapForm {
     private String windDirection = "";
     private String name = "";
     private List<String> tags = new ArrayList<>();
+
+    private String centerAddress = "";
+    private String centerAddressLat = "";
+    private String centerAddressLng = "";
+    private String distanceToCenter = "10";
 
     public static SearchMapFormBuilder builder() {
         return new SearchMapFormBuilder();
@@ -48,7 +54,6 @@ public class SearchMapForm {
 
     public void setLowerDistance(String lowerDistance) {
         this.lowerDistance = Objects.requireNonNullElse(lowerDistance, "");
-        ;
     }
 
     public String getUpperDistance() {
@@ -57,7 +62,6 @@ public class SearchMapForm {
 
     public void setUpperDistance(String upperDistance) {
         this.upperDistance = Objects.requireNonNullElse(upperDistance, "");
-        ;
     }
 
     public String getLowerPositiveElevation() {
@@ -66,7 +70,6 @@ public class SearchMapForm {
 
     public void setLowerPositiveElevation(String lowerPositiveElevation) {
         this.lowerPositiveElevation = Objects.requireNonNullElse(lowerPositiveElevation, "");
-        ;
     }
 
     public String getUpperPositiveElevation() {
@@ -75,7 +78,38 @@ public class SearchMapForm {
 
     public void setUpperPositiveElevation(String upperPositiveElevation) {
         this.upperPositiveElevation = Objects.requireNonNullElse(upperPositiveElevation, "");
-        ;
+    }
+
+    public String getCenterAddress() {
+        return centerAddress;
+    }
+
+    public void setCenterAddress(String centerAddress) {
+        this.centerAddress = Objects.requireNonNullElse(centerAddress, "");
+    }
+
+    public String getCenterAddressLat() {
+        return centerAddressLat;
+    }
+
+    public void setCenterAddressLat(String centerAddressLat) {
+        this.centerAddressLat = Objects.requireNonNullElse(centerAddressLat, "");
+    }
+
+    public String getCenterAddressLng() {
+        return centerAddressLng;
+    }
+
+    public void setCenterAddressLng(String centerAddressLng) {
+        this.centerAddressLng = Objects.requireNonNullElse(centerAddressLng, "");
+    }
+
+    public String getDistanceToCenter() {
+        return distanceToCenter;
+    }
+
+    public void setDistanceToCenter(String distanceToCenter) {
+        this.distanceToCenter = Objects.requireNonNullElse(distanceToCenter, "10");
     }
 
     public String getType() {
@@ -166,6 +200,28 @@ public class SearchMapForm {
             return Double.parseDouble(form.getUpperPositiveElevation());
         }
 
+        public String getCenterAddress() {
+            if (form.getCenterAddress() == null || form.getCenterAddress().isBlank()) {
+                return null;
+            }
+            return form.getCenterAddress();
+        }
+
+        public Point getCenterAddressPoint() {
+            if (form.getCenterAddressLat() == null || form.getCenterAddressLat().isBlank()
+            || form.getCenterAddressLng() == null || form.getCenterAddressLng().isBlank() ) {
+                return null;
+            }
+            return new Point(Double.parseDouble(form.getCenterAddressLat()), Double.parseDouble(form.getCenterAddressLng()));
+        }
+
+        public Integer getDistanceToCenter() {
+            if (form.getDistanceToCenter() == null || form.getDistanceToCenter().isBlank()) {
+                return null;
+            }
+            return Integer.parseInt(form.getDistanceToCenter());
+        }
+
         public MapSorterOption getSort() {
             if (form.getSort() == null || form.getSort().isBlank()) {
                 return null;
@@ -242,6 +298,29 @@ public class SearchMapForm {
         public SearchMapFormBuilder withUpperPositiveElevation(Double positiveElevation) {
             if (positiveElevation != null) {
                 form.setUpperPositiveElevation(String.valueOf(positiveElevation.intValue()));
+            }
+            return this;
+        }
+
+
+        public SearchMapFormBuilder withCenterAddress(String centerAddress) {
+            form.setCenterAddress(centerAddress);
+            return this;
+        }
+
+
+        public SearchMapFormBuilder withCenterAddressPoint(Point centerAddressPoint) {
+            if(centerAddressPoint != null) {
+                form.setCenterAddressLat(""+centerAddressPoint.getLat());
+                form.setCenterAddressLng(""+centerAddressPoint.getLng());
+            }
+            return this;
+        }
+
+
+        public SearchMapFormBuilder withDistanceToCenter(Integer distanceToCenter) {
+            if(distanceToCenter != null) {
+                form.setDistanceToCenter(""+distanceToCenter);
             }
             return this;
         }

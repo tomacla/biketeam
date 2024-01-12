@@ -150,6 +150,7 @@ public class MapController extends AbstractController {
                 parser.getUpperPositiveElevation(),
                 parser.getTags(),
                 parser.getWindDirection(),
+                null, null,
                 parser.getPage(),
                 parser.getPageSize(),
                 parser.getSort());

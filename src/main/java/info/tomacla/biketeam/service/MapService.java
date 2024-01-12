@@ -1,6 +1,7 @@
 package info.tomacla.biketeam.service;
 
 import info.tomacla.biketeam.common.file.FileRepositories;
+import info.tomacla.biketeam.common.geo.Point;
 import info.tomacla.biketeam.domain.map.*;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.service.file.FileService;
@@ -118,7 +119,7 @@ public class MapService extends AbstractPermalinkService {
 
     public Page<Map> searchMaps(Set<String> teamIds, String name, Double lowerDistance, Double upperDistance, MapType type,
                                 Double lowerPositiveElevation, Double upperPositiveElevation,
-                                List<String> tags, WindDirection windDirection,
+                                List<String> tags, WindDirection windDirection, Point center, Integer distanceToCenter,
                                 int page, int pageSize, MapSorterOption sortOption) {
 
         Sort sort = getPageSort(sortOption);
@@ -135,7 +136,9 @@ public class MapService extends AbstractPermalinkService {
                 lowerPositiveElevation,
                 upperPositiveElevation,
                 tags,
-                windDirection
+                windDirection,
+                center,
+                distanceToCenter
         );
 
         return mapRepository.findAll(spec, pageable);
