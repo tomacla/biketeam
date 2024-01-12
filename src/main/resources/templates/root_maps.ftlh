@@ -64,6 +64,23 @@
                           </div>
                       </div>
 
+                      <div class="col-12 col-md-6">
+                            <div class="input-group">
+                                      <span class="input-group-text">Autour de</span>
+                                      <input onchange="setFieldValue('maps-filter-page', 0);" type="text" autocomplete="off" value="${formdata.centerAddress}" name="centerAddress" id="maps-filter-address" placeholder="10 rue du coin, Nantes" class="form-input-geocode form-control">
+                                      <input type="hidden" value="${formdata.centerAddressLat}" name="centerAddressLat" id="maps-filter-address-lat">
+                                      <input type="hidden" value="${formdata.centerAddressLng}" name="centerAddressLng" id="maps-filter-address-lng">
+                              </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text">Distance de</span>
+                                <input onchange="setFieldValue('maps-filter-page', 0);" autocomplete="off" type="number" step="1" min="1" value="${formdata.distanceToCenter}" name="distanceToCenter" class="form-control">
+                                  <span class="input-group-text">km</span>
+                            </div>
+                        </div>
+
                       <div class="col-12 col-md-4">
                           <div class="input-group">
                               <label class="input-group-text" for="maps-filter-wind">Vent</label>

@@ -1,11 +1,11 @@
 package info.tomacla.biketeam.domain.map;
 
+import info.tomacla.biketeam.common.geo.Point;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -24,10 +24,12 @@ public class SearchMapSpecification implements Specification<Map> {
     private final Double upperPositiveElevation;
     private final List<String> tags;
     private final WindDirection windDirection;
+    private final Point center;
+    private final Integer distanceToCenter;
 
     public SearchMapSpecification(Boolean deletion, String permalink, Set<String> teamIds, String name, Double lowerDistance, Double upperDistance,
                                   MapType type, Double lowerPositiveElevation, Double upperPositiveElevation,
-                                  List<String> tags, WindDirection windDirection) {
+                                  List<String> tags, WindDirection windDirection, Point center, Integer distanceToCenter) {
         this.deletion = deletion;
         this.permalink = permalink;
         this.teamIds = teamIds;
@@ -39,6 +41,8 @@ public class SearchMapSpecification implements Specification<Map> {
         this.tags = Objects.requireNonNullElse(tags, new ArrayList<>());
         this.windDirection = windDirection;
         this.type = type;
+        this.center = center;
+        this.distanceToCenter = distanceToCenter;
     }
 
     @Override
@@ -80,20 +84,42 @@ public class SearchMapSpecification implements Specification<Map> {
         if (windDirection != null) {
             predicates.add(criteriaBuilder.equal(root.get("windDirection"), windDirection));
         }
+        if(center != null && distanceToCenter != null) {
+
+            double distance = 0.0089982311915998 * (double)distanceToCenter;
+
+            var minLat = center.getLat() - distance;
+            var maxLat = center.getLat() + distance;
+            var minLng = center.getLng() - distance;
+            var maxLng = center.getLng() + distance;
+
+            predicates.add(criteriaBuilder.or(criteriaBuilder.and(
+                    criteriaBuilder.greaterThanOrEqualTo(root.get("startPoint").get("lat"), minLat),
+                    criteriaBuilder.lessThanOrEqualTo(root.get("startPoint").get("lat"), maxLat),
+                    criteriaBuilder.greaterThanOrEqualTo(root.get("startPoint").get("lng"), minLng),
+                    criteriaBuilder.lessThanOrEqualTo(root.get("startPoint").get("lng"), maxLng)
+            ),criteriaBuilder.and(
+                    criteriaBuilder.greaterThanOrEqualTo(root.get("endPoint").get("lat"), minLat),
+                    criteriaBuilder.lessThanOrEqualTo(root.get("endPoint").get("lat"), maxLat),
+                    criteriaBuilder.greaterThanOrEqualTo(root.get("endPoint").get("lng"), minLng),
+                    criteriaBuilder.lessThanOrEqualTo(root.get("endPoint").get("lng"), maxLng)
+            )));
+
+        }
         criteriaQuery.distinct(true);
         return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
     }
 
     public static SearchMapSpecification readyForDeletion() {
-        return new SearchMapSpecification(true, null, null, null, null, null, null, null, null, null, null);
+        return new SearchMapSpecification(true, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     public static SearchMapSpecification allInTeam(String teamId) {
-        return new SearchMapSpecification(null, null, Set.of(teamId), null, null, null, null, null, null, null, null);
+        return new SearchMapSpecification(null, null, Set.of(teamId), null, null, null, null, null, null, null, null, null, null);
     }
 
     public static SearchMapSpecification byPermalink(String permalink) {
-        return new SearchMapSpecification(false, permalink, null, null, null, null, null, null, null, null, null);
+        return new SearchMapSpecification(false, permalink, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     public static SearchMapSpecification byNameInTeam(String teamId, String name) {
@@ -103,7 +129,7 @@ public class SearchMapSpecification implements Specification<Map> {
                 Set.of(teamId),
                 name,
                 null,
-                null, null, null, null, null, null
+                null, null, null, null, null, null, null, null
         );
     }
 
@@ -114,7 +140,7 @@ public class SearchMapSpecification implements Specification<Map> {
                 Set.of(teamId),
                 name,
                 null,
-                null, null, null, null, null, null
+                null, null, null, null, null, null, null, null
         );
     }
 

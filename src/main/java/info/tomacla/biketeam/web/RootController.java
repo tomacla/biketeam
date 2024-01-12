@@ -1,6 +1,7 @@
 package info.tomacla.biketeam.web;
 
 import info.tomacla.biketeam.common.file.FileRepositories;
+import info.tomacla.biketeam.common.geo.Point;
 import info.tomacla.biketeam.domain.feed.FeedEntity;
 import info.tomacla.biketeam.domain.feed.FeedOptions;
 import info.tomacla.biketeam.domain.map.Map;
@@ -131,6 +132,10 @@ public class RootController extends AbstractController {
                           @RequestParam(value = "windDirection", required = false) WindDirection windDirection,
                           @RequestParam(value = "type", required = false) MapType type,
                           @RequestParam(value = "name", required = false) String name,
+                          @RequestParam(value = "centerAddress", required = false) String centerAddress,
+                          @RequestParam(value = "centerAddressLat", required = false) Double centerAddressLat,
+                          @RequestParam(value = "centerAddressLng", required = false) Double centerAddressLng,
+                          @RequestParam(value = "distanceToCenter", required = false) Integer distanceToCenter,
                           @RequestParam(value = "page", defaultValue = "0", required = false) int page,
                           @RequestParam(value = "pageSize", defaultValue = "18", required = false) int pageSize,
                           @ModelAttribute("error") String error,
@@ -142,10 +147,11 @@ public class RootController extends AbstractController {
 
             final User user = userFromPrincipal.get();
 
-            final List<Team> teams = teamService.getUserTeams(user);
-            Set<String> teamIds = teams.stream().map(Team::getId).collect(Collectors.toSet());
+            Page<Team> publicTeams = teamService.searchTeams(0, 100000, null, List.of(Visibility.PUBLIC));
+            Set<String> teamIds = publicTeams.stream().map(Team::getId).collect(Collectors.toSet());
+            teamService.getUserTeams(user).forEach(t -> teamIds.add(t.getTeamId()));
 
-            SearchMapForm form = SearchMapForm.builder()
+            SearchMapForm.SearchMapFormBuilder formBuilder = SearchMapForm.builder()
                     .withSort(sort)
                     .withWindDirection(windDirection)
                     .withLowerDistance(lowerDistance)
@@ -155,8 +161,15 @@ public class RootController extends AbstractController {
                     .withPage(page)
                     .withPageSize(pageSize)
                     .withType(type)
-                    .withName(name)
-                    .get();
+                    .withName(name);
+
+            if(centerAddress != null && !centerAddress.isBlank() && centerAddressLat != null && centerAddressLng != null && distanceToCenter != null) {
+                formBuilder.withCenterAddress(centerAddress)
+                        .withCenterAddressPoint(new Point(centerAddressLat, centerAddressLng))
+                        .withDistanceToCenter(distanceToCenter);
+            }
+
+            SearchMapForm form = formBuilder.get();
 
             SearchMapForm.SearchMapFormParser parser = form.parser();
 
@@ -170,6 +183,8 @@ public class RootController extends AbstractController {
                     parser.getUpperPositiveElevation(),
                     parser.getTags(),
                     parser.getWindDirection(),
+                    parser.getCenterAddressPoint(),
+                    parser.getDistanceToCenter(),
                     parser.getPage(),
                     parser.getPageSize(),
                     parser.getSort());
