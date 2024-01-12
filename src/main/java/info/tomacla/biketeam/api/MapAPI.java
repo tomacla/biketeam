@@ -67,6 +67,7 @@ public class MapAPI extends AbstractAPI {
                 parser.getUpperPositiveElevation(),
                 parser.getTags(),
                 parser.getWindDirection(),
+                null, null,
                 parser.getPage(),
                 parser.getPageSize(),
                 parser.getSort());
