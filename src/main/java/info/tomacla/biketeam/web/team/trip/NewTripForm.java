@@ -29,6 +29,7 @@ public class NewTripForm {
     private String publishedAtTime = "";
     private String title = "";
     private String description = "";
+    private String markdownPage = "";
     private String meetingTime = "08:00";
     private String startPlaceId = "";
     private String endPlaceId = "";
@@ -139,6 +140,14 @@ public class NewTripForm {
         this.description = Strings.requireNonBlankOrDefault(description, "");
     }
 
+    public String getMarkdownPage() {
+        return markdownPage;
+    }
+
+    public void setMarkdownPage(String markdownPage) {
+        this.markdownPage = Strings.requireNonBlankOrDefault(markdownPage, "");
+    }
+
     public String getMeetingTime() {
         return meetingTime;
     }
@@ -219,6 +228,9 @@ public class NewTripForm {
             return Strings.requireNonBlankOrNull(form.getDescription());
         }
 
+        public String getMarkdownPage() {
+            return Strings.requireNonBlankOrNull(form.getMarkdownPage());
+        }
 
         public LocalTime getMeetingTime() {
             return LocalTime.parse(form.getMeetingTime());
@@ -307,6 +319,11 @@ public class NewTripForm {
 
         public NewTripFormBuilder withDescription(String description) {
             form.setDescription(description);
+            return this;
+        }
+
+        public NewTripFormBuilder withMarkdownPage(String markdownPage) {
+            form.setMarkdownPage(markdownPage);
             return this;
         }
 

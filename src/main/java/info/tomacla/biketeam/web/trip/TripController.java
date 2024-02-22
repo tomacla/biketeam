@@ -5,6 +5,7 @@ import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
 import info.tomacla.biketeam.domain.message.Message;
 import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.domain.team.TeamConfiguration;
 import info.tomacla.biketeam.domain.trip.Trip;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.userrole.Role;
@@ -15,6 +16,7 @@ import info.tomacla.biketeam.service.TripService;
 import info.tomacla.biketeam.service.UserRoleService;
 import info.tomacla.biketeam.service.file.ThumbnailService;
 import info.tomacla.biketeam.web.AbstractController;
+import info.tomacla.biketeam.web.team.configuration.EditTeamFAQForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -110,6 +112,37 @@ public class TripController extends AbstractController {
             model.addAttribute("errors", List.of(error));
         }
         return "trip_messages";
+    }
+
+    @GetMapping(value = "/{tripId}/notes")
+    public String getTripNotes(@PathVariable("teamId") String teamId,
+                                  @PathVariable("tripId") String tripId,
+                                  @ModelAttribute("error") String error,
+                                  Principal principal,
+                                  Model model) {
+
+        final Team team = checkTeam(teamId);
+
+        Optional<Trip> optionalTrip = tripService.get(team.getId(), tripId);
+        if (optionalTrip.isEmpty()) {
+            return viewHandler.redirect(team, "/trips");
+        }
+
+        Trip trip = optionalTrip.get();
+
+        if (!trip.getPublishedStatus().equals(PublishedStatus.PUBLISHED) && !isAdmin(principal, team)) {
+            return viewHandler.redirect(team, "/trips");
+        }
+
+        addGlobalValues(principal, model, "Trip " + trip.getTitle(), team);
+        model.addAttribute("trip", trip);
+        model.addAttribute("messages", messageService.listByTarget(trip));
+        model.addAttribute("notes", trip.getMarkdownPage());
+        if (!ObjectUtils.isEmpty(error)) {
+            model.addAttribute("errors", List.of(error));
+        }
+        return "trip_notes";
+
     }
 
 

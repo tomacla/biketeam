@@ -249,6 +249,14 @@
 
              </div>
 
+            <hr/>
+
+             <h5>Notes</h5>
+
+             <div class="mb-3">
+               <textarea name="markdownPage" class="form-control" id="form-trip-mdpage" rows="15">${formdata.markdownPage}</textarea>
+             </div>
+
                  <hr/>
 
                 <button type="submit" class="btn btn-secondary">Enregistrer</button>

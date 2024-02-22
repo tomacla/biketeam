@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "trip")
 public class Trip implements MessageHolder, FeedEntity {
-
     @Id
     private String id = UUID.randomUUID().toString();
     @Column(name = "team_id")
@@ -63,6 +62,9 @@ public class Trip implements MessageHolder, FeedEntity {
             joinColumns = @JoinColumn(name = "trip_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> participants = new HashSet<>();
+
+    @Column(name = "markdown_page")
+    private String markdownPage;
 
     private boolean deletion;
 
@@ -184,6 +186,14 @@ public class Trip implements MessageHolder, FeedEntity {
 
     public void setMeetingTime(LocalTime meetingTime) {
         this.meetingTime = Objects.requireNonNull(meetingTime);
+    }
+
+    public String getMarkdownPage() {
+        return markdownPage;
+    }
+
+    public void setMarkdownPage(String markdownPage) {
+        this.markdownPage = Strings.requireNonBlankOrNull(markdownPage);
     }
 
     public Set<TripStage> getStages() {

@@ -1423,4 +1423,12 @@
 
     </changeSet>
 
+    <changeSet id="add-trip-markdown-page" author="tomacla">
+
+        <addColumn tableName="trip">
+            <column name="markdown_page" type="TEXT"/>
+        </addColumn>
+
+    </changeSet>
+
 </databaseChangeLog>
