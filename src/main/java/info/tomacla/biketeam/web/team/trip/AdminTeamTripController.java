@@ -108,6 +108,7 @@ public class AdminTeamTripController extends AbstractController {
                 .withStartDate(trip.getStartDate())
                 .withEndDate(trip.getEndDate())
                 .withDescription(trip.getDescription())
+                .withMarkdownPage(trip.getMarkdownPage())
                 .withType(trip.getType())
                 .withPublishedAt(trip.getPublishedAt(), team.getZoneId())
                 .withTitle(trip.getTitle())
@@ -174,6 +175,7 @@ public class AdminTeamTripController extends AbstractController {
 
             target.setTitle(parser.getTitle());
             target.setDescription(parser.getDescription());
+            target.setMarkdownPage(parser.getMarkdownPage());
             target.setType(parser.getType());
             target.setMeetingTime(parser.getMeetingTime());
             target.setPermalink(parser.getPermalink());

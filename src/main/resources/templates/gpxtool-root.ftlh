@@ -85,6 +85,25 @@
         </div>
     </div>
 
+    <div class="col-12 col-md-4 mb-2">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Import VisuGPX</h5>
+            <p class="card-text">Saisissez l'ID VisuGPX pour visualiser le GPX</p>
+            <form method="GET" action="<@common.teamUrl '' '/gpxtool' />" class="card-text">
+               <div>
+                   <input id="visugpx-source-field" autocomplete="off" required="true" name="gpxvg" class="form-control" type="text"
+                        onkeyup="document.getElementById('visugpx-target-field').value='https://www.visugpx.com/download.php?id='+document.getElementById('visugpx-source-field').value">
+               </div>
+               <input type="hidden" id="visugpx-target-field" name="gpx" value="">
+              <div class="mt-2">
+                   <input type="submit" class="btn btn-secondary" value="Voir">
+               </div>
+           </form>
+          </div>
+        </div>
+    </div>
+
  <div class="row justify-content-center mt-4">
 
     <div class="col-12 col-md-6 text-center">
