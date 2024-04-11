@@ -82,7 +82,7 @@
             targetMap.removeLayer(geoJsonLayer);
         }
 
-        var targetMap = initMap('map-wrapper', 51.505, -0.09, 11, 'Cyclo OSM', {
+        var targetMap = initMap('map-wrapper', 51.505, -0.09, 11, 'OpenStreetMap', {
             layersControl: true,
             zoomControl: true,
             positionControl: true,
