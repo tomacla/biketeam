@@ -69,7 +69,7 @@
 
             </#if>
 
-            var targetMap = initMap('gpxtool<#if gpxuuid == 'raw'>raw</#if>map-wrapper', 51.505, -0.09, 11, 'Cyclo OSM',
+            var targetMap = initMap('gpxtool<#if gpxuuid == 'raw'>raw</#if>map-wrapper', 51.505, -0.09, 11, 'OpenStreetMap',
                 {
                      layersControl: true,
                      zoomControl: true,
