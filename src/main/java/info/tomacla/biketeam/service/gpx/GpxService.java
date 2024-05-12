@@ -103,9 +103,9 @@ public class GpxService {
         try {
             String defaultName = UUID.randomUUID().toString();
 
-        GPXPath gpxPath = getGpxPathFromFiles(defaultName, gpx);
-        gpxPath.setName(defaultName);
-        gpxPathEnhancer.virtualize(gpxPath);
+            GPXPath gpxPath = getGpxPathFromFiles(defaultName, gpx);
+            gpxPath.setName(defaultName);
+            gpxPathEnhancer.virtualize(gpxPath);
 
             Path toStoreGpx = getGpx(gpxPath);
 
