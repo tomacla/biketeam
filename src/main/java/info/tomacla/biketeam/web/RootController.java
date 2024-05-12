@@ -248,6 +248,7 @@ public class RootController extends AbstractController {
             final NewTeamForm.NewTeamFormParser parser = form.parser();
 
             String targetId = parser.getId().toLowerCase();
+            targetId = teamService.getPermalink(targetId);
 
             teamService.get(targetId).ifPresent(team -> {
                 throw new IllegalArgumentException("Team " + team.getId() + " already exists");
