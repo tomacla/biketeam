@@ -154,7 +154,7 @@
                     </div>
                     <div class="col-6">
                         <label for="form-ride-permalink" class="form-label">URL unique</label>
-                        <input data-element="rides" data-target-id-field="form-ride-permalink" minLength="2" maxLength="19" autocomplete="off" value="${formdata.permalink}" name="permalink" type="text" class="form-control form-unique-id" id="form-ride-permalink">
+                        <input data-element="rides" data-target-id-field="form-ride-permalink" minLength="2" maxLength="40" autocomplete="off" value="${formdata.permalink}" name="permalink" type="text" class="form-control form-unique-id" id="form-ride-permalink">
                     </div>
 
                 </div>

@@ -43,7 +43,7 @@
 
                     <div class="col-6">
                         <label for="form-map-permalink" class="form-label">URL unique</label>
-                        <input data-element="maps" data-target-id-field="form-map-permalink" minLength="2" maxLength="19" autocomplete="off" value="${formdata.permalink}" name="permalink" type="text" class="form-control form-unique-id" id="form-map-permalink">
+                        <input data-element="maps" data-target-id-field="form-map-permalink" minLength="2" maxLength="40" autocomplete="off" value="${formdata.permalink}" name="permalink" type="text" class="form-control form-unique-id" id="form-map-permalink">
                     </div>
 
 

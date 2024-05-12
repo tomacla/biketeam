@@ -36,21 +36,21 @@ public class AutocompleteController extends AbstractController {
     @ResponseBody
     @RequestMapping(value = "/permalink/maps", method = RequestMethod.GET)
     public String autocompleteMapPermalink(@RequestParam("title") String title,
-                                           @RequestParam(required = false, defaultValue = "100") int maxSize) {
+                                           @RequestParam(required = false, defaultValue = "40") int maxSize) {
         return mapService.getPermalink(title, maxSize, false);
     }
 
     @ResponseBody
     @RequestMapping(value = "/permalink/rides", method = RequestMethod.GET)
     public String autocompleteRidePermalink(@RequestParam("title") String title,
-                                            @RequestParam(required = false, defaultValue = "100") int maxSize) {
+                                            @RequestParam(required = false, defaultValue = "40") int maxSize) {
         return rideService.getPermalink(title, maxSize, false);
     }
 
     @ResponseBody
     @RequestMapping(value = "/permalink/trips", method = RequestMethod.GET)
     public String autocompleteTripPermalink(@RequestParam("title") String title,
-                                            @RequestParam(required = false, defaultValue = "100") int maxSize) {
+                                            @RequestParam(required = false, defaultValue = "40") int maxSize) {
         return tripService.getPermalink(title, maxSize, false);
     }
 

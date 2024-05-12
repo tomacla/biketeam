@@ -191,7 +191,7 @@
 
                      <div class="col-6">
                         <label for="form-trip-permalink" class="form-label">URL unique</label>
-                        <input data-element="trips" data-target-id-field="form-trip-permalink" minLength="2" maxLength="19" autocomplete="off" value="${formdata.permalink}" name="permalink" type="text" class="form-control form-unique-id" id="form-trip-permalink">
+                        <input data-element="trips" data-target-id-field="form-trip-permalink" minLength="2" maxLength="40" autocomplete="off" value="${formdata.permalink}" name="permalink" type="text" class="form-control form-unique-id" id="form-trip-permalink">
                     </div>
 
                 </div>
