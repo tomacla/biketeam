@@ -71,53 +71,51 @@ public class GpxService {
 
     public Map parseAndStore(Team team, Path gpx, String defaultName, String permalink) {
 
-        Map newMap = new Map();
-        newMap.setTeamId(team.getId());
-        newMap.setPermalink(permalink);
-        newMap.setType(MapType.ROAD);
-        newMap.setTags(team.getConfiguration().getDefaultSearchTags());
+        try {
+            Map newMap = new Map();
+            newMap.setTeamId(team.getId());
+            newMap.setPermalink(permalink);
+            newMap.setType(MapType.ROAD);
+            newMap.setTags(team.getConfiguration().getDefaultSearchTags());
 
-        GPXPath gpxPath = prepareMap(gpx, defaultName, newMap, team);
+            GPXPath gpxPath = prepareMap(gpx, defaultName, newMap, team);
 
-        newMap.setName(gpxPath.getName());
+            newMap.setName(gpxPath.getName());
 
-        return newMap;
+            return newMap;
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to parse GPX", e);
+        }
 
     }
 
     public Map parseAndReplace(Team team, Map map, Path gpx) {
-        prepareMap(gpx, map.getName(), map, team);
-        return map;
+        try {
+            prepareMap(gpx, map.getName(), map, team);
+            return map;
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to parse GPX", e);
+        }
     }
 
     public String parseAndStoreStandalone(Path... gpx) {
 
-        String defaultName = UUID.randomUUID().toString();
+        try {
+            String defaultName = UUID.randomUUID().toString();
 
-        GPXPath gpxPath = getGpxPathFromFiles(defaultName, gpx);
-        gpxPath.setName(defaultName);
-        gpxPathEnhancer.virtualize(gpxPath);
-        GPXFilter.filterPointsDouglasPeucker(gpxPath);
+            GPXPath gpxPath = getGpxPathFromFiles(defaultName, gpx);
+            gpxPath.setName(defaultName);
+            gpxPathEnhancer.virtualize(gpxPath);
+            GPXFilter.filterPointsDouglasPeucker(gpxPath);
 
-        Path toStoreGpx = getGpx(gpxPath);
+            Path toStoreGpx = getGpx(gpxPath);
 
-        fileService.storeFile(toStoreGpx, FileRepositories.GPXTOOLVIEWER, defaultName + ".gpx");
+            fileService.storeFile(toStoreGpx, FileRepositories.GPXTOOLVIEWER, defaultName + ".gpx");
 
-        return defaultName;
-
-    }
-
-    private GPXPath getGpxPathFromFiles(String defaultName, Path... gpx) {
-
-        GPXPath gpxPath = getGPXPath(gpx[0], defaultName);
-        if (gpx.length > 1) {
-            for (int i = 1; i < gpx.length; i++) {
-                GPXPath tgpxPath = getGPXPath(gpx[i], defaultName);
-                gpxPath.getPoints().addAll(tgpxPath.getPoints());
-                gpxPath.computeArrays(ValueKind.source);
-            }
+            return defaultName;
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to parse GPX", e);
         }
-        return gpxPath;
 
     }
 
@@ -143,6 +141,20 @@ public class GpxService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private GPXPath getGpxPathFromFiles(String defaultName, Path... gpx) {
+
+        GPXPath gpxPath = getGPXPath(gpx[0], defaultName);
+        if (gpx.length > 1) {
+            for (int i = 1; i < gpx.length; i++) {
+                GPXPath tgpxPath = getGPXPath(gpx[i], defaultName);
+                gpxPath.getPoints().addAll(tgpxPath.getPoints());
+                gpxPath.computeArrays(ValueKind.source);
+            }
+        }
+        return gpxPath;
+
     }
 
     private GPXPath prepareMap(final Path gpx, final String defaultName, final Map map, final Team team) {
