@@ -106,7 +106,6 @@ public class GpxService {
             GPXPath gpxPath = getGpxPathFromFiles(defaultName, gpx);
             gpxPath.setName(defaultName);
             gpxPathEnhancer.virtualize(gpxPath);
-            GPXFilter.filterPointsDouglasPeucker(gpxPath);
 
             Path toStoreGpx = getGpx(gpxPath);
 
@@ -162,7 +161,6 @@ public class GpxService {
 
         if (team.getType().isSimplifyGpx()) {
             gpxPathEnhancer.virtualize(gpxPath);
-            GPXFilter.filterPointsDouglasPeucker(gpxPath);
         }
 
         Path storedStaticMap = getStaticMap(gpxPath);
