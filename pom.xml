@@ -33,7 +33,7 @@
 		<java.version>17</java.version>
 		<dotenv-java.version>2.2.4</dotenv-java.version>
 		<restfb.version>3.22.0</restfb.version>
-		<gpx2web.version>1.1.11</gpx2web.version>
+		<gpx2web.version>1.1.12</gpx2web.version>
 		<zip4j.version>2.11.3</zip4j.version>
 		<h2.version>2.1.212</h2.version>
 		<postgresql.version>42.5.5</postgresql.version>
