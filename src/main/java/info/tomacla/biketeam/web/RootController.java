@@ -163,7 +163,7 @@ public class RootController extends AbstractController {
                     .withType(type)
                     .withName(name);
 
-            if(centerAddress != null && !centerAddress.isBlank() && centerAddressLat != null && centerAddressLng != null && distanceToCenter != null) {
+            if (centerAddress != null && !centerAddress.isBlank() && centerAddressLat != null && centerAddressLng != null && distanceToCenter != null) {
                 formBuilder.withCenterAddress(centerAddress)
                         .withCenterAddressPoint(new Point(centerAddressLat, centerAddressLng))
                         .withDistanceToCenter(distanceToCenter);

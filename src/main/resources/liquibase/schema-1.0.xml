@@ -1431,4 +1431,10 @@
 
     </changeSet>
 
+    <changeSet id="delete-team-type" author="tomacla">
+
+        <dropColumn tableName="team" columnName="type" />
+
+    </changeSet>
+
 </databaseChangeLog>

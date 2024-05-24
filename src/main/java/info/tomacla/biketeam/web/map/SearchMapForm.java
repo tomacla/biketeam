@@ -209,7 +209,7 @@ public class SearchMapForm {
 
         public Point getCenterAddressPoint() {
             if (form.getCenterAddressLat() == null || form.getCenterAddressLat().isBlank()
-            || form.getCenterAddressLng() == null || form.getCenterAddressLng().isBlank() ) {
+                    || form.getCenterAddressLng() == null || form.getCenterAddressLng().isBlank()) {
                 return null;
             }
             return new Point(Double.parseDouble(form.getCenterAddressLat()), Double.parseDouble(form.getCenterAddressLng()));
@@ -310,17 +310,17 @@ public class SearchMapForm {
 
 
         public SearchMapFormBuilder withCenterAddressPoint(Point centerAddressPoint) {
-            if(centerAddressPoint != null) {
-                form.setCenterAddressLat(""+centerAddressPoint.getLat());
-                form.setCenterAddressLng(""+centerAddressPoint.getLng());
+            if (centerAddressPoint != null) {
+                form.setCenterAddressLat("" + centerAddressPoint.getLat());
+                form.setCenterAddressLng("" + centerAddressPoint.getLng());
             }
             return this;
         }
 
 
         public SearchMapFormBuilder withDistanceToCenter(Integer distanceToCenter) {
-            if(distanceToCenter != null) {
-                form.setDistanceToCenter(""+distanceToCenter);
+            if (distanceToCenter != null) {
+                form.setDistanceToCenter("" + distanceToCenter);
             }
             return this;
         }

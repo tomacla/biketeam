@@ -158,10 +158,7 @@ public class GpxService {
 
     private GPXPath prepareMap(final Path gpx, final String defaultName, final Map map, final Team team) {
         GPXPath gpxPath = getGPXPath(gpx, defaultName);
-
-        if (team.getType().isSimplifyGpx()) {
-            gpxPathEnhancer.virtualize(gpxPath);
-        }
+        gpxPathEnhancer.virtualize(gpxPath);
 
         Path storedStaticMap = getStaticMap(gpxPath);
         Path storedGpx = getGpx(gpxPath);
