@@ -268,6 +268,7 @@ public class NewTripForm {
                 final TripStage ss = new TripStage();
                 ss.setName(parser.getName());
                 ss.setDate(parser.getDate());
+                ss.setAlternative(parser.isAlternative());
                 ss.setMap(map);
 
                 if (parser.getId() != null) {
@@ -380,6 +381,7 @@ public class NewTripForm {
                             .withId(st.getId())
                             .withName(st.getName())
                             .withDate(st.getDate())
+                            .withAlternative(st.isAlternative())
                             .withMapId(mapId)
                             .withMapName(mapName)
                             .get();

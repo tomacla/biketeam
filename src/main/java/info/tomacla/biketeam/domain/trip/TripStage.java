@@ -22,6 +22,7 @@ public class TripStage {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "map_id")
     private Map map;
+    private boolean alternative;
 
     public String getId() {
         return id;
@@ -61,6 +62,14 @@ public class TripStage {
 
     public void setMap(Map map) {
         this.map = map;
+    }
+
+    public boolean isAlternative() {
+        return alternative;
+    }
+
+    public void setAlternative(boolean alternative) {
+        this.alternative = alternative;
     }
 
     @Override

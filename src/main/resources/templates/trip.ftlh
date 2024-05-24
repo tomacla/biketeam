@@ -69,16 +69,12 @@
     <#assign colors=["#566B13", "#1d32a8", "#732C7B", "#bdbd22", "#c90808", "#b81491", "#628de3", "#6dcc5c", "#c694d4", "#e3a209"]>
    <#assign textColors=["#ffffff", "#ffffff", "#ffffff", "#000000", "#ffffff", "#ffffff", "#000000", "#000000", "#000000", "#000000"]>
    <#assign stageMaps = []>
-   <#assign totalDistance = 0>
-   <#assign totalPositiveElevation = 0>
    <#assign mapCenter = [0.0,0.0]>
    <#if trip.startPlace?? && trip.startPlace.point??>
         <#assign mapCenter = [trip.startPlace.point.lat,trip.startPlace.point.lng]>
    </#if>
    <#list trip.sortedStages as stage>
       <#if stage.map??>
-        <#assign totalDistance = totalDistance + stage.map.length>
-        <#assign totalPositiveElevation = totalPositiveElevation + stage.map.positiveElevation>
         <#if mapCenter[0] == 0.0>
             <#assign mapCenter = [stage.map.startPoint.lat, stage.map.startPoint.lng]>
         </#if>
@@ -129,10 +125,10 @@
                     <li>Arrivée : <a href="#" class="link-dark" data-bs-toggle="modal" data-bs-target="#placemodal">${trip.endPlace.name}</a></li>
                 </#if>
 
-                <#if totalDistance gt 0>
+                <#if trip.distance gt 0>
                  <li><div class="d-flex flex-row justify-content-start align-items-center gap-1 gap-md-2 gap-xxl-3">
-                       <span class="text-nowrap"><i class="bi bi-arrow-left-right d-none d-md-inline-block"></i> ${totalDistance?floor}km</span>
-                       <span class="text-nowrap"><i class="bi bi-arrow-up d-none d-md-inline-block"></i> ${totalPositiveElevation?floor}m</span>
+                       <span class="text-nowrap"><i class="bi bi-arrow-left-right d-none d-md-inline-block"></i> ${trip.distance?floor}km</span>
+                       <span class="text-nowrap"><i class="bi bi-arrow-up d-none d-md-inline-block"></i> ${trip.elevation?floor}m</span>
                    </div></li>
                  </#if>
 
@@ -205,7 +201,7 @@
                        <div class="d-flex flex-column flex-grow-1 gap-1">
                            <div class="gap-2 d-flex flex-row justify-content-start align-items-center">
                                 <span>${stage.date.format(_date_short_formatter)}</span>
-                               <span class="short-label text-nowrap text-truncate">${stage.name}</span>
+                               <span class="short-label text-nowrap text-truncate">${stage.name} <#if stage.alternative><span class="text-nowrap badge bg-light text-dark border px-1 py-1">alt</span></#if></span>
                            </div>
 
                            <div class="d-flex flex-row justify-content-start align-items-center small gap-1 gap-md-2 gap-xxl-3">

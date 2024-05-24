@@ -1437,4 +1437,14 @@
 
     </changeSet>
 
+    <changeSet id="trip-alternative-stage" author="tomacla">
+
+        <addColumn tableName="trip_stage">
+            <column name="alternative" type="BOOLEAN"/>
+        </addColumn>
+
+        <sql>update trip_stage set alternative = FALSE</sql>
+
+    </changeSet>
+
 </databaseChangeLog>

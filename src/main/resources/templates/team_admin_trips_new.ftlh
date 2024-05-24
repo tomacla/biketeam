@@ -214,6 +214,14 @@
                               <input autocomplete="off" required value="${stage.date}" name="stages[${stage?index}].date" type="date" class="form-control" id="form-trip-stage-date-${stage?index}">
                             </div>
                         </div>
+                        <div class="col-12 mb-3">
+                            <div class="p-2">
+                                <div class="form-check form-switch">
+                                 <input class="form-check-input" name="stages[${stage?index}].alternative" type="checkbox" id="form-trip-stage-mapalt-${stage?index}"<#if stage.alternative?? && stage.alternative == 'on'> checked</#if>>
+                                 <label class="form-check-label" for="form-trip-stage-mapalt-${stage?index}">Cette étape est une alternative au tracé principal</label>
+                               </div>
+                           </div>
+                        </div>
                         <div class="row border rounded mx-2">
                             <div class="my-2 col-12 align-items-center d-flex flex-row justify-content-between">
                                 <h6 class="m-0">Map associée</h6>

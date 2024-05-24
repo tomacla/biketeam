@@ -196,6 +196,26 @@ public class Trip implements MessageHolder, FeedEntity {
         this.markdownPage = Strings.requireNonBlankOrNull(markdownPage);
     }
 
+    public double getDistance() {
+        double distance = 0.0;
+        for (TripStage stage : this.stages) {
+            if(!stage.isAlternative() && stage.getMap() != null) {
+                distance += stage.getMap().getLength();
+            }
+        }
+        return distance;
+    }
+
+    public double getElevation() {
+        double elevation = 0.0;
+        for (TripStage stage : this.stages) {
+            if(!stage.isAlternative() && stage.getMap() != null) {
+                elevation += stage.getMap().getPositiveElevation();
+            }
+        }
+        return elevation;
+    }
+
     public Set<TripStage> getStages() {
         return stages;
     }
@@ -240,6 +260,7 @@ public class Trip implements MessageHolder, FeedEntity {
                     target.setName(g.getName());
                     target.setMap(g.getMap());
                     target.setDate(g.getDate());
+                    target.setAlternative(g.isAlternative());
                 })
         );
 
