@@ -180,9 +180,12 @@ public class CatalogController extends AbstractController {
             return "redirect:/catalog/trips";
         }
 
-        boolean canAccess = userService.authorizePublicAccess(authentication, team.getId());
-        if (!canAccess && getUserFromPrincipal(principal).isPresent()) {
-            canAccess = userService.authorizeAuthenticatedPublicAccess(authentication, team.getId()) || userService.authorizeAdminAccess(authentication, team.getId());
+        boolean canAccess = team.isPublic();
+        if (!canAccess && authentication != null) {
+            canAccess = userService.authorizePublicAccess(authentication, team.getId());
+            if (!canAccess && getUserFromPrincipal(principal).isPresent()) {
+                canAccess = userService.authorizeAuthenticatedPublicAccess(authentication, team.getId()) || userService.authorizeAdminAccess(authentication, team.getId());
+            }
         }
 
         if (!canAccess) {
