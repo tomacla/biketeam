@@ -2,7 +2,7 @@
 
 <div class="row pt-2 justify-content-center">
 
-        <form id="maps-filter" action="<@common.teamUrl '' '/maps' />" method="GET" class="border rounded p-2">
+        <form id="maps-filter" action="<@common.teamUrl '' '/catalog/maps' />" method="GET" class="border rounded p-2">
 
             <input type="hidden" id="maps-filter-page" name="page" value="${formdata.page}">
             <input type="hidden" id="maps-filter-pageSize" name="pageSize" value="${formdata.pageSize}">
