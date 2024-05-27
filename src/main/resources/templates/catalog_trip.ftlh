@@ -90,7 +90,6 @@
 
                        <div class="d-flex flex-column flex-grow-1 gap-1">
                            <div class="gap-2 d-flex flex-row justify-content-start align-items-center">
-                                <span>${stage.date.format(_date_short_formatter)}</span>
                                <span class="short-label text-nowrap text-truncate">${stage.name} <#if stage.alternative><span class="text-nowrap badge bg-light text-dark border px-1 py-1">alt</span></#if></span>
                            </div>
 
