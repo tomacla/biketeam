@@ -25,6 +25,7 @@ public class NewTripFormTest {
                 .withDescription("desc ride")
                 .withMeetingTime(LocalTime.parse("16:30"))
                 .withListedInFeed(true)
+                .withPublishToCatalog(true)
                 .get();
 
         final NewTripForm.NewTripFormParser parser = form.parser();
@@ -40,6 +41,7 @@ public class NewTripFormTest {
         assertEquals(2, parser.getStages("t1", null).size());
         assertEquals("2021-01-05T12:10Z", parser.getPublishedAt(ZoneOffset.UTC).toString());
         assertTrue(parser.isListedInFeed());
+        assertTrue(parser.isPublishTocatalog());
 
     }
 

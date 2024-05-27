@@ -129,6 +129,16 @@
                        </div>
                     </div>
 
+                    <div class="col-12 mb-3">
+                        <div class="border rounded p-2">
+                            <div class="form-check form-switch">
+                             <input class="form-check-input" name="publishToCatalog" type="checkbox" id="form-trip-publishToCatalog"<#if formdata.publishToCatalog?? && formdata.publishToCatalog == 'on'> checked</#if>>
+                             <label class="form-check-label" for="form-trip-publishToCatalog">Publier dans le catalogue</label>
+                           </div>
+                           <div id="form-trip-listedInFeed-help" class="form-text">Si l'option est activée, le trip sera publié au format générique (sans date) dans le catalogue public.</div>
+                       </div>
+                    </div>
+
                     <div class="col-6 mb-3">
                       <label for="form-trip-title" class="form-label">Titre</label>
                       <input data-element="trips" data-target-id-field="form-trip-permalink" autocomplete="off" required value="${formdata.title}" name="title" type="text" class="form-control form-unique-id" id="form-trip-title" placeholder="Voyage AR">
@@ -214,6 +224,14 @@
                               <input autocomplete="off" required value="${stage.date}" name="stages[${stage?index}].date" type="date" class="form-control" id="form-trip-stage-date-${stage?index}">
                             </div>
                         </div>
+                        <div class="col-12 mb-3">
+                            <div class="p-2">
+                                <div class="form-check form-switch">
+                                 <input class="form-check-input" name="stages[${stage?index}].alternative" type="checkbox" id="form-trip-stage-mapalt-${stage?index}"<#if stage.alternative?? && stage.alternative == 'on'> checked</#if>>
+                                 <label class="form-check-label" for="form-trip-stage-mapalt-${stage?index}">Cette étape est une alternative au tracé principal</label>
+                               </div>
+                           </div>
+                        </div>
                         <div class="row border rounded mx-2">
                             <div class="my-2 col-12 align-items-center d-flex flex-row justify-content-between">
                                 <h6 class="m-0">Map associée</h6>
@@ -252,6 +270,11 @@
             <hr/>
 
              <h5>Notes</h5>
+
+            <div class="alert alert-info p-2" role="alert">
+                Les notes apparaîtront dans la page du trip sous l'onglet "Notes"<br/>
+                A saisir en <strong>markdown</strong>.
+            </div>
 
              <div class="mb-3">
                <textarea name="markdownPage" class="form-control" id="form-trip-mdpage" rows="15">${formdata.markdownPage}</textarea>

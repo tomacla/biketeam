@@ -1431,4 +1431,30 @@
 
     </changeSet>
 
+    <changeSet id="delete-team-type" author="tomacla">
+
+        <dropColumn tableName="team" columnName="type" />
+
+    </changeSet>
+
+    <changeSet id="trip-alternative-stage" author="tomacla">
+
+        <addColumn tableName="trip_stage">
+            <column name="alternative" type="BOOLEAN"/>
+        </addColumn>
+
+        <sql>update trip_stage set alternative = FALSE</sql>
+
+    </changeSet>
+
+    <changeSet id="trip-catalogue" author="tomacla">
+
+        <addColumn tableName="trip">
+            <column name="publish_to_catalog" type="BOOLEAN"/>
+        </addColumn>
+
+        <sql>update trip set publish_to_catalog = FALSE</sql>
+
+    </changeSet>
+
 </databaseChangeLog>

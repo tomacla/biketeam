@@ -14,6 +14,7 @@ public class NewTripStageForm {
     private String mapId;
     private String mapName;
     private String date;
+    private String alternative = null;
 
     public NewTripStageForm() {
         setId(null);
@@ -67,6 +68,14 @@ public class NewTripStageForm {
         this.mapName = Strings.requireNonBlankOrDefault(mapName, "");
     }
 
+    public String getAlternative() {
+        return alternative;
+    }
+
+    public void setAlternative(String alternative) {
+        this.alternative = alternative;
+    }
+
     public NewTripStageFormParser parser() {
         return new NewTripStageFormParser(this);
     }
@@ -101,6 +110,10 @@ public class NewTripStageForm {
             return Optional.empty();
         }
 
+        public boolean isAlternative() {
+            return form.getAlternative() != null && form.getAlternative().equals("on");
+        }
+
     }
 
     public static class NewTripStageFormBuilder {
@@ -133,6 +146,11 @@ public class NewTripStageForm {
 
         public NewTripStageFormBuilder withDate(LocalDate date) {
             form.setDate(Dates.formatDate(date));
+            return this;
+        }
+
+        public NewTripStageFormBuilder withAlternative(boolean alternative) {
+            form.setAlternative(alternative ? "on" : null);
             return this;
         }
 

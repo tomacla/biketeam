@@ -27,8 +27,6 @@ public class Team implements MessageHolder {
     private String city;
     @Enumerated(EnumType.STRING)
     private Country country = Country.FR;
-    @Enumerated(EnumType.STRING)
-    private TeamType type = TeamType.BIKE;
     @Column(name = "created_at")
     private LocalDate createdAt = LocalDate.now(ZoneOffset.UTC);
     @OneToOne(mappedBy = "team", cascade = CascadeType.ALL)
@@ -83,10 +81,6 @@ public class Team implements MessageHolder {
 
     public void setCountry(Country country) {
         this.country = Objects.requireNonNull(country, "country is null");
-    }
-
-    public TeamType getType() {
-        return type;
     }
 
     public LocalDate getCreatedAt() {

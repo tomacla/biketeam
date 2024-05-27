@@ -1,11 +1,12 @@
 package info.tomacla.biketeam.domain.map;
 
 import info.tomacla.biketeam.common.geo.Point;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Restrictions;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -84,9 +85,9 @@ public class SearchMapSpecification implements Specification<Map> {
         if (windDirection != null) {
             predicates.add(criteriaBuilder.equal(root.get("windDirection"), windDirection));
         }
-        if(center != null && distanceToCenter != null) {
+        if (center != null && distanceToCenter != null) {
 
-            double distance = 0.0089982311915998 * (double)distanceToCenter;
+            double distance = 0.0089982311915998 * (double) distanceToCenter;
 
             var minLat = center.getLat() - distance;
             var maxLat = center.getLat() + distance;
@@ -98,7 +99,7 @@ public class SearchMapSpecification implements Specification<Map> {
                     criteriaBuilder.lessThanOrEqualTo(root.get("startPoint").get("lat"), maxLat),
                     criteriaBuilder.greaterThanOrEqualTo(root.get("startPoint").get("lng"), minLng),
                     criteriaBuilder.lessThanOrEqualTo(root.get("startPoint").get("lng"), maxLng)
-            ),criteriaBuilder.and(
+            ), criteriaBuilder.and(
                     criteriaBuilder.greaterThanOrEqualTo(root.get("endPoint").get("lat"), minLat),
                     criteriaBuilder.lessThanOrEqualTo(root.get("endPoint").get("lat"), maxLat),
                     criteriaBuilder.greaterThanOrEqualTo(root.get("endPoint").get("lng"), minLng),

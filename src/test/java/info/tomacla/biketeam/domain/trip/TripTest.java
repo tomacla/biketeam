@@ -34,7 +34,7 @@ public class TripTest extends AbstractDBTest {
     public void tripTest() {
 
         List<Trip> trips = tripRepository.findAll(new SearchTripSpecification(
-                false, null, null, null, null, Set.of("triptest-team"), PublishedStatus.PUBLISHED, null, ZonedDateTime.now(), null, null
+                false, null, null, null, null, Set.of("triptest-team"), PublishedStatus.PUBLISHED, null, ZonedDateTime.now(), null, null, null
         ));
 
         assertEquals(0, trips.size());
@@ -44,7 +44,7 @@ public class TripTest extends AbstractDBTest {
         createTrip(ZonedDateTime.now().plus(1, ChronoUnit.DAYS), PublishedStatus.PUBLISHED);
 
         trips = tripRepository.findAll(new SearchTripSpecification(
-                false, null, null, null, null, Set.of("triptest-team"), PublishedStatus.PUBLISHED, null, ZonedDateTime.now(), null, null
+                false, null, null, null, null, Set.of("triptest-team"), PublishedStatus.PUBLISHED, null, ZonedDateTime.now(), null, null, null
         ));
 
         assertEquals(1, trips.size());

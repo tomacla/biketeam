@@ -26,12 +26,13 @@
         <ul class="lead text-center list-unstyled">
             <li>Visualisez vos GPX</li>
             <li>Partagez vos traces</li>
-            <li>Manipulez vos fichiers</li>
+            <li>Trouvez des idées pour rouler</li>
             <li>Sans connexion requise</li>
         </ul>
 
         <div class="text-center">
             <a href="<@common.teamUrl '' '/gpxtool' />" class="btn btn-outline-secondary">Outils GPX</a>
+            <a href="<@common.teamUrl '' '/catalog' />" class="btn btn-outline-secondary">Catalogue</a>
         </div>
 
     </div>

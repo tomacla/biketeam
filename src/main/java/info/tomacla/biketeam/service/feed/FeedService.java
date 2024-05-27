@@ -80,6 +80,7 @@ public class FeedService {
                     options.getFrom(),
                     options.getTo(),
                     true,
+                    null,
                     0,
                     30
             ).getContent());
