@@ -21,6 +21,7 @@ public class SearchTripSpecification implements Specification<Trip> {
     private final Boolean deletion;
     private final String permalink;
     private final Boolean listedInFeed;
+    private final Boolean publishToCatalog;
     private final User user;
     private final Set<String> teamIds;
     private final String title;
@@ -30,11 +31,13 @@ public class SearchTripSpecification implements Specification<Trip> {
     private final LocalDate minStartDate;
     private final LocalDate maxStartDate;
 
-    public SearchTripSpecification(Boolean deletion, String permalink, String title, Boolean listedInFeed, User user, Set<String> teamIds, PublishedStatus publishedStatus, ZonedDateTime minPublishedDate, ZonedDateTime maxPublishedDate, LocalDate minStartDate, LocalDate maxStartDate) {
+
+    public SearchTripSpecification(Boolean deletion, String permalink, String title, Boolean listedInFeed, User user, Set<String> teamIds, PublishedStatus publishedStatus, ZonedDateTime minPublishedDate, ZonedDateTime maxPublishedDate, LocalDate minStartDate, LocalDate maxStartDate, Boolean publishToCatalog) {
         this.deletion = deletion;
         this.permalink = permalink;
         this.title = title;
         this.listedInFeed = listedInFeed;
+        this.publishToCatalog = publishToCatalog;
         this.user = user;
         this.teamIds = teamIds;
         this.publishedStatus = publishedStatus;
@@ -56,6 +59,9 @@ public class SearchTripSpecification implements Specification<Trip> {
         }
         if (listedInFeed != null) {
             predicates.add(criteriaBuilder.equal(root.get("listedInFeed"), listedInFeed.booleanValue()));
+        }
+        if (publishToCatalog != null) {
+            predicates.add(criteriaBuilder.equal(root.get("publishToCatalog"), publishToCatalog.booleanValue()));
         }
         if (title != null) {
             predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), "%" + title.toLowerCase() + "%"));
@@ -87,26 +93,26 @@ public class SearchTripSpecification implements Specification<Trip> {
     }
 
     public static SearchTripSpecification readyForDeletion() {
-        return new SearchTripSpecification(true, null, null, null, null, null, null, null, null, null, null);
+        return new SearchTripSpecification(true, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     public static SearchTripSpecification allInTeam(String teamId) {
-        return new SearchTripSpecification(null, null, null, null, null, Set.of(teamId), null, null, null, null, null);
+        return new SearchTripSpecification(null, null, null, null, null, Set.of(teamId), null, null, null, null, null, null);
     }
 
     public static SearchTripSpecification byTitleInTeam(String teamId, String title) {
-        return new SearchTripSpecification(false, null, title, null, null, Set.of(teamId), null, null, null, null, null);
+        return new SearchTripSpecification(false, null, title, null, null, Set.of(teamId), null, null, null, null, null, null);
     }
 
     public static SearchTripSpecification upcomingByUser(User user, Set<String> teamIds, LocalDate from, LocalDate to) {
         return new SearchTripSpecification(
                 false, null, null, null, user, teamIds, PublishedStatus.PUBLISHED, null, null,
-                from, to);
+                from, to, null);
     }
 
     public static SearchTripSpecification byPermalink(String permalink) {
         return new SearchTripSpecification(
-                false, permalink, null, null, null, null, null, null, null, null, null
+                false, permalink, null, null, null, null, null, null, null, null, null, null
         );
     }
 

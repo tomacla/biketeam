@@ -34,6 +34,7 @@ public class NewTripForm {
     private String startPlaceId = "";
     private String endPlaceId = "";
     private String listedInFeed = null;
+    private String publishToCatalog = null;
     private MultipartFile file;
     private List<NewTripStageForm> stages = new ArrayList<>();
 
@@ -184,6 +185,14 @@ public class NewTripForm {
         this.listedInFeed = listedInFeed;
     }
 
+    public String getPublishToCatalog() {
+        return publishToCatalog;
+    }
+
+    public void setPublishToCatalog(String publishToCatalog) {
+        this.publishToCatalog = publishToCatalog;
+    }
+
     public NewTripFormParser parser() {
         return new NewTripFormParser(this);
     }
@@ -282,6 +291,10 @@ public class NewTripForm {
 
         public boolean isListedInFeed() {
             return form.getListedInFeed() != null && form.getListedInFeed().equals("on");
+        }
+
+        public boolean isPublishTocatalog() {
+            return form.getPublishToCatalog() != null && form.getPublishToCatalog().equals("on");
         }
 
     }
@@ -392,6 +405,11 @@ public class NewTripForm {
 
         public NewTripFormBuilder withListedInFeed(boolean listedInFeed) {
             form.setListedInFeed(listedInFeed ? "on" : null);
+            return this;
+        }
+
+        public NewTripFormBuilder withPublishToCatalog(boolean publishToCatalog) {
+            form.setPublishToCatalog(publishToCatalog ? "on" : null);
             return this;
         }
 

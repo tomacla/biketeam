@@ -2,7 +2,6 @@ package info.tomacla.biketeam.web.team.trip;
 
 import info.tomacla.biketeam.common.datatype.Dates;
 import info.tomacla.biketeam.common.datatype.Strings;
-import info.tomacla.biketeam.web.team.configuration.EditTeamConfigurationForm;
 import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDate;

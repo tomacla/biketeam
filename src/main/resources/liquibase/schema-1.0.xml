@@ -1447,4 +1447,14 @@
 
     </changeSet>
 
+    <changeSet id="trip-catalogue" author="tomacla">
+
+        <addColumn tableName="trip">
+            <column name="publish_to_catalog" type="BOOLEAN"/>
+        </addColumn>
+
+        <sql>update trip set publish_to_catalog = FALSE</sql>
+
+    </changeSet>
+
 </databaseChangeLog>

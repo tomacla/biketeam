@@ -11,15 +11,31 @@
         <a class="navbar-brand order-0" href="<@common.teamUrl '' '/gpxtool' />">
             GPX Tools
         </a>
-    <#elseif springMacroRequestContext.requestUri == '/maps'>
+    <#elseif springMacroRequestContext.requestUri?contains('catalog')>
         <a class="nav-link link-secondary px-1" href="<@common.teamUrl '' '/' />"><img height="25" src="<@common.teamUrl '' '/misc/home.png' />" alt="prendlaroue" /><i class="bi bi-chevron-right"></i></a>
-        <a class="navbar-brand order-0" href="<@common.teamUrl '' '/maps' />">
-            Maps
+        <a class="navbar-brand order-0" href="<@common.teamUrl '' '/catalog' />">
+            Catalogue
         </a>
     <#else>
         <a class="navbar-brand order-0 p-0" href="<@common.teamUrl '' '/' />">
             <img height="42" src="<@common.teamUrl '' '/misc/logo.png' />" alt="Prendslaroue">
         </a>
+    </#if>
+
+    <#if springMacroRequestContext.requestUri?contains('catalog')>
+        <ul class="navbar-nav order-2 order-md-1">
+            <li class="nav-item d-list-item">
+                <a class="nav-link<#if springMacroRequestContext.requestUri?ends_with('/maps')> active</#if>" href="<@common.teamUrl '' '/catalog/maps' />"><i class="bi bi-map"></i> Maps</a>
+            </li>
+            <li class="nav-item d-list-item">
+                <a class="nav-link<#if springMacroRequestContext.requestUri?ends_with('/trips')> active</#if>" href="<@common.teamUrl '' '/catalog/trips' />"><i class="bi bi-signpost-2"></i> Trips</a>
+            </li>
+            <#if _authenticated>
+                <li class="nav-item d-list-item">
+                    <a class="nav-link<#if springMacroRequestContext.requestUri?ends_with('/favorites')> active</#if>" href="<@common.teamUrl '' '/catalog/favorites' />"><i class="bi bi-star"></i> Favoris</a>
+                </li>
+            </#if>
+        </ul>
     </#if>
 
     <#if team?? && (team.configuration.feedVisible || _team_admin || _admin || team.configuration.markdownPageWritten)>

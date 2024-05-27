@@ -10,11 +10,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.annotation.security.PermitAll;
-
 @Controller
 @RequestMapping(value = "/autocomplete")
-@PermitAll
 public class AutocompleteController extends AbstractController {
 
     @Autowired

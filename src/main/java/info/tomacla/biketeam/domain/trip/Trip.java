@@ -66,6 +66,9 @@ public class Trip implements MessageHolder, FeedEntity {
     @Column(name = "markdown_page")
     private String markdownPage;
 
+    @Column(name = "publish_to_catalog")
+    private boolean publishToCatalog;
+
     private boolean deletion;
 
     public String getId() {
@@ -196,10 +199,18 @@ public class Trip implements MessageHolder, FeedEntity {
         this.markdownPage = Strings.requireNonBlankOrNull(markdownPage);
     }
 
+    public boolean isPublishToCatalog() {
+        return publishToCatalog;
+    }
+
+    public void setPublishToCatalog(boolean publishToCatalog) {
+        this.publishToCatalog = publishToCatalog;
+    }
+
     public double getDistance() {
         double distance = 0.0;
         for (TripStage stage : this.stages) {
-            if(!stage.isAlternative() && stage.getMap() != null) {
+            if (!stage.isAlternative() && stage.getMap() != null) {
                 distance += stage.getMap().getLength();
             }
         }
@@ -209,7 +220,7 @@ public class Trip implements MessageHolder, FeedEntity {
     public double getElevation() {
         double elevation = 0.0;
         for (TripStage stage : this.stages) {
-            if(!stage.isAlternative() && stage.getMap() != null) {
+            if (!stage.isAlternative() && stage.getMap() != null) {
                 elevation += stage.getMap().getPositiveElevation();
             }
         }

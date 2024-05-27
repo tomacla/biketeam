@@ -77,7 +77,7 @@ public class TripService extends AbstractPermalinkService {
                             false, null, null,
                             null, null, Set.of(team.getId()),
                             PublishedStatus.UNPUBLISHED, null, ZonedDateTime.now(team.getZoneId()),
-                            null, null);
+                            null, null, null);
 
                     tripRepository.findAll(spec).forEach(trip -> {
                         log.info("Publishing trip {} for team {}", trip.getId(), team.getId());
@@ -111,13 +111,13 @@ public class TripService extends AbstractPermalinkService {
     }
 
 
-    public Page<Trip> searchTrips(Set<String> teamIds, LocalDate from, LocalDate to, boolean listedInFeed, int page, int pageSize) {
+    public Page<Trip> searchTrips(Set<String> teamIds, LocalDate from, LocalDate to, Boolean listedInFeed, Boolean publishToCatalog, int page, int pageSize) {
 
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by("startDate").descending());
 
         SearchTripSpecification spec = new SearchTripSpecification(
                 false, null, null, listedInFeed, null, teamIds, PublishedStatus.PUBLISHED, null, null,
-                from, to);
+                from, to, publishToCatalog);
 
         return tripRepository.findAll(spec, pageable);
     }
@@ -147,6 +147,10 @@ public class TripService extends AbstractPermalinkService {
 
     public Optional<Trip> findByPermalink(String permalink) {
         return tripRepository.findOne(SearchTripSpecification.byPermalink(permalink));
+    }
+
+    public Optional<Trip> findById(String id) {
+        return tripRepository.findById(id);
     }
 
     @Override

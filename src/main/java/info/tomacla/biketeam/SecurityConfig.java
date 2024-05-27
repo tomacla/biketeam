@@ -89,11 +89,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             auth.antMatchers("/notifications/**").permitAll();
             auth.antMatchers("/autocomplete/**").permitAll();
             auth.antMatchers("/users/*/image").permitAll();
+            auth.antMatchers("/catalog/**").permitAll();
 
             // web protected endpoints
             auth.antMatchers("/users/me/**").authenticated();
             auth.antMatchers("/users/space/**").authenticated();
-            auth.antMatchers("/maps/**").authenticated();
             auth.antMatchers("/new").authenticated();
             auth.antMatchers("/admin/**").hasRole("ADMIN");
             auth.antMatchers("/management/**").hasRole("ADMIN");

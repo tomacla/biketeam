@@ -1,10 +1,8 @@
 package info.tomacla.biketeam.web;
 
 import info.tomacla.biketeam.common.file.FileRepositories;
-import info.tomacla.biketeam.common.geo.Point;
 import info.tomacla.biketeam.domain.feed.FeedEntity;
 import info.tomacla.biketeam.domain.feed.FeedOptions;
-import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.map.MapSorterOption;
 import info.tomacla.biketeam.domain.map.MapType;
 import info.tomacla.biketeam.domain.map.WindDirection;
@@ -20,7 +18,6 @@ import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.service.UserRoleService;
 import info.tomacla.biketeam.service.feed.FeedService;
 import info.tomacla.biketeam.service.file.FileService;
-import info.tomacla.biketeam.web.map.SearchMapForm;
 import info.tomacla.biketeam.web.team.NewTeamForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -123,6 +120,7 @@ public class RootController extends AbstractController {
 
     }
 
+    @Deprecated
     @GetMapping("/maps")
     public String getMaps(@RequestParam(value = "lowerDistance", required = false) Double lowerDistance,
                           @RequestParam(value = "upperDistance", required = false) Double upperDistance,
@@ -142,65 +140,7 @@ public class RootController extends AbstractController {
                           Principal principal,
                           Model model) {
 
-        final Optional<User> userFromPrincipal = getUserFromPrincipal(principal);
-        if (userFromPrincipal.isPresent()) {
-
-            final User user = userFromPrincipal.get();
-
-            Page<Team> publicTeams = teamService.searchTeams(0, 100000, null, List.of(Visibility.PUBLIC));
-            Set<String> teamIds = publicTeams.stream().map(Team::getId).collect(Collectors.toSet());
-            teamService.getUserTeams(user).forEach(t -> teamIds.add(t.getTeamId()));
-
-            SearchMapForm.SearchMapFormBuilder formBuilder = SearchMapForm.builder()
-                    .withSort(sort)
-                    .withWindDirection(windDirection)
-                    .withLowerDistance(lowerDistance)
-                    .withUpperDistance(upperDistance)
-                    .withLowerPositiveElevation(lowerPositiveElevation)
-                    .withUpperPositiveElevation(upperPositiveElevation)
-                    .withPage(page)
-                    .withPageSize(pageSize)
-                    .withType(type)
-                    .withName(name);
-
-            if (centerAddress != null && !centerAddress.isBlank() && centerAddressLat != null && centerAddressLng != null && distanceToCenter != null) {
-                formBuilder.withCenterAddress(centerAddress)
-                        .withCenterAddressPoint(new Point(centerAddressLat, centerAddressLng))
-                        .withDistanceToCenter(distanceToCenter);
-            }
-
-            SearchMapForm form = formBuilder.get();
-
-            SearchMapForm.SearchMapFormParser parser = form.parser();
-
-            Page<Map> maps = mapService.searchMaps(
-                    teamIds,
-                    parser.getName(),
-                    parser.getLowerDistance(),
-                    parser.getUpperDistance(),
-                    parser.getType(),
-                    parser.getLowerPositiveElevation(),
-                    parser.getUpperPositiveElevation(),
-                    parser.getTags(),
-                    parser.getWindDirection(),
-                    parser.getCenterAddressPoint(),
-                    parser.getDistanceToCenter(),
-                    parser.getPage(),
-                    parser.getPageSize(),
-                    parser.getSort());
-
-            addGlobalValues(principal, model, "Maps", null);
-            model.addAttribute("maps", maps.getContent());
-            model.addAttribute("pages", maps.getTotalPages());
-            model.addAttribute("formdata", form);
-            if (!ObjectUtils.isEmpty(error)) {
-                model.addAttribute("errors", List.of(error));
-            }
-            return "root_maps";
-
-        }
-
-        return "redirect:/";
+        return "redirect:/catalog/maps";
 
     }
 

@@ -114,6 +114,7 @@ public class AdminTeamTripController extends AbstractController {
                 .withTitle(trip.getTitle())
                 .withMeetingTime(trip.getMeetingTime())
                 .withListedInFeed(trip.isListedInFeed())
+                .withPublishToCatalog(trip.isPublishToCatalog())
                 .withStages(trip.getSortedStages())
                 .withStartPlace(trip.getStartPlace())
                 .withEndPlace(trip.getEndPlace())
@@ -182,6 +183,7 @@ public class AdminTeamTripController extends AbstractController {
             target.setStartDate(parser.getStartDate());
             target.setEndDate(parser.getEndDate());
             target.setListedInFeed(parser.isListedInFeed());
+            target.setPublishToCatalog(parser.isPublishTocatalog());
             target.setStartPlace(parser.getStartPlace(teamId, placeService));
             target.setEndPlace(parser.getEndPlace(teamId, placeService));
 

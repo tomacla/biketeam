@@ -2,77 +2,10 @@
 
 <div class="row pt-2 justify-content-center">
 
-    <#include "trip_nav.ftlh">
-
-    <#if trip.startPlace?? || trip.endPlace??>
-            <div class="modal" tabindex="-1" id="placemodal">
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div class="modal-body">
-
-                      <#if trip.startPlace?? && trip.endPlace?? && trip.startPlace.id == trip.endPlace.id>
-                            <@common.displayPlace "Départ/Arrivée" trip.startPlace />
-                      <#else>
-
-                        <div class="row">
-
-                        <#if trip.startPlace??>
-                        <div class="col-12 col-md-6">
-                            <@common.displayPlace "Départ" trip.startPlace />
-                        </div>
-                        </#if>
-
-                        <#if trip.endPlace??>
-                        <div class="col-12 col-md-6">
-                        <@common.displayPlace "Arrivée" trip.endPlace />
-                        </div>
-                        </#if>
-
-                        </div>
-
-
-                       </#if>
-
-                  </div>
-                </div>
-              </div>
-            </div>
-        </#if>
-
-     <#if trip.sortedParticipants?size gt 0>
-       <div class="modal" tabindex="-1" id="participantsmodal">
-         <div class="modal-dialog">
-           <div class="modal-content">
-             <div class="modal-header">
-                 <h5>Participants</h5>
-                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-             </div>
-             <div class="modal-body">
-
-                  <div class="d-flex flex-wrap justify-content-center">
-                     <#list trip.sortedParticipants as participant>
-                         <div class="d-flex align-items-center border rounded pe-2 me-2 mb-2">
-                             <div style="width:30px; height:30px;" class="me-2"><img class="w-100 h-100 d-block rounded" src="<@common.teamUrl '' '/users/${participant.id}/image' />" alt="${participant.identity}"></div> <span class="small text-muted">${participant.identity}</span>
-                         </div>
-                     </#list>
-                  </div>
-
-             </div>
-           </div>
-         </div>
-       </div>
-       </#if>
-
     <#assign colors=["#566B13", "#1d32a8", "#732C7B", "#bdbd22", "#c90808", "#b81491", "#628de3", "#6dcc5c", "#c694d4", "#e3a209"]>
    <#assign textColors=["#ffffff", "#ffffff", "#ffffff", "#000000", "#ffffff", "#ffffff", "#000000", "#000000", "#000000", "#000000"]>
    <#assign stageMaps = []>
    <#assign mapCenter = [0.0,0.0]>
-   <#if trip.startPlace?? && trip.startPlace.point??>
-        <#assign mapCenter = [trip.startPlace.point.lat,trip.startPlace.point.lng]>
-   </#if>
    <#list trip.sortedStages as stage>
       <#if stage.map??>
         <#if mapCenter[0] == 0.0>
@@ -91,9 +24,9 @@
                       </div>
                       <div class="modal-body">
                         <div class="d-grid gap-2 col-6 mx-auto">
-                            <a download="${stage.map.name}.gpx" href="<@common.teamUrl team.id '/maps/${stage.map.id}/gpx' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-file-earmark-arrow-down"></i> GPX</a>
-                            <a download="${stage.map.name}.fit" href="<@common.teamUrl team.id '/maps/${stage.map.id}/fit' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-file-earmark-arrow-down"></i> FIT</a>
-                            <a href="<@common.teamUrl team.id '/maps/${stage.map.id}/garmin' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-triangle-fill"></i> Garmin</a>
+                            <a download="${stage.map.name}.gpx" href="<@common.teamUrl teamId '/maps/${stage.map.id}/gpx' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-file-earmark-arrow-down"></i> GPX</a>
+                            <a download="${stage.map.name}.fit" href="<@common.teamUrl teamId '/maps/${stage.map.id}/fit' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-file-earmark-arrow-down"></i> FIT</a>
+                            <a href="<@common.teamUrl teamId '/maps/${stage.map.id}/garmin' />" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-triangle-fill"></i> Garmin</a>
                         </div>
                       </div>
                       <div class="modal-footer">
@@ -112,18 +45,10 @@
 
             <div class="col-12 col-md-8">
 
-            <#if trip.publishedStatus != 'PUBLISHED'>
-                <div class="p-1 alert alert-warning" role="alert">Ce trip n'est pas publié.<br/> <span class="small text-muted">Publication le ${trip.publishedAt.format(_date_formatter)} à ${trip.publishedAt.format(_time_formatter)} (UTC)</span></div>
-            </#if>
-
-            <h5 class="text-muted">${trip.startDate.format(_date_formatter)} <i class="bi bi-arrow-right-short"></i> ${trip.endDate.format(_date_formatter)}</h5>
+            <h5 class="text-muted">${trip.title}</h5>
 
             <ul class="list-unstyled">
                 <li >${trip.stages?filter(st -> !st.alternative)?size} étape<#if trip.stages?filter(st -> !st.alternative)?size gt 1>s</#if> - <a class="link-dark" href="#stage-section">Détails</a></li>
-                <li>Départ à ${trip.meetingTime}<#if trip.startPlace??> - <a href="#" class="link-dark" data-bs-toggle="modal" data-bs-target="#placemodal">${trip.startPlace.name}</a></#if></li>
-                <#if trip.endPlace??>
-                    <li>Arrivée : <a href="#" class="link-dark" data-bs-toggle="modal" data-bs-target="#placemodal">${trip.endPlace.name}</a></li>
-                </#if>
 
                 <#if trip.distance gt 0>
                  <li><div class="d-flex flex-row justify-content-start align-items-center gap-1 gap-md-2 gap-xxl-3">
@@ -133,41 +58,6 @@
                  </#if>
 
             </ul>
-
-            <div class="d-flex flex-row align-items-center justify-content-between">
-                <div>Participants :</div>
-                <div>
-                    <div class="d-flex flex-row align-items-center justify-content-between">
-                        <div class="d-flex flex-row align-items-start justify-content-start">
-                            <div class="d-flex profile-images me-2">
-                                <#if trip.sortedParticipants?size gt 0>
-                                    <#list trip.sortedParticipants?chunk(6)[0] as participant>
-                                            <div class="profile-images-item" style="width:24px; height:24px;" class="d-inline-block"><a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#participantsmodal"><img class="w-100 h-100 d-block" src="<@common.teamUrl '' '/users/${participant.id}/image' />" alt="${participant.identity}"></a></div>
-                                    </#list>
-                                </#if>
-                            </div>
-                            <div>
-                                <#if trip.sortedParticipants?size gt 6>
-                                    <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#participantsmodal"><span class="text-muted small fst-italic">+${trip.sortedParticipants?size - 6}</span></a>
-                                <#elseif trip.sortedParticipants?size == 0>
-                                    <span class="text-muted small fst-italic">Aucun participant</span>
-                                </#if>
-                            </div>
-                        </div>
-                        <div class="d-block ms-2">
-                            <#if _authenticated>
-                                <#if trip.hasParticipant(_user.id)>
-                                    <a href="<@common.teamUrl team.id '/trips/${trip.permalink!trip.id}/remove-participant' />" class="py-0 px-2 d-block btn btn-sm btn-success"><i class="bi-person-dash bi"></i></a>
-                                <#else>
-                                    <a href="<@common.teamUrl team.id '/trips/${trip.permalink!trip.id}/add-participant' />" class="py-0 px-2 d-block btn btn-sm btn-outline-success"><i class="bi-person-add bi"></i></a>
-                                 </#if>
-                            <#else>
-                                   <a href="<@common.teamUrl team.id '/trips/${trip.permalink!trip.id}/add-participant' />" class="py-0 px-2 d-block btn btn-sm btn-outline-success"><i class="bi-person-add bi"></i></a>
-                            </#if>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
 
             <hr/>
@@ -179,7 +69,7 @@
             <div class="col-12 col-md-4">
 
             <#if trip.imaged>
-              <img src="<@common.teamUrl team.id '/trips/${trip.id}/image' />" class="d-block shadow rounded w-100 h-auto mx-auto" alt="${trip.id} image">
+              <img src="<@common.teamUrl teamId '/trips/${trip.id}/image' />" class="d-block shadow rounded w-100 h-auto mx-auto" alt="${trip.id} image">
             </#if>
 
          </div>
@@ -220,7 +110,7 @@
                                <div class="btn-group">
                                     <#if stage.map??>
                                         <button class="btn btn-sm btn-link link-dark py-0 px-2" type="button" data-bs-toggle="modal" data-bs-target="#modal-map-${stage.map.id}"><i class="bi bi-download"></i></button>
-                                       <a class="btn btn-sm btn-link link-dark py-0 px-2" href="<@common.teamUrl team.id '/maps/${stage.map.permalink!stage.map.id}' />"><i class="bi bi-map"></i></a>
+                                       <a class="btn btn-sm btn-link link-dark py-0 px-2" href="<@common.teamUrl teamId '/maps/${stage.map.permalink!stage.map.id}' />"><i class="bi bi-map"></i></a>
                                     </#if>
                                </div>
                            </div>
@@ -252,6 +142,13 @@
             </div>
 
 
+        </div>
+
+        <div class="col-12 mb-2">
+
+                <div class="row p-0 py-2 m-0 border rounded">
+                        <div class="markdown-content"><#if trip.markdownPage??>${trip.markdownPage}</#if></div>
+                </div>
         </div>
 
     <#if stageMaps?size != 0>
@@ -295,7 +192,7 @@
 
             <#list stageMaps as map>
 
-                loadJsonContent('<@common.teamUrl team.id '/maps/${map}/geojson' />', function(geojsonFeatures) {
+                loadJsonContent('<@common.teamUrl teamId '/maps/${map}/geojson' />', function(geojsonFeatures) {
 
                     var geojsonFeature = geojsonFeatures.features.find(f => f.geometry.type === 'LineString');
 
@@ -318,7 +215,7 @@
                         targetMap.fitBounds(geoJsonLayerGroup.getBounds());
                     }
 
-                    loadJsonContent('<@common.teamUrl team.id '/maps/${map}/elevation-profile' />', function(elevationProfile) {
+                    loadJsonContent('<@common.teamUrl teamId '/maps/${map}/elevation-profile' />', function(elevationProfile) {
 
                         geoJsonLayers.push({
                             layer: layer,

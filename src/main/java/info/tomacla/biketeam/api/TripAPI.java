@@ -47,6 +47,7 @@ public class TripAPI extends AbstractAPI {
                 parser.getFrom(),
                 parser.getTo(),
                 true,
+                null,
                 parser.getPage(),
                 parser.getPageSize());
 

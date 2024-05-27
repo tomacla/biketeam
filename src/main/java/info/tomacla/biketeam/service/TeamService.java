@@ -50,7 +50,7 @@ public class TeamService extends AbstractPermalinkService {
     }
 
     public long count() {
-        return teamRepository.count();
+        return teamRepository.count(SearchTeamSpecification.publiclyVisible());
     }
 
     public Optional<Team> get(String teamId) {
