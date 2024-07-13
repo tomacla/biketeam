@@ -71,7 +71,11 @@ public class MailSenderService {
                 helper.setBcc(Arrays.copyOf(bccs.toArray(), bccs.size(), String[].class));
             }
 
-            helper.setSubject(subject + " - " + team.getName());
+            if(team != null) {
+                helper.setSubject(subject + " - " + team.getName());
+            } else {
+                helper.setSubject(subject);
+            }
             helper.setText(message, true);
 
             if (embedImage != null) {

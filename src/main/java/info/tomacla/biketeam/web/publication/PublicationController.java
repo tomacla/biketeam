@@ -1,6 +1,8 @@
 package info.tomacla.biketeam.web.publication;
 
 import info.tomacla.biketeam.common.data.PublishedStatus;
+import info.tomacla.biketeam.common.datatype.Dates;
+import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.common.file.FileExtension;
 import info.tomacla.biketeam.common.file.ImageDescriptor;
 import info.tomacla.biketeam.domain.publication.Publication;
@@ -8,6 +10,8 @@ import info.tomacla.biketeam.domain.publication.PublicationRegistration;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.service.PublicationService;
 import info.tomacla.biketeam.service.file.ThumbnailService;
+import info.tomacla.biketeam.service.mail.MailSenderService;
+import info.tomacla.biketeam.service.url.UrlService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ContentDisposition;
@@ -28,6 +32,7 @@ import java.nio.file.Files;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Controller
 @RequestMapping(value = "/{teamId}/publications")
@@ -38,6 +43,12 @@ public class PublicationController extends AbstractController {
 
     @Autowired
     private ThumbnailService thumbnailService;
+
+    @Autowired
+    private MailSenderService mailSenderService;
+
+    @Autowired
+    private UrlService urlService;
 
 
     @GetMapping(value = "/{publicationId}")
@@ -127,18 +138,40 @@ public class PublicationController extends AbstractController {
             registration.setUserEmail(email);
             registration.setUserName(firstname + " " + lastname);
             registration.setPublication(publication);
+            registration.setUserEmailValid(false);
+
+            this.sendConfirmationEmail(registration);
 
             publication.getRegistrations().add(registration);
 
             publicationService.save(publication);
 
-            attributes.addFlashAttribute("infos", List.of("Inscription enregistrée"));
+            attributes.addFlashAttribute("infos", List.of("Inscription enregistrée - Merci de confirmer votre adresse email"));
             return viewHandler.redirectView(team, "/publications/" + publicationId);
 
         } catch (Exception e) {
             attributes.addFlashAttribute("error", e.getMessage());
             return viewHandler.redirectView(team, "/publications/" + publicationId);
         }
+    }
+
+    private void sendConfirmationEmail(PublicationRegistration registration) {
+
+        String url = urlService.getUrlWithSuffix("/confirm-email?code=" + registration.getUserEmailCode());
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("<html>").append("<head></head>").append("<body>");
+        sb.append("<h5>").append("Confirmation de votre adresse email").append("</h5>");
+        sb.append("<p>").append("Suite à votre inscription sur un événement, merci de bien vouloir confirmer votre adresse email en cliquant sur le lien ci dessous.").append("</p>");
+        sb.append("<p>").append(getHtmlLink(url)).append("</p>");
+        sb.append("</body>").append("</html>");
+
+        mailSenderService.sendDirectly(null, Set.of(registration.getUserEmail()), "Confirmation requise", sb.toString(), null);
+
+    }
+
+    private String getHtmlLink(String href) {
+        return "<a href=\"" + href + "\">" + href + "</a>";
     }
 
 }

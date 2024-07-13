@@ -86,7 +86,7 @@
                </tr>
             </thead>
             <tbody>
-            <#list publication.registrations as registration>
+            <#list publication.registrations?filter(r -> r.userEmailValid) as registration>
                    <tr>
                     <td>${registration.userName}</td>
                     <td>${registration.userEmail}</td>

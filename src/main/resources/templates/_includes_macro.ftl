@@ -132,7 +132,7 @@
               <div class="accordion-item">
                 <h2 class="accordion-header" id="publication-${publication.id}-accordion-title">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#publication-${publication.id}-accordion-content" aria-expanded="true" aria-controls="publication-${publication.id}-accordion-content">
-                      Inscription (${publication.registrations?size} inscrit.e<#if publication.registrations?size gt 1>.s</#if>)
+                      Inscription (${publication.registrations?filter(r -> r.userEmailValid)?size} inscrit.e<#if publication.registrations?filter(r -> r.userEmailValid)?size gt 1>.s</#if>)
                     </button>
                   </h2>
                   <div id="publication-${publication.id}-accordion-content" class="accordion-collapse collapse" aria-labelledby="publication-${publication.id}-accordion-title" data-bs-parent="#publication-${publication.id}-accordion">

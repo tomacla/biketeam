@@ -1,5 +1,7 @@
 package info.tomacla.biketeam.domain.publication;
 
+import info.tomacla.biketeam.common.datatype.Strings;
+
 import javax.persistence.*;
 import java.util.UUID;
 
@@ -19,6 +21,12 @@ public class PublicationRegistration {
 
     @Column(name = "user_email")
     private String userEmail;
+
+    @Column(name = "user_email_valid")
+    private boolean userEmailValid;
+
+    @Column(name = "user_email_code")
+    private String userEmailCode = UUID.randomUUID().toString();
 
     public String getId() {
         return id;
@@ -41,7 +49,7 @@ public class PublicationRegistration {
     }
 
     public void setUserName(String userName) {
-        this.userName = userName;
+        this.userName = Strings.requireNonBlank(userName, "Name is null");
     }
 
     public String getUserEmail() {
@@ -49,6 +57,22 @@ public class PublicationRegistration {
     }
 
     public void setUserEmail(String userEmail) {
-        this.userEmail = userEmail;
+        this.userEmail = Strings.requireEmail(userEmail);
+    }
+
+    public boolean isUserEmailValid() {
+        return userEmailValid;
+    }
+
+    public void setUserEmailValid(boolean userEmailValid) {
+        this.userEmailValid = userEmailValid;
+    }
+
+    public String getUserEmailCode() {
+        return userEmailCode;
+    }
+
+    public void setUserEmailCode(String userEmailCode) {
+        this.userEmailCode = userEmailCode;
     }
 }

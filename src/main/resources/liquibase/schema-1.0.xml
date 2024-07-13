@@ -1457,4 +1457,15 @@
 
     </changeSet>
 
+    <changeSet id="publication-email-validation" author="tomacla">
+
+        <addColumn tableName="publication_registration">
+            <column name="user_email_valid" type="BOOLEAN"/>
+            <column name="user_email_code" type="VARCHAR(255)"/>
+        </addColumn>
+
+        <sql>update publication_registration set user_email_code = NULL, user_email_valid = TRUE</sql>
+
+    </changeSet>
+
 </databaseChangeLog>
