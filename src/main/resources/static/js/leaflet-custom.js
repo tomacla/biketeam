@@ -126,7 +126,7 @@ function chartCorsairPlugin(containingMap) {
              y,
              draw: false
            }
-           chart.draw();
+           chart.render();
            return;
          }
 
@@ -136,7 +136,7 @@ function chartCorsairPlugin(containingMap) {
            draw: true
          }
 
-         chart.draw();
+         chart.render();
 
          const points = chart.getElementsAtEventForMode(evt.event, 'nearest', { intersect: false, axis : 'x' }, false);
          if(currentChartData !== null && points.length > 0) {
@@ -189,20 +189,39 @@ function chartCorsairPlugin(containingMap) {
     }
  }
 
+const minHue = 85;
+const maxHue = -105;
+const saturation = "86%";
+const lightness = "62%";
+
+function getColor(p) {
+    if (!p.inClimb) {
+        return "rgb(160,176,70)";
+    }
+    hue = minHue;
+    if (p.inClimb) {
+        if (p.grade > 18) {
+            hue = maxHue;
+        } else if (p.grade > 0) {
+            hue = Math.round(minHue + (p.grade / 18.0) * (maxHue - minHue));
+        }
+    }
+    if (hue < 0) {
+        hue = hue + 360;
+    }
+    return "hsl(" + hue + "," + saturation + "," + lightness + ")";
+}
+
 var chartLoaded = false;
 function initChart(containingMap, chartContainerId, elevationProfile, color, callback = null, segmentColor = false) {
 
-    currentChartData = elevationProfile;
-     const labels = elevationProfile.map(function(e) {
-         return Math.round(e.x / 1000);
-     });
+     currentChartData = elevationProfile;
 
      if(segmentColor === true) {
         color = 'rgb(160,176,70)';
      }
 
-     const data = {
-       labels: labels,
+     const configData = {
        datasets: [{
          fill: true,
          label: 'Elevation',
@@ -217,35 +236,67 @@ function initChart(containingMap, chartContainerId, elevationProfile, color, cal
          segment: {
             backgroundColor: function(ctx) {
                if(segmentColor) {
-                   return elevationProfile[ctx.p1DataIndex].color;
+                    return getColor(ctx.p0.raw);
                }
                return undefined;
             },
              borderColor: function(ctx) {
                  if(segmentColor) {
-                        return elevationProfile[ctx.p1DataIndex].color;
+                    return getColor(ctx.p0.raw);
                    }
                 return undefined;
              }
            },
-         data: elevationProfile.map(function(e) {
-               return e.y;
-           }),
+         data: elevationProfile
        }]
      };
 
      const config = {
        type: 'line',
-       data: data,
+       data: configData,
        options: {
-         responsive: true,
+           responsive: true,
+           interaction: {
+                intersect: false,
+                axis: 'x',
+                mode: 'nearest'
+           },
+           scales: {
+               x: {
+                   type: 'linear',
+                   ticks: {
+                       stepSize: 1.0
+                   }
+               }
+           },
            plugins: {
                legend: {
                    display: false
                },
                tooltip: {
-                 enabled: false
-               }
+                 enabled: true,
+                 callbacks: {
+                    title: (items) =>
+                        Math.round(items[0].raw.x * 10) / 10 + " km\n" +
+                        Math.round(items[0].raw.y) + " m\n" +
+                        Math.round(items[0].raw.grade * 10) / 10 + " %",
+                    label: (item) => ""
+                 }
+               },
+                zoom: {
+                    zoom: {
+                      wheel: {
+                        enabled: true,
+                      },
+                      pinch: {
+                        enabled: true
+                      },
+                      mode: 'x',
+                    },
+                    limits: {
+                      x: {min: 0, max: elevationProfile[elevationProfile.length - 1].x}
+                    },
+                },
            },
            layout: {
                padding: 0
@@ -304,8 +355,7 @@ function initChart(containingMap, chartContainerId, elevationProfile, color, cal
 
 function updateChart(elevationProfile, color) {
     currentChartData = elevationProfile;
-     elevationChart.data.labels = elevationProfile.map(function(e) { return Math.round(e.x / 1000); });
-     elevationChart.data.datasets[0].data = elevationProfile.map(function(e) { return e.y; });
+     elevationChart.data.datasets[0].data = elevationProfile;
      elevationChart.data.datasets[0].backgroundColor = color;
      elevationChart.update();
 }

@@ -14,7 +14,9 @@ import io.github.glandais.GPXPathEnhancer;
 import io.github.glandais.fit.FitFileWriter;
 import io.github.glandais.gpx.GPXPath;
 import io.github.glandais.gpx.Point;
-import io.github.glandais.gpx.filter.GPXFilter;
+import io.github.glandais.gpx.climb.Climb;
+import io.github.glandais.gpx.climb.ClimbDetector;
+import io.github.glandais.gpx.climb.ClimbPart;
 import io.github.glandais.gpx.storage.ValueKind;
 import io.github.glandais.io.GPXFileWriter;
 import io.github.glandais.io.GPXParser;
@@ -32,10 +34,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class GpxService {
@@ -65,6 +65,9 @@ public class GpxService {
 
     @Autowired
     private TileMapProducer tileMapProducer;
+
+    @Autowired
+    private ClimbDetector climbDetector;
 
     @Value("${mapbox.api-key}")
     private String mapBoxAPIKey;
@@ -235,45 +238,6 @@ public class GpxService {
         }
     }
 
-    private List<Elevation> getElevations(GPXPath gpxPath) {
-
-        if (gpxPath.size() < 2) {
-            return new ArrayList<>();
-        }
-
-        List<Elevation> elevations = getRawElevationList(gpxPath);
-        Elevation.mergeIfNear(elevations);
-        elevations.removeIf(e -> !e.isRelevant());
-        return elevations;
-
-    }
-
-    private static List<Elevation> getRawElevationList(GPXPath gpxPath) {
-        List<Elevation> elevations = new ArrayList<>();
-        Elevation currentElevation = null;
-
-        for (int i = 1; i < gpxPath.getPoints().size(); i++) {
-
-            Point previous = gpxPath.getPoints().get(i - 1);
-            Point current = gpxPath.getPoints().get(i);
-
-            if (current.getEle() >= previous.getEle()) {
-                if (currentElevation == null) {
-                    currentElevation = new Elevation(previous, current);
-                } else {
-                    currentElevation.add(current);
-                }
-            } else {
-                if (currentElevation != null) {
-                    elevations.add(currentElevation);
-                    currentElevation = null;
-                }
-            }
-
-        }
-        return elevations;
-    }
-
     public List<java.util.Map<String, Object>> getElevationProfile(Path gpx) {
         try {
             return getElevationProfile(getGPXPath(gpx));
@@ -286,24 +250,38 @@ public class GpxService {
 
     private List<java.util.Map<String, Object>> getElevationProfile(GPXPath gpxPath) {
         try {
+            List<Climb> climbs = climbDetector.getClimbs(gpxPath);
+            NavigableMap<Double, Double> climbGrades = new TreeMap<>();
+            climbGrades.put(0.0, null);
+            for (Climb climb : climbs) {
+                for (ClimbPart climbPart : climb.parts()) {
+                    climbGrades.put(climb.startDist() + climbPart.startDist(), climbPart.grade());
+                }
+                climbGrades.put(climb.endDist(), null);
+            }
+
             List<java.util.Map<String, Object>> result = new ArrayList<>();
-
-            List<Elevation> elevations = getElevations(gpxPath);
-
-            GPXFilter.filterPointsDouglasPeucker(gpxPath, Math.min(15, gpxPath.getDist() / 100));
 
             for (int i = 0; i < gpxPath.getPoints().size(); i++) {
                 Point point = gpxPath.getPoints().get(i);
+
+                Double grade = climbGrades.floorEntry(point.getDist()).getValue();
+                boolean inClimb;
+                if (grade == null) {
+                    grade = point.getGrade() * 100;
+                    inClimb = false;
+                } else {
+                    inClimb = true;
+                }
                 result.add(
                         java.util.Map.of("index", i,
-                                "x", point.getDist(),
+                                "x", point.getDist() / 1000.0,
                                 "y", point.getEle(),
                                 "lat", point.getLatDeg(),
                                 "lng", point.getLonDeg(),
-                                "color", elevations.stream()
-                                        .filter(e -> e.isInside(point))
-                                        .map(Elevation::getColor)
-                                        .findFirst().orElse(Elevation.getDefaultColor()))
+                                "grade", grade,
+                                "inClimb", inClimb
+                        )
                 );
             }
             return result;
