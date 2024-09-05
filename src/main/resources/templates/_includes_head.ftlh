@@ -49,6 +49,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
     <script src="<@common.teamUrl '' '/js/chartjs-plugin-zoom.min.js' />"></script>
+    <script src="<@common.teamUrl '' '/js/polycolorRenderer.js' />"></script>
     <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.79.0/dist/L.Control.Locate.min.js" charset="utf-8"></script>
     <script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>
     <script src="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js"></script>
@@ -58,6 +59,7 @@
     <script src="<@common.teamUrl '' '/js/tags.js' />"></script>
     <script src="<@common.teamUrl '' '/js/autocomplete.js' />"></script>
     <script src="<@common.teamUrl '' '/js/leaflet-custom.js' />"></script>
+    <script src="<@common.teamUrl '' '/js/multiple-maps.js' />"></script>
     <script src="<@common.teamUrl '' '/js/main.js' />"></script>
 
 
