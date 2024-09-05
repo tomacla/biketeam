@@ -15,6 +15,7 @@ import info.tomacla.biketeam.service.garmin.GarminAuthService;
 import info.tomacla.biketeam.service.garmin.GarminCourseService;
 import info.tomacla.biketeam.service.garmin.GarminMapDescriptor;
 import info.tomacla.biketeam.service.garmin.GarminToken;
+import info.tomacla.biketeam.service.gpx.MapData;
 import info.tomacla.biketeam.service.url.UrlService;
 import info.tomacla.biketeam.web.AbstractController;
 import info.tomacla.biketeam.web.ride.dto.AndroidMapDTO;
@@ -314,53 +315,25 @@ public class MapController extends AbstractController {
     }
 
     @ResponseBody
-    @RequestMapping(value = "/{mapId}/geojson", method = RequestMethod.GET, produces = "application/json")
-    public ResponseEntity<byte[]> getGeoJson(@PathVariable("teamId") String teamId, @PathVariable("mapId") String mapId) {
-        final Optional<Path> geoJsonFile = mapService.getGeoJsonFile(teamId, mapId);
-        final Optional<Map> map = mapService.get(teamId, mapId);
-        if (map.isPresent()) {
-            try {
-
-                HttpHeaders headers = new HttpHeaders();
-                headers.add("Content-Type", "application/json");
-                headers.setContentDisposition(ContentDisposition.builder("inline")
-                        .filename(Optional.ofNullable(map.get().getPermalink()).orElse(map.get().getId()) + ".json")
-                        .build());
-
-                return new ResponseEntity<>(
-                        Files.readAllBytes(geoJsonFile.get()),
-                        headers,
-                        HttpStatus.OK
-                );
-
-            } catch (IOException e) {
-                throw new ServerErrorException("Error while reading fit : " + mapId, e);
-            }
-        }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to find fit : " + mapId);
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/{mapId}/elevation-profile", method = RequestMethod.GET, produces = "application/json")
-    public ResponseEntity<List<java.util.Map<String, Object>>> getElevationProfile(@PathVariable("teamId") String teamId, @PathVariable("mapId") String mapId) {
-        Optional<List<java.util.Map<String, Object>>> elevationProfile = mapService.getElevationProfile(teamId, mapId);
-        final Optional<Map> map = mapService.get(teamId, mapId);
-        if (map.isPresent()) {
+    @RequestMapping(value = "/{mapId}/data", method = RequestMethod.GET, produces = "application/json")
+    public ResponseEntity<MapData> getMapData(@PathVariable("teamId") String teamId, @PathVariable("mapId") String mapId) {
+        Optional<MapData> mapData = mapService.getMapData(teamId, mapId);
+        if (mapData.isPresent()) {
 
             HttpHeaders headers = new HttpHeaders();
             headers.add("Content-Type", "application/json");
             headers.setContentDisposition(ContentDisposition.builder("inline")
-                    .filename(Optional.ofNullable(map.get().getPermalink()).orElse(map.get().getId()) + ".json")
+                    .filename("map-data.json")
                     .build());
 
             return new ResponseEntity<>(
-                    elevationProfile.get(),
+                    mapData.get(),
                     headers,
                     HttpStatus.OK
             );
 
         }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to calculation elevation profile : " + mapId);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to find data : " + mapId);
     }
 
     @ResponseBody

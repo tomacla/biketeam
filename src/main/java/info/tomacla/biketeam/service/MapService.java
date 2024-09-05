@@ -6,6 +6,7 @@ import info.tomacla.biketeam.domain.map.*;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.service.file.FileService;
 import info.tomacla.biketeam.service.gpx.GpxService;
+import info.tomacla.biketeam.service.gpx.MapData;
 import info.tomacla.biketeam.service.permalink.AbstractPermalinkService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,18 +154,10 @@ public class MapService extends AbstractPermalinkService {
         return Optional.empty();
     }
 
-    public Optional<Path> getGeoJsonFile(String teamId, String mapId) {
+    public Optional<MapData> getMapData(String teamId, String mapId) {
         Optional<Path> gpxFile = getGpxFile(teamId, mapId);
         if (gpxFile.isPresent()) {
-            return Optional.of(gpxService.getAsGeoJson(gpxFile.get()));
-        }
-        return Optional.empty();
-    }
-
-    public Optional<List<java.util.Map<String, Object>>> getElevationProfile(String teamId, String mapId) {
-        Optional<Path> gpxFile = getGpxFile(teamId, mapId);
-        if (gpxFile.isPresent()) {
-            return Optional.of(gpxService.getElevationProfile(gpxFile.get()));
+            return Optional.of(gpxService.getMapData(gpxFile.get()));
         }
         return Optional.empty();
     }

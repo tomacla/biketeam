@@ -9,6 +9,7 @@ import info.tomacla.biketeam.service.garmin.GarminMapDescriptor;
 import info.tomacla.biketeam.service.garmin.GarminToken;
 import info.tomacla.biketeam.service.gpx.GpxDownloadClient;
 import info.tomacla.biketeam.service.gpx.GpxService;
+import info.tomacla.biketeam.service.gpx.MapData;
 import info.tomacla.biketeam.service.gpx.StandaloneGpx;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ContentDisposition;
@@ -104,6 +105,28 @@ public class GpxToolController extends AbstractController {
             return new ModelAndView("gpxtool-root", model.asMap());
         }
 
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/{uuid}/data", method = RequestMethod.GET, produces = "application/json")
+    public ResponseEntity<MapData> getData(@PathVariable("uuid") String uuid) {
+        Optional<MapData> mapData = gpxService.getMapData(uuid);
+        if (mapData.isPresent()) {
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Content-Type", "application/json");
+            headers.setContentDisposition(ContentDisposition.builder("inline")
+                    .filename("map-data.json")
+                    .build());
+
+            return new ResponseEntity<>(
+                    mapData.get(),
+                    headers,
+                    HttpStatus.OK
+            );
+
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to calculation elevation profile : " + uuid);
     }
 
     @PostMapping
