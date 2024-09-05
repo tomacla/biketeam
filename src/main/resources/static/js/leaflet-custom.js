@@ -1,5 +1,15 @@
 var mouseDownFlag = 0;
 
+var targetMap = null;
+
+function showTrack() {
+    targetMap.addLayer(mapLayer);
+}
+
+function hideTrack() {
+    targetMap.removeLayer(mapLayer);
+}
+
 function initMap(mapContainerId, lat, lng, zoom, defaultLayer, providedOptions = {}) {
 
     var newMap = L.map(mapContainerId, { zoomControl: false, layers: [layers[defaultLayer]] }).setView([lat, lng], zoom);
@@ -87,6 +97,99 @@ function initMap(mapContainerId, lat, lng, zoom, defaultLayer, providedOptions =
     return newMap;
 }
 
+const neutralHue = 210;
+const minHue = 85;
+const maxHue = -105;
+const saturation = "86%";
+const lightness = "62%";
+
+function getColor(p, neutralColor) {
+    if (p.inClimb) {
+        hue = Math.round(minHue + (p.grade / 18.0) * (maxHue - minHue));
+        hue = Math.min(minHue, Math.max(maxHue, hue));
+    } else {
+        return neutralColor;
+    }
+    if (hue < 0) {
+        hue = hue + 360;
+    }
+    return "hsl(" + hue + "," + saturation + "," + lightness + ")";
+}
+
+function getLineFromData(data, neutralColor) {
+    var colors = data.points.map(p => getColor(p, neutralColor));
+    var latLngs = data.points.map(p => [p.lat, p.lon]);
+    return L.polyline(
+        latLngs, {
+        noClip: true,
+        smoothFactor: 0,
+        renderer: new polycolorRenderer(),
+        weight: 4,
+        colors: colors
+   });
+}
+
+function initMapView(mapContainerId, raw, dataUrl, elevationProfileContainer) {
+    const neutralColor = "hsl(" + neutralHue + "," + saturation + "," + lightness + ")";
+
+    var targetMap = initMap(mapContainerId, 47, 3, 5, 'OpenStreetMap', {
+        layersControl: true,
+        zoomControl: true,
+        positionControl: true,
+        positionOnLoad: raw,
+        trackDisplayCallBacks: raw ? false : [showTrack, hideTrack],
+        streetViewControl: true,
+        fullScreenControl: true
+    });
+
+    var mapLayer = L.layerGroup();
+    if (dataUrl != null) {
+        loadJsonContent(dataUrl, function(data) {
+
+           var line = getLineFromData(data, neutralColor);
+
+           line.addTo(mapLayer);
+
+           data.markers.forEach(marker => {
+                var latlon = [marker.lat, marker.lon];
+                if (marker.type === "start") {
+                    L.marker(latlon, {clickable: false, icon : L.divIcon({className: 'mapStartIcon'})})
+                        .addTo(mapLayer);
+                } else if (marker.type === "end") {
+                    L.marker(latlon, {clickable: false, icon : L.divIcon({className: 'mapEndIcon'})})
+                        .addTo(mapLayer);
+                } else {
+                    L.circleMarker(latlon, {
+                         radius: 10,
+                         fillColor: "#ffffff",
+                         color: "#000000",
+                         weight: 1,
+                         opacity: 1,
+                         fillOpacity: 0.8
+                    }).addTo(mapLayer);
+
+                    L.tooltip({
+                            permanent: true,
+                            direction: 'center',
+                            className: 'circle-text'
+                        })
+                        .setContent(marker.label)
+                        .setLatLng(latlon)
+                        .addTo(mapLayer);
+                }
+           });
+
+            mapLayer.addTo(targetMap);
+
+            initChart(targetMap, elevationProfileContainer, data, neutralColor, true);
+
+            targetMap.fitBounds(line.getBounds());
+
+        });
+    }
+
+}
+
 function activateStreetView(e) {
     window.open('http://maps.google.com/maps?q=&layer=c&cbll='+e.latlng.lat+','+e.latlng.lng+'&cbp=11,0,0,0,0', '_blank');
 }
@@ -141,12 +244,12 @@ function chartCorsairPlugin(containingMap) {
          const points = chart.getElementsAtEventForMode(evt.event, 'nearest', { intersect: false, axis : 'x' }, false);
          if(currentChartData !== null && points.length > 0) {
 
-             var targetPoint = currentChartData[points[0].index];
+             var targetPoint = currentChartData.points[points[0].index];
              if(evt.event.type === 'mousemove') {
                 if(mouseDownFlag) {
-                    containingMap.panTo(new L.LatLng(targetPoint.lat, targetPoint.lng));
+                    containingMap.panTo(new L.LatLng(targetPoint.lat, targetPoint.lon));
                 }
-                mouseHoverMarker.setLatLng(new L.LatLng(targetPoint.lat, targetPoint.lng));
+                mouseHoverMarker.setLatLng(new L.LatLng(targetPoint.lat, targetPoint.lon));
                 containingMap.addLayer(mouseHoverMarker);
              } else {
                 containingMap.removeLayer(mouseHoverMarker);
@@ -189,43 +292,17 @@ function chartCorsairPlugin(containingMap) {
     }
  }
 
-const minHue = 85;
-const maxHue = -105;
-const saturation = "86%";
-const lightness = "62%";
+var chartNeutralColor = null;
 
-function getColor(p) {
-    if (!p.inClimb) {
-        return "rgb(160,176,70)";
-    }
-    hue = minHue;
-    if (p.inClimb) {
-        if (p.grade > 18) {
-            hue = maxHue;
-        } else if (p.grade > 0) {
-            hue = Math.round(minHue + (p.grade / 18.0) * (maxHue - minHue));
-        }
-    }
-    if (hue < 0) {
-        hue = hue + 360;
-    }
-    return "hsl(" + hue + "," + saturation + "," + lightness + ")";
-}
+function initChart(containingMap, chartContainerId, data, neutralColor, bigMap = false) {
 
-var chartLoaded = false;
-function initChart(containingMap, chartContainerId, elevationProfile, color, callback = null, segmentColor = false) {
-
-     currentChartData = elevationProfile;
-
-     if(segmentColor === true) {
-        color = 'rgb(160,176,70)';
-     }
+     currentChartData = data;
+     chartNeutralColor = neutralColor;
 
      const configData = {
        datasets: [{
          fill: true,
          label: 'Elevation',
-         backgroundColor: color,
          borderColor: 'rgb(0, 0, 0)',
          borderWidth: 1,
          pointRadius: 0,
@@ -235,19 +312,13 @@ function initChart(containingMap, chartContainerId, elevationProfile, color, cal
          pointHoverRadius: 3,
          segment: {
             backgroundColor: function(ctx) {
-               if(segmentColor) {
-                    return getColor(ctx.p0.raw);
-               }
-               return undefined;
+               return getColor(ctx.p0.raw, chartNeutralColor);
             },
              borderColor: function(ctx) {
-                 if(segmentColor) {
-                    return getColor(ctx.p0.raw);
-                   }
-                return undefined;
+               return getColor(ctx.p0.raw, chartNeutralColor);
              }
            },
-         data: elevationProfile
+         data: data.points
        }]
      };
 
@@ -256,6 +327,10 @@ function initChart(containingMap, chartContainerId, elevationProfile, color, cal
        data: configData,
        options: {
            responsive: true,
+           parsing: {
+                 xAxisKey: 'dist',
+                 yAxisKey: 'ele'
+           },
            interaction: {
                 intersect: false,
                 axis: 'x',
@@ -277,8 +352,8 @@ function initChart(containingMap, chartContainerId, elevationProfile, color, cal
                  enabled: true,
                  callbacks: {
                     title: (items) =>
-                        Math.round(items[0].raw.x * 10) / 10 + " km\n" +
-                        Math.round(items[0].raw.y) + " m\n" +
+                        Math.round(items[0].raw.dist * 10) / 10 + " km\n" +
+                        Math.round(items[0].raw.ele) + " m\n" +
                         Math.round(items[0].raw.grade * 10) / 10 + " %",
                     label: (item) => ""
                  }
@@ -296,7 +371,7 @@ function initChart(containingMap, chartContainerId, elevationProfile, color, cal
                     limits: {
                       x: {
                         min: 0,
-                        max: elevationProfile[elevationProfile.length - 1].x,
+                        max: data.info.dist,
                         minRange: 1.0
                       }
                     },
@@ -304,18 +379,15 @@ function initChart(containingMap, chartContainerId, elevationProfile, color, cal
            },
            layout: {
                padding: 0
-           },
-           animation: {
-             onComplete: function() {
-                if(!chartLoaded && callback !== null) {
-                chartLoaded = true;
-                callback();
-                }
-             }
            }
        },
          plugins: [chartCorsairPlugin(containingMap)]
      };
+
+     if (!bigMap) {
+        config.options.plugins.zoom.zoom.wheel.enabled = false;
+        config.options.plugins.zoom.zoom.pinch.enabled = false;
+     }
 
      document.getElementById(chartContainerId).addEventListener('mouseover', function () {
          containingMap.dragging.disable();
@@ -357,11 +429,12 @@ function initChart(containingMap, chartContainerId, elevationProfile, color, cal
 
 }
 
-function updateChart(elevationProfile, color) {
-    currentChartData = elevationProfile;
-     elevationChart.data.datasets[0].data = elevationProfile;
-     elevationChart.data.datasets[0].backgroundColor = color;
-     elevationChart.options.plugins.zoom.limits.x.max = elevationProfile[elevationProfile.length - 1].x;
+function updateChart(data, color) {
+     currentChartData = data;
+     elevationChart.data.datasets[0].data = data.points;
+     chartNeutralColor = color;
+     elevationChart.options.plugins.zoom.limits.x.max = data.info.dist;
      elevationChart.update();
      elevationChart.resetZoom();
+     elevationChart.render();
 }

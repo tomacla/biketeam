@@ -73,80 +73,12 @@
 </div>
 
     <script type="text/javascript">
-
-        function showTrack() {
-            targetMap.addLayer(geoJsonLayer);
-        }
-
-        function hideTrack() {
-            targetMap.removeLayer(geoJsonLayer);
-        }
-
-        var targetMap = initMap('map-wrapper', 51.505, -0.09, 11, 'OpenStreetMap', {
-            layersControl: true,
-            zoomControl: true,
-            positionControl: true,
-            positionOnLoad: false,
-            trackDisplayCallBacks: [showTrack, hideTrack],
-            streetViewControl: true,
-            fullScreenControl: true
-        });
-
-        var geoJsonLayer = L.layerGroup();
-        loadJsonContent('<@common.teamUrl team.id '/maps/${map.id}/geojson' />', function(geojsonFeature) {
-
-            var layer = L.geoJSON(geojsonFeature,
-                {
-                  interactive:false,
-                  color: '#ff0000',
-                  weight: 5,
-                  opacity: 0.8,
-                  pointToLayer: function (feature, latlng) {
-
-                    if(feature.properties.name === 'start') {
-                        return L.marker(latlng, {clickable: false, icon : L.divIcon({className: 'mapStartIcon'})})
-
-                    } else if(feature.properties.name === 'end') {
-                        return L.marker(latlng, {clickable: false, icon : L.divIcon({className: 'mapEndIcon'})});
-                     } else {
-
-                        var circle = L.circleMarker(latlng, {
-                             radius: 10,
-                             fillColor: "#ffffff",
-                             color: "#000000",
-                             weight: 1,
-                             opacity: 1,
-                             fillOpacity: 0.8
-                         });
-
-                        var text = L.tooltip({
-                                permanent: true,
-                                direction: 'center',
-                                className: 'circle-text'
-                            })
-                            .setContent(feature.properties.name)
-                            .setLatLng(latlng);
-                            text.addTo(geoJsonLayer);
-
-                            return circle;
-                      }
-
-                  }
-                });
-
-            layer.addTo(geoJsonLayer);
-            geoJsonLayer.addTo(targetMap);
-
-            loadJsonContent('<@common.teamUrl team.id '/maps/${map.id}/elevation-profile' />', function(elevationProfile) {
-                initChart(targetMap, 'chart-container', elevationProfile, '#dbdbdb', null, true);
-            });
-
-            targetMap.fitBounds(layer.getBounds());
-
-
-        });
-
-
+        initMapView(
+            'map-wrapper',
+            false,
+            '<@common.teamUrl team.id '/maps/${map.id}/data' />',
+            'chart-container'
+        );
     </script>
 
 <#include "_includes_tail.ftlh">

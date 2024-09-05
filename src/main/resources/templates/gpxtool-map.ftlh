@@ -55,84 +55,13 @@
 
 
     <script type="text/javascript">
-
-
-             <#if gpxuuid != 'raw'>
-
-                function showTrack() {
-                           targetMap.addLayer(geoJsonLayer);
-                       }
-
-                       function hideTrack() {
-                           targetMap.removeLayer(geoJsonLayer);
-                       }
-
-            </#if>
-
-            var targetMap = initMap('gpxtool<#if gpxuuid == 'raw'>raw</#if>map-wrapper', 51.505, -0.09, 11, 'OpenStreetMap',
-                {
-                     layersControl: true,
-                     zoomControl: true,
-                     positionControl: true,
-                     positionOnLoad: <#if gpxuuid != 'raw'>false<#else>true</#if>,
-                     trackDisplayCallBacks: <#if gpxuuid != 'raw'>[showTrack, hideTrack]<#else>false</#if>,
-                     streetViewControl: true,
-                     fullScreenControl: true
-                 });
-
-             <#if gpxuuid != 'raw'>
-                var geojsonFeature = ${gpx.geojson?no_esc};
-                var elevationProfile = ${gpx.elevationProfile?no_esc};
-
-                var geoJsonLayer = L.layerGroup();
-                var layer = L.geoJSON(geojsonFeature,
-                    {
-                      interactive:false,
-                      color: '#ff0000',
-                      weight: 5,
-                      opacity: 0.8,
-                      pointToLayer: function (feature, latlng) {
-
-                          if(feature.properties.name === 'start') {
-                              return L.marker(latlng, {clickable: false, icon : L.divIcon({className: 'mapStartIcon'})})
-
-                          } else if(feature.properties.name === 'end') {
-                              return L.marker(latlng, {clickable: false, icon : L.divIcon({className: 'mapEndIcon'})});
-                           } else {
-
-                              var circle = L.circleMarker(latlng, {
-                                   radius: 10,
-                                   fillColor: "#ffffff",
-                                   color: "#000000",
-                                   weight: 1,
-                                   opacity: 1,
-                                   fillOpacity: 0.8
-                               });
-
-                              var text = L.tooltip({
-                                      permanent: true,
-                                      direction: 'center',
-                                      className: 'circle-text'
-                                  })
-                                  .setContent(feature.properties.name)
-                                  .setLatLng(latlng);
-                                  text.addTo(geoJsonLayer);
-
-                                  return circle;
-                            }
-
-                        }
-                    });
-
-                layer.addTo(geoJsonLayer);
-                geoJsonLayer.addTo(targetMap);
-                initChart(targetMap, 'chart-wrapper', elevationProfile, '#ff0000', null, true);
-
-                targetMap.fitBounds(layer.getBounds());
-
-             </#if>
-
-        </script>
+        initMapView(
+            'gpxtool<#if gpxuuid == 'raw'>raw</#if>map-wrapper',
+            <#if gpxuuid != 'raw'>false<#else>true</#if>,
+            <#if gpxuuid != 'raw'>'/gpxtool/${gpxuuid}/data'<#else>null</#if>,
+            'chart-wrapper'
+        );
+    </script>
 
 
 </div>

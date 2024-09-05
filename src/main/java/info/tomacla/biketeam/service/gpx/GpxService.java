@@ -2,7 +2,6 @@ package info.tomacla.biketeam.service.gpx;
 
 import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.common.geo.Vector;
-import info.tomacla.biketeam.common.json.Json;
 import info.tomacla.biketeam.common.math.Rounder;
 import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.map.MapType;
@@ -22,7 +21,6 @@ import io.github.glandais.io.GPXFileWriter;
 import io.github.glandais.io.GPXParser;
 import io.github.glandais.map.TileMapImage;
 import io.github.glandais.map.TileMapProducer;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +29,9 @@ import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.List;
 
 @Service
 public class GpxService {
@@ -59,9 +55,6 @@ public class GpxService {
 
     @Autowired
     private FitFileWriter fitFileWriter;
-
-    @Autowired
-    private GeoJsonFileWriter geoJsonFileWriter;
 
     @Autowired
     private TileMapProducer tileMapProducer;
@@ -122,27 +115,20 @@ public class GpxService {
     }
 
     public Optional<StandaloneGpx> getStandalone(String uuid) {
-        try {
-            if (fileService.fileExists(FileRepositories.GPXTOOLVIEWER, uuid + ".gpx")) {
+        if (fileService.fileExists(FileRepositories.GPXTOOLVIEWER, uuid + ".gpx")) {
 
-                Path file = fileService.getFile(FileRepositories.GPXTOOLVIEWER, uuid + ".gpx");
-                GPXPath gpxPath = getGPXPath(file, uuid);
+            Path file = fileService.getFile(FileRepositories.GPXTOOLVIEWER, uuid + ".gpx");
+            GPXPath gpxPath = getGPXPath(file, uuid);
 
-                Path asGeoJson = getAsGeoJson(file);
+            return Optional.of(
+                    new StandaloneGpx(Rounder.round2Decimals(Math.round(10.0 * gpxPath.getDist()) / 10000.0),
+                            Rounder.round1Decimal(gpxPath.getTotalElevation()),
+                            Rounder.round1Decimal(gpxPath.getTotalElevationNegative())
+                    )
+            );
 
-                return Optional.of(
-                        new StandaloneGpx(Rounder.round2Decimals(Math.round(10.0 * gpxPath.getDist()) / 10000.0),
-                                Rounder.round1Decimal(gpxPath.getTotalElevation()),
-                                Rounder.round1Decimal(gpxPath.getTotalElevationNegative()),
-                                Json.serialize(getElevationProfile(gpxPath)),
-                                FileUtils.readFileToString(asGeoJson.toFile(), StandardCharsets.UTF_8))
-                );
-
-            }
-            return Optional.empty();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
+        return Optional.empty();
     }
 
     private GPXPath getGpxPathFromFiles(String defaultName, Path... gpx) {
@@ -227,28 +213,24 @@ public class GpxService {
         }
     }
 
-    public Path getAsGeoJson(Path gpx) {
-        try {
-            Path geojson = fileService.getTempFile("gpxsimplified", ".json");
-            geoJsonFileWriter.writeGeoJsonFile(getGPXPath(gpx), geojson.toFile());
-            return geojson;
-        } catch (Exception e) {
-            log.error("Error while creating GEOJSON", e);
-            throw new RuntimeException(e);
+    public Optional<MapData> getMapData(String uuid) {
+        Optional<Path> gpxFile = getGpxFile(uuid);
+        if (gpxFile.isPresent()) {
+            return Optional.of(getMapData(gpxFile.get()));
         }
+        return Optional.empty();
     }
 
-    public List<java.util.Map<String, Object>> getElevationProfile(Path gpx) {
-        try {
-            return getElevationProfile(getGPXPath(gpx));
-        } catch (Exception e) {
-            log.error("Error while calculating GEOJSON", e);
-            throw new RuntimeException(e);
+    public Optional<Path> getGpxFile(String uuid) {
+        if (fileService.fileExists(FileRepositories.GPXTOOLVIEWER, uuid + ".gpx")) {
+            Path file = fileService.getFile(FileRepositories.GPXTOOLVIEWER, uuid + ".gpx");
+            return Optional.of(file);
         }
+        return Optional.empty();
     }
 
-
-    private List<java.util.Map<String, Object>> getElevationProfile(GPXPath gpxPath) {
+    public MapData getMapData(Path path) {
+        GPXPath gpxPath = getGPXPath(path);
         try {
             List<Climb> climbs = climbDetector.getClimbs(gpxPath);
             NavigableMap<Double, Double> climbGrades = new TreeMap<>();
@@ -260,12 +242,27 @@ public class GpxService {
                 climbGrades.put(climb.endDist(), null);
             }
 
-            List<java.util.Map<String, Object>> result = new ArrayList<>();
+            List<MapPoint> mapPoints = new ArrayList<>();
+            List<Marker> markers = new ArrayList<>();
+            List<Point> points = gpxPath.getPoints();
 
-            for (int i = 0; i < gpxPath.getPoints().size(); i++) {
-                Point point = gpxPath.getPoints().get(i);
+            Point start = points.get(0);
+            Point end = points.get(points.size() - 1);
+            markers.add(new Marker(start.getLatDeg(), start.getLonDeg(), "start", "start"));
+            markers.add(new Marker(end.getLatDeg(), end.getLonDeg(), "end", "end"));
 
-                Double grade = climbGrades.floorEntry(point.getDist()).getValue();
+            double markerDist = 10000;
+            double marker = markerDist;
+            for (int i = 0; i < points.size(); i++) {
+                Point point = points.get(i);
+
+                double dist = point.getDist();
+                if (dist > marker) {
+                    markers.add(new Marker(point.getLatDeg(), point.getLonDeg(), "step", String.valueOf(Math.round(marker / 1000))));
+                    marker += markerDist;
+                }
+
+                Double grade = climbGrades.floorEntry(dist).getValue();
                 boolean inClimb;
                 if (grade == null) {
                     grade = point.getGrade() * 100;
@@ -273,22 +270,31 @@ public class GpxService {
                 } else {
                     inClimb = true;
                 }
-                result.add(
-                        java.util.Map.of("index", i,
-                                "x", point.getDist() / 1000.0,
-                                "y", point.getEle(),
-                                "lat", point.getLatDeg(),
-                                "lng", point.getLonDeg(),
-                                "grade", grade,
-                                "inClimb", inClimb
+                mapPoints.add(new MapPoint(
+                                i,
+                                point.getLatDeg(),
+                                point.getLonDeg(),
+                                dist / 1000.0,
+                                point.getEle(),
+                                grade,
+                                inClimb
                         )
                 );
             }
-            return result;
+            return new MapData(getMapInfo(gpxPath), mapPoints, climbs, markers);
         } catch (Exception e) {
             log.error("Error while calculating Elevation profile", e);
             throw new RuntimeException(e);
         }
+    }
+
+    private MapInfo getMapInfo(GPXPath gpxPath) {
+        return new MapInfo(
+                gpxPath.getName(),
+                Math.round(gpxPath.getDist() / 100.0) / 10.0,
+                gpxPath.getTotalElevation(),
+                gpxPath.getTotalElevationNegative()
+        );
     }
 
     private GPXPath getGPXPath(Path path) {

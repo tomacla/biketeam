@@ -258,118 +258,21 @@
 
     <script type="text/javascript">
 
-            var targetMap = initMap('map-wrapper', ${mapCenter[0]?c} + 0.02, ${mapCenter[1]?c}, 11, "Carto");
-
-            var geoJsonLayers = [];
-
-            function highlightMap(mapIndex) {
-                restoreMap();
-                const layer = geoJsonLayers.find(function(l) {
-                    return l.mapIndex === mapIndex;
-                });
-                if(layer) {
-                    layer.layer.setStyle({
-                     weight: 8,
-                     opacity: 1
-                    });
-                    layer.layer.bringToFront();
-
-                    updateChart(layer.elevationProfile, layer.color);
-
-                }
-            }
-
-            function restoreMap() {
-                geoJsonLayers.forEach(function(layer) {
-                    layer.layer.setStyle({
-                      weight: 5,
-                      opacity: 0.8
-                    });
-                });
-            }
-
-            var geoJsonLayerGroup = L.featureGroup();
-
-
-            var promisesCount = ${stageMaps?size};
-
-            <#list stageMaps as map>
-
-                loadJsonContent('<@common.teamUrl team.id '/maps/${map}/geojson' />', function(geojsonFeatures) {
-
-                    var geojsonFeature = geojsonFeatures.features.find(f => f.geometry.type === 'LineString');
-
-                    var layer = L.geoJSON(geojsonFeature,
-                        {
-                          interactive:true,
-                          color: '${colors[map?index%10]}',
-                          weight: 5,
-                          opacity: 0.8
-                        }).on('click', function(e) {
-                            highlightMap(${map?index});
-                        });
-
-                    layer.addTo(geoJsonLayerGroup);
-
-                    promisesCount--;
-
-                    if(promisesCount === 0) {
-                        geoJsonLayerGroup.addTo(targetMap);
-                        targetMap.fitBounds(geoJsonLayerGroup.getBounds());
-                    }
-
-                    loadJsonContent('<@common.teamUrl team.id '/maps/${map}/elevation-profile' />', function(elevationProfile) {
-
-                        geoJsonLayers.push({
-                            layer: layer,
-                            mapIndex: ${map?index},
-                            color: '${colors[map?index%10]}',
-                            elevationProfile: elevationProfile
-                        });
-
-                        <#if map?is_first>
-                            if(elevationChart === null) {
-                                initChart(targetMap, 'chart-wrapper', elevationProfile, '${colors[map?index%10]}', function() {
-                                    highlightMap(${map?index});
-                                }, false);
-                            }
-                         </#if>
-                    });
-
-                    <#if map?is_first>
-
-                         var firstPoint = geojsonFeature.geometry.coordinates[0];
-
-                         L.marker([firstPoint[1], firstPoint[0]], {clickable: false, icon : L.divIcon({className: 'mapStartIcon'})}).addTo(geoJsonLayerGroup);
-
-                    </#if>
-
-                    <#if map?is_last>
-
-                            var lastPoint = geojsonFeature.geometry.coordinates[geojsonFeature.geometry.coordinates.length - 1];
-
-                         L.marker([lastPoint[1], lastPoint[0]], {clickable: false, icon : L.divIcon({className: 'mapEndIcon'})}).addTo(geoJsonLayerGroup);
-
-
-                    </#if>
-
-                });
-
-
+            var mapCenter = [${mapCenter[0]?c}, ${mapCenter[1]?c}];
+            var colors = [
+            <#list colors as color>
+                '${color}',
             </#list>
-
-
-
+            ];
+            var maps = [
+            <#list stageMaps as map>
+                { id: '${map}', url: '<@common.teamUrl team.id '/maps/${map}/data' />' },
+            </#list>
+            ];
+            initMaps(mapCenter, maps, colors, true);
 
             <#if trip.startPlace?? || trip.endPlace??>
-                const myModalEl = document.getElementById('placemodal')
-                myModalEl.addEventListener('show.bs.modal', event => {
-                    leafletModalMaps.forEach(map => {
-                     setTimeout(function() {
-                            map.invalidateSize();
-                        }, 10);
-                    });
-                })
+            resetPlacemodal();
             </#if>
 
         </script>
