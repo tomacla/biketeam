@@ -294,7 +294,11 @@ function initChart(containingMap, chartContainerId, elevationProfile, color, cal
                       mode: 'x',
                     },
                     limits: {
-                      x: {min: 0, max: elevationProfile[elevationProfile.length - 1].x}
+                      x: {
+                        min: 0,
+                        max: elevationProfile[elevationProfile.length - 1].x,
+                        minRange: 1.0
+                      }
                     },
                 },
            },
@@ -357,5 +361,7 @@ function updateChart(elevationProfile, color) {
     currentChartData = elevationProfile;
      elevationChart.data.datasets[0].data = elevationProfile;
      elevationChart.data.datasets[0].backgroundColor = color;
+     elevationChart.options.plugins.zoom.limits.x.max = elevationProfile[elevationProfile.length - 1].x;
      elevationChart.update();
+     elevationChart.resetZoom();
 }
