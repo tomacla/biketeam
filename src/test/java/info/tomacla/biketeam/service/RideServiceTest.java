@@ -1,5 +1,7 @@
 package info.tomacla.biketeam.service;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.ride.Ride;
@@ -9,7 +11,9 @@ import info.tomacla.biketeam.domain.ride.SearchRideSpecification;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.TeamConfiguration;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -21,6 +25,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.mockito.Mockito.*;
 
 class RideServiceTest {
+
+    @BeforeAll
+    public static void setUp() {
+        Logger log = (Logger) LoggerFactory.getLogger(RideService.class);
+        log.setLevel(Level.ALL);
+    }
 
     record TestGroup(int minutes, boolean hasMap) {
     }
@@ -65,7 +75,9 @@ class RideServiceTest {
         when(rideRepository.findAll(eq(spec)))
                 .thenReturn(rides);
 
-        List<RideGroup> rideGroups = rideService.listRideGroupsByStartProximity("teamId");
+        Instant now = Instant.parse("2024-09-05T18:00:00Z");
+
+        List<RideGroup> rideGroups = rideService.listRideGroupsByStartProximity(now, "teamId");
         Assertions.assertTrue(rideGroups.isEmpty());
     }
 
@@ -85,7 +97,7 @@ class RideServiceTest {
 
         AtomicInteger mapIdCounter = new AtomicInteger(1);
 
-        Instant now = Instant.now();
+        Instant now = Instant.parse("2024-09-05T18:00:00Z");
 
         List<Ride> rides = new ArrayList<>();
         rides.add(getRide(zoneId, now, mapIdCounter,
@@ -124,7 +136,7 @@ class RideServiceTest {
         when(rideRepository.findAll(eq(spec)))
                 .thenReturn(rides);
 
-        List<RideGroup> rideGroups = rideService.listRideGroupsByStartProximity("teamId");
+        List<RideGroup> rideGroups = rideService.listRideGroupsByStartProximity(now, "teamId");
         List<String> actualMapIds = rideGroups.stream().map(RideGroup::getMap).map(Map::getId).toList();
         List<String> expectedMapIds = List.of(
                 "map07",
