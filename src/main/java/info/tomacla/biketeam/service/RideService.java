@@ -35,6 +35,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class RideService extends AbstractPermalinkService {
@@ -125,9 +127,14 @@ public class RideService extends AbstractPermalinkService {
     }
 
     public List<RideGroup> listRideGroupsByStartProximity(String teamId) {
+        return listRideGroupsByStartProximity(Instant.now(), teamId);
+    }
+
+    public List<RideGroup> listRideGroupsByStartProximity(Instant now, String teamId) {
 
         // retrieve team zone id
         ZoneId zoneId = teamService.get(teamId).map(Team::getZoneId).orElse(ZoneId.of(Timezone.DEFAULT_TIMEZONE));
+        log.debug("zoneId : {}", zoneId);
 
         // get rides
         List<Ride> rides = rideRepository.findAll(new SearchRideSpecification(
@@ -142,9 +149,10 @@ public class RideService extends AbstractPermalinkService {
                 null,
                 LocalDate.now().minus(3, ChronoUnit.DAYS),
                 LocalDate.now().plus(7, ChronoUnit.DAYS)));
+        logRides(rides);
 
         // now
-        Instant now = Instant.now();
+        log.debug("now : {}", now);
 
         // compare for nearest start
         Comparator<RideGroupStart> nearesetComparator = Comparator.comparing(ms -> Duration.between(ms.start(), now).abs());
@@ -152,23 +160,47 @@ public class RideService extends AbstractPermalinkService {
         // then compare by rideGroup id if duration is the same
         Comparator<RideGroupStart> comparator = nearesetComparator.thenComparing(idComparator);
 
-        return rides.stream()
+        List<RideGroupStart> rideGroupStarts = rides.stream()
                 // retrieve maps with start
                 .flatMap(ride ->
                         ride.getGroups().stream()
                                 // only groups with a rideGroup
                                 .filter(rideGroup -> rideGroup.getMap() != null)
                                 .map(rideGroup -> new RideGroupStart(
-                                        rideGroup,
                                         // ride start as instant
-                                        ride.getDate().atTime(rideGroup.getMeetingTime()).atZone(zoneId).toInstant()
+                                        ride.getDate().atTime(rideGroup.getMeetingTime()).atZone(zoneId).toInstant(),
+                                        rideGroup
                                 ))
-                )
-                // sort by nearest starts
-                .sorted(comparator)
+                ).collect(Collectors.toList());
+        logRideGroupStarts("rideGroupStarts", rideGroupStarts);
+        // sort by nearest starts
+        rideGroupStarts.sort(comparator);
+        logRideGroupStarts("rideGroupStarts sorted", rideGroupStarts);
+
+        return rideGroupStarts.stream()
                 .map(RideGroupStart::rideGroup)
                 .toList();
+    }
 
+    private void logRides(List<Ride> rides) {
+        if (log.isDebugEnabled()) {
+            log.debug("rides : \n{}",
+                    rides.stream().map(r -> r.getId() + " [\n\t"+
+                            r.getGroups().stream().map(g -> g.getRide().getDate() + " " + g.getMeetingTime() + " : " + (g.getMap() == null ? null : g.getMap().getId())).collect(Collectors.joining(",\n\t"))
+                            +"]").collect(Collectors.joining(",\n"))
+            );
+        }
+    }
+
+    private void logRideGroupStarts(String title, List<RideGroupStart> rideGroupStarts) {
+        if (log.isDebugEnabled()) {
+            log.debug("{} : \n{}",
+                    title,
+                    rideGroupStarts.stream()
+                            .map(rgs -> rgs.start() + " " + rgs.rideGroup().getMap().getId())
+                            .collect(Collectors.joining(",\n"))
+            );
+        }
     }
 
     @RabbitListener(queues = Queues.TASK_PUBLISH_RIDES)
@@ -230,7 +262,7 @@ public class RideService extends AbstractPermalinkService {
     }
 
 
-    record RideGroupStart(RideGroup rideGroup, Instant start) {
+    record RideGroupStart(Instant start, RideGroup rideGroup) {
     }
 
 
