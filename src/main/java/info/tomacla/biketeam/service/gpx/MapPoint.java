@@ -7,7 +7,8 @@ public record MapPoint(
         double dist,
         double ele,
         double grade,
-        boolean inClimb
+        Integer climbIndex,
+        Double simplifiedClimbGrade
 ) {
 
 }

@@ -33,7 +33,7 @@ function initMaps(mapCenter, maps, colors, trip) {
         loadJsonContent(map.url, function(data) {
 
             var color = colors[index % 10];
-            var layer = getLineFromData(data, color, true);
+            var layer = getLineFromData(data, color, true, false);
             layer.on('click', e => { highlightMap(index); });
 
             layer.addTo(featureGroup);
@@ -45,7 +45,7 @@ function initMaps(mapCenter, maps, colors, trip) {
                 data: data
             });
             if (index === 0) {
-                initChart(targetMap, 'chart-wrapper', data, color, false);
+                initChart(targetMap, 'chart-wrapper', data, color, false, false, false);
                 var startPoint = data.points[0];
                 L.marker([startPoint.lat, startPoint.lon], {clickable: false, icon : L.divIcon({className: 'mapStartIcon'})})
                     .addTo(featureGroup);
