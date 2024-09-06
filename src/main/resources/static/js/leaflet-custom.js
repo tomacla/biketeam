@@ -143,7 +143,7 @@ function getLineFromData(data, neutralColor, interactive, showGrades) {
                             interactive: interactive,
                             color: color,
                             weight: 8,
-                            opacity: 0.6,
+                            opacity: 0.8,
                             lineCap: 'butt'
                         }
                     )
@@ -159,7 +159,7 @@ function getLineFromData(data, neutralColor, interactive, showGrades) {
                             interactive: interactive,
                             color: neutralColor,
                             weight: 8,
-                            opacity: 0.6,
+                            opacity: 0.8,
                             lineCap: 'butt'
                         }
                     );
@@ -381,6 +381,9 @@ function initChart(containingMap, chartContainerId, data, neutralColor, activate
                 }
             },
              borderColor: function(ctx) {
+                if(!activateZoom) {
+                    return undefined
+                }
                 if (colorGrades) {
                     return getColor(data, ctx.p0.raw, chartNeutralColor);
                 } else {
