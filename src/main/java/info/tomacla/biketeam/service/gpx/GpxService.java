@@ -233,17 +233,17 @@ public class GpxService {
         GPXPath gpxPath = getGPXPath(path);
         try {
             List<Climb> climbs = climbDetector.getClimbs(gpxPath);
-            NavigableMap<Double, Double> simplifiedClimbGrades = new TreeMap<>();
-            simplifiedClimbGrades.put(0.0, null);
             NavigableMap<Double, Integer> climbIndexes = new TreeMap<>();
             climbIndexes.put(0.0, null);
+            NavigableMap<Double, Integer> climbPartIndexes = new TreeMap<>();
+            climbPartIndexes.put(0.0, null);
             for (int i = 0; i < climbs.size(); i++) {
                 Climb climb = climbs.get(i);
 
-                for (ClimbPart climbPart : climb.parts()) {
-                    simplifiedClimbGrades.put(climb.startDist() + climbPart.startDist(), climbPart.grade());
+                for (int j = 0; j < climb.parts().size(); j++) {
+                    climbPartIndexes.put(climb.startDist() + climb.parts().get(j).startDist(), j);
                 }
-                simplifiedClimbGrades.put(climb.endDist(), null);
+                climbPartIndexes.put(climb.endDist(), null);
 
                 climbIndexes.put(climb.startDist(), i);
                 climbIndexes.put(climb.endDist(), null);
@@ -269,7 +269,6 @@ public class GpxService {
                     marker += markerDist;
                 }
 
-                Integer climbIndex = climbIndexes.floorEntry(dist).getValue();
                 mapPoints.add(new MapPoint(
                                 i,
                                 point.getLatDeg(),
@@ -277,8 +276,8 @@ public class GpxService {
                                 dist / 1000.0,
                                 point.getEle(),
                                 point.getGrade() * 100,
-                                climbIndex,
-                                simplifiedClimbGrades.floorEntry(dist).getValue()
+                                climbIndexes.floorEntry(dist).getValue(),
+                                climbPartIndexes.floorEntry(dist).getValue()
                         )
                 );
             }

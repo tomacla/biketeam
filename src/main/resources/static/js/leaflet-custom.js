@@ -94,8 +94,8 @@ const saturation = "86%";
 const lightness = "62%";
 
 function getColor(data, p, neutralColor) {
-    if (p.simplifiedClimbGrade !== null) {
-        var grade = Math.round(p.simplifiedClimbGrade);
+    if (p.climbIndex !== null && p.climbPartIndex !== null) {
+        var grade = Math.round(data.climbs[p.climbIndex].parts[p.climbPartIndex].grade);
         hue = Math.round(minHue + (grade / 18.0) * (maxHue - minHue));
         hue = Math.min(minHue, Math.max(maxHue, hue));
     } else {
@@ -334,15 +334,24 @@ function chartCorsairPlugin(containingMap) {
 var chartNeutralColor = null;
 
 function getTooltip(data, p) {
-    var result = Math.round(p.dist * 10) / 10 + " km - "
-            + Math.round(p.ele) + " m - " +
-            + Math.round(p.grade * 10) / 10 + " %";
+    var result = Math.round(p.dist * 10) / 10 + " km "
+            + Math.round(p.ele) + " m ("
+            + (Math.round(p.grade * 10) / 10) + " %)";
     if (p.climbIndex !== null && p.climbIndex < data.climbs.length) {
         var climb = data.climbs[p.climbIndex];
-        result = result + "\n"
-            + "Montée : " + Math.round(climb.dist / 100) / 10 + " km - " +
-            + Math.round(climb.elevation) + " m - "
-            + Math.round(climb.climbingGrade * 10) / 10 + " %"
+        if (p.climbPartIndex !== null && p.climbPartIndex < climb.parts.length) {
+            var part = climb.parts[p.climbPartIndex];
+            result = result + "\n"
+                + "Montée (" + (p.climbIndex+1) + "/" + data.climbs.length + ") : "
+                + Math.round(climb.elevation) + " m/"
+                + Math.round(climb.dist / 100) / 10 + " km (" +
+                + Math.round(climb.climbingGrade * 10) / 10 + " %)";
+            if (climb.parts.length > 1) {
+                result = result + "\n"
+                    + "Partie (" + (p.climbPartIndex+1) + "/" + climb.parts.length + ") : " + Math.round(part.dist / 100) / 10 + " km (" +
+                    Math.round(part.grade * 10) / 10 + " %)";
+            }
+        }
     }
     return result;
 }
