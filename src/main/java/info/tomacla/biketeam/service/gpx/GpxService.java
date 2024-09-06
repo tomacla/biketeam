@@ -233,13 +233,20 @@ public class GpxService {
         GPXPath gpxPath = getGPXPath(path);
         try {
             List<Climb> climbs = climbDetector.getClimbs(gpxPath);
-            NavigableMap<Double, Double> climbGrades = new TreeMap<>();
-            climbGrades.put(0.0, null);
-            for (Climb climb : climbs) {
+            NavigableMap<Double, Double> simplifiedClimbGrades = new TreeMap<>();
+            simplifiedClimbGrades.put(0.0, null);
+            NavigableMap<Double, Integer> climbIndexes = new TreeMap<>();
+            climbIndexes.put(0.0, null);
+            for (int i = 0; i < climbs.size(); i++) {
+                Climb climb = climbs.get(i);
+
                 for (ClimbPart climbPart : climb.parts()) {
-                    climbGrades.put(climb.startDist() + climbPart.startDist(), climbPart.grade());
+                    simplifiedClimbGrades.put(climb.startDist() + climbPart.startDist(), climbPart.grade());
                 }
-                climbGrades.put(climb.endDist(), null);
+                simplifiedClimbGrades.put(climb.endDist(), null);
+
+                climbIndexes.put(climb.startDist(), i);
+                climbIndexes.put(climb.endDist(), null);
             }
 
             List<MapPoint> mapPoints = new ArrayList<>();
@@ -262,22 +269,16 @@ public class GpxService {
                     marker += markerDist;
                 }
 
-                Double grade = climbGrades.floorEntry(dist).getValue();
-                boolean inClimb;
-                if (grade == null) {
-                    grade = point.getGrade() * 100;
-                    inClimb = false;
-                } else {
-                    inClimb = true;
-                }
+                Integer climbIndex = climbIndexes.floorEntry(dist).getValue();
                 mapPoints.add(new MapPoint(
                                 i,
                                 point.getLatDeg(),
                                 point.getLonDeg(),
                                 dist / 1000.0,
                                 point.getEle(),
-                                grade,
-                                inClimb
+                                point.getGrade() * 100,
+                                climbIndex,
+                                simplifiedClimbGrades.floorEntry(dist).getValue()
                         )
                 );
             }
