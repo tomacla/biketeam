@@ -93,10 +93,10 @@ const maxHue = -105;
 const saturation = "86%";
 const lightness = "62%";
 
-function getColor(p, neutralColor) {
-    if (p.inClimb) {
-        var roundedGrade = Math.round(p.grade);
-        hue = Math.round(minHue + (roundedGrade / 18.0) * (maxHue - minHue));
+function getColor(data, p, neutralColor) {
+    if (p.simplifiedClimbGrade !== null) {
+        var grade = Math.round(p.simplifiedClimbGrade);
+        hue = Math.round(minHue + (grade / 18.0) * (maxHue - minHue));
         hue = Math.min(minHue, Math.max(maxHue, hue));
     } else {
         return neutralColor;
@@ -107,49 +107,63 @@ function getColor(p, neutralColor) {
     return "hsl(" + hue + "," + saturation + "," + lightness + ")";
 }
 
-function getLineFromData(data, neutralColor, interactive) {
-    var colors = data.points.map(p => getColor(p, neutralColor));
+function getLineFromData(data, neutralColor, interactive, showGrades) {
+    if (showGrades) {
+        var colors = data.points.map(p => getColor(data, p, neutralColor));
 
-    var polylines = new Map();
-    var previousColor = null;
-    for (let i = 0; i < data.points.length - 1; i++) {
-      var color = colors[i];
+        var polylines = new Map();
+        var previousColor = null;
+        for (let i = 0; i < data.points.length - 1; i++) {
+          var color = colors[i];
 
-      if (!polylines.has(color)) {
-          polylines.set(color, []);
-      }
-      var polyline = polylines.get(color);
+          if (!polylines.has(color)) {
+              polylines.set(color, []);
+          }
+          var polyline = polylines.get(color);
 
-      var line = null;
-      if (color !== previousColor) {
-        // start a new line
-        line = [[data.points[i].lat, data.points[i].lon]];
-        polyline.push(line);
-        previousColor = color;
-      } else {
-        line = polyline[polyline.length - 1];
-      }
-      line.push([data.points[i + 1].lat, data.points[i + 1].lon]);
+          var line = null;
+          if (color !== previousColor) {
+            // start a new line
+            line = [[data.points[i].lat, data.points[i].lon]];
+            polyline.push(line);
+            previousColor = color;
+          } else {
+            line = polyline[polyline.length - 1];
+          }
+          line.push([data.points[i + 1].lat, data.points[i + 1].lon]);
+        }
+
+        var layers = [];
+
+        for (const [color, polylineLatLngs] of polylines.entries()) {
+          layers.push(
+            new L.polyline(
+                        polylineLatLngs,
+                        {
+                            interactive: interactive,
+                            color: color,
+                            weight: 8,
+                            opacity: 0.6,
+                            lineCap: 'butt'
+                        }
+                    )
+          );
+        }
+
+        return L.featureGroup(layers, {interactive: interactive});
+    } else {
+        var latLngs = data.points.map(p => [p.lat, p.lon]);
+        return new L.polyline(
+                        latLngs,
+                        {
+                            interactive: interactive,
+                            color: neutralColor,
+                            weight: 8,
+                            opacity: 0.6,
+                            lineCap: 'butt'
+                        }
+                    );
     }
-
-    var layers = [];
-
-    for (const [color, polylineLatLngs] of polylines.entries()) {
-      layers.push(
-        new L.polyline(
-                    polylineLatLngs,
-                    {
-                        interactive: interactive,
-                        color: color,
-                        weight: 8,
-                        opacity: 0.6,
-                        lineCap: 'butt'
-                    }
-                )
-      );
-    }
-
-    return L.featureGroup(layers, {interactive: interactive});
 }
 
 function initMapView(mapContainerId, raw, dataUrl, elevationProfileContainer) {
@@ -171,7 +185,7 @@ function initMapView(mapContainerId, raw, dataUrl, elevationProfileContainer) {
     if (dataUrl != null) {
         loadJsonContent(dataUrl, function(data) {
 
-           var line = getLineFromData(data, neutralColor, false);
+           var line = getLineFromData(data, neutralColor, false, true);
 
            line.addTo(mapLayer);
 
@@ -206,7 +220,7 @@ function initMapView(mapContainerId, raw, dataUrl, elevationProfileContainer) {
 
             mapLayer.addTo(targetMap);
 
-            initChart(targetMap, elevationProfileContainer, data, neutralColor, true);
+            initChart(targetMap, elevationProfileContainer, data, neutralColor, true, true, true);
 
             targetMap.fitBounds(line.getBounds());
 
@@ -319,7 +333,21 @@ function chartCorsairPlugin(containingMap) {
 
 var chartNeutralColor = null;
 
-function initChart(containingMap, chartContainerId, data, neutralColor, bigMap = false) {
+function getTooltip(data, p) {
+    var result = Math.round(p.dist * 10) / 10 + " km - "
+            + Math.round(p.ele) + " m - " +
+            + Math.round(p.grade * 10) / 10 + " %";
+    if (p.climbIndex !== null && p.climbIndex < data.climbs.length) {
+        var climb = data.climbs[p.climbIndex];
+        result = result + "\n"
+            + "Montée : " + Math.round(climb.dist / 100) / 10 + " km - " +
+            + Math.round(climb.elevation) + " m - "
+            + Math.round(climb.climbingGrade * 10) / 10 + " %"
+    }
+    return result;
+}
+
+function initChart(containingMap, chartContainerId, data, neutralColor, activateZoom, colorGrades, showTooltip) {
 
      currentChartData = data;
      chartNeutralColor = neutralColor;
@@ -337,10 +365,18 @@ function initChart(containingMap, chartContainerId, data, neutralColor, bigMap =
          pointHoverRadius: 3,
          segment: {
             backgroundColor: function(ctx) {
-               return getColor(ctx.p0.raw, chartNeutralColor);
+                if (colorGrades) {
+                    return getColor(data, ctx.p0.raw, chartNeutralColor);
+                } else {
+                    return chartNeutralColor;
+                }
             },
              borderColor: function(ctx) {
-               return getColor(ctx.p0.raw, chartNeutralColor);
+                if (colorGrades) {
+                    return getColor(data, ctx.p0.raw, chartNeutralColor);
+                } else {
+                    return chartNeutralColor;
+                }
              }
            },
          data: data.points
@@ -374,22 +410,19 @@ function initChart(containingMap, chartContainerId, data, neutralColor, bigMap =
                    display: false
                },
                tooltip: {
-                 enabled: true,
+                 enabled: showTooltip,
                  callbacks: {
-                    title: (items) =>
-                        Math.round(items[0].raw.dist * 10) / 10 + " km\n" +
-                        Math.round(items[0].raw.ele) + " m\n" +
-                        Math.round(items[0].raw.grade * 10) / 10 + " %",
+                    title: (items) => getTooltip(data, items[0].raw),
                     label: (item) => ""
                  }
                },
                 zoom: {
                     zoom: {
                       wheel: {
-                        enabled: true,
+                        enabled: activateZoom,
                       },
                       pinch: {
-                        enabled: true
+                        enabled: activateZoom
                       },
                       mode: 'x',
                     },
@@ -408,11 +441,6 @@ function initChart(containingMap, chartContainerId, data, neutralColor, bigMap =
        },
          plugins: [chartCorsairPlugin(containingMap)]
      };
-
-     if (!bigMap) {
-        config.options.plugins.zoom.zoom.wheel.enabled = false;
-        config.options.plugins.zoom.zoom.pinch.enabled = false;
-     }
 
      document.getElementById(chartContainerId).addEventListener('mouseover', function () {
          containingMap.dragging.disable();
