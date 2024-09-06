@@ -381,13 +381,10 @@ function initChart(containingMap, chartContainerId, data, neutralColor, activate
                 }
             },
              borderColor: function(ctx) {
-                if(!activateZoom) {
-                    return undefined
-                }
                 if (colorGrades) {
                     return getColor(data, ctx.p0.raw, chartNeutralColor);
                 } else {
-                    return chartNeutralColor;
+                    return undefined;
                 }
              }
            },
