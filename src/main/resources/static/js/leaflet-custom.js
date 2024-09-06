@@ -1,15 +1,5 @@
 var mouseDownFlag = 0;
 
-var targetMap = null;
-
-function showTrack() {
-    targetMap.addLayer(mapLayer);
-}
-
-function hideTrack() {
-    targetMap.removeLayer(mapLayer);
-}
-
 function initMap(mapContainerId, lat, lng, zoom, defaultLayer, providedOptions = {}) {
 
     var newMap = L.map(mapContainerId, { zoomControl: false, layers: [layers[defaultLayer]] }).setView([lat, lng], zoom);
@@ -105,7 +95,8 @@ const lightness = "62%";
 
 function getColor(p, neutralColor) {
     if (p.inClimb) {
-        hue = Math.round(minHue + (p.grade / 18.0) * (maxHue - minHue));
+        var roundedGrade = Math.round(p.grade);
+        hue = Math.round(minHue + (roundedGrade / 18.0) * (maxHue - minHue));
         hue = Math.min(minHue, Math.max(maxHue, hue));
     } else {
         return neutralColor;
@@ -116,37 +107,71 @@ function getColor(p, neutralColor) {
     return "hsl(" + hue + "," + saturation + "," + lightness + ")";
 }
 
-function getLineFromData(data, neutralColor) {
+function getLineFromData(data, neutralColor, interactive) {
     var colors = data.points.map(p => getColor(p, neutralColor));
-    var latLngs = data.points.map(p => [p.lat, p.lon]);
-    return L.polyline(
-        latLngs, {
-        noClip: true,
-        smoothFactor: 0,
-        renderer: new polycolorRenderer(),
-        weight: 4,
-        colors: colors
-   });
+
+    var polylines = new Map();
+    var previousColor = null;
+    for (let i = 0; i < data.points.length - 1; i++) {
+      var color = colors[i];
+
+      if (!polylines.has(color)) {
+          polylines.set(color, []);
+      }
+      var polyline = polylines.get(color);
+
+      var line = null;
+      if (color !== previousColor) {
+        // start a new line
+        line = [[data.points[i].lat, data.points[i].lon]];
+        polyline.push(line);
+        previousColor = color;
+      } else {
+        line = polyline[polyline.length - 1];
+      }
+      line.push([data.points[i + 1].lat, data.points[i + 1].lon]);
+    }
+
+    var layers = [];
+
+    for (const [color, polylineLatLngs] of polylines.entries()) {
+      layers.push(
+        new L.polyline(
+                    polylineLatLngs,
+                    {
+                        interactive: interactive,
+                        color: color,
+                        weight: 8,
+                        opacity: 0.6,
+                        lineCap: 'butt'
+                    }
+                )
+      );
+    }
+
+    return L.featureGroup(layers, {interactive: interactive});
 }
 
 function initMapView(mapContainerId, raw, dataUrl, elevationProfileContainer) {
     const neutralColor = "hsl(" + neutralHue + "," + saturation + "," + lightness + ")";
 
-    var targetMap = initMap(mapContainerId, 47, 3, 5, 'OpenStreetMap', {
+    var targetMap = null;
+    var mapLayer = L.layerGroup();
+
+    targetMap = initMap(mapContainerId, 47, 3, 5, 'OpenStreetMap', {
         layersControl: true,
         zoomControl: true,
         positionControl: true,
         positionOnLoad: raw,
-        trackDisplayCallBacks: raw ? false : [showTrack, hideTrack],
+        trackDisplayCallBacks: raw ? false : [() => { targetMap.addLayer(mapLayer) }, () => { targetMap.removeLayer(mapLayer); }],
         streetViewControl: true,
         fullScreenControl: true
     });
 
-    var mapLayer = L.layerGroup();
     if (dataUrl != null) {
         loadJsonContent(dataUrl, function(data) {
 
-           var line = getLineFromData(data, neutralColor);
+           var line = getLineFromData(data, neutralColor, false);
 
            line.addTo(mapLayer);
 

@@ -5,7 +5,7 @@ function restoreMap() {
     mapLayers.forEach(function(layer) {
         layer.layer.setStyle({
           weight: 5,
-          opacity: 0.8
+          opacity: 0.5
         });
     });
 }
@@ -18,7 +18,7 @@ function highlightMap(mapIndex) {
     if(layer) {
         layer.layer.setStyle({
          weight: 8,
-         opacity: 1
+         opacity: 0.7
         });
         layer.layer.bringToFront();
         updateChart(layer.data, layer.color);
@@ -33,7 +33,9 @@ function initMaps(mapCenter, maps, colors, trip) {
         loadJsonContent(map.url, function(data) {
 
             var color = colors[index % 10];
-            var layer = getLineFromData(data, color);
+            var layer = getLineFromData(data, color, true);
+            layer.on('click', e => { highlightMap(index); });
+
             layer.addTo(featureGroup);
 
             mapLayers.push({
