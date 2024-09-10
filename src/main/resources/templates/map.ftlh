@@ -73,7 +73,7 @@
 </div>
 
     <script type="text/javascript">
-        initMapView(
+        initSingleMapView(
             'map-wrapper',
             false,
             '<@common.teamUrl team.id '/maps/${map.id}/data' />',
