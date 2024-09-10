@@ -204,6 +204,37 @@ function loadJsonContent(url, callback) {
 
 }
 
+function makeRequest(query) {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', query.url, true);
+
+        xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                resolve({query, result:JSON.parse(xhr.responseText)});
+            } else {
+                reject(new Error('Request failed with status ' + xhr.status));
+            }
+        };
+
+        xhr.onerror = function () {
+            reject(new Error('Network error'));
+        };
+
+        xhr.send();
+    });
+}
+
+function loadJsonContentMultiple(queries, callback) {
+    Promise.all(queries.map(makeRequest))
+        .then((responses) => {
+            callback(responses);
+        })
+        .catch((error) => {
+            console.error('One or more requests failed:', error);
+        });
+}
+
 function wrapContent(contentContainer) {
 
       var text = contentContainer.innerHTML;

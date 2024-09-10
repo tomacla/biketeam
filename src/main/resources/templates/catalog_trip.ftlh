@@ -128,13 +128,13 @@
 
              <div class="border rounded">
 
-            <div class="position-relative w-100" style="z-index:1; height:500px;" id="map-wrapper">
-                <div class="w-100 w-sm-100 w-md-40 position-absolute bg-white top end-0" style="z-index:2000; height:150px;">
-                    <canvas class="w-100" style="height:150px;" id="chart-wrapper"></canvas>
-                </div>
-            </div>
-
-
+              <div class="position-relative w-100" style="z-index:1; height:500px;">
+                    <div class="w-100 position-absolute bg-white top end-0" style="z-index:1; height:500px;" id="map-wrapper">
+                    </div>
+                    <div class="w-100 w-sm-100 w-md-40 position-absolute bg-white top end-0" style="z-index:2000; height:150px;">
+                          <canvas class="w-100" style="height:150px;" id="chart-wrapper"></canvas>
+                     </div>
+              </div>
 
          </div>
 
