@@ -55,7 +55,7 @@
 
 
     <script type="text/javascript">
-        initMapView(
+        initSingleMapView(
             'gpxtool<#if gpxuuid == 'raw'>raw</#if>map-wrapper',
             <#if gpxuuid != 'raw'>false<#else>true</#if>,
             <#if gpxuuid != 'raw'>'/gpxtool/${gpxuuid}/data'<#else>null</#if>,
