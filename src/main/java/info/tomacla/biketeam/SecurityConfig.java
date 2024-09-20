@@ -11,6 +11,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.security.access.expression.SecurityExpressionHandler;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -27,6 +28,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.expression.DefaultHttpSecurityExpressionHandler;
 import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -59,12 +61,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
+        // expression with access to all beans in context (userService, ...)
+        SecurityExpressionHandler<RequestAuthorizationContext> expressionHandler = getExpressionHandler();
+
         // global conf
         http.cors(Customizer.withDefaults());
         http.csrf(AbstractHttpConfigurer::disable);
 
         // requests conf
         http.authorizeHttpRequests(auth -> {
+
+            // request matchers is using old style ant_path_matcher (see application.properties)
 
             // static
             auth.requestMatchers("/css/**", "/js/**", "/jsf/**", "/img/**", "/*/image", "/legal-mentions", "/robots.txt", "/misc/**").permitAll();
@@ -83,7 +90,7 @@ public class SecurityConfig {
 
             // api protected endpoints
             auth.requestMatchers("/api/teams/{teamId}/**").access(
-                    getWebExpressionAuthorizationManager("@userService.authorizePublicAccess(authentication, #teamId)")
+                    getWebExpressionAuthorizationManager(expressionHandler, "@userService.authorizePublicAccess(authentication, #teamId)")
             );
 
             // web public endpoints
@@ -93,13 +100,13 @@ public class SecurityConfig {
             auth.requestMatchers("/users/me/**", "/users/space/**", "/new").authenticated();
             auth.requestMatchers("/admin/**", "/management/**").hasRole("ADMIN");
             auth.requestMatchers("/{teamId}/admin/**").access(
-                    getWebExpressionAuthorizationManager("@userService.authorizeAdminAccess(authentication, #teamId)")
+                    getWebExpressionAuthorizationManager(expressionHandler, "@userService.authorizeAdminAccess(authentication, #teamId)")
             );
             auth.requestMatchers("/{teamId}/**/add-participant/**", "/{teamId}/**/remove-participant/**").access(
-                    getWebExpressionAuthorizationManager("@userService.authorizeAuthenticatedPublicAccess(authentication, #teamId)")
+                    getWebExpressionAuthorizationManager(expressionHandler, "@userService.authorizeAuthenticatedPublicAccess(authentication, #teamId)")
             );
             auth.requestMatchers("/{teamId}/join", "/{teamId}/leave", "/{teamId}/**").access(
-                    getWebExpressionAuthorizationManager("@userService.authorizePublicAccess(authentication, #teamId)")
+                    getWebExpressionAuthorizationManager(expressionHandler, "@userService.authorizePublicAccess(authentication, #teamId)")
             );
 
             // other request are permitted
@@ -132,10 +139,14 @@ public class SecurityConfig {
         return http.build();
     }
 
-    private WebExpressionAuthorizationManager getWebExpressionAuthorizationManager(final String expression) {
-        final var expressionHandler = new DefaultHttpSecurityExpressionHandler();
+    private DefaultHttpSecurityExpressionHandler getExpressionHandler() {
+        DefaultHttpSecurityExpressionHandler expressionHandler = new DefaultHttpSecurityExpressionHandler();
         expressionHandler.setApplicationContext(applicationContext);
-        final var authorizationManager = new WebExpressionAuthorizationManager(expression);
+        return expressionHandler;
+    }
+
+    private WebExpressionAuthorizationManager getWebExpressionAuthorizationManager(SecurityExpressionHandler<RequestAuthorizationContext> expressionHandler, String expression) {
+        WebExpressionAuthorizationManager authorizationManager = new WebExpressionAuthorizationManager(expression);
         authorizationManager.setExpressionHandler(expressionHandler);
         return authorizationManager;
     }
