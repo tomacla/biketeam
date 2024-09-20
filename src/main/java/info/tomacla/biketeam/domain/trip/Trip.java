@@ -12,7 +12,7 @@ import info.tomacla.biketeam.domain.place.Place;
 import info.tomacla.biketeam.domain.user.User;
 import org.springframework.util.ObjectUtils;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;

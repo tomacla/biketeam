@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.5.5</version>
+		<version>3.3.3</version>
 		<relativePath/>
 	</parent>
 	<groupId>info.tomacla</groupId>
@@ -31,15 +31,14 @@
 
 	<properties>
 		<java.version>17</java.version>
-		<dotenv-java.version>2.2.4</dotenv-java.version>
-		<restfb.version>3.22.0</restfb.version>
+		<dotenv-java.version>3.0.2</dotenv-java.version>
+		<restfb.version>2024.12.0</restfb.version>
 		<gpx2web.version>1.1.23</gpx2web.version>
-		<zip4j.version>2.11.3</zip4j.version>
+		<zip4j.version>2.11.5</zip4j.version>
 		<h2.version>2.1.212</h2.version>
-		<postgresql.version>42.5.5</postgresql.version>
-		<thumbnailator.version>0.4.14</thumbnailator.version>
+		<postgresql.version>42.7.4</postgresql.version>
+		<thumbnailator.version>0.4.20</thumbnailator.version>
 		<scribejava-core.version>8.3.3</scribejava-core.version>
-		<testcontainers.version>1.17.1</testcontainers.version>
 		<spring-boot.build-image.imageName>github.com/tomacla/biketeam:latest</spring-boot.build-image.imageName>
 	</properties>
 
@@ -109,8 +108,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
+			<groupId>org.apache.httpcomponents.client5</groupId>
+			<artifactId>httpclient5</artifactId>
 		</dependency>
 
 		<dependency>
@@ -153,14 +152,12 @@
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>${testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>junit-jupiter</artifactId>
-			<version>${testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
 

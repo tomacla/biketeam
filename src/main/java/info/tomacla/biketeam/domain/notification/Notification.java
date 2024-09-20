@@ -2,7 +2,7 @@ package info.tomacla.biketeam.domain.notification;
 
 import info.tomacla.biketeam.domain.user.User;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Objects;
