@@ -3,7 +3,7 @@ package info.tomacla.biketeam.domain.team;
 import info.tomacla.biketeam.common.data.Timezone;
 import info.tomacla.biketeam.common.datatype.Strings;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

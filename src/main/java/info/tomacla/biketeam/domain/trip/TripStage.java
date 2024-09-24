@@ -3,7 +3,7 @@ package info.tomacla.biketeam.domain.trip;
 import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.domain.map.Map;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;

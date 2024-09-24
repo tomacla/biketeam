@@ -1,26 +1,40 @@
 package info.tomacla.biketeam.service.gpx;
 
-import org.apache.http.client.config.CookieSpecs;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import jakarta.annotation.PostConstruct;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.client5.http.ssl.TrustAllStrategy;
+import org.apache.hc.core5.ssl.SSLContextBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 
+@Service
 public class GpxDownloadClient {
 
-    public static void downloadGPX(File targetFile, String gpxUrl) {
+    private RestTemplate template;
+
+    @PostConstruct
+    protected void buildRestTemplate() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+        template = new RestTemplate(requestFactory());
+    }
+
+    public void downloadGPX(File targetFile, String gpxUrl) {
 
         try {
-            RestTemplate template = new RestTemplate(requestFactory());
             template.execute(gpxUrl, HttpMethod.GET, null, (clientHttpResponse) -> StreamUtils.copy(clientHttpResponse.getBody(), new FileOutputStream(targetFile)));
         } catch (Exception e) {
             throw new RuntimeException("Unable to download GPX", e);
@@ -29,19 +43,24 @@ public class GpxDownloadClient {
     }
 
     // FIXME disable https
-    private static ClientHttpRequestFactory requestFactory() {
+    private static ClientHttpRequestFactory requestFactory() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 
-        RequestConfig defaultRequestConfig = RequestConfig.custom()
-                .setCookieSpec(CookieSpecs.DEFAULT)
-                .setExpectContinueEnabled(true)
+        CloseableHttpClient httpclient = HttpClients.custom()
+                .setDefaultRequestConfig(
+                        RequestConfig.custom()
+                                .setExpectContinueEnabled(true)
+                                .build()
+                )
+                .setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create()
+                        .setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
+                                .setSslContext(SSLContextBuilder.create()
+                                        .loadTrustMaterial(TrustAllStrategy.INSTANCE)
+                                        .build())
+                                .setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                                .build())
+                        .build())
                 .build();
 
-        CloseableHttpClient httpClient = HttpClients.custom()
-                .setDefaultCookieStore(new BasicCookieStore())
-                .setDefaultRequestConfig(defaultRequestConfig)
-                .setSSLHostnameVerifier(new NoopHostnameVerifier())
-                .build();
-
-        return new HttpComponentsClientHttpRequestFactory(httpClient);
+        return new HttpComponentsClientHttpRequestFactory(httpclient);
     }
 }

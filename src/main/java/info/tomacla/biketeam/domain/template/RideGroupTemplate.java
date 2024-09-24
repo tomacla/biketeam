@@ -2,7 +2,7 @@ package info.tomacla.biketeam.domain.template;
 
 import info.tomacla.biketeam.common.datatype.Strings;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalTime;
 import java.util.Objects;
 import java.util.UUID;

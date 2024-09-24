@@ -32,11 +32,13 @@ public class FeedService {
 
     public LocalDate getDefaultFrom(Set<String> teamIds) {
         List<LastTeamData> lastTeamData = teamService.getLastTeamData(teamIds);
-        LocalDate defaultIfNull = LocalDate.now().minus(3L, ChronoUnit.MONTHS);
+        OffsetDateTime minInstant = Instant.now().atOffset(ZoneOffset.UTC).minusMonths(3L);
+        LocalDate minDate = minInstant.toLocalDate();
+        Instant defaultIfNull = minInstant.toInstant();
         LocalDate publicationFromDate = LastTeamData.extractDate(lastTeamData, d -> d.getLastPublicationPublishedAt(), defaultIfNull);
         LocalDate rideFromDate = LastTeamData.extractDate(lastTeamData, d -> d.getLastRidePublishedAt(), defaultIfNull);
         LocalDate tripFromDate = LastTeamData.extractDate(lastTeamData, d -> d.getLastTripPublishedAt(), defaultIfNull);
-        return Collections.min(Arrays.asList(publicationFromDate, rideFromDate, tripFromDate, defaultIfNull));
+        return Collections.min(Arrays.asList(publicationFromDate, rideFromDate, tripFromDate, minDate));
     }
 
     public List<FeedEntity> listFeed(User user, Team team, FeedOptions options) {

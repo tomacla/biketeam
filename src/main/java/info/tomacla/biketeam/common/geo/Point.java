@@ -1,6 +1,6 @@
 package info.tomacla.biketeam.common.geo;
 
-import javax.persistence.Embeddable;
+import jakarta.persistence.Embeddable;
 import java.util.Objects;
 
 @Embeddable
