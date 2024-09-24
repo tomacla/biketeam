@@ -4,7 +4,7 @@ import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.user.User;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;

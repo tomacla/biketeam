@@ -2,7 +2,7 @@ package info.tomacla.biketeam.domain.team;
 
 import info.tomacla.biketeam.common.datatype.Strings;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity

@@ -1,7 +1,7 @@
 package info.tomacla.biketeam.common.file;
 
 import info.tomacla.biketeam.common.datatype.Strings;
-import liquibase.util.file.FilenameUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.http.MediaType;
 
 import java.util.ArrayList;
