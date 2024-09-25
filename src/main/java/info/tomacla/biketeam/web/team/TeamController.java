@@ -55,7 +55,7 @@ public class TeamController extends AbstractController {
     @Autowired
     private FeedService feedService;
 
-    @GetMapping
+    @GetMapping(value = {"", "/"})
     public String getFeed(@PathVariable("teamId") String teamId,
                           @RequestParam(value = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
                           @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
