@@ -14,7 +14,7 @@ import java.security.Principal;
 @RequestMapping(value = "/{teamId}/faq")
 public class FAQController extends AbstractController {
 
-    @GetMapping
+    @GetMapping(value = {"", "/"})
     public String getPage(@PathVariable("teamId") String teamId,
                           Principal principal,
                           Model model) {

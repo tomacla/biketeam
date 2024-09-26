@@ -84,7 +84,7 @@ public class RideController extends AbstractController {
         return "ride";
     }
 
-    @GetMapping
+    @GetMapping(value = {"", "/"})
     public RedirectView getRides(@PathVariable("teamId") String teamId,
                                  Principal principal,
                                  Model model) {

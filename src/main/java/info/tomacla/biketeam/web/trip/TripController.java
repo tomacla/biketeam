@@ -144,7 +144,7 @@ public class TripController extends AbstractController {
     }
 
 
-    @GetMapping
+    @GetMapping(value = {"", "/"})
     public RedirectView getTrips(@PathVariable("teamId") String teamId,
                                  Principal principal,
                                  Model model) {

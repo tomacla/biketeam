@@ -55,7 +55,7 @@ public class GpxToolController extends AbstractController {
     @Autowired
     private GpxDownloadClient gpxDownloadClient;
 
-    @GetMapping
+    @GetMapping(value = {"", "/"})
     public ModelAndView root(@RequestParam(name = "gpx", required = false) String gpx, Principal principal, Model model) {
 
         if (StringUtils.hasText(gpx)) {
