@@ -53,7 +53,7 @@ public class CatalogController extends AbstractController {
     @Autowired
     private TripService tripService;
 
-    @GetMapping
+    @GetMapping(value = {"", "/"})
     public String getCatalog(@ModelAttribute("error") String error,
                              Principal principal,
                              Model model) {

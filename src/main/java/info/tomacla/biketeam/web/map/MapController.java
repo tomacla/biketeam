@@ -106,7 +106,7 @@ public class MapController extends AbstractController {
 
     }
 
-    @GetMapping
+    @GetMapping(value = {"", "/"})
     public String getMaps(@PathVariable("teamId") String teamId,
                           @RequestParam(value = "lowerDistance", required = false) Double lowerDistance,
                           @RequestParam(value = "upperDistance", required = false) Double upperDistance,

@@ -22,7 +22,7 @@ public class ConfirmEmailController extends AbstractController {
     @Autowired
     private PublicationRepository publicationRepository;
 
-    @GetMapping
+    @GetMapping(value = {"", "/"})
     public String confirmEmail(@RequestParam(value = "code", required = true) String code,
                                @ModelAttribute("error") String error,
                                Principal principal,

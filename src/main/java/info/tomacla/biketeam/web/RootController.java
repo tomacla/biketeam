@@ -61,7 +61,7 @@ public class RootController extends AbstractController {
     @Autowired
     private MapService mapService;
 
-    @GetMapping
+    @GetMapping(value = {"", "/"})
     public String getRoot(@RequestParam(required = false, name = "error") String error,
                           @ModelAttribute(name = "error") String modelError,
                           @RequestParam(value = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
