@@ -1468,4 +1468,59 @@
 
     </changeSet>
 
+    <changeSet id="create-indexes" author="tomacla">
+        <createIndex tableName="map" indexName="map_length">
+            <column name="length"/>
+        </createIndex>
+        <createIndex tableName="message" indexName="message_target_id">
+            <column name="target_id"/>
+        </createIndex>
+        <createIndex tableName="message" indexName="message_team_id">
+            <column name="team_id"/>
+        </createIndex>
+        <createIndex tableName="notification" indexName="notification_user_notif">
+            <column name="user_id"/>
+            <column name="viewed" />
+        </createIndex>
+        <createIndex tableName="publication" indexName="publication_feed">
+            <column name="team_id"/>
+            <column name="published_status"/>
+            <column name="published_at"/>
+            <column name="deletion"/>
+        </createIndex>
+        <createIndex tableName="ride" indexName="ride_feed">
+            <column name="team_id"/>
+            <column name="listed_in_feed"/>
+            <column name="published_status"/>
+            <column name="published_at"/>
+            <column name="deletion"/>
+        </createIndex>
+        <createIndex tableName="trip" indexName="trip_feed">
+            <column name="team_id"/>
+            <column name="listed_in_feed"/>
+            <column name="published_status"/>
+            <column name="published_at"/>
+            <column name="deletion"/>
+        </createIndex>
+
+        <createIndex tableName="publication" indexName="publication_published_status">
+            <column name="published_status"/>
+        </createIndex>
+        <createIndex tableName="publication" indexName="publication_published_at">
+            <column name="published_at"/>
+        </createIndex>
+        <createIndex tableName="ride" indexName="ride_published_status">
+            <column name="published_status"/>
+        </createIndex>
+        <createIndex tableName="ride" indexName="ride_published_at">
+            <column name="published_at"/>
+        </createIndex>
+        <createIndex tableName="trip" indexName="trip_published_status">
+            <column name="published_status"/>
+        </createIndex>
+        <createIndex tableName="trip" indexName="trip_published_at">
+            <column name="published_at"/>
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>
