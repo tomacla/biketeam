@@ -35,7 +35,9 @@ public class JSFilteredControler {
 
         Map<String, String> data = new HashMap<>();
         data.put("customMbTilesLayerURL", customMbTilesLayerURL.equals("undefined") ? null : customMbTilesLayerURL);
-        data.put("ignApiKey", ignApiKey.equals("undefined") ? null : ignApiKey);
+        // FIXME utiliser les nouvelles clés en 2025 cf https://geoservices.ign.fr/actualites/2023-11-20-acces-donnesnonlibres-gpf
+        // data.put("ignApiKey", ignApiKey.equals("undefined") ? null : ignApiKey);
+        data.put("ignApiKey", "ign_scan_ws");
 
         return returnContent("__js_layers.ftlh", data);
 
