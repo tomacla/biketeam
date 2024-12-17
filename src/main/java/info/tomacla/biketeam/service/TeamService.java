@@ -57,17 +57,13 @@ public class TeamService extends AbstractPermalinkService {
         return teamRepository.findById(teamId.toLowerCase());
     }
 
-    public void save(Team team) {
-        this.save(team, false);
-    }
-
     @Transactional
-    public void save(Team team, boolean newTeam) {
+    public void save(Team team) {
         log.info("Team {} is updated", team.getTeamId());
 
         teamRepository.save(team);
 
-        if (newTeam) {
+        if (team.isNew()) {
             this.initTeamImage(team);
         }
 

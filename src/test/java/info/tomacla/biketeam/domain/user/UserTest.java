@@ -37,7 +37,6 @@ public class UserTest extends AbstractDBTest {
         user.setStravaId(21212L);
         user.setFirstName("foo");
         user.setLastName("bar");
-        user.setId("user-id");
         userRepository.save(user);
         return user;
     }

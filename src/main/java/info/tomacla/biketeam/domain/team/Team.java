@@ -9,6 +9,8 @@ import info.tomacla.biketeam.domain.userrole.Role;
 import info.tomacla.biketeam.domain.userrole.UserRole;
 
 import jakarta.persistence.*;
+import org.springframework.data.domain.Persistable;
+
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -19,10 +21,13 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "team")
-public class Team implements MessageHolder {
+public class Team implements MessageHolder, Persistable<String> {
+
+    @Transient
+    private boolean isNew = false;
 
     @Id
-    private String id = UUID.randomUUID().toString();
+    private String id;
     private String name;
     private String city;
     @Enumerated(EnumType.STRING)
@@ -53,6 +58,15 @@ public class Team implements MessageHolder {
 
     public String getId() {
         return id;
+    }
+
+    @Override
+    public boolean isNew() {
+        return isNew;
+    }
+
+    public void markAsNew() {
+        this.isNew = true;
     }
 
     public void setId(String id) {

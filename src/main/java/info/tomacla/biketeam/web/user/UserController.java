@@ -110,6 +110,8 @@ public class UserController extends AbstractController {
             });
 
             final Team newTeam = new Team();
+            newTeam.markAsNew();
+
             newTeam.setId(targetId);
             newTeam.setName(parser.getName());
             newTeam.setCity(parser.getCity());
@@ -118,7 +120,7 @@ public class UserController extends AbstractController {
             newTeam.getConfiguration().setTimezone(parser.getTimezone());
             newTeam.setVisibility(Visibility.USER);
 
-            teamService.save(newTeam, true);
+            teamService.save(newTeam);
 
             userRoleService.save(new UserRole(newTeam, targetAdmin, Role.ADMIN));
 

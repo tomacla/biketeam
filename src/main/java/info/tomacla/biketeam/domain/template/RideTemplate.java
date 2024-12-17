@@ -6,6 +6,8 @@ import info.tomacla.biketeam.domain.place.Place;
 import info.tomacla.biketeam.domain.ride.RideType;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -14,7 +16,8 @@ import java.util.stream.Collectors;
 public class RideTemplate {
 
     @Id
-    private String id = UUID.randomUUID().toString();
+    @UuidGenerator
+    private String id;
     @Column(name = "team_id")
     private String teamId;
     private String name;

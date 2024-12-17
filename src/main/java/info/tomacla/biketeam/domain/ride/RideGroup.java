@@ -5,6 +5,8 @@ import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.user.User;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
+
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -14,7 +16,8 @@ import java.util.stream.Collectors;
 public class RideGroup {
 
     @Id
-    private String id = UUID.randomUUID().toString();
+    @UuidGenerator
+    private String id;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ride_id")
     private Ride ride;

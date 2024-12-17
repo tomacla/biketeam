@@ -30,7 +30,6 @@ public class MapTest extends AbstractDBTest {
     public void mapRepositoryTU() {
 
         Map map = new Map();
-        map.setId("mapRepositoryTU-id");
         map.setTeamId("maptest-team");
         map.setPermalink("map-perma");
         map.setLength(100.0);
@@ -40,12 +39,10 @@ public class MapTest extends AbstractDBTest {
         map.setStartPoint(new Point(52.0, 3.0));
         map.setEndPoint(new Point(53.0, 3.1));
 
-        assertFalse(mapRepository.findById("map-id").isPresent());
         assertFalse(mapRepository.findOne(new SearchMapSpecification(null, "map-perma", null, null, null, null, null, null, null, null, null, null, null)).isPresent());
 
         mapRepository.save(map);
 
-        assertTrue(mapRepository.findById("mapRepositoryTU-id").isPresent());
         assertTrue(mapRepository.findOne(new SearchMapSpecification(null, "map-perma", null, null, null, null, null, null, null, null, null, null, null)).isPresent());
 
         mapRepository.deleteAll();
@@ -56,7 +53,6 @@ public class MapTest extends AbstractDBTest {
     public void mapRepositoryTU_findall() {
 
         Map map1 = new Map();
-        map1.setId("mapRepositoryTU_findall-id1");
         map1.setTeamId("maptest-team");
         map1.setPermalink("map-perma");
         map1.setLength(100.0);
@@ -68,7 +64,6 @@ public class MapTest extends AbstractDBTest {
         mapRepository.save(map1);
 
         Map map2 = new Map();
-        map2.setId("mapRepositoryTU_findall-id2");
         map2.setTeamId("maptest-team");
         map2.setPermalink("map2-perma");
         map2.setLength(100.0);
@@ -80,7 +75,6 @@ public class MapTest extends AbstractDBTest {
         mapRepository.save(map2);
 
         Map map3 = new Map();
-        map3.setId("mapRepositoryTU_findall-id3");
         map3.setTeamId("maptest-team2");
         map3.setPermalink("map3-perma");
         map3.setLength(100.0);
@@ -103,7 +97,6 @@ public class MapTest extends AbstractDBTest {
     public void mapRepositoryTU_tags() {
 
         Map map1 = new Map();
-        map1.setId("mapRepositoryTU_findall-id1");
         map1.setTeamId("maptest-team");
         map1.setPermalink("map-perma");
         map1.setTags(List.of("fondo", "road"));
@@ -116,7 +109,6 @@ public class MapTest extends AbstractDBTest {
         mapRepository.save(map1);
 
         Map map2 = new Map();
-        map2.setId("mapRepositoryTU_findall-id2");
         map2.setTeamId("maptest-team");
         map2.setPermalink("map2-perma");
         map2.setTags(List.of("fondo", "gravel"));
@@ -129,7 +121,6 @@ public class MapTest extends AbstractDBTest {
         mapRepository.save(map2);
 
         Map map3 = new Map();
-        map3.setId("mapRepositoryTU_findall-id3");
         map3.setTeamId("maptest-team");
         map3.setPermalink("map3-perma");
         map3.setTags(List.of("trip", "bikepack"));
@@ -167,7 +158,6 @@ public class MapTest extends AbstractDBTest {
         );
 
         Map map1 = new Map();
-        map1.setId("mapRepositoryTU_findall-id1");
         map1.setTeamId("maptest-team");
         map1.setPermalink("map-perma");
         map1.setTags(List.of("fondo", "road"));
@@ -180,7 +170,6 @@ public class MapTest extends AbstractDBTest {
         mapRepository.save(map1);
 
         Map map2 = new Map();
-        map2.setId("mapRepositoryTU_findall-id2");
         map2.setTeamId("maptest-team");
         map2.setPermalink("map2-perma");
         map2.setTags(List.of("fondo", "gravel"));
@@ -193,7 +182,6 @@ public class MapTest extends AbstractDBTest {
         mapRepository.save(map2);
 
         Map map3 = new Map();
-        map3.setId("mapRepositoryTU_findall-id3");
         map3.setTeamId("maptest-team");
         map3.setPermalink("map3-perma");
         map3.setTags(List.of("trip", "bikepack"));

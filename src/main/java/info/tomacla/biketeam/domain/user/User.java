@@ -5,6 +5,8 @@ import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.userrole.UserRole;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
+
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -15,7 +17,8 @@ import java.util.UUID;
 public class User {
 
     @Id
-    private String id = UUID.randomUUID().toString();
+    @UuidGenerator
+    private String id;
     private boolean admin = false;
 
     private boolean deletion;

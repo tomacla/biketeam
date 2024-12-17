@@ -3,6 +3,8 @@ package info.tomacla.biketeam.domain.template;
 import info.tomacla.biketeam.common.datatype.Strings;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
+
 import java.time.LocalTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -12,7 +14,8 @@ import java.util.UUID;
 public class RideGroupTemplate {
 
     @Id
-    private String id = UUID.randomUUID().toString();
+    @UuidGenerator
+    private String id;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ride_template_id")
     private RideTemplate rideTemplate;
