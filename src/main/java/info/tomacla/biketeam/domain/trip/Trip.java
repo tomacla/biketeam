@@ -10,6 +10,7 @@ import info.tomacla.biketeam.domain.message.MessageHolder;
 import info.tomacla.biketeam.domain.message.MessageTargetType;
 import info.tomacla.biketeam.domain.place.Place;
 import info.tomacla.biketeam.domain.user.User;
+import org.hibernate.annotations.UuidGenerator;
 import org.springframework.util.ObjectUtils;
 
 import jakarta.persistence.*;
@@ -23,7 +24,8 @@ import java.util.stream.Collectors;
 @Table(name = "trip")
 public class Trip implements MessageHolder, FeedEntity {
     @Id
-    private String id = UUID.randomUUID().toString();
+    @UuidGenerator
+    private String id;
     @Column(name = "team_id")
     private String teamId;
     private String permalink;

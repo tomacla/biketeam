@@ -3,6 +3,8 @@ package info.tomacla.biketeam.domain.notification;
 import info.tomacla.biketeam.domain.user.User;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
+
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Objects;
@@ -13,7 +15,8 @@ import java.util.UUID;
 public class Notification {
 
     @Id
-    private String id = UUID.randomUUID().toString();
+    @UuidGenerator
+    private String id;
     @Column(name = "team_id")
     private String teamId;
     @Column(name = "element_id")

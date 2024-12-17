@@ -4,6 +4,8 @@ import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.common.geo.Point;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
+
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -16,7 +18,8 @@ import java.util.UUID;
 public class Map {
 
     @Id
-    private String id = UUID.randomUUID().toString();
+    @UuidGenerator
+    private String id;
     @Column(name = "team_id")
     private String teamId;
     private String permalink;

@@ -6,6 +6,8 @@ import info.tomacla.biketeam.domain.feed.FeedEntity;
 import info.tomacla.biketeam.domain.feed.FeedType;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
+
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -19,7 +21,8 @@ import java.util.UUID;
 public class Publication implements FeedEntity {
 
     @Id
-    private String id = UUID.randomUUID().toString();
+    @UuidGenerator
+    private String id;
     @Column(name = "team_id")
     private String teamId;
     @Enumerated(EnumType.STRING)

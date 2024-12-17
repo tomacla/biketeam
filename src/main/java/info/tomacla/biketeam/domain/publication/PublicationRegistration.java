@@ -3,6 +3,8 @@ package info.tomacla.biketeam.domain.publication;
 import info.tomacla.biketeam.common.datatype.Strings;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
+
 import java.util.UUID;
 
 @Entity
@@ -10,7 +12,8 @@ import java.util.UUID;
 public class PublicationRegistration {
 
     @Id
-    private String id = UUID.randomUUID().toString();
+    @UuidGenerator
+    private String id;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "publication_id")

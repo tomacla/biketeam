@@ -195,14 +195,15 @@ public class RootController extends AbstractController {
             });
 
             final Team newTeam = new Team();
+
+
             newTeam.setId(targetId);
             newTeam.setName(parser.getName());
             newTeam.setCity(parser.getCity());
             newTeam.setCountry(parser.getCountry());
             newTeam.getDescription().setDescription(parser.getDescription());
             newTeam.getConfiguration().setTimezone(parser.getTimezone());
-
-            teamService.save(newTeam, true);
+            teamService.save(newTeam);
 
             userRoleService.save(new UserRole(newTeam, targetAdmin, Role.ADMIN));
 
