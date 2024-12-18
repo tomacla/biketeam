@@ -4,6 +4,8 @@ import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.domain.user.User;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
+
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Objects;
@@ -14,7 +16,8 @@ import java.util.UUID;
 public class Message {
 
     @Id
-    private String id = UUID.randomUUID().toString();
+    @UuidGenerator
+    private String id;
     @Column(name = "team_id")
     private String teamId;
     @Column(name = "target_id")
@@ -106,14 +109,13 @@ public class Message {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Message that = (Message) o;
-        return id.equals(that.id);
+        Message message = (Message) o;
+        return Objects.equals(id, message.id) && Objects.equals(teamId, message.teamId) && Objects.equals(targetId, message.targetId) && Objects.equals(replyToId, message.replyToId) && type == message.type && Objects.equals(user, message.user) && Objects.equals(publishedAt, message.publishedAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, teamId, targetId, replyToId, type, user, publishedAt);
     }
 }

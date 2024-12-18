@@ -127,7 +127,6 @@ public class RideTest extends AbstractDBTest {
         user.setStravaId(stravaId);
         user.setFirstName("foo");
         user.setLastName("bar");
-        user.setId("" + stravaId);
         userRepository.save(user);
         return user;
     }

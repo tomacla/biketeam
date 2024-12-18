@@ -6,6 +6,8 @@ import info.tomacla.biketeam.domain.feed.FeedEntity;
 import info.tomacla.biketeam.domain.feed.FeedType;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
+
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -19,7 +21,8 @@ import java.util.UUID;
 public class Publication implements FeedEntity {
 
     @Id
-    private String id = UUID.randomUUID().toString();
+    @UuidGenerator
+    private String id;
     @Column(name = "team_id")
     private String teamId;
     @Enumerated(EnumType.STRING)
@@ -132,15 +135,13 @@ public class Publication implements FeedEntity {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Publication that = (Publication) o;
-        return id.equals(that.id);
+        return Objects.equals(id, that.id) && Objects.equals(teamId, that.teamId) && publishedStatus == that.publishedStatus && Objects.equals(title, that.title) && Objects.equals(publishedAt, that.publishedAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, teamId, publishedStatus, title, publishedAt);
     }
-
 }

@@ -45,8 +45,10 @@ public class NewRideFormTest {
     public void testFromTemplate() {
 
         RideGroupTemplate g1 = new RideGroupTemplate();
+        g1.setId("g1");
         g1.setName("toot");
         RideGroupTemplate g2 = new RideGroupTemplate();
+        g2.setId("g2");
         g2.setName("taat");
 
         RideTemplate template = new RideTemplate();

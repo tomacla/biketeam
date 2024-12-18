@@ -137,6 +137,8 @@ public class AdminTeamPublicationController extends AbstractController {
                 publication.setImaged(parser.getFile().isPresent());
             }
 
+            publication = publicationService.save(publication);
+
             if (parser.getFile().isPresent()) {
                 publication.setImaged(true);
                 MultipartFile uploadedFile = parser.getFile().get();

@@ -28,7 +28,6 @@ public class PlaceTest extends AbstractDBTest {
     public void placeRepositoryTU() {
 
         Place place = new Place();
-        place.setId("placeRepositoryTU-id");
         place.setTeamId("placetest-team");
         place.setPoint(new Point(52.0, 3.0));
         place.setLink("http://toto");
@@ -37,11 +36,11 @@ public class PlaceTest extends AbstractDBTest {
         place.setStartPlace(true);
         place.setEndPlace(false);
 
-        assertFalse(placeRepository.findById("placeRepositoryTU-id").isPresent());
+        assertFalse(placeRepository.exists(SearchPlaceSpecification.allInTeam("placetest-team")));
 
         placeRepository.save(place);
 
-        assertTrue(placeRepository.findById("placeRepositoryTU-id").isPresent());
+        assertTrue(placeRepository.exists(SearchPlaceSpecification.allInTeam("placetest-team")));
 
         placeRepository.deleteAll();
 

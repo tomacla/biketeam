@@ -5,6 +5,8 @@ import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.user.User;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
+
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -14,7 +16,8 @@ import java.util.stream.Collectors;
 public class RideGroup {
 
     @Id
-    private String id = UUID.randomUUID().toString();
+    @UuidGenerator
+    private String id;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ride_id")
     private Ride ride;
@@ -113,15 +116,13 @@ public class RideGroup {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RideGroup rideGroup = (RideGroup) o;
-        return id.equals(rideGroup.id);
+        return Double.compare(averageSpeed, rideGroup.averageSpeed) == 0 && Objects.equals(id, rideGroup.id) && Objects.equals(ride, rideGroup.ride) && Objects.equals(name, rideGroup.name) && Objects.equals(meetingTime, rideGroup.meetingTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, ride, name, averageSpeed, meetingTime);
     }
-
 }

@@ -10,6 +10,7 @@ import info.tomacla.biketeam.domain.message.MessageHolder;
 import info.tomacla.biketeam.domain.message.MessageTargetType;
 import info.tomacla.biketeam.domain.place.Place;
 import info.tomacla.biketeam.domain.user.User;
+import org.hibernate.annotations.UuidGenerator;
 import org.springframework.util.ObjectUtils;
 
 import jakarta.persistence.*;
@@ -23,7 +24,8 @@ import java.util.stream.Collectors;
 @Table(name = "trip")
 public class Trip implements MessageHolder, FeedEntity {
     @Id
-    private String id = UUID.randomUUID().toString();
+    @UuidGenerator
+    private String id;
     @Column(name = "team_id")
     private String teamId;
     private String permalink;
@@ -334,16 +336,13 @@ public class Trip implements MessageHolder, FeedEntity {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Trip trip = (Trip) o;
-        return id.equals(trip.id);
+        return Objects.equals(id, trip.id) && Objects.equals(teamId, trip.teamId) && Objects.equals(permalink, trip.permalink) && Objects.equals(startDate, trip.startDate) && Objects.equals(endDate, trip.endDate) && Objects.equals(meetingTime, trip.meetingTime) && type == trip.type && publishedStatus == trip.publishedStatus && Objects.equals(publishedAt, trip.publishedAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, teamId, permalink, startDate, endDate, meetingTime, type, publishedStatus, publishedAt);
     }
-
-
 }

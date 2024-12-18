@@ -4,6 +4,8 @@ import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.common.geo.Point;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
+
 import java.util.Objects;
 import java.util.UUID;
 
@@ -12,7 +14,8 @@ import java.util.UUID;
 public class Place {
 
     @Id
-    private String id = UUID.randomUUID().toString();
+    @UuidGenerator
+    private String id;
 
     private String teamId;
 
@@ -101,4 +104,15 @@ public class Place {
         this.endPlace = endPlace;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Place place = (Place) o;
+        return Objects.equals(id, place.id) && Objects.equals(teamId, place.teamId) && Objects.equals(name, place.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, teamId, name);
+    }
 }

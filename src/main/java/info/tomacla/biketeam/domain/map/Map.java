@@ -4,6 +4,8 @@ import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.common.geo.Point;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
+
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -16,7 +18,8 @@ import java.util.UUID;
 public class Map {
 
     @Id
-    private String id = UUID.randomUUID().toString();
+    @UuidGenerator
+    private String id;
     @Column(name = "team_id")
     private String teamId;
     private String permalink;
@@ -178,15 +181,13 @@ public class Map {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Map that = (Map) o;
-        return id.equals(that.id);
+        Map map = (Map) o;
+        return Double.compare(length, map.length) == 0 && Objects.equals(id, map.id) && Objects.equals(teamId, map.teamId) && Objects.equals(permalink, map.permalink) && Objects.equals(name, map.name) && type == map.type && Objects.equals(postedAt, map.postedAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, teamId, permalink, name, length, type, postedAt);
     }
-
 }

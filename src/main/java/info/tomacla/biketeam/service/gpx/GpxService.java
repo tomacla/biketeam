@@ -65,19 +65,11 @@ public class GpxService {
     @Value("${mapbox.api-key}")
     private String mapBoxAPIKey;
 
-    public Map parseAndStore(Team team, Path gpx, String defaultName, String permalink) {
+    public Map parseAndStore(Team team, Map newMap, Path gpx, String defaultName) {
 
         try {
-            Map newMap = new Map();
-            newMap.setTeamId(team.getId());
-            newMap.setPermalink(permalink);
-            newMap.setType(MapType.ROAD);
-            newMap.setTags(team.getConfiguration().getDefaultSearchTags());
-
             GPXPath gpxPath = prepareMap(gpx, defaultName, newMap, team);
-
             newMap.setName(gpxPath.getName());
-
             return newMap;
         } catch (Exception e) {
             throw new RuntimeException("Unable to parse GPX", e);
