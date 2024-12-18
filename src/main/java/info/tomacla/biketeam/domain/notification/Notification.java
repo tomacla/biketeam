@@ -90,15 +90,13 @@ public class Notification {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Notification that = (Notification) o;
-        return id.equals(that.id);
+        return Objects.equals(id, that.id) && Objects.equals(teamId, that.teamId) && Objects.equals(elementId, that.elementId) && type == that.type && Objects.equals(user, that.user) && Objects.equals(createdAt, that.createdAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, teamId, elementId, type, user, createdAt);
     }
-
 }

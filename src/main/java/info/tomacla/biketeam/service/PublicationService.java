@@ -48,8 +48,8 @@ public class PublicationService {
     }
 
     @Transactional
-    public void save(Publication publication) {
-        publicationRepository.save(publication);
+    public Publication save(Publication publication) {
+        return publicationRepository.save(publication);
     }
 
     public Page<Publication> listPublications(String teamId, String title, int page, int pageSize) {

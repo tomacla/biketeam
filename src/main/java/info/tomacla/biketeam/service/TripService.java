@@ -93,8 +93,8 @@ public class TripService extends AbstractPermalinkService {
     }
 
     @Transactional
-    public void save(Trip trip) {
-        tripRepository.save(trip);
+    public Trip save(Trip trip) {
+        return tripRepository.save(trip);
     }
 
     @Transactional

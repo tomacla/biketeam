@@ -133,15 +133,13 @@ public class RideTemplate {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        RideTemplate ride = (RideTemplate) o;
-        return id.equals(ride.id);
+        RideTemplate that = (RideTemplate) o;
+        return Objects.equals(id, that.id) && Objects.equals(teamId, that.teamId) && Objects.equals(name, that.name) && type == that.type && Objects.equals(description, that.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, teamId, name, type, description);
     }
-
 }

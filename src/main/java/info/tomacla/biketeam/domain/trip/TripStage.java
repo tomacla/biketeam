@@ -77,15 +77,13 @@ public class TripStage {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TripStage tripStage = (TripStage) o;
-        return id.equals(tripStage.id);
+        return alternative == tripStage.alternative && Objects.equals(id, tripStage.id) && Objects.equals(trip, tripStage.trip) && Objects.equals(date, tripStage.date) && Objects.equals(name, tripStage.name) && Objects.equals(map, tripStage.map);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, trip, date, name, map, alternative);
     }
-
 }

@@ -195,8 +195,7 @@ public class RootController extends AbstractController {
             });
 
             final Team newTeam = new Team();
-
-
+            newTeam.markAsNew();
             newTeam.setId(targetId);
             newTeam.setName(parser.getName());
             newTeam.setCity(parser.getCity());

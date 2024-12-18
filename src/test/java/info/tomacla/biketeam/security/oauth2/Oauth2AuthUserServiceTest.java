@@ -27,6 +27,7 @@ public class Oauth2AuthUserServiceTest {
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         Mockito.when(userService.getByStravaId(10002L)).thenReturn(Optional.empty());
+        Mockito.when(userService.save(Mockito.any())).thenAnswer(i -> i.getArguments()[0]);
 
         final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService, brokerService);
 
@@ -67,6 +68,7 @@ public class Oauth2AuthUserServiceTest {
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         Mockito.when(userService.getByStravaId(10002L)).thenReturn(Optional.of(u));
+        Mockito.when(userService.save(Mockito.any())).thenAnswer(i -> i.getArguments()[0]);
 
         final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService, brokerService);
 
@@ -105,6 +107,7 @@ public class Oauth2AuthUserServiceTest {
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         Mockito.when(userService.getByFacebookId("10002")).thenReturn(Optional.empty());
+        Mockito.when(userService.save(Mockito.any())).thenAnswer(i -> i.getArguments()[0]);
 
         final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService, brokerService);
 
@@ -138,6 +141,7 @@ public class Oauth2AuthUserServiceTest {
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         Mockito.when(userService.getByFacebookId("10002")).thenReturn(Optional.of(u));
+        Mockito.when(userService.save(Mockito.any())).thenAnswer(i -> i.getArguments()[0]);
 
         final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService, brokerService);
 
@@ -166,6 +170,7 @@ public class Oauth2AuthUserServiceTest {
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         Mockito.when(userService.getByGoogleId("10002")).thenReturn(Optional.empty());
+        Mockito.when(userService.save(Mockito.any())).thenAnswer(i -> i.getArguments()[0]);
 
         final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService, brokerService);
 
@@ -204,6 +209,7 @@ public class Oauth2AuthUserServiceTest {
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         Mockito.when(userService.getByGoogleId("10002")).thenReturn(Optional.of(u));
+        Mockito.when(userService.save(Mockito.any())).thenAnswer(i -> i.getArguments()[0]);
 
         final Oauth2AuthUserService oauth2AuthUserService = new Oauth2AuthUserService(userService, brokerService);
 

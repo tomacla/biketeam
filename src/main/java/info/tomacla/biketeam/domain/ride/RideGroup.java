@@ -116,15 +116,13 @@ public class RideGroup {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RideGroup rideGroup = (RideGroup) o;
-        return id.equals(rideGroup.id);
+        return Double.compare(averageSpeed, rideGroup.averageSpeed) == 0 && Objects.equals(id, rideGroup.id) && Objects.equals(ride, rideGroup.ride) && Objects.equals(name, rideGroup.name) && Objects.equals(meetingTime, rideGroup.meetingTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, ride, name, averageSpeed, meetingTime);
     }
-
 }
