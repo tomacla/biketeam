@@ -149,16 +149,6 @@ public class FileService {
         }
     }
 
-    public void storeFile(InputStream file, String directory, String teamId, String fileName) {
-        try {
-            Files.createDirectories(Path.of(fileRepository, directory, teamId));
-            Files.copy(file, Path.of(fileRepository, directory, teamId, fileName), StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            log.error("Unable to store file : " + fileName, e);
-            throw new RuntimeException("Unable to store file : " + file.toString(), e);
-        }
-    }
-
     public void storeFile(InputStream file, String directory, String fileName) {
         try {
             Files.createDirectories(Path.of(fileRepository, directory));

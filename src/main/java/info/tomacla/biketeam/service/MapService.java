@@ -75,7 +75,20 @@ public class MapService extends AbstractPermalinkService {
         if (!ObjectUtils.isEmpty(permalink)) {
             permalink = getPermalink(permalink);
         }
-        final Map newMap = gpxService.parseAndStore(team, fileService.getTempFileFromInputStream(gpxIs), defaultName, permalink);
+
+        Map newMap = new Map();
+        newMap.setTeamId(team.getId());
+        newMap.setPermalink(permalink);
+        newMap.setType(MapType.ROAD);
+        newMap.setTags(team.getConfiguration().getDefaultSearchTags());
+        newMap.setName(defaultName);
+        newMap = mapRepository.save(newMap);
+        try {
+            newMap = gpxService.parseAndStore(team, newMap, fileService.getTempFileFromInputStream(gpxIs), defaultName.endsWith(".gpx") ? null : defaultName);
+        } catch(Exception e) {
+            mapRepository.delete(newMap);
+            throw e;
+        }
         return mapRepository.save(newMap);
     }
 

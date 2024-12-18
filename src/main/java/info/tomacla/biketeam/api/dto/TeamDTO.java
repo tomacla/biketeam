@@ -19,7 +19,6 @@ public class TeamDTO {
     public TeamSocialDTO social;
     public TeamContactDTO contact;
     public TeamConfigurationDTO configuration;
-    public boolean heatmap;
 
     public static class TeamSocialDTO {
         public String facebook;
@@ -70,7 +69,6 @@ public class TeamDTO {
             dto.contact.addressStreetLine = team.getDescription().getAddressStreetLine();
             dto.contact.addressPostalCode = team.getDescription().getAddressPostalCode();
             dto.contact.addressCity = team.getDescription().getAddressCity();
-            dto.heatmap = team.getIntegration().isHeatmapDisplay() && team.getIntegration().isHeatmapConfigured();
             dto.configuration = new TeamConfigurationDTO();
             dto.configuration.defaultSearchTags = team.getConfiguration().getDefaultSearchTags();
             dto.configuration.feedVisible = team.getConfiguration().isFeedVisible();

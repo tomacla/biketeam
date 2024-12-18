@@ -2,9 +2,11 @@ package info.tomacla.biketeam.service.file;
 
 import info.tomacla.biketeam.common.file.FileExtension;
 import net.coobird.thumbnailator.Thumbnails;
+import net.coobird.thumbnailator.filters.ImageFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -32,12 +34,35 @@ public class ThumbnailService {
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             Thumbnails.of(new ByteArrayInputStream(originalImage))
-                    .size(targetWidth, targetWidth)
+                    .scale(1) // do not resize
+                    .addFilter(new NoScaleUpResizer(targetWidth, targetWidth)) // then resize only if larger
                     .outputFormat(format.getImageIOType())
                     .toOutputStream(outputStream);
             return outputStream.toByteArray();
         } catch (IOException e) {
             throw new RuntimeException("Error while generating image", e);
+        }
+    }
+
+    public class NoScaleUpResizer implements ImageFilter {
+        private final int maxWidth;
+        private final int maxHeight;
+
+        public NoScaleUpResizer(int maxWidth, int maxHeight) {
+            this.maxWidth = maxWidth;
+            this.maxHeight = maxHeight;
+        }
+
+        @Override
+        public BufferedImage apply(BufferedImage img) {
+            if (img.getWidth() <= maxWidth && img.getHeight() <= maxHeight) {
+                return img;
+            }
+            try {
+                return Thumbnails.of(img).size(maxWidth, maxHeight).asBufferedImage();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

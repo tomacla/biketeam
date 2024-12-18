@@ -21,6 +21,7 @@ import org.springframework.ui.Model;
 import jakarta.servlet.http.HttpSession;
 import java.security.Principal;
 import java.time.LocalDate;
+import java.time.Year;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -57,6 +58,7 @@ public abstract class AbstractController {
 
         model.addAttribute("_pagetitle", pageTitle == null ? siteName : pageTitle);
         model.addAttribute("_sitename", siteName);
+        model.addAttribute("_currentYear", Year.now().getValue());
         model.addAttribute("_date_formatter", Dates.frenchFormatter);
         model.addAttribute("_date_short_formatter", Dates.frenchShortFormatter);
         model.addAttribute("_time_formatter", Dates.timeFormatter);

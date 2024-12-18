@@ -310,8 +310,7 @@ public class RideController extends AbstractController {
     @ResponseBody
     @RequestMapping(value = "/{rideId}/image", method = RequestMethod.GET)
     public ResponseEntity<byte[]> getRideImage(@PathVariable("teamId") String teamId,
-                                               @PathVariable("rideId") String rideId,
-                                               @RequestParam(name = "width", defaultValue = "-1", required = false) int targetWidth) {
+                                               @PathVariable("rideId") String rideId) {
 
         final Optional<ImageDescriptor> image = rideService.getImage(teamId, rideId);
         if (image.isPresent()) {
@@ -322,14 +321,12 @@ public class RideController extends AbstractController {
 
                 HttpHeaders headers = new HttpHeaders();
                 headers.add("Content-Type", targetImageExtension.getMediaType());
+                headers.add("Cache-Control", "public; max-age=604800");
                 headers.setContentDisposition(ContentDisposition.builder("inline")
                         .filename(rideId + targetImageExtension.getExtension())
                         .build());
 
                 byte[] bytes = Files.readAllBytes(targetImage.getPath());
-                if (targetWidth != -1) {
-                    bytes = thumbnailService.resizeImage(bytes, targetWidth, targetImageExtension);
-                }
 
                 return new ResponseEntity<>(
                         bytes,

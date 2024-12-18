@@ -31,14 +31,13 @@ public class Parameter {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Parameter parameter = (Parameter) o;
-        return name.equals(parameter.name);
+        return Objects.equals(name, parameter.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hashCode(name);
     }
 }

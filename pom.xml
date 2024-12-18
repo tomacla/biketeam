@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.3.4</version>
+		<version>3.4.0</version>
 		<relativePath/>
 	</parent>
 	<groupId>info.tomacla</groupId>
@@ -31,8 +31,7 @@
 
 	<properties>
 		<java.version>17</java.version>
-		<dotenv-java.version>3.0.2</dotenv-java.version>
-		<restfb.version>2024.13.0</restfb.version>
+		<dotenv-java.version>3.1.0</dotenv-java.version>
 		<gpx2web.version>1.1.25</gpx2web.version>
 		<zip4j.version>2.11.5</zip4j.version>
 		<h2.version>2.1.212</h2.version>
@@ -110,12 +109,6 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents.client5</groupId>
 			<artifactId>httpclient5</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.restfb</groupId>
-			<artifactId>restfb</artifactId>
-			<version>${restfb.version}</version>
 		</dependency>
 
 		<dependency>

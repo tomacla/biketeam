@@ -187,6 +187,8 @@ public class AdminTeamTripController extends AbstractController {
             target.setStartPlace(parser.getStartPlace(teamId, placeService));
             target.setEndPlace(parser.getEndPlace(teamId, placeService));
 
+            target = tripService.save(target);
+
             if (parser.getFile().isPresent()) {
                 target.setImaged(true);
                 MultipartFile uploadedFile = parser.getFile().get();

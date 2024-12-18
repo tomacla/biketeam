@@ -11,6 +11,7 @@ import info.tomacla.biketeam.domain.publication.SearchPublicationSpecification;
 import info.tomacla.biketeam.service.amqp.BrokerService;
 import info.tomacla.biketeam.service.amqp.dto.TeamEntityDTO;
 import info.tomacla.biketeam.service.file.FileService;
+import info.tomacla.biketeam.service.file.ThumbnailService;
 import info.tomacla.biketeam.service.image.ImageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -40,16 +42,16 @@ public class PublicationService {
 
     private final ImageService imageService;
 
-    public PublicationService(PublicationRepository publicationRepository, TeamService teamService, FileService fileService, BrokerService brokerService) {
+    public PublicationService(PublicationRepository publicationRepository, TeamService teamService, FileService fileService, BrokerService brokerService, ThumbnailService thumbnailService) {
         this.publicationRepository = publicationRepository;
         this.teamService = teamService;
         this.brokerService = brokerService;
-        this.imageService = new ImageService(FileRepositories.PUBLICATION_IMAGES, fileService);
+        this.imageService = new ImageService(FileRepositories.PUBLICATION_IMAGES, fileService, thumbnailService);
     }
 
     @Transactional
-    public void save(Publication publication) {
-        publicationRepository.save(publication);
+    public Publication save(Publication publication) {
+        return publicationRepository.save(publication);
     }
 
     public Page<Publication> listPublications(String teamId, String title, int page, int pageSize) {
@@ -100,7 +102,11 @@ public class PublicationService {
     }
 
     public void saveImage(String teamId, String publicationId, InputStream is, String fileName) {
-        imageService.save(teamId, publicationId, is, fileName);
+        try {
+            imageService.save(teamId, publicationId, is, fileName);
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to save image", e);
+        }
     }
 
     @RabbitListener(queues = Queues.TASK_PUBLISH_PUBLICATIONS)

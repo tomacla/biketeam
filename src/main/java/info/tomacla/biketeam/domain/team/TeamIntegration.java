@@ -34,14 +34,6 @@ public class TeamIntegration {
     private boolean mattermostPublishRides;
     @Column(name = "mattermost_publish_publications")
     private boolean mattermostPublishPublications;
-    @AttributeOverrides({
-            @AttributeOverride(name = "lat", column = @Column(name = "heatmap_center_lat")),
-            @AttributeOverride(name = "lng", column = @Column(name = "heatmap_center_lng"))
-    })
-    @Embedded
-    private Point heatmapCenter;
-    @Column(name = "heatmap_display")
-    private boolean heatmapDisplay;
     @Column(name = "webhook_ride")
     private String webhookRide;
     @Column(name = "webhook_trip")
@@ -124,26 +116,6 @@ public class TeamIntegration {
 
     public void setMattermostPublishPublications(boolean mattermostPublishPublications) {
         this.mattermostPublishPublications = mattermostPublishPublications;
-    }
-
-    public Point getHeatmapCenter() {
-        return heatmapCenter;
-    }
-
-    public void setHeatmapCenter(Point heatmapCenter) {
-        this.heatmapCenter = heatmapCenter;
-    }
-
-    public boolean isHeatmapDisplay() {
-        return heatmapDisplay;
-    }
-
-    public void setHeatmapDisplay(boolean heatmapDisplay) {
-        this.heatmapDisplay = heatmapDisplay;
-    }
-
-    public boolean isHeatmapConfigured() {
-        return this.heatmapCenter != null;
     }
 
     public String getWebhookRide() {

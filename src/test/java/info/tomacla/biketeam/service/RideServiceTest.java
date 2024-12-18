@@ -38,7 +38,7 @@ class RideServiceTest {
     @Test
     void getShortNameTest() {
 
-        RideService rideService = new RideService(null, null, null, null);
+        RideService rideService = new RideService(null, null, null, null, null);
 
         Assertions.assertEquals("RR122", rideService.getShortName(getRide("Raymond Ride #122")));
         Assertions.assertEquals("NP492", rideService.getShortName(getRide("N-Peloton #492")));
@@ -58,7 +58,7 @@ class RideServiceTest {
     void listMapsForNearestRidesNoRideTest() {
         TeamService teamService = mock(TeamService.class);
         RideRepository rideRepository = mock(RideRepository.class);
-        RideService rideService = new RideService(null, rideRepository, teamService, null);
+        RideService rideService = new RideService(null, rideRepository, teamService, null, null);
 
         Team team = new Team();
         TeamConfiguration teamConfiguration = new TeamConfiguration();
@@ -85,7 +85,7 @@ class RideServiceTest {
     void listMapsForNearestRidesTest() {
         TeamService teamService = mock(TeamService.class);
         RideRepository rideRepository = mock(RideRepository.class);
-        RideService rideService = new RideService(null, rideRepository, teamService, null);
+        RideService rideService = new RideService(null, rideRepository, teamService, null, null);
 
         Team team = new Team();
         TeamConfiguration teamConfiguration = new TeamConfiguration();
@@ -96,11 +96,12 @@ class RideServiceTest {
         when(teamService.get("teamId")).thenReturn(Optional.of(team));
 
         AtomicInteger mapIdCounter = new AtomicInteger(1);
+        AtomicInteger rideGroupIdCounter = new AtomicInteger(1);
 
         Instant now = Instant.parse("2024-09-05T18:00:00Z");
 
         List<Ride> rides = new ArrayList<>();
-        rides.add(getRide(zoneId, now, mapIdCounter,
+        rides.add(getRide(zoneId, now, mapIdCounter, rideGroupIdCounter,
                 new TestGroup(-55, true), // 1 - rank 7
                 new TestGroup(-55, true), // 2 - rank 8
                 new TestGroup(-40, true), // 3 - rank 5
@@ -112,7 +113,7 @@ class RideServiceTest {
                 new TestGroup(5, true) // 8 - rank 2
         ));
         rides.add(getRide(zoneId, now.plus(24, ChronoUnit.HOURS),
-                mapIdCounter,
+                mapIdCounter, rideGroupIdCounter,
                 new TestGroup(0, false),
                 new TestGroup(0, true), // 9 - rank 9
                 new TestGroup(0, true), // 10 - rank 10
@@ -121,7 +122,7 @@ class RideServiceTest {
                 new TestGroup(5, true) // 12 - rank 11
         ));
         rides.add(getRide(zoneId, now.minus(48, ChronoUnit.HOURS),
-                mapIdCounter,
+                mapIdCounter,rideGroupIdCounter,
                 new TestGroup(0, false),
                 new TestGroup(-5, true), // 13 - rank 16
                 new TestGroup(0, true), // 14 - rank 14
@@ -159,13 +160,14 @@ class RideServiceTest {
         Assertions.assertEquals(expectedMapIds, actualMapIds);
     }
 
-    private Ride getRide(ZoneId zoneId, Instant rideStart, AtomicInteger mapIdCounter, TestGroup... testGroups) {
+    private Ride getRide(ZoneId zoneId, Instant rideStart, AtomicInteger mapIdCounter, AtomicInteger rideGroupCounter, TestGroup... testGroups) {
         Ride ride = new Ride();
         ride.setDate(rideStart.atZone(zoneId).toLocalDate());
         Set<RideGroup> groups = new HashSet<>();
 
         for (TestGroup testGroup : testGroups) {
             RideGroup rideGroup = new RideGroup();
+            rideGroup.setId("rg"+rideGroupCounter.getAndIncrement());
             rideGroup.setMeetingTime(rideStart.plus(testGroup.minutes(), ChronoUnit.MINUTES).atZone(zoneId).toLocalTime());
             if (testGroup.hasMap()) {
                 Map map = createMap(mapIdCounter);

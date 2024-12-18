@@ -36,7 +36,7 @@
 
                   <div class="col-12 col-md-4">
                     <div class="card">
-                        <a href="<@common.teamUrl map.teamId '/maps/${map.permalink!map.id}' />"><img src="<@common.teamUrl map.teamId '/maps/${map.id}/image?width=450' />" class="card-img-top" alt="${map.id} image"></a>
+                        <a href="<@common.teamUrl map.teamId '/maps/${map.permalink!map.id}' />"><img src="<@common.teamUrl map.teamId '/maps/${map.id}/image' />" style="max-width:450px;width:100%" class="card-img-top" alt="${map.id} image"></a>
                         <div class="card-body">
                           <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl map.teamId '/maps/${map.permalink!map.id}' />">${map.name}</a></h5>
                           <h6 class="card-subtitle mb-2 text-muted">${map.postedAt.format(_date_formatter)}</h6>

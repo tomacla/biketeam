@@ -123,7 +123,7 @@
                 </div>
             </div>
             <#if publication.imaged>
-            <img src="<@common.teamUrl publication.teamId '/publications/${publication.id}/image?width=500' />" class="card-img-top" alt="${publication.title} image">
+            <img src="<@common.teamUrl publication.teamId '/publications/${publication.id}/image' />" class="card-img-top" alt="${publication.title} image">
             </#if>
             <div class="card-body">
               <p class="card-text wrap-content">${publication.content}</p>
@@ -199,7 +199,7 @@
 
                   <div class="row justify-content-center">
                     <div class="col-12 col-md-6">
-                      <a href="<@common.teamUrl ride.teamId '/rides/'+ ride.permalink!ride.id />"><img src="<@common.teamUrl ride.teamId '/rides/${ride.id}/image?width=500' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${ride.title} image"></a>
+                      <a href="<@common.teamUrl ride.teamId '/rides/'+ ride.permalink!ride.id />"><img src="<@common.teamUrl ride.teamId '/rides/${ride.id}/image' />" style="max-width:500px;width:100%" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${ride.title} image"></a>
                     </div>
                   </div>
             </div>
@@ -243,7 +243,7 @@
 
               <div class="row justify-content-center">
                 <div class="col-12 col-md-6">
-                  <a href="<@common.teamUrl trip.teamId '/trips/'+ trip.permalink!trip.id />"><img src="<@common.teamUrl trip.teamId '/trips/${trip.id}/image?width=500' />" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${trip.title} image"></a>
+                  <a href="<@common.teamUrl trip.teamId '/trips/'+ trip.permalink!trip.id />"><img src="<@common.teamUrl trip.teamId '/trips/${trip.id}/image' />" style="max-width:500px;width:100%" class="mx-auto d-block shadow rounded w-100 h-auto mx-auto" alt="${trip.title} image"></a>
                 </div>
               </div>
 

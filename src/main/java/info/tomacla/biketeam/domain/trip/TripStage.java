@@ -4,6 +4,8 @@ import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.domain.map.Map;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
+
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
@@ -13,7 +15,8 @@ import java.util.UUID;
 public class TripStage {
 
     @Id
-    private String id = UUID.randomUUID().toString();
+    @UuidGenerator
+    private String id;
     @ManyToOne(fetch = FetchType.EAGER)
     private Trip trip;
     @Column(name = "date")
@@ -74,15 +77,13 @@ public class TripStage {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TripStage tripStage = (TripStage) o;
-        return id.equals(tripStage.id);
+        return alternative == tripStage.alternative && Objects.equals(id, tripStage.id) && Objects.equals(trip, tripStage.trip) && Objects.equals(date, tripStage.date) && Objects.equals(name, tripStage.name) && Objects.equals(map, tripStage.map);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, trip, date, name, map, alternative);
     }
-
 }

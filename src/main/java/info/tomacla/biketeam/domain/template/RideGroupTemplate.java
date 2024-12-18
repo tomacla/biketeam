@@ -3,6 +3,8 @@ package info.tomacla.biketeam.domain.template;
 import info.tomacla.biketeam.common.datatype.Strings;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
+
 import java.time.LocalTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -12,7 +14,8 @@ import java.util.UUID;
 public class RideGroupTemplate {
 
     @Id
-    private String id = UUID.randomUUID().toString();
+    @UuidGenerator
+    private String id;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ride_template_id")
     private RideTemplate rideTemplate;
@@ -66,15 +69,13 @@ public class RideGroupTemplate {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        RideGroupTemplate rideGroupTemplate = (RideGroupTemplate) o;
-        return id.equals(rideGroupTemplate.id) && rideTemplate.equals(rideGroupTemplate.rideTemplate);
+        RideGroupTemplate that = (RideGroupTemplate) o;
+        return Double.compare(averageSpeed, that.averageSpeed) == 0 && Objects.equals(id, that.id) && Objects.equals(rideTemplate, that.rideTemplate) && Objects.equals(name, that.name) && Objects.equals(meetingTime, that.meetingTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, rideTemplate);
+        return Objects.hash(id, rideTemplate, name, averageSpeed, meetingTime);
     }
-
 }

@@ -15,6 +15,7 @@ import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.service.amqp.BrokerService;
 import info.tomacla.biketeam.service.amqp.dto.TeamEntityDTO;
 import info.tomacla.biketeam.service.file.FileService;
+import info.tomacla.biketeam.service.file.ThumbnailService;
 import info.tomacla.biketeam.service.image.ImageService;
 import info.tomacla.biketeam.service.permalink.AbstractPermalinkService;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
@@ -52,11 +54,11 @@ public class RideService extends AbstractPermalinkService {
     private final ImageService imageService;
 
     @Autowired
-    public RideService(FileService fileService, RideRepository rideRepository, TeamService teamService, BrokerService brokerService) {
+    public RideService(FileService fileService, RideRepository rideRepository, TeamService teamService, BrokerService brokerService, ThumbnailService thumbnailService) {
         this.rideRepository = rideRepository;
         this.teamService = teamService;
         this.brokerService = brokerService;
-        this.imageService = new ImageService(FileRepositories.RIDE_IMAGES, fileService);
+        this.imageService = new ImageService(FileRepositories.RIDE_IMAGES, fileService, thumbnailService);
     }
 
     public Optional<Ride> get(String teamId, String rideIdOrPermalink) {
@@ -85,8 +87,8 @@ public class RideService extends AbstractPermalinkService {
     }
 
     @Transactional
-    public void save(Ride ride) {
-        rideRepository.save(ride);
+    public Ride save(Ride ride) {
+        return rideRepository.save(ride);
     }
 
     @Transactional
@@ -267,7 +269,11 @@ public class RideService extends AbstractPermalinkService {
 
 
     public void saveImage(String teamId, String rideId, InputStream is, String fileName) {
-        imageService.save(teamId, rideId, is, fileName);
+        try {
+            imageService.save(teamId, rideId, is, fileName);
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to save image", e);
+        }
     }
 
     public void deleteImage(String teamId, String rideId) {
