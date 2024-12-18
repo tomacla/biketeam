@@ -138,7 +138,7 @@ public class AdminTeamMapController extends AbstractController {
             final Map newMap = mapService.createFromGpx(
                     team,
                     file.getInputStream(),
-                    null,
+                    file.getOriginalFilename(),
                     null
             );
 

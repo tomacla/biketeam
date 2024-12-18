@@ -70,15 +70,13 @@ public class UserRole {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserRole userRole = (UserRole) o;
-        return id.equals(userRole.id);
+        return Objects.equals(id, userRole.id) && Objects.equals(user, userRole.user) && Objects.equals(team, userRole.team) && role == userRole.role;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, user, team, role);
     }
-
 }

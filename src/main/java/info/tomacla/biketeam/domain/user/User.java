@@ -228,14 +228,13 @@ public class User {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return id.equals(user.id);
+        return admin == user.admin && emailPublishTrips == user.emailPublishTrips && emailPublishRides == user.emailPublishRides && emailPublishPublications == user.emailPublishPublications && Objects.equals(id, user.id) && Objects.equals(stravaId, user.stravaId) && Objects.equals(facebookId, user.facebookId) && Objects.equals(googleId, user.googleId) && Objects.equals(stravaUserName, user.stravaUserName) && Objects.equals(email, user.email) && Objects.equals(teamId, user.teamId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, admin, stravaId, facebookId, googleId, stravaUserName, email, emailPublishTrips, emailPublishRides, emailPublishPublications, teamId);
     }
 }

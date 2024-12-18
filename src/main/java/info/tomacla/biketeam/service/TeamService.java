@@ -61,9 +61,9 @@ public class TeamService extends AbstractPermalinkService {
     public void save(Team team) {
         log.info("Team {} is updated", team.getTeamId());
 
-        teamRepository.save(team);
-
-        if (team.isNew()) {
+        boolean isNew = team.isNew();
+        team = teamRepository.save(team);
+        if (isNew) {
             this.initTeamImage(team);
         }
 

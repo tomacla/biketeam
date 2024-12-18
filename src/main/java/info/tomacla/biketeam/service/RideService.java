@@ -85,8 +85,8 @@ public class RideService extends AbstractPermalinkService {
     }
 
     @Transactional
-    public void save(Ride ride) {
-        rideRepository.save(ride);
+    public Ride save(Ride ride) {
+        return rideRepository.save(ride);
     }
 
     @Transactional

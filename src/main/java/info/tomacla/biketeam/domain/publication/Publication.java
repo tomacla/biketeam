@@ -135,15 +135,13 @@ public class Publication implements FeedEntity {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Publication that = (Publication) o;
-        return id.equals(that.id);
+        return Objects.equals(id, that.id) && Objects.equals(teamId, that.teamId) && publishedStatus == that.publishedStatus && Objects.equals(title, that.title) && Objects.equals(publishedAt, that.publishedAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, teamId, publishedStatus, title, publishedAt);
     }
-
 }

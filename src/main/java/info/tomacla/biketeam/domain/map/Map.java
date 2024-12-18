@@ -181,15 +181,13 @@ public class Map {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Map that = (Map) o;
-        return id.equals(that.id);
+        Map map = (Map) o;
+        return Double.compare(length, map.length) == 0 && Objects.equals(id, map.id) && Objects.equals(teamId, map.teamId) && Objects.equals(permalink, map.permalink) && Objects.equals(name, map.name) && type == map.type && Objects.equals(postedAt, map.postedAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, teamId, permalink, name, length, type, postedAt);
     }
-
 }
