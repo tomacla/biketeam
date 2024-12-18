@@ -339,8 +339,7 @@ public class MapController extends AbstractController {
     @ResponseBody
     @RequestMapping(value = "/{mapId}/image", method = RequestMethod.GET, produces = "image/png")
     public ResponseEntity<byte[]> getMapImage(@PathVariable("teamId") String teamId,
-                                              @PathVariable("mapId") String mapId,
-                                              @RequestParam(name = "width", defaultValue = "-1", required = false) int targetWidth) {
+                                              @PathVariable("mapId") String mapId) {
 
         final Optional<Path> imageFile = mapService.getImageFile(teamId, mapId);
         if (imageFile.isPresent()) {
@@ -348,14 +347,12 @@ public class MapController extends AbstractController {
 
                 HttpHeaders headers = new HttpHeaders();
                 headers.add("Content-Type", "image/png");
+                headers.add("Cache-Control", "public; max-age=604800");
                 headers.setContentDisposition(ContentDisposition.builder("inline")
                         .filename(mapId + ".png")
                         .build());
 
                 byte[] bytes = Files.readAllBytes(imageFile.get());
-                if (targetWidth != -1) {
-                    bytes = thumbnailService.resizeImage(bytes, targetWidth, FileExtension.PNG);
-                }
 
                 return new ResponseEntity<>(
                         bytes,

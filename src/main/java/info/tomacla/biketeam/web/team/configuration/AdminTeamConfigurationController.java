@@ -267,8 +267,6 @@ public class AdminTeamConfigurationController extends AbstractController {
                 .withMattermostPublishPublications(teamIntegration.isMattermostPublishPublications())
                 .withMattermostPublishRides(teamIntegration.isMattermostPublishRides())
                 .withMattermostPublishTrips(teamIntegration.isMattermostPublishTrips())
-                .withHeatmapCenter(teamIntegration.getHeatmapCenter())
-                .withHeatmapDisplay(teamIntegration.isHeatmapDisplay())
                 .withWebhookRide(teamIntegration.getWebhookRide())
                 .withWebhookTrip(teamIntegration.getWebhookTrip())
                 .withWebhookPublication(teamIntegration.getWebhookPublication())
@@ -302,8 +300,6 @@ public class AdminTeamConfigurationController extends AbstractController {
             teamIntegration.setMattermostPublishPublications(parser.isMattermostPublishPublications());
             teamIntegration.setMattermostPublishRides(parser.isMattermostPublishRides());
             teamIntegration.setMattermostPublishTrips(parser.isMattermostPublishTrips());
-            teamIntegration.setHeatmapCenter(parser.getHeatmapCenter());
-            teamIntegration.setHeatmapDisplay(parser.isHeatmapDisplay());
             teamIntegration.setWebhookRide(parser.getWebhookRide());
             teamIntegration.setWebhookTrip(parser.getWebhookTrip());
             teamIntegration.setWebhookPublication(parser.getWebhookPublication());

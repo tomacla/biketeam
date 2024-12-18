@@ -332,8 +332,7 @@ public class TripController extends AbstractController {
     @ResponseBody
     @RequestMapping(value = "/{tripId}/image", method = RequestMethod.GET)
     public ResponseEntity<byte[]> getTripImage(@PathVariable("teamId") String teamId,
-                                               @PathVariable("tripId") String tripId,
-                                               @RequestParam(name = "width", defaultValue = "-1", required = false) int targetWidth) {
+                                               @PathVariable("tripId") String tripId) {
 
         final Optional<ImageDescriptor> image = tripService.getImage(teamId, tripId);
         if (image.isPresent()) {
@@ -344,14 +343,12 @@ public class TripController extends AbstractController {
 
                 HttpHeaders headers = new HttpHeaders();
                 headers.add("Content-Type", targetImageExtension.getMediaType());
+                headers.add("Cache-Control", "public; max-age=604800");
                 headers.setContentDisposition(ContentDisposition.builder("inline")
                         .filename(tripId + targetImageExtension.getExtension())
                         .build());
 
                 byte[] bytes = Files.readAllBytes(targetImage.getPath());
-                if (targetWidth != -1) {
-                    bytes = thumbnailService.resizeImage(bytes, targetWidth, targetImageExtension);
-                }
 
                 return new ResponseEntity<>(
                         bytes,

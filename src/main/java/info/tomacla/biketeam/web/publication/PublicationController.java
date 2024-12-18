@@ -82,8 +82,7 @@ public class PublicationController extends AbstractController {
     @ResponseBody
     @RequestMapping(value = "/{publicationId}/image", method = RequestMethod.GET)
     public ResponseEntity<byte[]> getPublicationImage(@PathVariable("teamId") String teamId,
-                                                      @PathVariable("publicationId") String publicationId,
-                                                      @RequestParam(name = "width", defaultValue = "-1", required = false) int targetWidth) {
+                                                      @PathVariable("publicationId") String publicationId) {
         final Optional<ImageDescriptor> image = publicationService.getImage(teamId, publicationId);
         if (image.isPresent()) {
             try {
@@ -93,14 +92,12 @@ public class PublicationController extends AbstractController {
 
                 HttpHeaders headers = new HttpHeaders();
                 headers.add("Content-Type", targetImageExtension.getMediaType());
+                headers.add("Cache-Control", "public; max-age=604800");
                 headers.setContentDisposition(ContentDisposition.builder("inline")
                         .filename(publicationId + targetImageExtension.getExtension())
                         .build());
 
                 byte[] bytes = Files.readAllBytes(targetImage.getPath());
-                if (targetWidth != -1) {
-                    bytes = thumbnailService.resizeImage(bytes, targetWidth, targetImageExtension);
-                }
 
                 return new ResponseEntity<>(
                         bytes,

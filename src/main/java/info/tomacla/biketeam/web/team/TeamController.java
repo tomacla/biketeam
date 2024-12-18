@@ -12,7 +12,6 @@ import info.tomacla.biketeam.domain.userrole.UserRole;
 import info.tomacla.biketeam.service.UserRoleService;
 import info.tomacla.biketeam.service.feed.FeedService;
 import info.tomacla.biketeam.service.file.ThumbnailService;
-import info.tomacla.biketeam.service.heatmap.HeatmapService;
 import info.tomacla.biketeam.web.AbstractController;
 import info.tomacla.biketeam.web.SearchFeedForm;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,9 +41,6 @@ import java.util.stream.Collectors;
 @Controller
 @RequestMapping(value = "/{teamId}")
 public class TeamController extends AbstractController {
-
-    @Autowired
-    private HeatmapService heatmapService;
 
     @Autowired
     private ThumbnailService thumbnailService;
@@ -96,7 +92,6 @@ public class TeamController extends AbstractController {
         model.addAttribute("feed", feed);
         model.addAttribute("formdata", form);
         model.addAttribute("users", team.getRoles().stream().map(UserRole::getUser).collect(Collectors.toSet()));
-        model.addAttribute("hasHeatmap", team.getIntegration().isHeatmapDisplay() && heatmapService.get(team.getId()).isPresent());
         if (!ObjectUtils.isEmpty(error)) {
             model.addAttribute("errors", List.of(error));
         }
@@ -168,42 +163,6 @@ public class TeamController extends AbstractController {
 
                 return new ResponseEntity<>(
                         Files.readAllBytes(image.get().getPath()),
-                        headers,
-                        HttpStatus.OK
-                );
-            } catch (IOException e) {
-                throw new ServerErrorException("Error while reading team image : " + teamId, e);
-            }
-        }
-
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to find team image : " + teamId);
-
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "/heatmap", method = RequestMethod.GET)
-    public ResponseEntity<byte[]> getHeatmap(@PathVariable("teamId") String teamId,
-                                             @RequestParam(name = "width", defaultValue = "-1", required = false) int targetWidth) {
-        final Optional<ImageDescriptor> image = heatmapService.get(teamId);
-        if (image.isPresent()) {
-            try {
-
-                final ImageDescriptor targetImage = image.get();
-                final FileExtension targetImageExtension = targetImage.getExtension();
-
-                HttpHeaders headers = new HttpHeaders();
-                headers.add("Content-Type", targetImageExtension.getMediaType());
-                headers.setContentDisposition(ContentDisposition.builder("inline")
-                        .filename(teamId + targetImageExtension.getExtension())
-                        .build());
-
-                byte[] bytes = Files.readAllBytes(targetImage.getPath());
-                if (targetWidth != -1) {
-                    bytes = thumbnailService.resizeImage(bytes, targetWidth, targetImageExtension);
-                }
-
-                return new ResponseEntity<>(
-                        bytes,
                         headers,
                         HttpStatus.OK
                 );

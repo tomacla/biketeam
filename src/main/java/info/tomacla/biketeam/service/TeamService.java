@@ -10,6 +10,7 @@ import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.service.amqp.BrokerService;
 import info.tomacla.biketeam.service.amqp.dto.TeamDTO;
 import info.tomacla.biketeam.service.file.FileService;
+import info.tomacla.biketeam.service.file.ThumbnailService;
 import info.tomacla.biketeam.service.image.ImageService;
 import info.tomacla.biketeam.service.permalink.AbstractPermalinkService;
 import org.slf4j.Logger;
@@ -23,6 +24,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
@@ -42,11 +44,11 @@ public class TeamService extends AbstractPermalinkService {
     private FileService fileService;
 
     @Autowired
-    public TeamService(TeamRepository teamRepository, FileService fileService, BrokerService brokerService, FileService fileService1) {
+    public TeamService(TeamRepository teamRepository, FileService fileService, BrokerService brokerService, ThumbnailService thumbnailService) {
         this.teamRepository = teamRepository;
         this.brokerService = brokerService;
-        this.imageService = new ImageService(FileRepositories.MISC_IMAGES, fileService);
-        this.fileService = fileService1;
+        this.imageService = new ImageService(FileRepositories.MISC_IMAGES, fileService, thumbnailService);
+        this.fileService = fileService;
     }
 
     public long count() {
@@ -65,10 +67,6 @@ public class TeamService extends AbstractPermalinkService {
         team = teamRepository.save(team);
         if (isNew) {
             this.initTeamImage(team);
-        }
-
-        if (team.getIntegration().isHeatmapConfigured()) {
-            brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_GENERATE_HEATMAP, TeamDTO.valueOf(team.getId()));
         }
 
     }
@@ -127,12 +125,20 @@ public class TeamService extends AbstractPermalinkService {
 
 
     private void initTeamImage(Team newTeam) {
-        imageService.save(newTeam.getId(), "logo", getClass().getResourceAsStream("/default-images/empty.png"),
-                "empty.png");
+        try {
+            imageService.save(newTeam.getId(), "logo", getClass().getResourceAsStream("/default-images/empty.png"),
+                    "empty.png");
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to save image", e);
+        }
     }
 
     public void saveImage(String teamId, InputStream is, String fileName) {
-        imageService.save(teamId, "logo", is, fileName);
+        try {
+            imageService.save(teamId, "logo", is, fileName);
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to save image", e);
+        }
     }
 
     public void deleteImage(String teamId) {

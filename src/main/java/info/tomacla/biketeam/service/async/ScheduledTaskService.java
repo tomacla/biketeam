@@ -40,12 +40,6 @@ public class ScheduledTaskService {
         brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_CLEAN_TEAM_FILES, null);
     }
 
-    @Scheduled(cron = "0 0 2 * * 0")
-    public void regenerateHeatmaps() {
-        log.debug("Executing scheduled regenerateHeatmaps");
-        brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_GENERATE_HEATMAPS, null);
-    }
-
     @Scheduled(cron = "0 30 2 * * 0")
     public void cleanNotifications() {
         log.debug("Executing scheduled cleanNotifications");

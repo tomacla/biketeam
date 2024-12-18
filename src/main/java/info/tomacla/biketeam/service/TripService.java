@@ -12,6 +12,7 @@ import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.service.amqp.BrokerService;
 import info.tomacla.biketeam.service.amqp.dto.TeamEntityDTO;
 import info.tomacla.biketeam.service.file.FileService;
+import info.tomacla.biketeam.service.file.ThumbnailService;
 import info.tomacla.biketeam.service.image.ImageService;
 import info.tomacla.biketeam.service.permalink.AbstractPermalinkService;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -45,11 +47,11 @@ public class TripService extends AbstractPermalinkService {
     private ImageService imageService;
 
     @Autowired
-    public TripService(FileService fileService, TripRepository tripRepository, TeamService teamService, BrokerService brokerService) {
+    public TripService(FileService fileService, TripRepository tripRepository, TeamService teamService, BrokerService brokerService, ThumbnailService thumbnailService) {
         this.tripRepository = tripRepository;
         this.teamService = teamService;
         this.brokerService = brokerService;
-        this.imageService = new ImageService(FileRepositories.TRIP_IMAGES, fileService);
+        this.imageService = new ImageService(FileRepositories.TRIP_IMAGES, fileService, thumbnailService);
     }
 
     public Optional<Trip> get(String teamId, String tripIdOrPermalink) {
@@ -138,7 +140,11 @@ public class TripService extends AbstractPermalinkService {
     }
 
     public void saveImage(String teamId, String tripId, InputStream is, String fileName) {
-        imageService.save(teamId, tripId, is, fileName);
+        try {
+            imageService.save(teamId, tripId, is, fileName);
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to save image", e);
+        }
     }
 
     public void deleteImage(String teamId, String tripId) {

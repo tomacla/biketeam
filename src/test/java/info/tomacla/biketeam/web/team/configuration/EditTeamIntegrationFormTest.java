@@ -14,8 +14,6 @@ public class EditTeamIntegrationFormTest {
                 .withMattermostPublishTrips(true)
                 .withMattermostPublishRides(true)
                 .withMattermostPublishPublications(true)
-                .withHeatmapDisplay(true)
-                .withHeatmapCenter(new Point(10.0, 5.0))
                 .withMattermostChannelID("channelId")
                 .withMattermostMessageChannelID("mchannelId")
                 .withMattermostApiToken("apitoken")
@@ -31,8 +29,6 @@ public class EditTeamIntegrationFormTest {
         assertEquals("mchannelId", parser.getMattermostMessageChannelID());
         assertEquals("apitoken", parser.getMattermostApiToken());
         assertEquals("endpoint", parser.getMattermostApiEndpoint());
-        assertTrue(parser.isHeatmapDisplay());
-        assertEquals(new Point(10.0, 5.0), parser.getHeatmapCenter());
 
 
     }
@@ -51,8 +47,6 @@ public class EditTeamIntegrationFormTest {
         assertNull(parser.getMattermostApiEndpoint());
         assertNull(parser.getMattermostApiToken());
         assertNull(parser.getMattermostChannelID());
-        assertFalse(parser.isHeatmapDisplay());
-        assertNull(parser.getHeatmapCenter());
 
     }
 

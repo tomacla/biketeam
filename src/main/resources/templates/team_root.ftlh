@@ -40,13 +40,6 @@
              </#if>
         </section>
 
-        <#if hasHeatmap>
-            <section class="border d-none d-md-block p-2 rounded">
-                <h5>Heatmap</h5>
-                <a href="<@common.teamUrl team.id '/heatmap' />" target="_blank"><img src="<@common.teamUrl team.id '/heatmap?width=500' />" class="d-block w-100 my-auto" alt="Heatmap"></a>
-            </section>
-        </#if>
-
     </aside>
 
 

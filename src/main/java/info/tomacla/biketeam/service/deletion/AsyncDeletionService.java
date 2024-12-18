@@ -28,6 +28,7 @@ import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.user.UserRepository;
 import info.tomacla.biketeam.domain.userrole.UserRoleRepository;
 import info.tomacla.biketeam.service.file.FileService;
+import info.tomacla.biketeam.service.file.ThumbnailService;
 import info.tomacla.biketeam.service.image.ImageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,6 +81,9 @@ public class AsyncDeletionService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private ThumbnailService thumbnailService;
+
     @RabbitListener(queues = Queues.TASK_PERFORM_DELETION)
     // ASYNC ENTITIES : map, publication, ride, team, trip, user
     public void performEffectiveDeletion() {
@@ -103,7 +107,7 @@ public class AsyncDeletionService {
         final Optional<Publication> optionalPublication = publicationRepository.findById(publicationId);
         if (optionalPublication.isPresent()) {
             final Publication publication = optionalPublication.get();
-            ImageService imageService = new ImageService(FileRepositories.PUBLICATION_IMAGES, fileService);
+            ImageService imageService = new ImageService(FileRepositories.PUBLICATION_IMAGES, fileService, thumbnailService);
             messageRepository.deleteByTargetId(publicationId);
             notificationRepository.deleteByElementId(publicationId);
             imageService.delete(publication.getTeamId(), publication.getId());
@@ -117,7 +121,7 @@ public class AsyncDeletionService {
         final Optional<Ride> optionalRide = rideRepository.findById(rideId);
         if (optionalRide.isPresent()) {
             final Ride ride = optionalRide.get();
-            ImageService imageService = new ImageService(FileRepositories.RIDE_IMAGES, fileService);
+            ImageService imageService = new ImageService(FileRepositories.RIDE_IMAGES, fileService, thumbnailService);
             messageRepository.deleteByTargetId(rideId);
             notificationRepository.deleteByElementId(rideId);
             imageService.delete(ride.getTeamId(), ride.getId());
@@ -131,7 +135,7 @@ public class AsyncDeletionService {
         final Optional<Trip> optionalTrip = tripRepository.findById(tripId);
         if (optionalTrip.isPresent()) {
             final Trip trip = optionalTrip.get();
-            ImageService imageService = new ImageService(FileRepositories.TRIP_IMAGES, fileService);
+            ImageService imageService = new ImageService(FileRepositories.TRIP_IMAGES, fileService, thumbnailService);
             messageRepository.deleteByTargetId(tripId);
             notificationRepository.deleteByElementId(tripId);
             imageService.delete(trip.getTeamId(), trip.getId());

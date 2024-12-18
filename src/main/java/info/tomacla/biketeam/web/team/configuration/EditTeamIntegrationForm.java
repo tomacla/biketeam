@@ -13,9 +13,6 @@ public class EditTeamIntegrationForm {
     private String mattermostPublishTrips = null;
     private String mattermostPublishRides = null;
     private String mattermostPublishPublications = null;
-    private String heatmapCenterLat = "";
-    private String heatmapCenterLng = "";
-    private String heatmapDisplay = null;
     private String webhookRide = "";
     private String webhookTrip = "";
     private String webhookPublication = "";
@@ -78,30 +75,6 @@ public class EditTeamIntegrationForm {
 
     public void setMattermostPublishPublications(String mattermostPublishPublications) {
         this.mattermostPublishPublications = mattermostPublishPublications;
-    }
-
-    public String getHeatmapCenterLat() {
-        return heatmapCenterLat;
-    }
-
-    public void setHeatmapCenterLat(String heatmapCenterLat) {
-        this.heatmapCenterLat = Strings.requireNonBlankOrDefault(heatmapCenterLat, "");
-    }
-
-    public String getHeatmapCenterLng() {
-        return heatmapCenterLng;
-    }
-
-    public void setHeatmapCenterLng(String heatmapCenterLng) {
-        this.heatmapCenterLng = Strings.requireNonBlankOrDefault(heatmapCenterLng, "");
-    }
-
-    public String getHeatmapDisplay() {
-        return heatmapDisplay;
-    }
-
-    public void setHeatmapDisplay(String heatmapDisplay) {
-        this.heatmapDisplay = heatmapDisplay;
     }
 
     public String getWebhookRide() {
@@ -168,17 +141,6 @@ public class EditTeamIntegrationForm {
             return form.getMattermostPublishPublications() != null && form.getMattermostPublishPublications().equals("on");
         }
 
-        public Point getHeatmapCenter() {
-            if (!ObjectUtils.isEmpty(form.getHeatmapCenterLat()) && !ObjectUtils.isEmpty(form.getHeatmapCenterLng())) {
-                return new Point(Double.parseDouble(form.getHeatmapCenterLat()), Double.parseDouble(form.getHeatmapCenterLng()));
-            }
-            return null;
-        }
-
-        public boolean isHeatmapDisplay() {
-            return form.getHeatmapDisplay() != null && form.getHeatmapDisplay().equals("on");
-        }
-
         public String getWebhookRide() {
             return Strings.requireNonBlankOrNull(form.getWebhookRide());
         }
@@ -234,19 +196,6 @@ public class EditTeamIntegrationForm {
 
         public EditTeamIntegrationFormBuilder withMattermostApiEndpoint(String mattermostApiEndpoint) {
             form.setMattermostApiEndpoint(mattermostApiEndpoint);
-            return this;
-        }
-
-        public EditTeamIntegrationFormBuilder withHeatmapCenter(Point heatmapCenter) {
-            if (heatmapCenter != null) {
-                form.setHeatmapCenterLat(String.valueOf(heatmapCenter.getLat()));
-                form.setHeatmapCenterLng(String.valueOf(heatmapCenter.getLng()));
-            }
-            return this;
-        }
-
-        public EditTeamIntegrationFormBuilder withHeatmapDisplay(boolean heatmapDisplay) {
-            form.setHeatmapDisplay(heatmapDisplay ? "on" : null);
             return this;
         }
 

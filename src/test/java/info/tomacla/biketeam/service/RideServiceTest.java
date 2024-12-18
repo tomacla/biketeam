@@ -38,7 +38,7 @@ class RideServiceTest {
     @Test
     void getShortNameTest() {
 
-        RideService rideService = new RideService(null, null, null, null);
+        RideService rideService = new RideService(null, null, null, null, null);
 
         Assertions.assertEquals("RR122", rideService.getShortName(getRide("Raymond Ride #122")));
         Assertions.assertEquals("NP492", rideService.getShortName(getRide("N-Peloton #492")));
@@ -58,7 +58,7 @@ class RideServiceTest {
     void listMapsForNearestRidesNoRideTest() {
         TeamService teamService = mock(TeamService.class);
         RideRepository rideRepository = mock(RideRepository.class);
-        RideService rideService = new RideService(null, rideRepository, teamService, null);
+        RideService rideService = new RideService(null, rideRepository, teamService, null, null);
 
         Team team = new Team();
         TeamConfiguration teamConfiguration = new TeamConfiguration();
@@ -85,7 +85,7 @@ class RideServiceTest {
     void listMapsForNearestRidesTest() {
         TeamService teamService = mock(TeamService.class);
         RideRepository rideRepository = mock(RideRepository.class);
-        RideService rideService = new RideService(null, rideRepository, teamService, null);
+        RideService rideService = new RideService(null, rideRepository, teamService, null, null);
 
         Team team = new Team();
         TeamConfiguration teamConfiguration = new TeamConfiguration();
