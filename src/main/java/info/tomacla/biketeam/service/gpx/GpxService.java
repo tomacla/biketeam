@@ -4,23 +4,22 @@ import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.common.geo.Vector;
 import info.tomacla.biketeam.common.math.Rounder;
 import info.tomacla.biketeam.domain.map.Map;
-import info.tomacla.biketeam.domain.map.MapType;
 import info.tomacla.biketeam.domain.map.WindDirection;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.service.file.FileService;
-import io.github.glandais.GPXDataComputer;
-import io.github.glandais.GPXPathEnhancer;
-import io.github.glandais.fit.FitFileWriter;
-import io.github.glandais.gpx.GPXPath;
-import io.github.glandais.gpx.Point;
 import io.github.glandais.gpx.climb.Climb;
 import io.github.glandais.gpx.climb.ClimbDetector;
-import io.github.glandais.gpx.climb.ClimbPart;
-import io.github.glandais.gpx.storage.ValueKind;
-import io.github.glandais.io.GPXFileWriter;
-import io.github.glandais.io.GPXParser;
+import io.github.glandais.gpx.data.GPX;
+import io.github.glandais.gpx.data.GPXPath;
+import io.github.glandais.gpx.data.Point;
+import io.github.glandais.gpx.data.values.ValueKind;
+import io.github.glandais.io.read.GPXFileReader;
+import io.github.glandais.io.write.FitFileWriter;
+import io.github.glandais.io.write.GPXFileWriter;
 import io.github.glandais.map.TileMapImage;
 import io.github.glandais.map.TileMapProducer;
+import io.github.glandais.util.GPXDataComputer;
+import io.github.glandais.virtual.GPXPathEnhancer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +41,7 @@ public class GpxService {
     private FileService fileService;
 
     @Autowired
-    private GPXParser gpxParser;
+    private GPXFileReader gpxFileReader;
 
     @Autowired
     private GPXPathEnhancer gpxPathEnhancer;
@@ -130,8 +129,8 @@ public class GpxService {
             for (int i = 1; i < gpx.length; i++) {
                 GPXPath tgpxPath = getGPXPath(gpx[i], defaultName);
                 gpxPath.getPoints().addAll(tgpxPath.getPoints());
-                gpxPath.computeArrays(ValueKind.source);
             }
+            gpxPath.computeArrays(ValueKind.source);
         }
         return gpxPath;
 
@@ -149,8 +148,8 @@ public class GpxService {
         boolean crossing = gpxDataComputer.isCrossing(gpxPath);
 
         List<Point> points = gpxPath.getPoints();
-        io.github.glandais.gpx.Point startPoint = points.get(0);
-        io.github.glandais.gpx.Point endPoint = points.get(points.size() - 1);
+        Point startPoint = points.get(0);
+        Point endPoint = points.get(points.size() - 1);
 
         info.tomacla.biketeam.common.geo.Point start = new info.tomacla.biketeam.common.geo.Point(startPoint.getLatDeg(), startPoint.getLonDeg());
         info.tomacla.biketeam.common.geo.Point end = new info.tomacla.biketeam.common.geo.Point(endPoint.getLatDeg(), endPoint.getLonDeg());
@@ -296,7 +295,7 @@ public class GpxService {
     private GPXPath getGPXPath(Path path, String defaultName) {
         GPXPath gpxPath;
         try {
-            List<GPXPath> paths = gpxParser.parsePaths(path.toFile(), defaultName);
+            List<GPXPath> paths = gpxFileReader.parseGpx(path.toFile(), defaultName).paths();
             if (paths.size() == 1) {
                 gpxPath = paths.get(0);
                 if (gpxPath.getPoints().size() < 2) {
@@ -318,7 +317,7 @@ public class GpxService {
     private Path getGpx(GPXPath gpxPath) {
         try {
             Path gpx = fileService.getTempFile("gpxsimplified", ".gpx");
-            gpxFileWriter.writeGpxFile(List.of(gpxPath), gpx.toFile());
+            gpxFileWriter.writeGpxFile(new GPX(gpxPath.getName(), List.of(gpxPath), List.of()), gpx.toFile());
             return gpx;
         } catch (Exception e) {
             log.error("Error while creating FIT", e);

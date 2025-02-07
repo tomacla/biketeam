@@ -3,8 +3,8 @@ package info.tomacla.biketeam.service.garmin;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.scribejava.core.model.OAuthRequest;
 import com.github.scribejava.core.model.Verb;
-import io.github.glandais.gpx.GPXPath;
-import io.github.glandais.io.GPXParser;
+import io.github.glandais.gpx.data.GPXPath;
+import io.github.glandais.io.read.GPXFileReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +21,7 @@ public class GarminCourseService {
     private GarminAuthService garminAuthService;
 
     @Autowired
-    private GPXParser gpxParser;
+    private GPXFileReader gpxFileReader;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -39,7 +39,7 @@ public class GarminCourseService {
         }
 
         result.setCoordinateSystem("WGS84");
-        GPXPath gpxPath = gpxParser.parsePaths(descriptor.gpxFilePath().toFile()).get(0);
+        GPXPath gpxPath = gpxFileReader.parseGpx(descriptor.gpxFilePath().toFile()).paths().get(0);
         List<GarminCourseGeoPoint> geoPoints = gpxPath.getPoints().stream()
                 .map(p -> new GarminCourseGeoPoint(
                         p.getLatDeg(),
