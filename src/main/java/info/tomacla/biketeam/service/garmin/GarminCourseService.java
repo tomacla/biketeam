@@ -3,14 +3,14 @@ package info.tomacla.biketeam.service.garmin;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.scribejava.core.model.OAuthRequest;
 import com.github.scribejava.core.model.Verb;
-import io.github.glandais.gpx.data.GPXPath;
-import io.github.glandais.io.read.GPXFileReader;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import io.github.glandais.gpx.data.GPX;
+import io.github.glandais.gpx.io.read.GPXFileReader;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,13 +39,16 @@ public class GarminCourseService {
         }
 
         result.setCoordinateSystem("WGS84");
-        GPXPath gpxPath = gpxFileReader.parseGpx(descriptor.gpxFilePath().toFile()).paths().get(0);
-        List<GarminCourseGeoPoint> geoPoints = gpxPath.getPoints().stream()
-                .map(p -> new GarminCourseGeoPoint(
-                        p.getLatDeg(),
-                        p.getLonDeg(),
-                        p.getEle()
-                ))
+        GPX gpx = gpxFileReader.parseGpx(descriptor.gpxFilePath().toFile());
+        List<GarminCourseGeoPoint> geoPoints =
+                gpx.paths().stream().flatMap(gpxPath ->
+                            gpxPath.getPoints().stream()
+                            .map(p -> new GarminCourseGeoPoint(
+                                    p.getLatDeg(),
+                                    p.getLonDeg(),
+                                    p.getEle()
+                            ))
+                        )
                 .collect(Collectors.toList());
         result.setGeoPoints(geoPoints);
         return result;

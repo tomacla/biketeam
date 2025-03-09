@@ -13,13 +13,13 @@ import io.github.glandais.gpx.data.GPX;
 import io.github.glandais.gpx.data.GPXPath;
 import io.github.glandais.gpx.data.Point;
 import io.github.glandais.gpx.data.values.ValueKind;
-import io.github.glandais.io.read.GPXFileReader;
-import io.github.glandais.io.write.FitFileWriter;
-import io.github.glandais.io.write.GPXFileWriter;
-import io.github.glandais.map.TileMapImage;
-import io.github.glandais.map.TileMapProducer;
-import io.github.glandais.util.GPXDataComputer;
-import io.github.glandais.virtual.GPXPathEnhancer;
+import io.github.glandais.gpx.io.read.GPXFileReader;
+import io.github.glandais.gpx.io.write.FitFileWriter;
+import io.github.glandais.gpx.io.write.GPXFileWriter;
+import io.github.glandais.gpx.map.TileMapImage;
+import io.github.glandais.gpx.map.TileMapProducer;
+import io.github.glandais.gpx.util.GPXDataComputer;
+import io.github.glandais.gpx.virtual.GPXPathEnhancer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,7 +92,7 @@ public class GpxService {
 
             GPXPath gpxPath = getGpxPathFromFiles(defaultName, gpx);
             gpxPath.setName(defaultName);
-            gpxPathEnhancer.virtualize(gpxPath);
+            gpxPathEnhancer.virtualize(gpxPath, true);
 
             Path toStoreGpx = getGpx(gpxPath);
 
@@ -138,13 +138,13 @@ public class GpxService {
 
     private GPXPath prepareMap(final Path gpx, final String defaultName, final Map map, final Team team) {
         GPXPath gpxPath = getGPXPath(gpx, defaultName);
-        gpxPathEnhancer.virtualize(gpxPath);
+        gpxPathEnhancer.virtualize(gpxPath, true);
 
         Path storedStaticMap = getStaticMap(gpxPath);
         Path storedGpx = getGpx(gpxPath);
 
-        io.github.glandais.util.Vector windRaw = gpxDataComputer.getWind(gpxPath);
-        Vector wind = new Vector(windRaw.getX(), windRaw.getY());
+        io.github.glandais.gpx.util.Vector windRaw = gpxDataComputer.getWind(gpxPath);
+        Vector wind = new Vector(windRaw.x(), windRaw.y());
         boolean crossing = gpxDataComputer.isCrossing(gpxPath);
 
         List<Point> points = gpxPath.getPoints();
@@ -196,7 +196,7 @@ public class GpxService {
     public Path getAsFit(Path gpx) {
         try {
             Path fit = fileService.getTempFile("gpxsimplified", ".fit");
-            fitFileWriter.writeFitFile(getGPXPath(gpx), fit.toFile());
+            fitFileWriter.writeGPXPath(getGPXPath(gpx), fit.toFile());
             return fit;
         } catch (Exception e) {
             log.error("Error while creating FIT", e);
@@ -317,7 +317,7 @@ public class GpxService {
     private Path getGpx(GPXPath gpxPath) {
         try {
             Path gpx = fileService.getTempFile("gpxsimplified", ".gpx");
-            gpxFileWriter.writeGpxFile(new GPX(gpxPath.getName(), List.of(gpxPath), List.of()), gpx.toFile());
+            gpxFileWriter.writeGPXPath(gpxPath, gpx.toFile());
             return gpx;
         } catch (Exception e) {
             log.error("Error while creating FIT", e);
