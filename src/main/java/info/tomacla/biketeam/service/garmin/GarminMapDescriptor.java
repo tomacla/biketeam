@@ -1,10 +1,8 @@
 package info.tomacla.biketeam.service.garmin;
 
 import info.tomacla.biketeam.domain.map.MapType;
+import io.github.glandais.gpx.data.GPX;
 
-import java.nio.file.Path;
-
-public record GarminMapDescriptor(Path gpxFilePath, String courseName, MapType type, double length,
-                                  double positiveElevation, double negativeElevation) {
+public record GarminMapDescriptor(GPX gpx, MapType type) {
 
 }

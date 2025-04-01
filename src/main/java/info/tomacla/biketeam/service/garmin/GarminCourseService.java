@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.scribejava.core.model.OAuthRequest;
 import com.github.scribejava.core.model.Verb;
 import io.github.glandais.gpx.data.GPX;
-import io.github.glandais.gpx.io.read.GPXFileReader;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -21,17 +20,15 @@ public class GarminCourseService {
     private GarminAuthService garminAuthService;
 
     @Autowired
-    private GPXFileReader gpxFileReader;
-
-    @Autowired
     private ObjectMapper objectMapper;
 
     protected GarminCourse convert(GarminMapDescriptor descriptor) throws Exception {
         GarminCourse result = new GarminCourse();
-        result.setCourseName(descriptor.courseName());
-        result.setDistance(1000.0 * descriptor.length());
-        result.setElevationGain(descriptor.positiveElevation());
-        result.setElevationLoss(-descriptor.negativeElevation());
+        GPX gpx = descriptor.gpx();
+        result.setCourseName(gpx.name());
+        result.setDistance(1000.0 * gpx.getDist());
+        result.setElevationGain(gpx.getTotalElevation());
+        result.setElevationLoss(-gpx.getTotalElevationNegative());
         switch (descriptor.type()) {
             case GRAVEL -> result.setActivityType(GarminCourseActivityType.GRAVEL_CYCLING);
             case MTB -> result.setActivityType(GarminCourseActivityType.MOUNTAIN_BIKING);
@@ -39,16 +36,13 @@ public class GarminCourseService {
         }
 
         result.setCoordinateSystem("WGS84");
-        GPX gpx = gpxFileReader.parseGpx(descriptor.gpxFilePath().toFile());
         List<GarminCourseGeoPoint> geoPoints =
-                gpx.paths().stream().flatMap(gpxPath ->
-                            gpxPath.getPoints().stream()
+                gpx.paths().stream().flatMap(gpxPath -> gpxPath.getPoints().stream())
                             .map(p -> new GarminCourseGeoPoint(
                                     p.getLatDeg(),
                                     p.getLonDeg(),
                                     p.getEle()
                             ))
-                        )
                 .collect(Collectors.toList());
         result.setGeoPoints(geoPoints);
         return result;
