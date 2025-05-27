@@ -59,6 +59,12 @@ public class Map {
 
     private boolean deletion;
 
+    @Column(name = "average_rating")
+    private Double averageRating = 0.0;
+
+    @Column(name = "rating_count")
+    private Integer ratingCount = 0;
+
     public String getId() {
         return id;
     }
@@ -177,6 +183,22 @@ public class Map {
 
     public void setDeletion(boolean deletion) {
         this.deletion = deletion;
+    }
+
+    public Double getAverageRating() {
+        return averageRating;
+    }
+
+    public void setAverageRating(Double averageRating) {
+        this.averageRating = averageRating != null ? averageRating : 0.0;
+    }
+
+    public Integer getRatingCount() {
+        return ratingCount;
+    }
+
+    public void setRatingCount(Integer ratingCount) {
+        this.ratingCount = ratingCount != null ? ratingCount : 0;
     }
 
     @Override
