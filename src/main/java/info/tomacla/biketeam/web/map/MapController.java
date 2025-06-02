@@ -17,6 +17,9 @@ import info.tomacla.biketeam.service.url.UrlService;
 import info.tomacla.biketeam.web.AbstractController;
 import info.tomacla.biketeam.web.ride.dto.AndroidMapDTO;
 import info.tomacla.biketeam.web.ride.dto.GarminMapDTO;
+import io.github.glandais.gpx.data.GPX;
+import io.github.glandais.gpx.data.GPXPath;
+import io.github.glandais.gpx.io.read.GPXFileReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -67,6 +70,9 @@ public class MapController extends AbstractController {
 
     @Value("${mapbox.api-key}")
     private String mapBoxAPIKey;
+
+    @Autowired
+    private GPXFileReader gpxFileReader;
 
     @GetMapping(value = "/{mapId}")
     public String getMap(@PathVariable("teamId") String teamId,
@@ -268,16 +274,12 @@ public class MapController extends AbstractController {
 
                 Map map = optionalMap.get();
 
-                GarminMapDescriptor descriptor = new GarminMapDescriptor(
-                        gpxFile.get(),
-                        Optional.ofNullable(map.getPermalink()).orElse(map.getId()),
-                        map.getType(),
-                        map.getLength(),
-                        map.getPositiveElevation(),
-                        map.getNegativeElevation()
-                );
+                String url = null;
 
-                String url = garminCourseService.upload(request, response, session, token, descriptor);
+                GPX gpx = gpxFileReader.parseGPX(gpxFile.get().toFile());
+                GarminMapDescriptor descriptor = new GarminMapDescriptor(gpx, map.getType());
+                url = garminCourseService.upload(request, response, session, token, descriptor);
+
                 if (url != null) {
                     response.sendRedirect(url);
                 }

@@ -3,14 +3,13 @@ package info.tomacla.biketeam.service.garmin;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.scribejava.core.model.OAuthRequest;
 import com.github.scribejava.core.model.Verb;
-import io.github.glandais.gpx.data.GPXPath;
-import io.github.glandais.io.read.GPXFileReader;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import io.github.glandais.gpx.data.GPX;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,17 +20,15 @@ public class GarminCourseService {
     private GarminAuthService garminAuthService;
 
     @Autowired
-    private GPXFileReader gpxFileReader;
-
-    @Autowired
     private ObjectMapper objectMapper;
 
     protected GarminCourse convert(GarminMapDescriptor descriptor) throws Exception {
         GarminCourse result = new GarminCourse();
-        result.setCourseName(descriptor.courseName());
-        result.setDistance(1000.0 * descriptor.length());
-        result.setElevationGain(descriptor.positiveElevation());
-        result.setElevationLoss(-descriptor.negativeElevation());
+        GPX gpx = descriptor.gpx();
+        result.setCourseName(gpx.name());
+        result.setDistance(1000.0 * gpx.getDist());
+        result.setElevationGain(gpx.getTotalElevation());
+        result.setElevationLoss(-gpx.getTotalElevationNegative());
         switch (descriptor.type()) {
             case GRAVEL -> result.setActivityType(GarminCourseActivityType.GRAVEL_CYCLING);
             case MTB -> result.setActivityType(GarminCourseActivityType.MOUNTAIN_BIKING);
@@ -39,13 +36,13 @@ public class GarminCourseService {
         }
 
         result.setCoordinateSystem("WGS84");
-        GPXPath gpxPath = gpxFileReader.parseGpx(descriptor.gpxFilePath().toFile()).paths().get(0);
-        List<GarminCourseGeoPoint> geoPoints = gpxPath.getPoints().stream()
-                .map(p -> new GarminCourseGeoPoint(
-                        p.getLatDeg(),
-                        p.getLonDeg(),
-                        p.getEle()
-                ))
+        List<GarminCourseGeoPoint> geoPoints =
+                gpx.paths().stream().flatMap(gpxPath -> gpxPath.getPoints().stream())
+                            .map(p -> new GarminCourseGeoPoint(
+                                    p.getLatDeg(),
+                                    p.getLonDeg(),
+                                    p.getEle()
+                            ))
                 .collect(Collectors.toList());
         result.setGeoPoints(geoPoints);
         return result;

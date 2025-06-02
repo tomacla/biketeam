@@ -166,16 +166,18 @@ public class MapService extends AbstractPermalinkService {
 
     public Optional<Path> getFitFile(String teamId, String mapId) {
         Optional<Path> gpxFile = getGpxFile(teamId, mapId);
-        if (gpxFile.isPresent()) {
-            return Optional.of(gpxService.getAsFit(gpxFile.get()));
+        Optional<Map> map = get(teamId, mapId);
+        if (gpxFile.isPresent() && map.isPresent()) {
+            return Optional.of(gpxService.getAsFit(gpxFile.get(), map.get().getName()));
         }
         return Optional.empty();
     }
 
     public Optional<MapData> getMapData(String teamId, String mapId) {
         Optional<Path> gpxFile = getGpxFile(teamId, mapId);
-        if (gpxFile.isPresent()) {
-            return Optional.of(gpxService.getMapData(gpxFile.get()));
+        Optional<Map> map = get(teamId, mapId);
+        if (gpxFile.isPresent() && map.isPresent()) {
+            return Optional.of(gpxService.getMapData(gpxFile.get(), map.get().getName()));
         }
         return Optional.empty();
     }

@@ -32,10 +32,10 @@
 	<properties>
 		<java.version>17</java.version>
 		<dotenv-java.version>3.2.0</dotenv-java.version>
-		<gpx2web.version>1.1.27</gpx2web.version>
+		<gpx2web.version>1.1.31</gpx2web.version>
 		<zip4j.version>2.11.5</zip4j.version>
 		<h2.version>2.1.212</h2.version>
-		<postgresql.version>42.7.5</postgresql.version>
+		<postgresql.version>42.7.6</postgresql.version>
 		<thumbnailator.version>0.4.20</thumbnailator.version>
 		<scribejava-core.version>8.3.3</scribejava-core.version>
 		<spring-boot.build-image.imageName>github.com/tomacla/biketeam:latest</spring-boot.build-image.imageName>
@@ -128,13 +128,6 @@
 			<artifactId>gpx</artifactId>
 			<version>${gpx2web.version}</version>
 		</dependency>
-
-		<dependency>
-			<groupId>io.github.glandais.gpx2web</groupId>
-			<artifactId>virtual-cyclist</artifactId>
-			<version>${gpx2web.version}</version>
-		</dependency>
-
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
