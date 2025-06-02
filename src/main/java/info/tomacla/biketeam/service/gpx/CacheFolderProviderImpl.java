@@ -1,6 +1,6 @@
 package info.tomacla.biketeam.service.gpx;
 
-import io.github.glandais.util.CacheFolderProvider;
+import io.github.glandais.gpx.util.CacheFolderProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
