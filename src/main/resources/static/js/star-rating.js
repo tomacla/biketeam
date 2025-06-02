@@ -18,19 +18,40 @@ class StarRating {
 
         this.hoveredRating = 0;
 
-        if (this.readonly) {
-            this.container.classList.add('readonly');
-        } else {
-            this.container.classList.add('interactive');
-        }
         this.container.innerHTML = '';
 
         for (let i = 1; i <= 5; i++) {
             const star = document.createElement('span');
-            star.className = 'star';
+            star.classList.add('star');
+            star.classList.add('average');
             star.dataset.rating = i;
             star.innerHTML = '★';
             this.container.appendChild(star);
+        }
+
+        if (!this.readonly) {
+            const start = document.createElement('span');
+            start.textContent = '(';
+            this.container.appendChild(start);
+
+            for (let i = 1; i <= 5; i++) {
+                const star = document.createElement('span');
+                star.classList.add('star');
+                star.classList.add('user');
+                star.dataset.rating = i;
+                star.innerHTML = '★';
+                this.container.appendChild(star);
+            }
+            const star = document.createElement('span');
+            star.classList.add('star');
+            star.classList.add('user');
+            star.classList.add('cancel');
+            star.dataset.rating = -1;
+            star.innerHTML = '🗙';
+            this.container.appendChild(star);
+            const end = document.createElement('span');
+            end.textContent = ')';
+            this.container.appendChild(end);
         }
 
         this.info = document.createElement('span');
@@ -45,7 +66,7 @@ class StarRating {
     }
 
     bindEvents() {
-        const stars = this.container.querySelectorAll('.star');
+        const stars = this.container.querySelectorAll('.star.user');
 
         stars.forEach(star => {
             star.addEventListener('mouseenter', (e) => {
@@ -57,44 +78,54 @@ class StarRating {
                 const rating = parseInt(e.target.dataset.rating);
                 this.setRating(rating);
             });
-        });
 
-        this.container.addEventListener('mouseleave', () => {
-            this.hoveredRating = 0;
-            this.updateStarDisplay();
+            star.addEventListener('mouseleave', () => {
+                this.hoveredRating = 0;
+                this.updateStarDisplay();
+            });
         });
     }
 
     updateStarDisplay() {
-        const stars = this.container.querySelectorAll('.star');
-        var displayRating;
-        if (this.hoveredRating > 0) {
-            displayRating = this.hoveredRating
-        } else if (this.averageRating) {
-            displayRating = this.averageRating;
-        } else {
-            displayRating = 0;
-        }
-
-        stars.forEach((star, index) => {
+        const averageStars = this.container.querySelectorAll('.star.average');
+        averageStars.forEach((star, index) => {
             const starRating = index + 1;
-            star.classList.remove('filled', 'empty', 'hovered');
-
-            if (!this.readonly && this.hoveredRating > 0 && starRating <= this.hoveredRating) {
-                star.classList.add('hovered');
-            } else if (starRating <= displayRating) {
+            star.classList.remove('filled', 'empty');
+            if (starRating <= this.averageRating) {
                 star.classList.add('filled');
             } else {
                 star.classList.add('empty');
             }
         });
 
+        if (!this.readonly) {
+
+            var displayRating;
+            if (this.hoveredRating > 0) {
+                displayRating = this.hoveredRating
+            } else if (this.userRating) {
+                displayRating = this.userRating;
+            } else {
+                displayRating = 0;
+            }
+
+            const userStars = this.container.querySelectorAll('.star.user');
+            userStars.forEach((star, index) => {
+                const starRating = index + 1;
+                star.classList.remove('filled', 'empty', 'hovered');
+                if (starRating <= this.hoveredRating) {
+                    star.classList.add('hovered');
+                } else if (starRating <= displayRating) {
+                    star.classList.add('filled');
+                } else {
+                    star.classList.add('empty');
+                }
+            });
+        }
+
         if (this.averageRating && this.ratingCount && this.ratingCount > 0) {
             const avg = parseFloat(this.averageRating).toFixed(1);
             this.info.textContent = `${avg}/5 (${this.ratingCount} ${this.ratingCount === 1 ? 'vote' : 'votes'})`;
-            if (!this.readonly && this.userRating) {
-                this.info.textContent += ` - vous : ${this.userRating}/5`;
-            }
         } else {
             this.info.textContent = 'Pas de vote';
         }
@@ -103,10 +134,10 @@ class StarRating {
     setRating(rating) {
         if (this.readonly) return;
 
-        const url = `/${this.teamId}/maps/${this.mapId}/rate`;
-
         // Show loading state
         this.container.classList.add('loading');
+
+        const url = `/${this.teamId}/maps/${this.mapId}/rate`;
 
         fetch(url, {
             method: 'POST',

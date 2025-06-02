@@ -243,16 +243,14 @@ public class MapService extends AbstractPermalinkService {
         Optional<MapRating> existingRating = mapRatingRepository.findByMapIdAndUserId(mapId, user.getId());
 
         Integer newRating;
-        if (existingRating.isPresent()) {
+        if (rating == -1) {
+            existingRating.ifPresent(mapRating -> mapRatingRepository.deleteById(mapRating.getId()));
+            newRating = null;
+        } else if (existingRating.isPresent()) {
             MapRating mapRating = existingRating.get();
-            if (mapRating.getRating() != rating) {
-                mapRating.setRating(rating);
-                mapRatingRepository.save(mapRating);
-                newRating = rating;
-            } else {
-                mapRatingRepository.deleteById(mapRating.getId());
-                newRating = null;
-            }
+            mapRating.setRating(rating);
+            mapRatingRepository.save(mapRating);
+            newRating = rating;
         } else {
             Map map = mapRepository.findById(mapId)
                 .orElseThrow(() -> new IllegalArgumentException("Map not found"));
