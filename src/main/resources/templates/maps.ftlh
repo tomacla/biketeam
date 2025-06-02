@@ -94,6 +94,8 @@
                           <option <#if formdata.sort == 'LONG'>selected</#if> value="LONG">Plus longues</option>
                           <option <#if formdata.sort == 'FLAT'>selected</#if> value="FLAT">Plus plates</option>
                           <option <#if formdata.sort == 'HILLY'>selected</#if> value="HILLY">Plus valonnées</option>
+                          <option <#if formdata.sort == 'BEST_RATED'>selected</#if> value="BEST_RATED">Mieux notées</option>
+                          <option <#if formdata.sort == 'WORST_RATED'>selected</#if> value="WORST_RATED">Moins bien notées</option>
                         </select>
                    </div>
                 </div>
@@ -146,11 +148,20 @@
                         <div class="card-body">
                           <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl team.id '/maps/${map.permalink!map.id}' />">${map.name}</a></h5>
                           <h6 class="card-subtitle mb-2 text-muted">${map.postedAt.format(_date_formatter)}</h6>
-                          <p class="card-text">
-                            <i class="bi bi-arrow-left-right"></i> ${map.length}km
-                            <i class="bi bi-arrow-up"></i> ${map.positiveElevation}m
-                            <i class="bi bi-arrow-down"></i> ${map.negativeElevation}m
-                          </p>
+                          <div class="card-text">
+                            <div>
+                                <i class="bi bi-arrow-left-right"></i> ${map.length}km
+                                <i class="bi bi-arrow-up"></i> ${map.positiveElevation}m
+                                <i class="bi bi-arrow-down"></i> ${map.negativeElevation}m
+                            </div>
+                              <div class="star-rating"
+                                   data-team-id="${team.id}"
+                                   data-map-id="${map.id}"
+                                   data-readonly="<#if _team_member>false<#else>true</#if>"
+                                   data-average-rating="${map.averageRating?c}"
+                                   data-rating-count="${map.ratingCount?c}">
+                              </div>
+                          </div>
                         </div>
                         <div class="card-footer d-flex justify-content-center align-items-center">
                             <div class="btn-group" role="group">
@@ -173,4 +184,5 @@
 
 </div>
 
+<script src="/js/star-rating.js"></script>
 <#include "_includes_tail.ftlh">

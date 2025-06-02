@@ -1,9 +1,7 @@
 package info.tomacla.biketeam.web.map;
 
-import info.tomacla.biketeam.domain.map.Map;
-import info.tomacla.biketeam.domain.map.MapSorterOption;
-import info.tomacla.biketeam.domain.map.MapType;
-import info.tomacla.biketeam.domain.map.WindDirection;
+import info.tomacla.biketeam.common.file.FileExtension;
+import info.tomacla.biketeam.domain.map.*;
 import info.tomacla.biketeam.domain.ride.RideGroup;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
@@ -26,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.http.*;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ObjectUtils;
@@ -434,6 +433,49 @@ public class MapController extends AbstractController {
             attributes.addFlashAttribute("error", e.getMessage());
             return viewHandler.redirectView(team, "/maps/" + mapId);
         }
+    }
+
+    // Rating endpoints
+    @PostMapping("/{mapId}/rate")
+    @ResponseBody
+    public ResponseEntity<RatingResponse> rateMap(@PathVariable String teamId, @PathVariable String mapId,
+                                     @RequestParam int rating, Authentication authentication, Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        // Check if user is member of the team
+        if (!userService.authorizePublicAccess(authentication, teamId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        User user = getUserFromPrincipal(principal).orElseThrow();
+
+        Integer newRating = mapService.rateMap(mapId, user, rating);
+
+        // Return updated rating statistics
+        Double avgRating = mapService.getAverageRating(mapId);
+        Long ratingCount = mapService.getRatingCount(mapId);
+
+        return ResponseEntity.ok(new RatingResponse(avgRating, ratingCount, newRating));
+    }
+
+    @GetMapping("/{mapId}/rating")
+    @ResponseBody
+    public ResponseEntity<RatingResponse> getMapRating(@PathVariable String teamId, @PathVariable String mapId,
+                                                       Authentication authentication, Principal principal) {
+        Double avgRating = mapService.getAverageRating(mapId);
+        Long ratingCount = mapService.getRatingCount(mapId);
+        Integer userRating = null;
+        
+        if (principal != null && userService.authorizePublicAccess(authentication, teamId)) {
+            User user = getUserFromPrincipal(principal).orElse(null);
+            if (user != null) {
+                userRating = mapService.getUserRating(mapId, user.getId())
+                    .map(MapRating::getRating).orElse(null);
+            }
+        }
+        
+        return ResponseEntity.ok(new RatingResponse(avgRating, ratingCount, userRating));
     }
 
     public String getMapOGDescription(Map map) {

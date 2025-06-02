@@ -43,8 +43,15 @@
                 <span><i class="bi bi-arrow-up"></i> ${map.positiveElevation}m</span>
                 <span><i class="bi bi-arrow-down"></i> ${map.negativeElevation}m</span>
             </div>
+            <div class="star-rating order-3 order-md-2 my-1 my-md-0"
+                 data-team-id="${team.id}"
+                 data-map-id="${map.id}"
+                 data-readonly="<#if _team_member>false<#else>true</#if>"
+                 data-average-rating="${map.averageRating?c}"
+                 data-rating-count="${map.ratingCount?c}">
+            </div>
             <#if !_embed>
-            <div class="order-1 order-md-2 btn-group btn-group-sm" role="group">
+            <div class="order-1 order-md-3 btn-group btn-group-sm" role="group">
                 <#if _authenticated>
                     <#if _user.mapFavorites?filter(mp -> mp.id == map.id)?size == 0>
                         <a href="<@common.teamUrl team.id '/maps/${map.id}/add-favorite' />" class="btn btn-outline-secondary" role="button"><i class="bi bi-star"></i><span class="d-none d-md-inline"> Favori</span></a>
@@ -72,6 +79,7 @@
 </div>
 </div>
 
+    <script src="/js/star-rating.js"></script>
     <script type="text/javascript">
         initSingleMapView(
             'map-wrapper',

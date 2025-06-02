@@ -4,6 +4,7 @@ import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.common.geo.Point;
 import info.tomacla.biketeam.domain.map.*;
 import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.service.file.FileService;
 import info.tomacla.biketeam.service.gpx.GpxService;
 import info.tomacla.biketeam.service.gpx.MapData;
@@ -35,12 +36,16 @@ public class MapService extends AbstractPermalinkService {
     private final FileService fileService;
 
     private final MapRepository mapRepository;
+    
+    private final MapRatingRepository mapRatingRepository;
 
     @Autowired
-    public MapService(GpxService gpxService, FileService fileService, MapRepository mapRepository) {
+    public MapService(GpxService gpxService, FileService fileService, MapRepository mapRepository, 
+                     MapRatingRepository mapRatingRepository) {
         this.gpxService = gpxService;
         this.fileService = fileService;
         this.mapRepository = mapRepository;
+        this.mapRatingRepository = mapRatingRepository;
     }
 
     public Optional<Map> get(String teamId, String mapIdOrPermalink) {
@@ -210,9 +215,73 @@ public class MapService extends AbstractPermalinkService {
                 sort = Sort.by("positiveElevation").descending();
             } else if (sortOption.equals(MapSorterOption.FLAT)) {
                 sort = Sort.by("positiveElevation").ascending();
+            } else if (sortOption.equals(MapSorterOption.BEST_RATED)) {
+                sort = Sort.by("averageRating").descending().and(Sort.by("ratingCount").descending());
+            } else if (sortOption.equals(MapSorterOption.WORST_RATED)) {
+                sort = Sort.by("averageRating").ascending().and(Sort.by("ratingCount").ascending());
             }
         }
         return sort;
+    }
+
+    // Rating methods
+    @Transactional
+    public Integer rateMap(String mapId, User user, int rating) {
+        Optional<MapRating> existingRating = mapRatingRepository.findByMapIdAndUserId(mapId, user.getId());
+
+        Integer newRating;
+        if (existingRating.isPresent()) {
+            MapRating mapRating = existingRating.get();
+            if (mapRating.getRating() != rating) {
+                mapRating.setRating(rating);
+                mapRatingRepository.save(mapRating);
+                newRating = rating;
+            } else {
+                mapRatingRepository.deleteById(mapRating.getId());
+                newRating = null;
+            }
+        } else {
+            Map map = mapRepository.findById(mapId)
+                .orElseThrow(() -> new IllegalArgumentException("Map not found"));
+            MapRating mapRating = new MapRating(map, user, rating);
+            mapRatingRepository.save(mapRating);
+            newRating = rating;
+        }
+        
+        // Update cached rating values in map
+        updateCachedRatings(mapId);
+        return newRating;
+    }
+
+    public Optional<MapRating> getUserRating(String mapId, String userId) {
+        return mapRatingRepository.findByMapIdAndUserId(mapId, userId);
+    }
+
+    public Double getAverageRating(String mapId) {
+        return mapRepository.findById(mapId)
+                .map(Map::getAverageRating)
+                .orElse(null);
+    }
+
+    public Long getRatingCount(String mapId) {
+        return mapRepository.findById(mapId)
+                .map(map -> map.getRatingCount().longValue())
+                .orElse(0L);
+    }
+
+    private void updateCachedRatings(String mapId) {
+        Map map = mapRepository.findById(mapId)
+                .orElseThrow(() -> new IllegalArgumentException("Map not found"));
+        
+        // Get fresh rating data from repository
+        Double averageRating = mapRatingRepository.findAverageRatingByMapId(mapId);
+        Long ratingCount = mapRatingRepository.countRatingsByMapId(mapId);
+        
+        // Update cached values
+        map.setAverageRating(averageRating != null ? averageRating : 0.0);
+        map.setRatingCount(ratingCount != null ? ratingCount.intValue() : 0);
+        
+        mapRepository.save(map);
     }
 
     private static String getGpxName(Map map) {
