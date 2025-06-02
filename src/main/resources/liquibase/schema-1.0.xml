@@ -1531,4 +1531,59 @@
 
     </changeSet>
 
+    <changeSet id="create-map-rating-table" author="tomacla">
+        <createTable tableName="map_rating">
+            <column name="id" type="varchar(255)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="map_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rating" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint
+                tableName="map_rating"
+                columnNames="map_id, user_id"
+                constraintName="uk_map_rating_map_user"/>
+
+        <addForeignKeyConstraint
+                baseTableName="map_rating"
+                baseColumnNames="map_id"
+                referencedTableName="map"
+                referencedColumnNames="id"
+                constraintName="fk_map_rating_map"
+                onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint
+                baseTableName="map_rating"
+                baseColumnNames="user_id"
+                referencedTableName="user_account"
+                referencedColumnNames="id"
+                constraintName="fk_map_rating_user"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+    <changeSet id="add-rating-columns-to-map" author="tomacla">
+        <addColumn tableName="map">
+            <column name="average_rating" type="double precision" defaultValue="0.0">
+                <constraints nullable="true"/>
+            </column>
+            <column name="rating_count" type="int" defaultValue="0">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

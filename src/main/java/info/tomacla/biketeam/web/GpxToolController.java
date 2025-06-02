@@ -11,6 +11,9 @@ import info.tomacla.biketeam.service.gpx.GpxDownloadClient;
 import info.tomacla.biketeam.service.gpx.GpxService;
 import info.tomacla.biketeam.service.gpx.MapData;
 import info.tomacla.biketeam.service.gpx.StandaloneGpx;
+import io.github.glandais.gpx.data.GPX;
+import io.github.glandais.gpx.data.GPXPath;
+import io.github.glandais.gpx.io.read.GPXFileReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -54,6 +57,9 @@ public class GpxToolController extends AbstractController {
 
     @Autowired
     private GpxDownloadClient gpxDownloadClient;
+
+    @Autowired
+    private GPXFileReader gpxFileReader;
 
     @GetMapping(value = {"", "/"})
     public ModelAndView root(@RequestParam(name = "gpx", required = false) String gpx, Principal principal, Model model) {
@@ -137,9 +143,9 @@ public class GpxToolController extends AbstractController {
 
         try {
 
-            Path gpxPath = fileService.getTempFileFromInputStream(file.getInputStream());
+            Path gpxFile = fileService.getTempFileFromInputStream(file.getInputStream());
 
-            String uuid = gpxService.parseAndStoreStandalone(gpxPath);
+            String uuid = gpxService.parseAndStoreStandalone(gpxFile);
 
             return new ModelAndView(new RedirectView("/gpxtool/" + uuid, false, false, false));
 
@@ -158,10 +164,10 @@ public class GpxToolController extends AbstractController {
 
         try {
 
-            Path gpxPath1 = fileService.getTempFileFromInputStream(file1.getInputStream());
-            Path gpxPath2 = fileService.getTempFileFromInputStream(file2.getInputStream());
+            Path gpxFile1 = fileService.getTempFileFromInputStream(file1.getInputStream());
+            Path gpxFile2 = fileService.getTempFileFromInputStream(file2.getInputStream());
 
-            String uuid = gpxService.parseAndStoreStandalone(gpxPath1, gpxPath2);
+            String uuid = gpxService.mergeAndStoreStandalone(gpxFile1, gpxFile2);
 
             return new ModelAndView(new RedirectView("/gpxtool/" + uuid, false, false, false));
 
@@ -216,23 +222,13 @@ public class GpxToolController extends AbstractController {
                 try {
                     Path file = fileService.getFile(FileRepositories.GPXTOOLVIEWER, uuid + ".gpx");
 
-                    StandaloneGpx standaloneGpx = standalone.get();
+                    String url = null;
 
-                    GarminMapDescriptor descriptor = new GarminMapDescriptor(
-                            file,
-                            uuid,
-                            MapType.ROAD,
-                            standaloneGpx.getLength(),
-                            standaloneGpx.getPositiveElevation(),
-                            standaloneGpx.getNegativeElevation()
-                    );
+                    GPX gpx = gpxFileReader.parseGPX(file.toFile());
+                    GarminMapDescriptor descriptor = new GarminMapDescriptor(gpx, MapType.ROAD);
+                    url = garminCourseService.upload(request, response, session, token, descriptor);
 
-                    String url = garminCourseService.upload(request, response, session, token, descriptor);
-                    if (url != null) {
-                        response.sendRedirect(url);
-                    }
-
-
+                    response.sendRedirect(url);
                 } catch (IOException e) {
                     throw new ServerErrorException("Error while reading gpx : " + uuid, e);
                 }
