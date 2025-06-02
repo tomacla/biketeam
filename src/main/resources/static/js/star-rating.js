@@ -20,19 +20,31 @@ class StarRating {
 
         this.container.innerHTML = '';
 
+        // data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Tooltip on bottom"
+        this.average = document.createElement('span');
+        this.average.dataset.bsPlacement = "bottom"
+        this.average.dataset.bsOriginalTitle = "Average"
         for (let i = 1; i <= 5; i++) {
             const star = document.createElement('span');
             star.classList.add('star');
             star.classList.add('average');
             star.dataset.rating = i;
             star.innerHTML = '★';
-            this.container.appendChild(star);
+            this.average.appendChild(star);
         }
+        this.container.appendChild(this.average);
+        new bootstrap.Tooltip(this.average, {
+            container: 'body'
+        });
 
         if (!this.readonly) {
+            this.user = document.createElement('span');
+            this.user.dataset.bsPlacement = "bottom"
+            this.user.dataset.bsOriginalTitle = "Average"
+
             const start = document.createElement('span');
             start.textContent = '(';
-            this.container.appendChild(start);
+            this.user.appendChild(start);
 
             for (let i = 1; i <= 5; i++) {
                 const star = document.createElement('span');
@@ -40,29 +52,33 @@ class StarRating {
                 star.classList.add('user');
                 star.dataset.rating = i;
                 star.innerHTML = '★';
-                this.container.appendChild(star);
+                this.user.appendChild(star);
             }
-            const star = document.createElement('span');
-            star.classList.add('star');
-            star.classList.add('user');
-            star.classList.add('cancel');
-            star.dataset.rating = -1;
-            star.innerHTML = '🗙';
-            this.container.appendChild(star);
+
+            this.deleteUserRating = document.createElement('span');
+            this.deleteUserRating.classList.add('star');
+            this.deleteUserRating.classList.add('user');
+            this.deleteUserRating.classList.add('cancel');
+            this.deleteUserRating.classList.add('disabled');
+            this.deleteUserRating.dataset.rating = -1;
+            this.deleteUserRating.innerHTML = '🗙';
+            this.user.appendChild(this.deleteUserRating);
+
             const end = document.createElement('span');
             end.textContent = ')';
-            this.container.appendChild(end);
-        }
+            this.user.appendChild(end);
 
-        this.info = document.createElement('span');
-        this.info.className = 'rating-info';
-        this.container.appendChild(this.info);
+            this.container.appendChild(this.user);
+            new bootstrap.Tooltip(this.user, {
+                container: 'body'
+            });
+        }
 
         if (!this.readonly) {
             this.bindEvents();
         }
 
-        this.updateStarDisplay();
+        this.updateStarDisplay(1);
     }
 
     bindEvents() {
@@ -71,7 +87,7 @@ class StarRating {
         stars.forEach(star => {
             star.addEventListener('mouseenter', (e) => {
                 this.hoveredRating = parseInt(e.target.dataset.rating);
-                this.updateStarDisplay();
+                this.updateStarDisplay(e.target.dataset.rating);
             });
 
             star.addEventListener('click', (e) => {
@@ -81,25 +97,34 @@ class StarRating {
 
             star.addEventListener('mouseleave', () => {
                 this.hoveredRating = 0;
-                this.updateStarDisplay();
+                this.updateStarDisplay(0);
             });
         });
     }
 
-    updateStarDisplay() {
+    updateStarDisplay(userStar) {
         const averageStars = this.container.querySelectorAll('.star.average');
         averageStars.forEach((star, index) => {
             const starRating = index + 1;
-            star.classList.remove('filled', 'empty');
-            if (starRating <= this.averageRating) {
-                star.classList.add('filled');
+            star.classList.remove('filled', 'empty', 'partial');
+            star.style.removeProperty('--fill-percentage');
+            if (this.averageRating) {
+                if (starRating <= Math.floor(this.averageRating)) {
+                    star.classList.add('filled');
+                } else if (starRating === Math.ceil(this.averageRating) && this.averageRating % 1 !== 0) {
+                    star.classList.add('partial');
+                    const percentage = 20 + ((this.averageRating % 1) * 60).toFixed(1);
+                    star.style.setProperty('--fill-percentage', `${percentage}%`);
+                } else {
+                    // Étoile vide
+                    star.classList.add('empty');
+                }
             } else {
                 star.classList.add('empty');
             }
         });
 
         if (!this.readonly) {
-
             var displayRating;
             if (this.hoveredRating > 0) {
                 displayRating = this.hoveredRating
@@ -121,13 +146,30 @@ class StarRating {
                     star.classList.add('empty');
                 }
             });
+
+            if (this.userRating) {
+                this.deleteUserRating.classList.remove('disabled');
+                this.deleteUserRating.classList.add('enabled');
+                if (userStar === -1) {
+                    this.user.dataset.bsOriginalTitle = `Supprimer votre note`;
+                } else {
+                    this.user.dataset.bsOriginalTitle = `Votre note : ${this.userRating}`;
+                }
+            } else {
+                this.deleteUserRating.classList.remove('enabled');
+                this.deleteUserRating.classList.add('disabled');
+                this.user.dataset.bsOriginalTitle = `Vous n'avez pas encore voté`;
+            }
         }
 
         if (this.averageRating && this.ratingCount && this.ratingCount > 0) {
-            const avg = parseFloat(this.averageRating).toFixed(1);
-            this.info.textContent = `${avg}/5 (${this.ratingCount} ${this.ratingCount === 1 ? 'vote' : 'votes'})`;
-        } else {
-            this.info.textContent = 'Pas de vote';
+            var avg = this.averageRating;
+            if (avg === Math.round(avg)) {
+                avg = this.averageRating.toFixed(0);
+            } else {
+                avg = this.averageRating.toFixed(1);
+            }
+            this.average.dataset.bsOriginalTitle = `${avg}/5 (${this.ratingCount} ${this.ratingCount === 1 ? 'vote' : 'votes'})`;
         }
     }
 
@@ -166,8 +208,7 @@ class StarRating {
             console.error('Error submitting rating:', error);
         })
             .finally(() => {
-            this.hoveredRating = 0;
-            this.updateStarDisplay();
+            this.updateStarDisplay(1);
             this.container.classList.remove('loading');
         });
     }
