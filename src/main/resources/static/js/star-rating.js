@@ -6,16 +6,18 @@ class StarRating {
     constructor(element) {
         this.container = element;
 
-        this.readonly = element.dataset.readonly === 'true';
+        this.readonly = element.dataset.canRate ? element.dataset.canRate === "false" : true;
         this.averageRating = element.dataset.averageRating ? parseFloat(element.dataset.averageRating) : null;
         this.userRating = element.dataset.userRating ? parseFloat(element.dataset.userRating) : null;
+        if (this.userRating === -1) {
+            this.userRating = null;
+        }
         this.ratingCount = element.dataset.ratingCount ? parseInt(element.dataset.ratingCount) : 0;
         this.mapId = element.dataset.mapId;
         this.teamId = element.dataset.teamId;
 
         this.hoveredRating = 0;
 
-        this.container.classList.add('small');
         if (this.readonly) {
             this.container.classList.add('readonly');
         } else {
@@ -143,27 +145,5 @@ class StarRating {
 
 // Auto-initialize all star ratings on page load
 document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.star-rating').forEach(element => {
-        if (element.dataset.readonly === 'true') {
-            new StarRating(element);
-        } else {
-            const url = `/${element.dataset.teamId}/maps/${element.dataset.mapId}/rating`;
-            fetch(url, { method: 'GET' })
-                .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to submit rating');
-                }
-                return response.json();
-            }).then(data => {
-                element.dataset.averageRating = data.averageRating;
-                element.dataset.ratingCount = data.ratingCount;
-                if (data.userRating) {
-                    element.dataset.userRating = data.userRating;
-                } else {
-                    element.dataset.userRating = null;
-                }
-                new StarRating(element);
-            })
-        }
-    });
+    document.querySelectorAll('.star-rating').forEach(element => new StarRating(element));
 });

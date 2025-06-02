@@ -10,22 +10,11 @@
     transition: all 0.2s ease;
     user-select: none;
     position: relative;
+    font-size: 14px;
 }
 
 .star-rating.readonly .star {
     cursor: default;
-}
-
-.star-rating.small .star {
-    font-size: 14px;
-}
-
-.star-rating.medium .star {
-    font-size: 18px;
-}
-
-.star-rating.large .star {
-    font-size: 24px;
 }
 
 .star-rating .star.empty {

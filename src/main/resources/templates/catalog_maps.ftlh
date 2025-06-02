@@ -141,9 +141,19 @@
                           <h5 class="card-title"><a class="link-dark" href="<@common.teamUrl map.teamId '/maps/${map.permalink!map.id}' />">${map.name}</a></h5>
                           <h6 class="card-subtitle mb-2 text-muted">${map.postedAt.format(_date_formatter)}</h6>
                           <p class="card-text">
-                            <i class="bi bi-arrow-left-right"></i> ${map.length}km
-                            <i class="bi bi-arrow-up"></i> ${map.positiveElevation}m
-                            <i class="bi bi-arrow-down"></i> ${map.negativeElevation}m
+                            <div>
+                                <i class="bi bi-arrow-left-right"></i> ${map.length}km
+                                <i class="bi bi-arrow-up"></i> ${map.positiveElevation}m
+                                <i class="bi bi-arrow-down"></i> ${map.negativeElevation}m
+                            </div>
+                              <div class="star-rating"
+                                   data-team-id="${map.teamId}"
+                                   data-map-id="${map.id}"
+                                   data-can-rate="${map.canRate?c}"
+                                   data-user-rating="${map.userRating?c}"
+                                   data-average-rating="${map.averageRating?c}"
+                                   data-rating-count="${map.ratingCount?c}">
+                              </div>
                           </p>
                         </div>
                         <div class="card-footer d-flex justify-content-between align-items-center">
@@ -170,4 +180,5 @@
 
 </div>
 
+<script src="/js/star-rating.js"></script>
 <#include "_includes_tail.ftlh">

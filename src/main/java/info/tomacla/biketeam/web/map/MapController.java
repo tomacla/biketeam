@@ -84,7 +84,7 @@ public class MapController extends AbstractController {
 
         final Team team = checkTeam(teamId);
 
-        Optional<Map> optionalMap = mapService.get(team.getId(), mapId);
+        Optional<Map> optionalMap = mapService.getWithUserRating(getUserFromPrincipal(principal).orElse(null), team.getId(), mapId);
         if (optionalMap.isEmpty()) {
             return viewHandler.redirect(team, "/maps");
         }
@@ -146,6 +146,7 @@ public class MapController extends AbstractController {
         SearchMapForm.SearchMapFormParser parser = form.parser();
 
         Page<Map> maps = mapService.searchMaps(
+                getUserFromPrincipal(principal).orElse(null),
                 Set.of(team.getId()),
                 parser.getName(),
                 parser.getLowerDistance(),
@@ -457,25 +458,6 @@ public class MapController extends AbstractController {
         Long ratingCount = mapService.getRatingCount(mapId);
 
         return ResponseEntity.ok(new RatingResponse(avgRating, ratingCount, newRating));
-    }
-
-    @GetMapping("/{mapId}/rating")
-    @ResponseBody
-    public ResponseEntity<RatingResponse> getMapRating(@PathVariable String teamId, @PathVariable String mapId,
-                                                       Authentication authentication, Principal principal) {
-        Double avgRating = mapService.getAverageRating(mapId);
-        Long ratingCount = mapService.getRatingCount(mapId);
-        Integer userRating = null;
-        
-        if (principal != null && userService.authorizePublicAccess(authentication, teamId)) {
-            User user = getUserFromPrincipal(principal).orElse(null);
-            if (user != null) {
-                userRating = mapService.getUserRating(mapId, user.getId())
-                    .map(MapRating::getRating).orElse(null);
-            }
-        }
-        
-        return ResponseEntity.ok(new RatingResponse(avgRating, ratingCount, userRating));
     }
 
     public String getMapOGDescription(Map map) {
