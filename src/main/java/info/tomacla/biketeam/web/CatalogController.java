@@ -110,6 +110,7 @@ public class CatalogController extends AbstractController {
         SearchMapForm.SearchMapFormParser parser = form.parser();
 
         Page<Map> maps = mapService.searchMaps(
+                getUserFromPrincipal(principal).orElse(null),
                 teamIds,
                 parser.getName(),
                 parser.getLowerDistance(),

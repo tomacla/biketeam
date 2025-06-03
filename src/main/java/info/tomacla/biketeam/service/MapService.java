@@ -4,6 +4,7 @@ import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.common.geo.Point;
 import info.tomacla.biketeam.domain.map.*;
 import info.tomacla.biketeam.domain.team.Team;
+import info.tomacla.biketeam.domain.team.TeamRepository;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.service.file.FileService;
 import info.tomacla.biketeam.service.gpx.GpxService;
@@ -36,16 +37,25 @@ public class MapService extends AbstractPermalinkService {
     private final FileService fileService;
 
     private final MapRepository mapRepository;
-    
+
     private final MapRatingRepository mapRatingRepository;
+
+    private final TeamRepository teamRepository;
 
     @Autowired
     public MapService(GpxService gpxService, FileService fileService, MapRepository mapRepository, 
-                     MapRatingRepository mapRatingRepository) {
+                     MapRatingRepository mapRatingRepository, TeamRepository teamRepository) {
         this.gpxService = gpxService;
         this.fileService = fileService;
         this.mapRepository = mapRepository;
         this.mapRatingRepository = mapRatingRepository;
+        this.teamRepository = teamRepository;
+    }
+
+    public Optional<Map> getWithUserRating(User userForRating, String teamId, String mapIdOrPermalink) {
+        Optional<Map> result = get(teamId, mapIdOrPermalink);
+        result.ifPresent(map -> setUserRating(map, userForRating));
+        return result;
     }
 
     public Optional<Map> get(String teamId, String mapIdOrPermalink) {
@@ -60,7 +70,6 @@ public class MapService extends AbstractPermalinkService {
         }
 
         return Optional.empty();
-
     }
 
     public void save(Map map) {
@@ -136,7 +145,7 @@ public class MapService extends AbstractPermalinkService {
         return mapRepository.findAll(SearchMapSpecification.byNameInTeam(teamId, name), PageRequest.of(page, pageSize, getPageSort(null)));
     }
 
-    public Page<Map> searchMaps(Set<String> teamIds, String name, Double lowerDistance, Double upperDistance, MapType type,
+    public Page<Map> searchMaps(User userForRating, Set<String> teamIds, String name, Double lowerDistance, Double upperDistance, MapType type,
                                 Double lowerPositiveElevation, Double upperPositiveElevation,
                                 List<String> tags, WindDirection windDirection, Point center, Integer distanceToCenter,
                                 int page, int pageSize, MapSorterOption sortOption) {
@@ -160,7 +169,11 @@ public class MapService extends AbstractPermalinkService {
                 distanceToCenter
         );
 
-        return mapRepository.findAll(spec, pageable);
+        Page<Map> result = mapRepository.findAll(spec, pageable);
+        if (userForRating != null) {
+            result.getContent().forEach(map -> setUserRating(map, userForRating));
+        }
+        return result;
 
     }
 
@@ -230,16 +243,14 @@ public class MapService extends AbstractPermalinkService {
         Optional<MapRating> existingRating = mapRatingRepository.findByMapIdAndUserId(mapId, user.getId());
 
         Integer newRating;
-        if (existingRating.isPresent()) {
+        if (rating == -1) {
+            existingRating.ifPresent(mapRating -> mapRatingRepository.deleteById(mapRating.getId()));
+            newRating = null;
+        } else if (existingRating.isPresent()) {
             MapRating mapRating = existingRating.get();
-            if (mapRating.getRating() != rating) {
-                mapRating.setRating(rating);
-                mapRatingRepository.save(mapRating);
-                newRating = rating;
-            } else {
-                mapRatingRepository.deleteById(mapRating.getId());
-                newRating = null;
-            }
+            mapRating.setRating(rating);
+            mapRatingRepository.save(mapRating);
+            newRating = rating;
         } else {
             Map map = mapRepository.findById(mapId)
                 .orElseThrow(() -> new IllegalArgumentException("Map not found"));
@@ -251,10 +262,6 @@ public class MapService extends AbstractPermalinkService {
         // Update cached rating values in map
         updateCachedRatings(mapId);
         return newRating;
-    }
-
-    public Optional<MapRating> getUserRating(String mapId, String userId) {
-        return mapRatingRepository.findByMapIdAndUserId(mapId, userId);
     }
 
     public Double getAverageRating(String mapId) {
@@ -286,6 +293,22 @@ public class MapService extends AbstractPermalinkService {
 
     private static String getGpxName(Map map) {
         return map.getId() + ".gpx";
+    }
+
+    private void setUserRating(Map map, User userForRating) {
+        if (userForRating != null) {
+            map.setCanRate(false);
+            map.setUserRating(-1);
+            teamRepository.findById(map.getTeamId())
+                .ifPresent(team -> {
+                    if (team.isMember(userForRating)) {
+                        map.setCanRate(true);
+                        mapRatingRepository.findByMapIdAndUserId(map.getId(), userForRating.getId())
+                                .map(MapRating::getRating)
+                                .ifPresent(map::setUserRating);
+                    }
+                });
+        }
     }
 
 }

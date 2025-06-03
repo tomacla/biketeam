@@ -65,6 +65,12 @@ public class Map {
     @Column(name = "rating_count")
     private Integer ratingCount = 0;
 
+    @Transient
+    private boolean canRate = false;
+
+    @Transient
+    private int userRating = -1;
+
     public String getId() {
         return id;
     }
@@ -199,6 +205,22 @@ public class Map {
 
     public void setRatingCount(Integer ratingCount) {
         this.ratingCount = ratingCount != null ? ratingCount : 0;
+    }
+
+    public boolean isCanRate() {
+        return canRate;
+    }
+
+    public void setCanRate(boolean canRate) {
+        this.canRate = canRate;
+    }
+
+    public int getUserRating() {
+        return userRating;
+    }
+
+    public void setUserRating(int userRating) {
+        this.userRating = userRating;
     }
 
     @Override
