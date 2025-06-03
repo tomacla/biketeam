@@ -33,7 +33,7 @@ class StarRating {
             this.average.appendChild(star);
         }
         this.container.appendChild(this.average);
-        new bootstrap.Tooltip(this.average, {
+        this.average_tooltip = new bootstrap.Tooltip(this.average, {
             container: 'body'
         });
 
@@ -61,7 +61,7 @@ class StarRating {
             this.deleteUserRating.classList.add('cancel');
             this.deleteUserRating.classList.add('disabled');
             this.deleteUserRating.dataset.rating = -1;
-            this.deleteUserRating.innerHTML = '🗙';
+            this.deleteUserRating.innerHTML = '×';
             this.user.appendChild(this.deleteUserRating);
 
             const end = document.createElement('span');
@@ -69,7 +69,7 @@ class StarRating {
             this.user.appendChild(end);
 
             this.container.appendChild(this.user);
-            new bootstrap.Tooltip(this.user, {
+            this.user_tooltip = new bootstrap.Tooltip(this.user, {
                 container: 'body'
             });
         }
@@ -87,7 +87,7 @@ class StarRating {
         stars.forEach(star => {
             star.addEventListener('mouseenter', (e) => {
                 this.hoveredRating = parseInt(e.target.dataset.rating);
-                this.updateStarDisplay(e.target.dataset.rating);
+                this.updateStarDisplay(this.hoveredRating);
             });
 
             star.addEventListener('click', (e) => {
@@ -113,7 +113,7 @@ class StarRating {
                     star.classList.add('filled');
                 } else if (starRating === Math.ceil(this.averageRating) && this.averageRating % 1 !== 0) {
                     star.classList.add('partial');
-                    const percentage = 20 + ((this.averageRating % 1) * 60).toFixed(1);
+                    const percentage = (20 + (this.averageRating % 1) * 60).toFixed(1);
                     star.style.setProperty('--fill-percentage', `${percentage}%`);
                 } else {
                     // Étoile vide
@@ -147,21 +147,24 @@ class StarRating {
                 }
             });
 
+            var newTooltip;
             if (this.userRating) {
                 this.deleteUserRating.classList.remove('disabled');
                 this.deleteUserRating.classList.add('enabled');
                 if (userStar === -1) {
-                    this.user.dataset.bsOriginalTitle = `Supprimer votre note`;
+                    newTooltip = `Supprimer votre note`;
                 } else {
-                    this.user.dataset.bsOriginalTitle = `Votre note : ${this.userRating}`;
+                    newTooltip = `Votre note : ${this.userRating}`;
                 }
             } else {
                 this.deleteUserRating.classList.remove('enabled');
                 this.deleteUserRating.classList.add('disabled');
-                this.user.dataset.bsOriginalTitle = `Vous n'avez pas encore voté`;
+                newTooltip = `Vous n'avez pas encore voté`;
             }
+            this.updateTooltip(this.user, this.user_tooltip, newTooltip);
         }
 
+        var newTooltip;
         if (this.averageRating && this.ratingCount && this.ratingCount > 0) {
             var avg = this.averageRating;
             if (avg === Math.round(avg)) {
@@ -169,7 +172,17 @@ class StarRating {
             } else {
                 avg = this.averageRating.toFixed(1);
             }
-            this.average.dataset.bsOriginalTitle = `${avg}/5 (${this.ratingCount} ${this.ratingCount === 1 ? 'vote' : 'votes'})`;
+            newTooltip = `${avg}/5 (${this.ratingCount} ${this.ratingCount === 1 ? 'vote' : 'votes'})`;
+        } else {
+            newTooltip = `Pas de vote`;
+        }
+        this.updateTooltip(this.average, this.average_tooltip, newTooltip);
+    }
+
+    updateTooltip(element, tooltip, title) {
+        if (element.dataset.bsOriginalTitle !== title) {
+            element.dataset.bsOriginalTitle = title;
+            tooltip.setContent({ '.tooltip-inner': title});
         }
     }
 
@@ -208,6 +221,8 @@ class StarRating {
             console.error('Error submitting rating:', error);
         })
             .finally(() => {
+            this.user_tooltip.hide();
+            this.average_tooltip.hide();
             this.updateStarDisplay(1);
             this.container.classList.remove('loading');
         });
