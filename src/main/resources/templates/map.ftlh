@@ -46,7 +46,8 @@
             <div class="star-rating order-3 order-md-2 my-1 my-md-0"
                  data-team-id="${team.id}"
                  data-map-id="${map.id}"
-                 data-readonly="<#if _team_member>false<#else>true</#if>"
+                 data-can-rate="${map.canRate?c}"
+                 data-user-rating="${map.userRating?c}"
                  data-average-rating="${map.averageRating?c}"
                  data-rating-count="${map.ratingCount?c}">
             </div>
