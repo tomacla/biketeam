@@ -26,7 +26,7 @@ public class GarminCourseService {
         GarminCourse result = new GarminCourse();
         GPX gpx = descriptor.gpx();
         result.setCourseName(gpx.name());
-        result.setDistance(1000.0 * gpx.getDist());
+        result.setDistance(gpx.getDist());
         result.setElevationGain(gpx.getTotalElevation());
         result.setElevationLoss(-gpx.getTotalElevationNegative());
         switch (descriptor.type()) {
