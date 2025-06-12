@@ -56,7 +56,7 @@ public class FeedService {
                     options.getFrom() == null ? null : ZonedDateTime.of(options.getFrom(), LocalTime.MIDNIGHT, ZoneOffset.UTC),
                     options.getTo() == null ? null : ZonedDateTime.of(options.getTo().plus(1, ChronoUnit.DAYS), LocalTime.MIDNIGHT, ZoneOffset.UTC),
                     0,
-                    30
+                    10
             ).getContent());
         }
 
@@ -68,7 +68,7 @@ public class FeedService {
                     options.getTo(),
                     true,
                     0,
-                    30
+                    10
             ).getContent());
         }
         if (user != null) {
@@ -84,7 +84,7 @@ public class FeedService {
                     true,
                     null,
                     0,
-                    30
+                    10
             ).getContent());
         }
         if (user != null) {
