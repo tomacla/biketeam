@@ -17,6 +17,7 @@ import info.tomacla.biketeam.service.UserRoleService;
 import info.tomacla.biketeam.service.file.ThumbnailService;
 import info.tomacla.biketeam.web.AbstractController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.CacheControl;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -31,6 +32,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.io.IOException;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.nio.file.Files;
 import java.security.Principal;
 import java.util.List;
@@ -309,24 +312,35 @@ public class RideController extends AbstractController {
 
     @ResponseBody
     @RequestMapping(value = "/{rideId}/image", method = RequestMethod.GET)
-    public ResponseEntity<byte[]> getRideImage(@PathVariable("teamId") String teamId,
-                                               @PathVariable("rideId") String rideId) {
+    public ResponseEntity<byte[]> getRideImage(
+            @PathVariable("teamId") String teamId,
+            @PathVariable("rideId") String rideId,
+            @RequestHeader(value = "If-None-Match", required = false) String ifNoneMatch) {
 
         final Optional<ImageDescriptor> image = rideService.getImage(teamId, rideId);
         if (image.isPresent()) {
             try {
-
                 final ImageDescriptor targetImage = image.get();
                 final FileExtension targetImageExtension = targetImage.getExtension();
 
+                String eTag = "\"" + targetImage.getPath().toFile().lastModified() + "\"";
+
+                if (ifNoneMatch != null && ifNoneMatch.equals(eTag)) {
+                    return ResponseEntity.status(HttpStatus.NOT_MODIFIED)
+                            .cacheControl(CacheControl.maxAge(7, TimeUnit.DAYS))
+                            .eTag(eTag)
+                            .build();
+                }
+
                 HttpHeaders headers = new HttpHeaders();
                 headers.add("Content-Type", targetImageExtension.getMediaType());
-                headers.add("Cache-Control", "public; max-age=604800");
+                headers.setETag(eTag);
+                headers.setCacheControl(CacheControl.maxAge(7, TimeUnit.DAYS).getHeaderValue());
                 headers.setContentDisposition(ContentDisposition.builder("inline")
                         .filename(rideId + targetImageExtension.getExtension())
                         .build());
 
-                byte[] bytes = Files.readAllBytes(targetImage.getPath());
+                byte[] bytes = thumbnailService.getOptimizedImage(targetImage.getPath(), 800);
 
                 return new ResponseEntity<>(
                         bytes,
@@ -340,7 +354,6 @@ public class RideController extends AbstractController {
         }
 
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to find ride image : " + rideId);
-
     }
 
 
