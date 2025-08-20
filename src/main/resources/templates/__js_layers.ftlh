@@ -1,4 +1,14 @@
 var overlayLayers = {
+    "Relief ombré": new L.gridLayer.relief({
+        mode: 'hillshade',
+        opacity: 0.5,
+        attribution: '&copy; <a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md" target="_blank">Mapzen Elevation</a>'
+    }),
+    "Pente": new L.gridLayer.relief({
+        mode: 'slope',
+        opacity: 0.3,
+        attribution: '&copy; <a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md" target="_blank">Mapzen Elevation</a>'
+    }),
     "Voies cyclables": L.tileLayer('https://tile.waymarkedtrails.org/cycling/{z}/{x}/{y}.png', {
         maxNativeZoom: 18,
         maxZoom: 24,
