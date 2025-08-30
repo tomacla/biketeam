@@ -1,4 +1,12 @@
 var overlayLayers = {
+    "Relief ombré": new L.gridLayer.relief({
+        mode: 'hillshade',
+        opacity: 0.5
+    }),
+    "Pente": new L.gridLayer.relief({
+        mode: 'slope',
+        opacity: 0.3
+    }),
     "Voies cyclables": L.tileLayer('https://tile.waymarkedtrails.org/cycling/{z}/{x}/{y}.png', {
         maxNativeZoom: 18,
         maxZoom: 24,
