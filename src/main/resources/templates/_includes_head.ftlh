@@ -55,6 +55,7 @@
     <script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2.4.0/src/easy-button.js"></script>
     <script src="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js"></script>
     <script src="https://unpkg.com/leaflet.vectorgrid@1.3.0/dist/Leaflet.VectorGrid.bundled.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-relief@1.3.0/dist/leaflet-relief.min.js"></script>
 
     <script src="<@common.teamUrl '' '/js/geoindex/kdbush.js' />"></script>
     <script src="<@common.teamUrl '' '/js/geoindex/tinyqueue.js' />"></script>
