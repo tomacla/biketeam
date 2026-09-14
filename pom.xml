@@ -38,6 +38,7 @@
 		<postgresql.version>42.7.13</postgresql.version>
 		<thumbnailator.version>0.4.21</thumbnailator.version>
 		<scribejava-core.version>8.3.3</scribejava-core.version>
+		<testcontainers.version>1.21.4</testcontainers.version>
 		<spring-boot.build-image.imageName>github.com/tomacla/biketeam:latest</spring-boot.build-image.imageName>
 	</properties>
 
