@@ -3,7 +3,6 @@ package info.tomacla.biketeam.web.auth;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.user.UserAuthToken;
 import info.tomacla.biketeam.domain.user.UserAuthTokenType;
-import info.tomacla.biketeam.security.completion.AccountCompletionService;
 import info.tomacla.biketeam.security.session.SecurityContextService;
 import info.tomacla.biketeam.service.auth.UserAuthTokenService;
 import info.tomacla.biketeam.web.AbstractController;
@@ -41,8 +40,6 @@ public class EmailVerificationController extends AbstractController {
     @Autowired
     private SecurityContextService securityContextService;
 
-    @Autowired
-    private AccountCompletionService accountCompletionService;
 
     @GetMapping(value = {"", "/"})
     public String verifyEmail(@RequestParam(value = "code", required = false) String code,

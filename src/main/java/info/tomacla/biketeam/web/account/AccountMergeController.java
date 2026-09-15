@@ -3,7 +3,6 @@ package info.tomacla.biketeam.web.account;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.user.UserAuthToken;
 import info.tomacla.biketeam.domain.user.UserAuthTokenType;
-import info.tomacla.biketeam.security.completion.AccountCompletionService;
 import info.tomacla.biketeam.security.session.SecurityContextService;
 import info.tomacla.biketeam.service.auth.UserAuthTokenService;
 import info.tomacla.biketeam.service.merge.UserMergeService;
@@ -71,8 +70,6 @@ public class AccountMergeController extends AbstractController {
     @Autowired
     private SecurityContextService securityContextService;
 
-    @Autowired
-    private AccountCompletionService accountCompletionService;
 
     /**
      * Ouverture du lien recu par email : affiche les deux comptes et ce que la fusion ferait.

@@ -68,7 +68,7 @@
             <li class="nav-item">
                 <a class="nav-link" href="<@common.teamUrl '' '/users/me' />"><img class="rounded" height="24" src="<@common.teamUrl '' '/users/${_user.id}/image' />" alt="profile"></a>
             </li>
-            <#if _user?? && !_user.accountComplete>
+            <#if (_account_completion_needed!false)>
             <li class="nav-item">
                 <a class="nav-link" href="<@common.teamUrl '' '/account/complete' />"><span class="badge bg-warning text-dark">Compte à compléter</span></a>
             </li>

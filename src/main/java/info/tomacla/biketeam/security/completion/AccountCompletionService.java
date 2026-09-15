@@ -14,6 +14,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.Locale;
+
 /**
  * Etat de completion du compte de la session courante.
  * <p>
@@ -42,14 +45,40 @@ public class AccountCompletionService {
     @Autowired
     private MailSenderService mailSenderService;
 
-    @Value("${auth.completion.enabled:true}")
-    private boolean completionEnabled;
+    @Value("${auth.completion.mode:SUGGESTED}")
+    private String configuredMode;
+
+    /**
+     * Mode effectif, resolu une fois au demarrage. Une valeur de configuration inconnue ne doit
+     * pas empecher l'application de demarrer : on retombe sur {@link AccountCompletionMode#SUGGESTED},
+     * le mode le moins penalisant qui sollicite quand meme l'utilisateur.
+     */
+    private AccountCompletionMode mode = AccountCompletionMode.SUGGESTED;
 
     @PostConstruct
     public void init() {
-        if (completionEnabled && !mailSenderService.isSmtpConfigured()) {
-            log.warn("Complétion de compte désactivée : SMTP non configuré.");
+        mode = parseMode(configuredMode);
+        log.info("Mode de complétion de compte : {}", mode);
+        if (mode == AccountCompletionMode.ENFORCED && !mailSenderService.isSmtpConfigured()) {
+            log.warn("Forçage de la complétion de compte désactivé : SMTP non configuré. Le bandeau d'incitation reste affiché.");
         }
+    }
+
+    private AccountCompletionMode parseMode(String value) {
+        if (value == null || value.isBlank()) {
+            return AccountCompletionMode.SUGGESTED;
+        }
+        try {
+            return AccountCompletionMode.valueOf(value.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            log.warn("Valeur inconnue pour auth.completion.mode : '{}'. Modes acceptés : {}. Repli sur {}.",
+                    value, Arrays.toString(AccountCompletionMode.values()), AccountCompletionMode.SUGGESTED);
+            return AccountCompletionMode.SUGGESTED;
+        }
+    }
+
+    public AccountCompletionMode getMode() {
+        return mode;
     }
 
     /**
@@ -58,7 +87,16 @@ public class AccountCompletionService {
      * la propriete serve de retour arriere immediat.
      */
     public boolean enforcementEnabled() {
-        return completionEnabled && mailSenderService.isSmtpConfigured();
+        return mode == AccountCompletionMode.ENFORCED && mailSenderService.isSmtpConfigured();
+    }
+
+    /**
+     * Incitation (bandeau + badge). Contrairement au forcage, elle ne depend PAS du SMTP : la page
+     * de completion permet aussi de lier un compte Google ou Facebook, ce qui ne demande aucun
+     * envoi de mail. Un utilisateur sollicite sans SMTP a donc bien un chemin de sortie.
+     */
+    public boolean suggestionEnabled() {
+        return mode == AccountCompletionMode.SUGGESTED || mode == AccountCompletionMode.ENFORCED;
     }
 
     /**

@@ -5,6 +5,7 @@ import info.tomacla.biketeam.common.datatype.Dates;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.security.OAuth2UserDetails;
+import info.tomacla.biketeam.security.completion.AccountCompletionService;
 import info.tomacla.biketeam.security.session.SecurityContextService;
 import info.tomacla.biketeam.service.NotificationService;
 import info.tomacla.biketeam.service.TeamService;
@@ -42,6 +43,9 @@ public abstract class AbstractController {
 
     @Autowired
     private SecurityContextService securityContextService;
+
+    @Autowired
+    protected AccountCompletionService accountCompletionService;
 
     @Value("${site.name}")
     private String siteName;
@@ -87,6 +91,7 @@ public abstract class AbstractController {
         model.addAttribute("_siteUrl", urlService.getSiteUrl());
         model.addAttribute("_embed", false);
         model.addAttribute("_fullSize", false);
+        model.addAttribute("_account_completion_needed", false);
 
         if (session != null && session.getId() != null) {
             model.addAttribute("_session", session.getId());
@@ -108,6 +113,10 @@ public abstract class AbstractController {
             }
 
             model.addAttribute("_notifications", notificationService.listUnviewedByUser(user));
+
+            // bandeau et badge d'incitation : le mode OFF doit les faire disparaitre tous les deux
+            model.addAttribute("_account_completion_needed",
+                    !user.isAccountComplete() && accountCompletionService.suggestionEnabled());
 
         });
 

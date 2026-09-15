@@ -1,7 +1,6 @@
 package info.tomacla.biketeam.web.account;
 
 import info.tomacla.biketeam.domain.user.User;
-import info.tomacla.biketeam.security.completion.AccountCompletionService;
 import info.tomacla.biketeam.security.oauth2.link.AccountLinkService;
 import info.tomacla.biketeam.security.oauth2.link.OAuth2LinkIntentStore;
 import info.tomacla.biketeam.security.session.SecurityContextService;
@@ -54,8 +53,6 @@ public class AccountLinkController extends AbstractController {
     @Autowired
     private SecurityContextService securityContextService;
 
-    @Autowired
-    private AccountCompletionService accountCompletionService;
 
     @Autowired
     private UserMergeService userMergeService;
