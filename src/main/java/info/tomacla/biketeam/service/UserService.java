@@ -19,11 +19,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -31,6 +33,9 @@ import org.springframework.web.client.RestTemplate;
 import jakarta.annotation.PostConstruct;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.SecureRandom;
+import java.time.Instant;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,11 +44,31 @@ public class UserService {
 
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * @Lazy indispensable : le bean PasswordEncoder est declare par SecurityConfig, qui injecte
+     * lui-meme UserDetailsService -> UserService. Sans proxy differe, le contexte echouerait
+     * au demarrage sur une reference circulaire (interdite par defaut depuis Spring Boot 2.6).
+     */
+    @Autowired
+    @Lazy
+    private PasswordEncoder passwordEncoder;
+
     @Value("${admin.strava-id}")
     private Long adminStravaId;
+
+    @Value("${admin.email:}")
+    private String adminEmail;
+
+    @Value("${admin.password:}")
+    private String adminPassword;
+
+    @Value("${auth.rotate-legacy-seed:true}")
+    private boolean rotateLegacySeed;
 
     @Value("${admin.first-name}")
     private String adminFirstName;
@@ -88,8 +113,82 @@ public class UserService {
         return userRepository.findOne(SearchUserSpecification.byEmail(email));
     }
 
+    /**
+     * Vrai si l'adresse n'est utilisee par aucun autre compte actif.
+     * L'index unique fonctionnel (lower(email) where deletion = false) reste le garde-fou
+     * ultime en cas de course : tout appelant doit egalement traiter DataIntegrityViolationException.
+     */
+    public boolean isEmailAvailable(String email, String currentUserId) {
+        if (Strings.isBlank(email)) {
+            return false;
+        }
+        return getByEmail(email.trim().toLowerCase())
+                .map(user -> user.getId().equals(currentUserId))
+                .orElse(true);
+    }
+
+    /**
+     * Rotation paresseuse de la graine de signature remember-me.
+     * <p>
+     * La migration a initialise auth_token_seed avec l'id utilisateur pour ne pas invalider les
+     * cookies deja emis (leur signature a ete calculee avec l'id en guise de mot de passe).
+     * A la premiere authentification interactive, on remplace cette valeur devinable par
+     * 32 octets aleatoires. A n'appeler JAMAIS sur un auto-login remember-me : la signature
+     * presentee ne correspondrait plus.
+     */
+    @Transactional
+    public User ensureAuthTokenSeed(User user) {
+
+        if (user == null) {
+            return null;
+        }
+
+        final String seed = user.getAuthTokenSeed();
+        final boolean legacySeed = seed == null || seed.equals(user.getId());
+
+        if (legacySeed && (seed == null || rotateLegacySeed)) {
+            user.setAuthTokenSeed(newAuthTokenSeed());
+            return save(user);
+        }
+
+        return user;
+
+    }
+
+    /**
+     * Invalide immediatement tous les cookies remember-me du compte.
+     */
+    @Transactional
+    public void rotateAuthTokenSeed(String userId) {
+        log.info("Rotating auth token seed of user {}", userId);
+        get(userId).ifPresent(user -> {
+            user.setAuthTokenSeed(newAuthTokenSeed());
+            save(user);
+        });
+    }
+
+    @Transactional
+    public void setPassword(String userId, String rawPassword) {
+        get(userId).ifPresent(user -> {
+            user.setPasswordHash(passwordEncoder.encode(rawPassword));
+            user.setPasswordUpdatedAt(Instant.now());
+            save(user);
+        });
+    }
+
+    private static String newAuthTokenSeed() {
+        byte[] bytes = new byte[32];
+        SECURE_RANDOM.nextBytes(bytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
+
     @Transactional
     public User save(User user) {
+        // auth_token_seed est NOT NULL en base : tout compte cree (Strava, Google, Facebook,
+        // inscription) doit en porter un des sa premiere ecriture.
+        if (user.getAuthTokenSeed() == null) {
+            user.setAuthTokenSeed(newAuthTokenSeed());
+        }
         return userRepository.save(user);
     }
 
@@ -243,8 +342,23 @@ public class UserService {
                 target.setCity(source.getCity());
             }
             if (!Strings.isBlank(source.getEmail()) && Strings.isBlank(target.getEmail())) {
-                target.setEmail(source.getEmail());
+                // setVerifiedEmail des lors que la source avait prouve l'adresse : setEmail
+                // remettrait emailVerified a false et ferait perdre a la cible la seule identite
+                // de connexion que la fusion etait censee lui apporter.
+                if (source.isEmailVerified()) {
+                    target.setVerifiedEmail(source.getEmail());
+                } else {
+                    target.setEmail(source.getEmail());
+                }
                 source.setEmail(null);
+            }
+
+            // le mot de passe de la source est detruit par delete() juste apres : sans cette
+            // reprise, fusionner un compte email/mot de passe dans un compte Strava nu laisserait
+            // la cible incomplete et bloquee sur l'ecran de completion.
+            if (target.getPasswordHash() == null && source.getPasswordHash() != null) {
+                target.setPasswordHash(source.getPasswordHash());
+                target.setPasswordUpdatedAt(source.getPasswordUpdatedAt());
             }
             if (!Strings.isBlank(source.getGoogleId()) && Strings.isBlank(target.getGoogleId())) {
                 target.setGoogleId(source.getGoogleId());
@@ -280,7 +394,8 @@ public class UserService {
             // TODO copy participations in trips and rides
 
         } catch (Exception e) {
-
+            log.error("Unable to merge user {} into {}", sourceId, targetId, e);
+            throw new IllegalStateException("Impossible de fusionner les comptes", e);
         }
 
     }
@@ -290,6 +405,11 @@ public class UserService {
         log.info("Request user deletion {}", userId);
         get(userId).ifPresent(user -> {
             user.setDeletion(true);
+            // hygiene : plus aucun moyen de connexion sur un compte supprime.
+            // L'email n'est PAS efface : l'index unique partiel (where deletion = false)
+            // libere deja l'adresse, et la conserver permet un rattrapage eventuel.
+            user.setPasswordHash(null);
+            user.setAuthTokenSeed(newAuthTokenSeed());
             save(user);
         });
     }
@@ -307,6 +427,30 @@ public class UserService {
             root.setLastName(adminLastName);
             root.setStravaId(adminStravaId);
             save(root);
+        }
+
+        // amorcage d'un administrateur sans Strava (prepare le retrait de la connexion Strava).
+        // Un mot de passe deja pose n'est jamais reecrit au demarrage.
+        if (!Strings.isBlank(adminEmail) && !Strings.isBlank(adminPassword)) {
+
+            final String normalizedAdminEmail = adminEmail.trim().toLowerCase();
+
+            if (getByEmail(normalizedAdminEmail).isEmpty()) {
+
+                log.info("Creating admin account from admin.email");
+
+                User admin = new User();
+                admin.setAdmin(true);
+                admin.setFirstName(adminFirstName);
+                admin.setLastName(adminLastName);
+                admin.setVerifiedEmail(normalizedAdminEmail);
+                admin.setPasswordHash(passwordEncoder.encode(adminPassword));
+                admin.setPasswordUpdatedAt(Instant.now());
+                admin.setAuthTokenSeed(newAuthTokenSeed());
+                save(admin);
+
+            }
+
         }
 
     }

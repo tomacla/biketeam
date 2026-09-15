@@ -11,6 +11,16 @@ import java.util.*;
 
 public class OAuth2UserDetails implements Serializable, UserDetails, OAuth2User {
 
+    /**
+     * Valeur calculee par serialver sur la version d'origine de cette classe.
+     * Les sessions sont serialisees en base (spring.session.store-type=jdbc) : toute evolution
+     * de la classe (methode ajoutee, signature modifiee) changerait l'identifiant calcule et
+     * invaliderait toutes les sessions vivantes. NE PAS MODIFIER.
+     * Corollaire : aucun champ d'instance supplementaire ne doit etre ajoute ici,
+     * toute nouvelle donnee passe par la map d'attributs.
+     */
+    private static final long serialVersionUID = 6064613477799000059L;
+
     private List<GrantedAuthority> authorities;
     private Map<String, Object> attributes;
 
@@ -24,9 +34,15 @@ public class OAuth2UserDetails implements Serializable, UserDetails, OAuth2User 
         return authorities;
     }
 
+    /**
+     * Graine de signature remember-me (colonne user_account.auth_token_seed).
+     * Ce n'est NI l'identifiant utilisateur, NI le hash BCrypt : les identifiants
+     * ne transitent jamais par le principal. La verification du mot de passe est
+     * faite par EmailPasswordAuthenticationProvider contre user_account.password_hash.
+     */
     @Override
     public String getPassword() {
-        return getAttribute("id");
+        return getAttribute("authTokenSeed");
     }
 
     @Override
@@ -51,7 +67,8 @@ public class OAuth2UserDetails implements Serializable, UserDetails, OAuth2User 
 
     @Override
     public boolean isEnabled() {
-        return true;
+        Boolean enabled = getAttribute("enabled");
+        return enabled == null || enabled;
     }
 
     @Override
@@ -87,6 +104,12 @@ public class OAuth2UserDetails implements Serializable, UserDetails, OAuth2User 
         attrs.put("facebookId", u.getFacebookId());
         attrs.put("googleId", u.getGoogleId());
         attrs.put("stravaUserName", u.getStravaUserName());
+        attrs.put("authTokenSeed", u.getAuthTokenSeed());
+        attrs.put("email", u.getEmail());
+        attrs.put("emailVerified", u.isEmailVerified());
+        attrs.put("passwordDefined", u.getPasswordHash() != null);
+        attrs.put("accountComplete", u.isAccountComplete());
+        attrs.put("enabled", !u.isDeletion());
         ud.setAttributes(attrs);
 
         List<GrantedAuthority> authorities = new ArrayList<>();

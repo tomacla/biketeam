@@ -37,6 +37,7 @@
 		<postgresql.version>42.7.13</postgresql.version>
 		<thumbnailator.version>0.4.21</thumbnailator.version>
 		<scribejava-core.version>8.3.3</scribejava-core.version>
+		<jacoco.version>0.8.15</jacoco.version>
 		<spring-boot.build-image.imageName>github.com/tomacla/biketeam:latest</spring-boot.build-image.imageName>
 	</properties>
 
@@ -159,6 +160,26 @@
 				<configuration>
 					<executable>true</executable>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

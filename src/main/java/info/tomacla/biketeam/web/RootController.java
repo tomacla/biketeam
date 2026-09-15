@@ -29,6 +29,8 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -179,7 +181,8 @@ public class RootController extends AbstractController {
     }
 
     @PostMapping(value = "new")
-    public String submitNewTeam(NewTeamForm form, Principal principal, Model model) {
+    public String submitNewTeam(NewTeamForm form, Principal principal, Model model,
+                                HttpServletRequest request, HttpServletResponse response) {
 
         try {
 
@@ -206,7 +209,7 @@ public class RootController extends AbstractController {
 
             userRoleService.save(new UserRole(newTeam, targetAdmin, Role.ADMIN));
 
-            addAuthorityToCurrentSession(Authorities.teamAdmin(newTeam.getId()));
+            addAuthorityToCurrentSession(Authorities.teamAdmin(newTeam.getId()), request, response);
 
             return "redirect:/" + newTeam.getId();
 
@@ -222,9 +225,18 @@ public class RootController extends AbstractController {
     }
 
 
+    /**
+     * Le parametre error est pose par les redirections d'echec de connexion
+     * (/login?error ou /login?error=locked). Il est expose au modele : FreeMarker n'a pas acces
+     * aux parametres de requete, spring.freemarker.expose-request-attributes restant desactive.
+     */
     @GetMapping(value = "login")
-    public String loginPage(@RequestParam(value = "requestUri", required = false) final String referer, Principal principal, Model model) {
+    public String loginPage(@RequestParam(value = "requestUri", required = false) final String referer,
+                            @RequestParam(value = "error", required = false) final String error,
+                            Principal principal, Model model) {
         addGlobalValues(principal, model, "Connexion", null);
+        model.addAttribute("loginError", error != null);
+        model.addAttribute("loginLocked", "locked".equals(error));
         return "login";
     }
 
