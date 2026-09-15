@@ -1744,4 +1744,27 @@ update user_account set email = lower(trim(email))
         </createIndex>
     </changeSet>
 
+    <changeSet id="account-merge-token-related-user" author="tomacla">
+        <!-- Second compte implique par un token ACCOUNT_MERGE : le compte destinataire du lien
+             de rattachement, celui que la fusion conservera. Epingle a l'emission plutot que
+             reresolu par target_email a la consommation : entre les deux, l'adresse peut avoir
+             change de proprietaire.
+             ON DELETE CASCADE : un token qui designe un compte disparu n'a plus d'objet. -->
+        <addColumn tableName="user_auth_token">
+            <column name="related_user_id" type="VARCHAR(255)"/>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="user_auth_token" baseColumnNames="related_user_id"
+                                 referencedTableName="user_account" referencedColumnNames="id"
+                                 constraintName="fk_user_auth_token_related_user" onDelete="CASCADE"/>
+        <createIndex tableName="user_auth_token" indexName="idx_user_auth_token_related_user">
+            <column name="related_user_id"/>
+            <column name="type"/>
+        </createIndex>
+        <rollback>
+            <dropIndex tableName="user_auth_token" indexName="idx_user_auth_token_related_user"/>
+            <dropForeignKeyConstraint baseTableName="user_auth_token" constraintName="fk_user_auth_token_related_user"/>
+            <dropColumn tableName="user_auth_token" columnName="related_user_id"/>
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>

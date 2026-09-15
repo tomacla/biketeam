@@ -6,6 +6,7 @@ import info.tomacla.biketeam.security.oauth2.link.AccountLinkService;
 import info.tomacla.biketeam.security.oauth2.link.OAuth2LinkIntentStore;
 import info.tomacla.biketeam.security.session.SecurityContextService;
 import info.tomacla.biketeam.service.UserService;
+import info.tomacla.biketeam.service.merge.UserMergeService;
 import info.tomacla.biketeam.web.ControllerTestSupport;
 import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +15,8 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,8 +40,11 @@ public class AccountLinkControllerTest {
     private AccountLinkService accountLinkService;
     private SecurityContextService securityContextService;
     private AccountCompletionService accountCompletionService;
+    private UserMergeService userMergeService;
 
     private MockMvc mockMvc;
+
+    private final Map<String, User> accounts = new HashMap<>();
 
     @BeforeEach
     public void setUp() {
@@ -48,6 +54,7 @@ public class AccountLinkControllerTest {
         accountLinkService = mock(AccountLinkService.class);
         securityContextService = mock(SecurityContextService.class);
         accountCompletionService = mock(AccountCompletionService.class);
+        userMergeService = mock(UserMergeService.class);
 
         AccountLinkController controller = new AccountLinkController();
         ReflectionTestUtils.setField(controller, "userService", userService);
@@ -55,11 +62,17 @@ public class AccountLinkControllerTest {
         ReflectionTestUtils.setField(controller, "accountLinkService", accountLinkService);
         ReflectionTestUtils.setField(controller, "securityContextService", securityContextService);
         ReflectionTestUtils.setField(controller, "accountCompletionService", accountCompletionService);
+        ReflectionTestUtils.setField(controller, "userMergeService", userMergeService);
 
         when(accountLinkService.getPendingMergeUserId(any())).thenReturn(Optional.empty());
         when(accountLinkService.getPendingMergeProvider(any())).thenReturn(Optional.empty());
         when(accountLinkService.getPendingMergeSubject(any())).thenReturn(Optional.empty());
         when(userService.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // merge renvoie desormais le compte conserve, relu : les requetes natives de la fusion
+        // detachent tout le contexte de persistance.
+        when(userService.merge(anyString(), anyString())).thenAnswer(invocation ->
+                accounts.get(invocation.getArgument(1, String.class)));
 
         mockMvc = ControllerTestSupport.mockMvc(controller);
 
@@ -69,6 +82,7 @@ public class AccountLinkControllerTest {
         User user = new User();
         user.setId(id);
         when(userService.get(id)).thenReturn(Optional.of(user));
+        accounts.put(id, user);
         return user;
     }
 

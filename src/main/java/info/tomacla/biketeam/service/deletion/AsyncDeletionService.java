@@ -221,6 +221,12 @@ public class AsyncDeletionService {
             messageRepository.deleteByUserId(user.getId());
             userRoleRepository.deleteByUserId(user.getId());
 
+            // map_favorite est la seule table enfant dont la cle etrangere vers user_account n'a
+            // pas de ON DELETE CASCADE : sans ce nettoyage, la suppression d'un compte ayant des
+            // favoris echoue, et le try/catch global de performEffectiveDeletion interrompt alors
+            // la purge entiere (cartes, publications, sorties, sejours, equipes comprises).
+            userRepository.deleteMapFavorites(user.getId());
+
             // finaly delete the user
             userRepository.delete(user);
 
