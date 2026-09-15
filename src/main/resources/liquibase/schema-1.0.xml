@@ -1767,4 +1767,63 @@ update user_account set email = lower(trim(email))
         </rollback>
     </changeSet>
 
+
+    <changeSet id="passkey-table" author="tomacla">
+        <!--
+            Une passkey ne contient aucun secret : seule la cle PUBLIQUE est stockee
+            (attested_credential_data, au format webauthn4j : AAGUID + credential id + cle COSE).
+            Sa fuite ne permet pas de se connecter, seulement de verifier une signature.
+        -->
+        <createTable tableName="user_passkey">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="credential_id" type="VARCHAR(500)">
+                <constraints nullable="false"/>
+            </column>
+            <!-- BYTEA et non BLOB : sur PostgreSQL, le type abstrait BLOB de Liquibase produit un
+                 "oid" (large object), alors qu'Hibernate ecrit un byte[] en "bytea". Le decalage
+                 ne se voit pas a la migration, seulement au premier insert :
+                 "column is of type oid but expression is of type bytea". -->
+            <column name="attested_credential_data" type="BYTEA">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sign_count" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="uv_initialized" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="backup_eligible" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="backed_up" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="transports" type="VARCHAR(100)"/>
+            <column name="label" type="VARCHAR(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_used_at" type="TIMESTAMP"/>
+        </createTable>
+        <addPrimaryKey tableName="user_passkey" columnNames="id"/>
+        <addForeignKeyConstraint baseTableName="user_passkey" baseColumnNames="user_id"
+                                  referencedTableName="user_account" referencedColumnNames="id"
+                                  constraintName="fk_user_passkey_user" onDelete="CASCADE"/>
+        <!-- l'unicite du credential id est une exigence du protocole : c'est la seule cle de
+             recherche disponible a la connexion, un doublon rendrait la resolution ambigue -->
+        <createIndex tableName="user_passkey" indexName="uk_user_passkey_credential_id" unique="true">
+            <column name="credential_id"/>
+        </createIndex>
+        <createIndex tableName="user_passkey" indexName="idx_user_passkey_user">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>

@@ -11,6 +11,7 @@ import info.tomacla.biketeam.domain.ride.RideRepository;
 import info.tomacla.biketeam.domain.trip.TripRepository;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.user.UserAuthTokenRepository;
+import info.tomacla.biketeam.domain.user.UserPasskeyRepository;
 import info.tomacla.biketeam.domain.user.UserRepository;
 import info.tomacla.biketeam.domain.userrole.Role;
 import info.tomacla.biketeam.domain.userrole.UserRole;
@@ -57,6 +58,7 @@ public class UserMergeService {
     private final NotificationRepository notificationRepository;
     private final MapRatingRepository mapRatingRepository;
     private final UserAuthTokenRepository userAuthTokenRepository;
+    private final UserPasskeyRepository userPasskeyRepository;
     private final MapService mapService;
     private final FileService fileService;
 
@@ -72,6 +74,7 @@ public class UserMergeService {
                             NotificationRepository notificationRepository,
                             MapRatingRepository mapRatingRepository,
                             UserAuthTokenRepository userAuthTokenRepository,
+                            UserPasskeyRepository userPasskeyRepository,
                             MapService mapService,
                             FileService fileService) {
         this.userRepository = userRepository;
@@ -82,6 +85,7 @@ public class UserMergeService {
         this.notificationRepository = notificationRepository;
         this.mapRatingRepository = mapRatingRepository;
         this.userAuthTokenRepository = userAuthTokenRepository;
+        this.userPasskeyRepository = userPasskeyRepository;
         this.mapService = mapService;
         this.fileService = fileService;
     }
@@ -178,6 +182,10 @@ public class UserMergeService {
         final int notifications = notificationRepository.moveToUser(sourceId, targetId);
 
         userAuthTokenRepository.consumeAllForUser(sourceId, Instant.now());
+
+        // les passkeys suivent le compte : le soft delete de la source les detruirait, et
+        // l'utilisateur perdrait sans prevenir l'appareil avec lequel il venait de se connecter
+        userPasskeyRepository.moveToUser(sourceId, targetId);
 
         ratedMapIds.forEach(mapService::refreshCachedRatings);
 

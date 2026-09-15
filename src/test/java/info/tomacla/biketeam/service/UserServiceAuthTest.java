@@ -1,6 +1,7 @@
 package info.tomacla.biketeam.service;
 
 import info.tomacla.biketeam.domain.user.User;
+import info.tomacla.biketeam.domain.user.UserPasskeyRepository;
 import info.tomacla.biketeam.domain.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,7 @@ import static org.mockito.Mockito.*;
 public class UserServiceAuthTest {
 
     private UserRepository userRepository;
+    private UserPasskeyRepository userPasskeyRepository;
     private PasswordEncoder passwordEncoder;
     private UserService service;
 
@@ -29,11 +31,13 @@ public class UserServiceAuthTest {
     public void setUp() {
 
         userRepository = mock(UserRepository.class);
+        userPasskeyRepository = mock(UserPasskeyRepository.class);
         passwordEncoder = mock(PasswordEncoder.class);
 
         service = new UserService();
         ReflectionTestUtils.setField(service, "userRepository", userRepository);
         ReflectionTestUtils.setField(service, "passwordEncoder", passwordEncoder);
+        ReflectionTestUtils.setField(service, "userPasskeyRepository", userPasskeyRepository);
         ReflectionTestUtils.setField(service, "rotateLegacySeed", true);
 
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -230,6 +234,30 @@ public class UserServiceAuthTest {
     @Test
     public void testEnsureAuthTokenSeedToleratesNull() {
         assertNull(service.ensureAuthTokenSeed(null));
+    }
+
+
+    // --- suppression de compte ---
+
+    /**
+     * Le soft delete doit retirer TOUS les moyens de connexion. Une passkey laissee en place
+     * rendrait le compte supprime connectable d'un simple geste, alors que le mot de passe et la
+     * graine remember-me sont, eux, bien neutralises.
+     */
+    @Test
+    public void testDeleteRemovesEveryLoginMean() {
+
+        User user = user("user-1", "user@example.com");
+        user.setPasswordHash("bcrypt-hash");
+        user.setAuthTokenSeed("old-seed");
+
+        service.delete("user-1");
+
+        assertTrue(user.isDeletion());
+        assertNull(user.getPasswordHash());
+        assertNotEquals("old-seed", user.getAuthTokenSeed());
+        verify(userPasskeyRepository).deleteByUserId("user-1");
+
     }
 
 }

@@ -1,9 +1,16 @@
 package info.tomacla.biketeam;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import info.tomacla.biketeam.security.completion.AccountCompletionFilter;
 import info.tomacla.biketeam.security.login.CustomAccessDeniedHandler;
 import info.tomacla.biketeam.security.login.CustomLoginUrlAuthenticationEntryPoint;
 import info.tomacla.biketeam.security.oauth2.link.OAuth2LoginFailureHandler;
+import info.tomacla.biketeam.security.passkey.PasskeyAuthenticationFilter;
+import info.tomacla.biketeam.security.passkey.PasskeyAuthenticationProvider;
+import info.tomacla.biketeam.security.passkey.PasskeyAuthenticationService;
+import info.tomacla.biketeam.security.passkey.PasskeyLoginFailureHandler;
+import info.tomacla.biketeam.security.passkey.PasskeyLoginSuccessHandler;
+import info.tomacla.biketeam.security.password.EmailPasswordAuthenticationProvider;
 import info.tomacla.biketeam.security.password.LoginFailureHandler;
 import info.tomacla.biketeam.security.session.CustomSessionIdResolver;
 import info.tomacla.biketeam.service.TeamService;
@@ -19,7 +26,9 @@ import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.security.access.expression.SecurityExpressionHandler;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.authentication.configuration.GlobalAuthenticationConfigurerAdapter;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -35,7 +44,10 @@ import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -73,7 +85,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                   LoginFailureHandler loginFailureHandler,
                                                   OAuth2LoginFailureHandler oauth2LoginFailureHandler,
-                                                  AccountCompletionFilter accountCompletionFilter) throws Exception {
+                                                  AccountCompletionFilter accountCompletionFilter,
+                                                  PasskeyAuthenticationFilter passkeyAuthenticationFilter,
+                                                  RememberMeServices rememberMeServices) throws Exception {
 
         // expression with access to all beans in context (userService, ...)
         SecurityExpressionHandler<RequestAuthorizationContext> expressionHandler = getExpressionHandler();
@@ -95,6 +109,10 @@ public class SecurityConfig {
                 AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/users/me/email"),
                 AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/users/me/email/resend"),
                 AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/users/me/unlink/*"),
+                AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/users/me/passkeys"),
+                AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/users/me/passkeys/**"),
+                AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/login/webauthn"),
+                AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/login/webauthn/options"),
                 AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/users/me/delete"))));
 
         // requests conf
@@ -157,11 +175,13 @@ public class SecurityConfig {
         });
 
         // remember me conf
+        // les services sont declares en bean plutot que configures ici : le filtre passkey doit
+        // poser le MEME cookie que les autres modes de connexion, et pour cela partager
+        // l'instance. Les parametres sont identiques a ceux de la configuration precedente.
         http.rememberMe(rm -> {
-            rm.alwaysRemember(true);
+            rm.rememberMeServices(rememberMeServices);
             rm.userDetailsService(userDetailsService);
             rm.key(rememberMeKey);
-            rm.tokenValiditySeconds(rememberMeValidity);
         });
 
         // oauth2 conf
@@ -194,6 +214,11 @@ public class SecurityConfig {
                         AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/logout"),
                         AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/logout")))
                 .logoutSuccessUrl("/"));
+
+        // connexion par passkey : POST /login/webauthn.
+        // Place avant UsernamePasswordAuthenticationFilter par symetrie avec form login ; les deux
+        // filtres ne se marchent pas dessus, leurs matchers portent sur des URL distinctes.
+        http.addFilterBefore(passkeyAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         // completion de compte forcee
         // place APRES l'AuthorizationFilter : les regles d'autorisation sont deja appliquees,
@@ -273,6 +298,70 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    /**
+     * Services remember-me partages entre le form login, la connexion OAuth2 et la connexion par
+     * passkey. La signature du cookie repose sur {@code UserDetails.getPassword()}, c'est-a-dire
+     * sur user_account.auth_token_seed (voir OAuth2UserDetails) : aucun mot de passe n'y transite.
+     */
+    @Bean
+    public RememberMeServices rememberMeServices(UserDetailsService userDetailsService) {
+        TokenBasedRememberMeServices services = new TokenBasedRememberMeServices(rememberMeKey, userDetailsService,
+                TokenBasedRememberMeServices.RememberMeTokenAlgorithm.SHA256);
+        services.setAlwaysRemember(true);
+        services.setTokenValiditySeconds(rememberMeValidity);
+        return services;
+    }
+
+    @Bean
+    public PasskeyAuthenticationFilter passkeyAuthenticationFilter(AuthenticationManager authenticationManager,
+                                                                   PasskeyAuthenticationService passkeyAuthenticationService,
+                                                                   RememberMeServices rememberMeServices,
+                                                                   ObjectMapper objectMapper) {
+        PasskeyAuthenticationFilter filter = new PasskeyAuthenticationFilter(
+                authenticationManager, passkeyAuthenticationService, objectMapper);
+        filter.setSecurityContextRepository(securityContextRepository());
+        filter.setRememberMeServices(rememberMeServices);
+        filter.setAuthenticationSuccessHandler(new PasskeyLoginSuccessHandler(objectMapper, "/"));
+        filter.setAuthenticationFailureHandler(new PasskeyLoginFailureHandler(objectMapper));
+        return filter;
+    }
+
+    /**
+     * Meme motif que pour AccountCompletionFilter : sans cela Spring Boot enregistrerait aussi le
+     * filtre dans le conteneur de servlets, ou il s'executerait AVANT la chaine de securite et
+     * tenterait une premiere authentification hors contexte.
+     */
+    @Bean
+    public FilterRegistrationBean<PasskeyAuthenticationFilter> passkeyAuthenticationFilterRegistration(
+            PasskeyAuthenticationFilter passkeyAuthenticationFilter) {
+        FilterRegistrationBean<PasskeyAuthenticationFilter> registration =
+                new FilterRegistrationBean<>(passkeyAuthenticationFilter);
+        registration.setEnabled(false);
+        return registration;
+    }
+
+    /**
+     * Enregistrement EXPLICITE des providers dans l'AuthenticationManager global.
+     * <p>
+     * Indispensable des lors qu'il existe plus d'un bean de type AuthenticationProvider :
+     * InitializeAuthenticationProviderBeanManagerConfigurer, qui enregistrait jusqu'ici
+     * EmailPasswordAuthenticationProvider tout seul, ne le fait QUE s'il trouve exactement un
+     * bean de ce type. L'ajout de PasskeyAuthenticationProvider aurait donc, sans ce bean,
+     * silencieusement desactive la connexion par email et mot de passe.
+     */
+    @Bean
+    public GlobalAuthenticationConfigurerAdapter authenticationProvidersConfigurer(
+            EmailPasswordAuthenticationProvider emailPasswordAuthenticationProvider,
+            PasskeyAuthenticationProvider passkeyAuthenticationProvider) {
+        return new GlobalAuthenticationConfigurerAdapter() {
+            @Override
+            public void init(AuthenticationManagerBuilder auth) {
+                auth.authenticationProvider(emailPasswordAuthenticationProvider);
+                auth.authenticationProvider(passkeyAuthenticationProvider);
+            }
+        };
     }
 
     @Bean

@@ -11,6 +11,7 @@ import info.tomacla.biketeam.domain.userrole.Role;
 import info.tomacla.biketeam.domain.userrole.UserRole;
 import info.tomacla.biketeam.domain.user.UserAuthTokenType;
 import info.tomacla.biketeam.security.Authorities;
+import info.tomacla.biketeam.security.passkey.PasskeyService;
 import info.tomacla.biketeam.security.password.PasswordPolicy;
 import info.tomacla.biketeam.service.UserRoleService;
 import info.tomacla.biketeam.service.auth.AuthMailService;
@@ -63,6 +64,9 @@ public class UserController extends AbstractController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private PasskeyService passkeyService;
+
     @GetMapping(value = "/me")
     public String getUser(Principal principal,
                           Model model) {
@@ -97,6 +101,7 @@ public class UserController extends AbstractController {
         model.addAttribute("pendingEmail", userAuthTokenService
                 .getPendingTargetEmail(user.getId(), UserAuthTokenType.EMAIL_VERIFICATION)
                 .orElse(null));
+        model.addAttribute("passkeys", passkeyService.listByUser(user.getId()));
 
     }
 

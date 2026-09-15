@@ -7,6 +7,7 @@ import info.tomacla.biketeam.domain.ride.RideRepository;
 import info.tomacla.biketeam.domain.trip.TripRepository;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.user.UserAuthTokenRepository;
+import info.tomacla.biketeam.domain.user.UserPasskeyRepository;
 import info.tomacla.biketeam.domain.user.UserRepository;
 import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.service.UserRoleService;
@@ -58,6 +59,7 @@ public class UserMergeServiceTest {
     private NotificationRepository notificationRepository;
     private MapRatingRepository mapRatingRepository;
     private UserAuthTokenRepository userAuthTokenRepository;
+    private UserPasskeyRepository userPasskeyRepository;
     private MapService mapService;
     private FileService fileService;
     private EntityManager entityManager;
@@ -75,13 +77,14 @@ public class UserMergeServiceTest {
         notificationRepository = mock(NotificationRepository.class);
         mapRatingRepository = mock(MapRatingRepository.class);
         userAuthTokenRepository = mock(UserAuthTokenRepository.class);
+        userPasskeyRepository = mock(UserPasskeyRepository.class);
         mapService = mock(MapService.class);
         fileService = mock(FileService.class);
         entityManager = mock(EntityManager.class);
 
         service = new UserMergeService(userRepository, userRoleService, tripRepository, rideRepository,
                 messageRepository, notificationRepository, mapRatingRepository, userAuthTokenRepository,
-                mapService, fileService);
+                userPasskeyRepository, mapService, fileService);
 
         Field f = UserMergeService.class.getDeclaredField("entityManager");
         f.setAccessible(true);
@@ -386,6 +389,24 @@ public class UserMergeServiceTest {
         order.verify(messageRepository).moveToUser(src, tgt);
         order.verify(notificationRepository).moveToUser(src, tgt);
         order.verify(userAuthTokenRepository).consumeAllForUser(eq(src), any(Instant.class));
+
+    }
+
+    /**
+     * Les passkeys suivent le compte conserve. Sans ce deplacement, le soft delete du compte
+     * source les detruirait : l'utilisateur perdrait l'appareil avec lequel il venait
+     * eventuellement de se connecter, sans aucun avertissement.
+     */
+    @Test
+    public void testPasskeysAreMovedToTheKeptAccount() {
+
+        User source = account("source-12");
+        User target = account("target-12");
+        given(source, target);
+
+        service.merge(source.getId(), target.getId());
+
+        verify(userPasskeyRepository).moveToUser(source.getId(), target.getId());
 
     }
 

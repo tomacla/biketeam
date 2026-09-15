@@ -5,6 +5,7 @@ import info.tomacla.biketeam.domain.user.UserAuthTokenType;
 import info.tomacla.biketeam.service.UserRoleService;
 import info.tomacla.biketeam.service.UserService;
 import info.tomacla.biketeam.service.auth.AuthMailService;
+import info.tomacla.biketeam.security.passkey.PasskeyService;
 import info.tomacla.biketeam.service.auth.UserAuthTokenService;
 import info.tomacla.biketeam.web.ControllerTestSupport;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +15,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,6 +38,7 @@ public class UserControllerTest {
 
     private UserService userService;
     private UserAuthTokenService userAuthTokenService;
+    private PasskeyService passkeyService;
     private AuthMailService authMailService;
     private PasswordEncoder passwordEncoder;
 
@@ -46,6 +49,7 @@ public class UserControllerTest {
 
         userService = mock(UserService.class);
         userAuthTokenService = mock(UserAuthTokenService.class);
+        passkeyService = mock(PasskeyService.class);
         authMailService = mock(AuthMailService.class);
         passwordEncoder = mock(PasswordEncoder.class);
 
@@ -55,11 +59,13 @@ public class UserControllerTest {
         ReflectionTestUtils.setField(controller, "userAuthTokenService", userAuthTokenService);
         ReflectionTestUtils.setField(controller, "authMailService", authMailService);
         ReflectionTestUtils.setField(controller, "passwordEncoder", passwordEncoder);
+        ReflectionTestUtils.setField(controller, "passkeyService", passkeyService);
 
         when(userAuthTokenService.getEmailVerificationValidity()).thenReturn(Duration.ofHours(24));
         when(userAuthTokenService.create(any(), any(), any(), any())).thenReturn("clear-token");
         when(userAuthTokenService.getPendingTargetEmail(anyString(), any())).thenReturn(Optional.empty());
         when(userAuthTokenService.isThrottled(anyString(), any(), anyInt())).thenReturn(false);
+        when(passkeyService.listByUser(anyString())).thenReturn(List.of());
         when(userService.isEmailAvailable(anyString(), anyString())).thenReturn(true);
         when(userService.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);

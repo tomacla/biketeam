@@ -1,5 +1,7 @@
 <#include "_includes_head.ftlh">
 
+<@common.csrfMeta />
+
 <div class="row pt-2 justify-content-center">
 
      <script type="text/javascript">
@@ -187,6 +189,67 @@
                 <button type="submit" class="btn btn-secondary"<#if !user.passwordHash?? && !user.emailVerified> disabled</#if>>Enregistrer le mot de passe</button>
 
             </form>
+
+            <hr/>
+
+            <h5>Passkeys</h5>
+
+            <p class="text-muted small">
+                Une passkey remplace le mot de passe par l'empreinte, le visage ou le code de
+                votre appareil. Votre mot de passe et vos comptes liés restent actifs : une
+                passkey s'ajoute à vos moyens de connexion, elle n'en remplace aucun.
+            </p>
+
+            <#if passkeys?has_content>
+                <ul class="list-group mb-3">
+                    <#list passkeys as passkey>
+                        <li class="list-group-item d-flex flex-row justify-content-between align-items-center">
+                            <div>
+                                <div>${passkey.label}</div>
+                                <div class="small text-muted">
+                                    Ajoutée le ${passkey.createdAtUtc.format(_date_formatter)}
+                                    <#if passkey.lastUsedAtUtc??>
+                                        &middot; utilisée le ${passkey.lastUsedAtUtc.format(_date_formatter)}
+                                    <#else>
+                                        &middot; jamais utilisée
+                                    </#if>
+                                    <#if passkey.syncedAcrossDevices>
+                                        &middot; synchronisée sur vos appareils
+                                    </#if>
+                                </div>
+                            </div>
+                            <form name="form-user-passkey-delete-${passkey?index}" class="d-inline"
+                                  action="<@common.teamUrl '' '/users/me/passkeys/${passkey.id}/delete' />" method="POST">
+                                <#if _csrf??><input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/></#if>
+                                <button type="submit" class="btn btn-outline-secondary btn-sm">Supprimer</button>
+                            </form>
+                        </li>
+                    </#list>
+                </ul>
+            <#else>
+                <p class="text-muted">Aucune passkey enregistrée.</p>
+            </#if>
+
+            <div data-passkey-supported-only hidden>
+                <div class="mb-3">
+                    <label for="passkey-label" class="form-label">Nom de cette passkey</label>
+                    <input type="text" class="form-control" id="passkey-label" maxlength="80"
+                           placeholder="Mon téléphone">
+                    <div class="form-text">Sert uniquement à la reconnaître dans cette liste.</div>
+                </div>
+                <button type="button" class="btn btn-secondary" id="passkey-register-button"
+                        data-options-url="<@common.teamUrl '' '/users/me/passkeys/options' />"
+                        data-register-url="<@common.teamUrl '' '/users/me/passkeys' />"
+                        data-label-id="passkey-label"
+                        data-status-id="passkey-register-status">
+                    Ajouter une passkey
+                </button>
+                <div class="form-text mt-1 text-muted" id="passkey-register-status" hidden></div>
+            </div>
+
+            <div class="alert alert-secondary" data-passkey-unsupported-only hidden>
+                Ce navigateur ne gère pas les passkeys.
+            </div>
 
             <hr/>
 

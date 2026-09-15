@@ -2,6 +2,7 @@ package info.tomacla.biketeam.security.session;
 
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.security.OAuth2UserDetails;
+import info.tomacla.biketeam.security.passkey.PasskeyAuthenticationToken;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,6 +84,12 @@ public class SecurityContextService {
 
         if (current instanceof RememberMeAuthenticationToken) {
             return new RememberMeAuthenticationToken(rememberMeKey, principal, authorities);
+        }
+
+        // le type de jeton est conserve : le retrograder en UsernamePasswordAuthenticationToken
+        // ferait passer une session ouverte par passkey pour une session par mot de passe
+        if (current instanceof PasskeyAuthenticationToken passkeyAuth) {
+            return PasskeyAuthenticationToken.authenticated(principal, passkeyAuth.getPasskeyId(), authorities);
         }
 
         return UsernamePasswordAuthenticationToken.authenticated(principal, null, authorities);

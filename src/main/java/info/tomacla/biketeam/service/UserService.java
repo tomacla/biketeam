@@ -8,6 +8,7 @@ import info.tomacla.biketeam.common.file.ImageDescriptor;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.SearchUserSpecification;
 import info.tomacla.biketeam.domain.user.User;
+import info.tomacla.biketeam.domain.user.UserPasskeyRepository;
 import info.tomacla.biketeam.domain.user.UserRepository;
 import info.tomacla.biketeam.security.Authorities;
 import info.tomacla.biketeam.service.amqp.dto.UserProfileImageDTO;
@@ -83,6 +84,9 @@ public class UserService {
 
     @Autowired
     private UserMergeService userMergeService;
+
+    @Autowired
+    private UserPasskeyRepository userPasskeyRepository;
 
     public Optional<User> getByStravaId(Long stravaId) {
         return userRepository.findOne(SearchUserSpecification.byStravaId(stravaId));
@@ -344,6 +348,9 @@ public class UserService {
             // libere deja l'adresse, et la conserver permet un rattrapage eventuel.
             user.setPasswordHash(null);
             user.setAuthTokenSeed(newAuthTokenSeed());
+            // les passkeys sont un moyen de connexion a part entiere : les laisser en place
+            // rendrait le compte supprime connectable d'un simple geste.
+            userPasskeyRepository.deleteByUserId(userId);
             save(user);
         });
     }

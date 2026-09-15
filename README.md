@@ -73,6 +73,7 @@ Run `mvn clean package -Pdocker` then execute
 
 Biketeam propose plusieurs modes de connexion :
 * **email / mot de passe** — inscription avec vérification de l'adresse par lien envoyé par mail, mot de passe oublié / réinitialisation par lien mail, changement de mot de passe depuis `/users/me` ;
+* **passkey** (WebAuthn) — s'active depuis `/users/me` sur un compte déjà connecté, voir ci-dessous ;
 * **Google** (OAuth2, optionnel) ;
 * **Facebook** (OAuth2, optionnel) ;
 * **Strava** (OAuth2) — voir ci-dessous, connexion en cours de transition.
@@ -104,6 +105,45 @@ Le niveau d'insistance est piloté par `auth.completion.mode`, qui forme une esc
 Une valeur inconnue ne bloque pas le démarrage : repli sur `SUGGESTED` avec un avertissement dans les logs. Le mode effectif est loggué au démarrage.
 
 La trajectoire prévue est donc d'ouvrir en `SUGGESTED` le temps que les comptes Strava se complètent d'eux-mêmes, puis de passer en `ENFORCED` pour les retardataires, `OFF` servant de retour arrière.
+
+### Passkeys (WebAuthn)
+
+Une passkey remplace le mot de passe par l'empreinte, le visage ou le code de l'appareil. Deux règles structurent toute l'implémentation :
+
+* **une passkey ne crée jamais de compte.** Elle s'enregistre depuis `/users/me`, sur une session déjà ouverte. C'est ce qui dispense d'un parcours de récupération dédié : perdre toutes ses passkeys ramène simplement au mot de passe ou au compte Google/Facebook, qui restent en place.
+* **une passkey ne rend pas un compte « complet »** au sens de la section précédente. Elle disparaît avec l'appareil, elle ne peut donc pas tenir lieu de moyen de récupération. Un compte Strava seul qui ajoute une passkey continue de voir le bandeau d'incitation.
+
+La connexion, elle, ne demande aucun identifiant : la passkey est enregistrée comme *credential découvrable* (`residentKey: required`), l'authentificateur présente donc lui-même celle dont il dispose pour le site. Le champ email de `/login` porte `autocomplete="username webauthn"`, ce qui fait apparaître la passkey dans la liste de suggestions du navigateur sans clic préalable ; un bouton explicite reste disponible.
+
+#### Contrainte de domaine
+
+Une passkey est liée cryptographiquement à un **RP ID**, dérivé de `site.url`. L'authentificateur refuse de la présenter sur tout autre domaine : **les passkeys ne fonctionnent pas sur le domaine personnalisé d'une team** (`TeamConfiguration.domain`). Ce n'est pas une régression — la macro `common.teamUrl` sert déjà `/login`, `/register` et `/users/me` depuis `_siteUrl` — mais c'est une limite structurelle de WebAuthn, pas un choix d'implémentation.
+
+Si une de ces pages est malgré tout atteinte depuis un domaine de team, `passkey.js` masque le bouton plutôt que d'en proposer un qui échouerait : la requête serait interdomaine, le cookie de session ne partirait pas et le challenge ne serait jamais retrouvé.
+
+Le navigateur n'expose l'API WebAuthn qu'en **contexte sécurisé** : HTTPS, ou `localhost`. En développement sur `http://localhost:8080` tout fonctionne sans configuration. Sur un `site.url` en HTTP autre que `localhost`, un avertissement est loggué au démarrage et le bouton restera sans effet.
+
+#### Configuration
+
+| Propriété | Défaut | Rôle |
+| --- | --- | --- |
+| `auth.passkey.rp-id` | hôte de `site.url` | Domaine auquel les passkeys sont liées. À ne forcer que pour couvrir plusieurs sous-domaines, et toujours avec un suffixe enregistrable de l'origine — sinon le navigateur refuse l'enregistrement **sans message d'erreur**. |
+| `auth.passkey.origins` | origine de `site.url` | Origines supplémentaires acceptées, séparées par des virgules (reverse proxy exposé sur plusieurs noms). |
+| `auth.passkey.challenge-validity-seconds` | `300` | Validité d'un challenge, et timeout côté navigateur. |
+| `auth.passkey.max-per-user` | `20` | Nombre maximum de passkeys par compte. |
+| `auth.passkey.login-options.max-per-hour` | `60` | Débit sur `POST /login/webauthn/options`, par adresse IP. Cette route est publique et crée une session. |
+
+Les deux premières sont surchargeables par `AUTH_PASSKEY_RP_ID` et `AUTH_PASSKEY_ORIGINS` (voir `.env.template`). Aucune n'est requise pour un déploiement mono-domaine.
+
+#### Notes d'implémentation
+
+La vérification est confiée à `webauthn4j`, et non au DSL WebAuthn natif de Spring Security : celui-ci impose sa page de connexion et résout le compte via `UserDetailsService.loadUserByUsername(userEntity.getName())`, ce qui obligerait à loger l'identifiant technique dans un champ destiné à l'affichage. Le projet avait déjà tranché dans ce sens pour le mot de passe.
+
+Aucun comptage de tentatives, contrairement au mot de passe : une signature asymétrique ne se devine pas. Le débit est limité en amont, sur l'émission des options. Le message d'échec est uniformément le même que le credential soit inconnu ou la signature invalide — les distinguer ferait de l'endpoint un oracle d'énumération.
+
+Seule la clé **publique** est stockée (`user_passkey.attested_credential_data`) : sa fuite ne permet pas de se connecter. La colonne est déclarée `BYTEA` et non `BLOB`, le type abstrait de Liquibase produisant un `oid` sur PostgreSQL alors qu'Hibernate écrit du `bytea` — le décalage ne se voit qu'au premier insert.
+
+Côté cycle de vie du compte : la suppression (soft delete) détruit les passkeys, au même titre que le mot de passe et la graine remember-me ; la fusion de comptes les déplace vers le compte conservé.
 
 ### Prérequis SMTP
 
@@ -151,3 +191,11 @@ Aucun test automatique ne couvre la chaîne complète de filtres de sécurité :
 6. **Cookie "se souvenir de moi" émis avant déploiement** : vérifier qu'il reste valide (compatibilité ascendante de `auth_token_seed`, initialisé à l'id utilisateur par la migration), puis qu'il est réémis avec une nouvelle graine aléatoire à la première connexion interactive (form login ou OAuth2 — jamais lors d'un auto-login remember-me).
 7. `POST /api/auth/refresh` avec un cookie valide, puis appel à `/api/auth/me` avec l'en-tête `X-Auth-Token` retourné.
 8. Vérifier qu'un nouvel identifiant de session est émis après `POST /login` (protection contre la fixation de session).
+9. **Passkeys** — la vérification de signature n'est couverte par aucun test automatique (elle appartient à `webauthn4j` et demanderait un authentificateur virtuel) : ce scénario doit être joué en navigateur réel.
+   1. Depuis `/users/me`, « Ajouter une passkey », nommer l'appareil, vérifier qu'elle apparaît dans la liste avec sa date.
+   2. Se déconnecter, puis se connecter par le bouton « Se connecter avec une passkey » — sans saisir d'adresse.
+   3. Recharger `/login` et vérifier que la passkey est proposée directement dans la liste d'autocomplétion du champ email (remplissage conditionnel).
+   4. Vérifier que « dernière utilisation » s'est mise à jour, puis supprimer la passkey et vérifier que la connexion par ce moyen n'est plus possible.
+   5. Tenter un second enregistrement avec le même appareil : il doit être refusé (`excludeCredentials`, doublé d'un contrôle serveur).
+   6. Sur un navigateur sans WebAuthn, vérifier que `/login` n'affiche pas le bouton et que `/users/me` affiche « Ce navigateur ne gère pas les passkeys ».
+   7. Si une team dispose d'un domaine personnalisé, ouvrir `/login` sur ce domaine et vérifier que le bouton passkey est bien absent.
