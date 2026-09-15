@@ -1,13 +1,9 @@
 package info.tomacla.biketeam.security.oauth2;
 
-import info.tomacla.biketeam.common.amqp.Exchanges;
-import info.tomacla.biketeam.common.amqp.RoutingKeys;
-import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.security.OAuth2UserDetails;
+import info.tomacla.biketeam.security.oauth2.provider.OAuth2ProviderHandler;
 import info.tomacla.biketeam.service.UserService;
-import info.tomacla.biketeam.service.amqp.BrokerService;
-import info.tomacla.biketeam.service.amqp.dto.UserProfileImageDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,21 +14,29 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
+/**
+ * Dispatcheur : chaque fournisseur OAuth2 est traite par son propre
+ * {@link OAuth2ProviderHandler}, indexe par registrationId.
+ * <p>
+ * Aucune logique specifique a un fournisseur ici : retirer la connexion Strava consistera a
+ * supprimer {@code StravaProviderHandler} et sa registration, sans toucher a cette classe.
+ */
 @Service
 public class Oauth2AuthUserService extends DefaultOAuth2UserService {
 
     private static final Logger log = LoggerFactory.getLogger(Oauth2AuthUserService.class);
 
     private final UserService userService;
-    private final BrokerService brokerService;
+    private final Map<String, OAuth2ProviderHandler> handlers;
 
     @Autowired
-    public Oauth2AuthUserService(UserService userService, BrokerService brokerService) {
+    public Oauth2AuthUserService(UserService userService, List<OAuth2ProviderHandler> handlers) {
         this.userService = userService;
-        this.brokerService = brokerService;
+        this.handlers = handlers.stream().collect(Collectors.toMap(OAuth2ProviderHandler::registrationId, h -> h));
     }
 
     @Override
@@ -43,151 +47,23 @@ public class Oauth2AuthUserService extends DefaultOAuth2UserService {
     }
 
     protected OAuth2User loadUser(DefaultOAuth2User user, String registrationId) {
-        return switch (registrationId) {
-            case "facebook" -> handleFacebookProvider(user);
-            case "google" -> handleGoogleProvider(user);
-            case "strava" -> handleStravaProvider(user);
-            default -> user;
-        };
-    }
 
-    private OAuth2UserDetails handleStravaProvider(DefaultOAuth2User user) {
-
-        Map<String, Object> attributes = user.getAttributes();
-        Long stravaId = Long.valueOf((Integer) attributes.get("id"));
-
-        log.debug("Load user with strava id {}", stravaId);
-
-        Optional<User> optionalUser = userService.getByStravaId(stravaId);
-        User u;
-        String profileImage = (String) attributes.get("profile_medium");
-        if (optionalUser.isEmpty()) {
-
-            log.debug("Register new user with strava id {}", stravaId);
-
-            u = new User();
-            u.setFirstName((String) attributes.get("firstname"));
-            u.setLastName((String) attributes.get("lastname"));
-            u.setStravaId(stravaId);
-            u.setStravaUserName((String) attributes.get("username"));
-            u.setCity((String) attributes.get("city"));
-
-        } else {
-
-            log.debug("Updating existing user with strava id {}", stravaId);
-
-            u = optionalUser.get();
-            u.setStravaUserName((String) attributes.get("username"));
-            u.setFirstName((String) attributes.get("firstname"));
-            u.setLastName((String) attributes.get("lastname"));
-            u.setCity((String) attributes.get("city"));
-
+        final OAuth2ProviderHandler handler = handlers.get(registrationId);
+        if (handler == null) {
+            log.warn("No handler for OAuth2 registration {}", registrationId);
+            return user;
         }
 
-        u = userService.save(u);
-        if (!Strings.isBlank(profileImage)) {
-            brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_DOWNLOAD_PROFILE_IMAGE,
-                    UserProfileImageDTO.valueOf(u.getId(), profileImage));
-        }
+        final User u = handler.resolve(user);
+
+        // authentification interactive : la graine de signature remember-me heritee de la
+        // migration (= id utilisateur) est remplacee par une valeur aleatoire.
+        // L'instance est mutee sur place, le principal construit ci-dessous porte donc la
+        // graine a jour.
+        userService.ensureAuthTokenSeed(u);
 
         return OAuth2UserDetails.create(u);
-    }
 
-
-    private OAuth2UserDetails handleGoogleProvider(DefaultOAuth2User user) {
-        Map<String, Object> attributes = user.getAttributes();
-        String googleId = (String) attributes.get("sub");
-
-        log.debug("Load user with google id {}", googleId);
-
-        Optional<User> optionalUser = userService.getByGoogleId(googleId);
-        if (optionalUser.isEmpty() && attributes.get("email") != null) {
-            optionalUser = userService.getByEmail((String) attributes.get("email"));
-        }
-
-        User u;
-        String profileImage = (String) attributes.get("picture");
-        if (optionalUser.isEmpty()) {
-
-            log.debug("Register new user with google id {}", googleId);
-
-            u = new User();
-            u.setFirstName((String) attributes.get("given_name"));
-            u.setLastName((String) attributes.get("family_name"));
-            u.setGoogleId(googleId);
-
-            if (attributes.get("email") != null) {
-                u.setEmail((String) attributes.get("email"));
-            }
-
-        } else {
-            u = optionalUser.get();
-
-            if (attributes.get("email") != null) {
-                u.setEmail((String) attributes.get("email"));
-            }
-
-            u.setGoogleId(googleId);
-
-        }
-
-        u = userService.save(u);
-        if (!Strings.isBlank(profileImage)) {
-            brokerService.sendToBroker(Exchanges.TASK, RoutingKeys.TASK_DOWNLOAD_PROFILE_IMAGE,
-                    UserProfileImageDTO.valueOf(u.getId(), profileImage + "?.jpg"));
-        }
-
-        return OAuth2UserDetails.create(u);
-    }
-
-    private OAuth2UserDetails handleFacebookProvider(DefaultOAuth2User user) {
-        Map<String, Object> attributes = user.getAttributes();
-        String facebookId = (String) attributes.get("id");
-
-        log.debug("Load user with facebook id {}", facebookId);
-
-        Optional<User> optionalUser = userService.getByFacebookId(facebookId);
-        if (optionalUser.isEmpty() && attributes.get("email") != null) {
-            optionalUser = userService.getByEmail((String) attributes.get("email"));
-        }
-
-        User u;
-        if (optionalUser.isEmpty()) {
-
-            log.debug("Register new user with facebook id {}", facebookId);
-
-            String fullName = (String) attributes.get("name");
-            final String[] nameParts = fullName.split(" ");
-            String firstName = fullName;
-            String lastName = "";
-            if (nameParts.length > 1) {
-                firstName = nameParts[0];
-                lastName = nameParts[1];
-            }
-
-            u = new User();
-            u.setFirstName(firstName);
-            u.setLastName(lastName);
-            u.setFacebookId(facebookId);
-
-            if (attributes.get("email") != null) {
-                u.setEmail((String) attributes.get("email"));
-            }
-
-        } else {
-            u = optionalUser.get();
-
-            if (attributes.get("email") != null) {
-                u.setEmail((String) attributes.get("email"));
-            }
-
-            u.setFacebookId(facebookId);
-
-        }
-
-        userService.save(u);
-
-        return OAuth2UserDetails.create(u);
     }
 
 }

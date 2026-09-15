@@ -1,33 +1,21 @@
 package info.tomacla.biketeam.web.user;
 
-import info.tomacla.biketeam.common.datatype.Strings;
-
+/**
+ * Preferences de notification de l'utilisateur.
+ * <p>
+ * Les champs libres {@code email} et {@code stravaId} ont ete retires : ils permettaient de
+ * poser n'importe quelle adresse ou n'importe quel identifiant Strava sur son propre compte.
+ * L'adresse email etant devenue une identite de connexion, c'etait un vecteur d'usurpation
+ * direct. L'adresse se change desormais par /users/me/email, avec verification par lien.
+ */
 public class EditUserForm {
 
-    private String stravaId = "";
-    private String email = "";
     private String emailPublishTrips = null;
     private String emailPublishRides = null;
     private String emailPublishPublications = null;
 
     public static EditUserFormBuilder builder() {
         return new EditUserFormBuilder();
-    }
-
-    public String getStravaId() {
-        return stravaId;
-    }
-
-    public void setStravaId(String stravaId) {
-        this.stravaId = Strings.requireNonBlankOrDefault(stravaId, "");
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = Strings.requireNonBlankOrDefault(email, "");
     }
 
     public String getEmailPublishTrips() {
@@ -66,17 +54,6 @@ public class EditUserForm {
             this.form = form;
         }
 
-        public Long getStravaId() {
-            if (Strings.isBlank(form.getStravaId())) {
-                return null;
-            }
-            return Long.valueOf(form.getStravaId());
-        }
-
-        public String getEmail() {
-            return Strings.requireNonBlankOrNull(form.getEmail());
-        }
-
         public boolean isEmailPublishRides() {
             return form.getEmailPublishRides() != null && form.getEmailPublishRides().equals("on");
         }
@@ -97,16 +74,6 @@ public class EditUserForm {
 
         public EditUserFormBuilder() {
             this.form = new EditUserForm();
-        }
-
-        public EditUserFormBuilder withEmail(String email) {
-            form.setEmail(email);
-            return this;
-        }
-
-        public EditUserFormBuilder withStravaId(Long stravaId) {
-            form.setStravaId(stravaId != null ? String.valueOf(stravaId) : null);
-            return this;
         }
 
         public EditUserFormBuilder withEmailPublishRides(boolean emailPublishRides) {

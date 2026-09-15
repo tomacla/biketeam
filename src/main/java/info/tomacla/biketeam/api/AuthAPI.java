@@ -3,11 +3,14 @@ package info.tomacla.biketeam.api;
 import info.tomacla.biketeam.api.dto.TokenDTO;
 import info.tomacla.biketeam.api.dto.UserDTO;
 import info.tomacla.biketeam.security.session.RememberMeService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.server.ResponseStatusException;
@@ -22,7 +25,7 @@ public class AuthAPI extends AbstractAPI {
     private RememberMeService rememberMeService;
 
     @Autowired
-    private AuthenticationManager authenticationManager;
+    private SecurityContextRepository securityContextRepository;
 
     @GetMapping(path = "/me", produces = "application/json")
     public UserDTO whoami(Principal principal) {
@@ -30,13 +33,23 @@ public class AuthAPI extends AbstractAPI {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN)));
     }
 
+    /**
+     * RememberMeService renvoie deja un RememberMeAuthenticationToken authentifie : le repasser
+     * dans l'AuthenticationManager global leverait une ProviderNotFoundException (aucun
+     * RememberMeAuthenticationProvider n'y est enregistre). Le contexte est donc pose directement,
+     * puis sauvegarde explicitement (Spring Security 6 ne le fait plus automatiquement).
+     */
     @PostMapping(path = "/refresh", consumes = "text/plain", produces = "application/json")
-    public TokenDTO refreshSessionId(@RequestBody String rememberMe) {
+    public TokenDTO refreshSessionId(@RequestBody String rememberMe,
+                                     HttpServletRequest request,
+                                     HttpServletResponse response) {
 
-        Authentication userDetailsFromRememberMe = rememberMeService.getUserDetailsFromRememberMe(rememberMe);
+        Authentication authentication = rememberMeService.getUserDetailsFromRememberMe(rememberMe);
 
-        userDetailsFromRememberMe = this.authenticationManager.authenticate(userDetailsFromRememberMe);
-        SecurityContextHolder.getContext().setAuthentication(userDetailsFromRememberMe);
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(authentication);
+        SecurityContextHolder.setContext(context);
+        securityContextRepository.saveContext(context, request, response);
 
         final String sessionId = RequestContextHolder.currentRequestAttributes().getSessionId();
 

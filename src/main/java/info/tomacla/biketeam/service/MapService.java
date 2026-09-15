@@ -276,9 +276,24 @@ public class MapService extends AbstractPermalinkService {
                 .orElse(0L);
     }
 
+    /**
+     * Recalcule les compteurs denormalises map.average_rating / map.rating_count a partir des
+     * lignes de map_rating. Public car la fusion de comptes (UserMergeService) deplace et
+     * dedoublonne des notes en SQL natif : sans ce recalcul, la moyenne affichee derive.
+     * Sans effet si la carte n'existe plus.
+     */
+    public void refreshCachedRatings(String mapId) {
+        mapRepository.findById(mapId).ifPresent(this::updateCachedRatings);
+    }
+
     private void updateCachedRatings(String mapId) {
         Map map = mapRepository.findById(mapId)
                 .orElseThrow(() -> new IllegalArgumentException("Map not found"));
+        updateCachedRatings(map);
+    }
+
+    private void updateCachedRatings(Map map) {
+        final String mapId = map.getId();
         
         // Get fresh rating data from repository
         Double averageRating = mapRatingRepository.findAverageRatingByMapId(mapId);

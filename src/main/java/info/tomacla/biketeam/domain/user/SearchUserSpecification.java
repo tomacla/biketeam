@@ -61,7 +61,7 @@ public class SearchUserSpecification implements Specification<User> {
             predicates.add(criteriaBuilder.equal(root.get("googleId"), googleId));
         }
         if (email != null && !email.isBlank()) {
-            predicates.add(criteriaBuilder.equal(root.get("email"), email));
+            predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(root.get("email")), email.trim().toLowerCase()));
         }
         if (team != null) {
             predicates.add(criteriaBuilder.equal(root.join("roles").get("team"), team));
