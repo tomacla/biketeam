@@ -14,6 +14,8 @@ import info.tomacla.biketeam.service.gpx.StandaloneGpx;
 import io.github.glandais.gpx.data.GPX;
 import io.github.glandais.gpx.data.GPXPath;
 import io.github.glandais.gpx.io.read.GPXFileReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -43,6 +45,8 @@ import java.util.Optional;
 @RequestMapping(value = "/gpxtool")
 public class GpxToolController extends AbstractController {
 
+    private static final Logger log = LoggerFactory.getLogger(GpxToolController.class);
+
     @Autowired
     private GpxService gpxService;
 
@@ -71,6 +75,7 @@ public class GpxToolController extends AbstractController {
                 String uuid = gpxService.parseAndStoreStandalone(targetFile);
                 return new ModelAndView(new RedirectView("/gpxtool/" + uuid, false, false, false));
             } catch (Exception e) {
+                log.error("Unable to parse GPX from url {}", gpx, e);
                 addGlobalValues(principal, model, "GPX Tool", null);
                 model.addAttribute("errors", List.of("Unable to parse GPX"));
                 return new ModelAndView("gpxtool-root", model.asMap());
@@ -109,6 +114,7 @@ public class GpxToolController extends AbstractController {
             return new ModelAndView(new RedirectView("gpxtool-root", false, false, false));
 
         } catch (Exception e) {
+            log.error("Unable to display GPX {}", uuid, e);
             addGlobalValues(principal, model, "GPX Tool", null);
             model.addAttribute("errors", List.of("Unable to parse GPX"));
             return new ModelAndView("gpxtool-root", model.asMap());
@@ -150,6 +156,7 @@ public class GpxToolController extends AbstractController {
             return new ModelAndView(new RedirectView("/gpxtool/" + uuid, false, false, false));
 
         } catch (Exception e) {
+            log.error("Unable to parse uploaded GPX {}", file.getOriginalFilename(), e);
             addGlobalValues(principal, model, "GPX Tool", null);
             model.addAttribute("errors", List.of("Unable to parse GPX"));
             return new ModelAndView("gpxtool-root", model.asMap());
@@ -172,6 +179,7 @@ public class GpxToolController extends AbstractController {
             return new ModelAndView(new RedirectView("/gpxtool/" + uuid, false, false, false));
 
         } catch (Exception e) {
+            log.error("Unable to merge uploaded GPX {} and {}", file1.getOriginalFilename(), file2.getOriginalFilename(), e);
             addGlobalValues(principal, model, "GPX Tool", null);
             model.addAttribute("errors", List.of("Unable to parse GPX"));
             return new ModelAndView("gpxtool-root", model.asMap());
