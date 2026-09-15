@@ -10,8 +10,6 @@ public class EditUserFormTest {
     public void test() {
 
         final EditUserForm editUserForm = EditUserForm.builder()
-                .withStravaId(10002L)
-                .withEmail("foo@bar.com")
                 .withEmailPublishTrips(true)
                 .withEmailPublishRides(true)
                 .withEmailPublishPublications(true)
@@ -22,8 +20,6 @@ public class EditUserFormTest {
         assertTrue(parser.isEmailPublishPublications());
         assertTrue(parser.isEmailPublishRides());
         assertTrue(parser.isEmailPublishTrips());
-        assertEquals(10002L, parser.getStravaId());
-        assertEquals("foo@bar.com", parser.getEmail());
 
     }
 
@@ -37,8 +33,6 @@ public class EditUserFormTest {
         assertFalse(parser.isEmailPublishPublications());
         assertFalse(parser.isEmailPublishRides());
         assertFalse(parser.isEmailPublishTrips());
-        assertNull(parser.getStravaId());
-        assertNull(parser.getEmail());
 
     }
 

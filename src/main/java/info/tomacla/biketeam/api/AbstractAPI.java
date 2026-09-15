@@ -7,8 +7,7 @@ import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.RememberMeAuthenticationToken;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
@@ -27,16 +26,13 @@ public abstract class AbstractAPI {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to find team " + teamId));
     }
 
+    /**
+     * Tout type d'authentification est accepte (OAuth2, remember-me, form login) des lors que le
+     * principal est un OAuth2UserDetails : c'est le seul principal pose par l'application.
+     */
     protected Optional<User> getUserFromPrincipal(Principal principal) {
-        if (principal instanceof OAuth2AuthenticationToken) {
-            OAuth2AuthenticationToken wrapperPrincipal = (OAuth2AuthenticationToken) principal;
-            OAuth2UserDetails oauthprincipal = (OAuth2UserDetails) wrapperPrincipal.getPrincipal();
-            return userService.get(oauthprincipal.getUsername());
-        }
-        if (principal instanceof RememberMeAuthenticationToken) {
-            RememberMeAuthenticationToken wrapperPrincipal = (RememberMeAuthenticationToken) principal;
-            OAuth2UserDetails oauthprincipal = (OAuth2UserDetails) wrapperPrincipal.getPrincipal();
-            return userService.get(oauthprincipal.getUsername());
+        if (principal instanceof Authentication a && a.getPrincipal() instanceof OAuth2UserDetails ud) {
+            return userService.get(ud.getUsername());
         }
         return Optional.empty();
     }

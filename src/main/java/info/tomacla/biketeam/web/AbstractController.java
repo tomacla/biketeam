@@ -5,19 +5,21 @@ import info.tomacla.biketeam.common.datatype.Dates;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.security.OAuth2UserDetails;
+import info.tomacla.biketeam.security.session.SecurityContextService;
 import info.tomacla.biketeam.service.NotificationService;
 import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.service.UserService;
 import info.tomacla.biketeam.service.url.UrlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.RememberMeAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationTrustResolver;
+import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.ui.Model;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.security.Principal;
 import java.time.LocalDate;
@@ -38,8 +40,8 @@ public abstract class AbstractController {
     @Autowired
     private NotificationService notificationService;
 
-    @Value("${rememberme.key}")
-    private String rememberMeKey;
+    @Autowired
+    private SecurityContextService securityContextService;
 
     @Value("${site.name}")
     private String siteName;
@@ -48,6 +50,21 @@ public abstract class AbstractController {
     private UrlService urlService;
 
     protected ViewHandler viewHandler = new ViewHandler();
+
+    private static final AuthenticationTrustResolver TRUST_RESOLVER = new AuthenticationTrustResolverImpl();
+
+    /**
+     * Vrai si l'authentification courante ne repose que sur un cookie remember-me.
+     * <p>
+     * Les cookies ont une validite de 30 jours et sont poses systematiquement
+     * (rememberMe.alwaysRemember) : un cookie vole suffit a naviguer sur le site. Toute operation
+     * qui modifie un MOYEN DE CONNEXION (adresse email servant d'identifiant, premier mot de
+     * passe) doit donc exiger une authentification fraiche, faute de quoi le vol du cookie
+     * permettrait une prise de controle definitive du compte.
+     */
+    protected boolean isRememberMeAuthentication(Principal principal) {
+        return principal instanceof Authentication authentication && TRUST_RESOLVER.isRememberMe(authentication);
+    }
 
     protected void addGlobalValues(Principal principal, Model model, String pageTitle, Team team) {
         this.addGlobalValues(principal, model, pageTitle, team, null);
@@ -131,16 +148,13 @@ public abstract class AbstractController {
 
     }
 
+    /**
+     * Tout type d'authentification est accepte (OAuth2, remember-me, form login) des lors que le
+     * principal est un OAuth2UserDetails : c'est le seul principal pose par l'application.
+     */
     protected Optional<User> getUserFromPrincipal(Principal principal) {
-        if (principal instanceof OAuth2AuthenticationToken) {
-            OAuth2AuthenticationToken wrapperPrincipal = (OAuth2AuthenticationToken) principal;
-            OAuth2UserDetails oauthprincipal = (OAuth2UserDetails) wrapperPrincipal.getPrincipal();
-            return userService.get(oauthprincipal.getUsername());
-        }
-        if (principal instanceof RememberMeAuthenticationToken) {
-            RememberMeAuthenticationToken wrapperPrincipal = (RememberMeAuthenticationToken) principal;
-            OAuth2UserDetails oauthprincipal = (OAuth2UserDetails) wrapperPrincipal.getPrincipal();
-            return userService.get(oauthprincipal.getUsername());
+        if (principal instanceof Authentication a && a.getPrincipal() instanceof OAuth2UserDetails ud) {
+            return userService.get(ud.getUsername());
         }
         return Optional.empty();
     }
@@ -177,35 +191,14 @@ public abstract class AbstractController {
         return "redirect:/" + team.getId() + suffix;
     }
 
-    protected void addAuthorityToCurrentSession(GrantedAuthority authority) {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        List<GrantedAuthority> updatedAuthorities = new ArrayList<>(authentication.getAuthorities());
-        updatedAuthorities.add(authority);
-
-        if (authentication instanceof OAuth2AuthenticationToken) {
-
-            OAuth2AuthenticationToken oauth2Auth = (OAuth2AuthenticationToken) authentication;
-            SecurityContextHolder.getContext().setAuthentication(
-                    new OAuth2AuthenticationToken(
-                            oauth2Auth.getPrincipal(),
-                            updatedAuthorities,
-                            oauth2Auth.getAuthorizedClientRegistrationId())
-            );
-
-        } else if (authentication instanceof RememberMeAuthenticationToken) {
-
-            RememberMeAuthenticationToken rmAuth = (RememberMeAuthenticationToken) authentication;
-            SecurityContextHolder.getContext().setAuthentication(
-                    new RememberMeAuthenticationToken(
-                            rememberMeKey,
-                            rmAuth.getPrincipal(),
-                            updatedAuthorities)
-            );
-
-        }
-
+    /**
+     * L'enregistrement explicite du contexte est indispensable : sans lui l'autorite ajoutee
+     * serait perdue des la requete suivante (Spring Security 6).
+     */
+    protected void addAuthorityToCurrentSession(GrantedAuthority authority,
+                                                HttpServletRequest request,
+                                                HttpServletResponse response) {
+        securityContextService.addAuthority(authority, request, response);
     }
 
 }
