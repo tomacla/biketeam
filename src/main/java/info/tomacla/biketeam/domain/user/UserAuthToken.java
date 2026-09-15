@@ -31,6 +31,18 @@ public class UserAuthToken {
     @Column(name = "target_email", length = 150)
     private String targetEmail;
 
+    /**
+     * Second compte implique, pour les tokens {@link UserAuthTokenType#ACCOUNT_MERGE} : le
+     * compte destinataire du lien, celui qui sera conserve par la fusion.
+     * <p>
+     * Epingler son identifiant plutot que de le reresoudre par {@code targetEmail} au moment de
+     * la consommation est une precaution de securite : entre l'emission et le clic, l'adresse
+     * peut avoir change de proprietaire, et la fusion se ferait alors vers un compte tiers.
+     * Null pour tous les autres types.
+     */
+    @Column(name = "related_user_id")
+    private String relatedUserId;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -50,6 +62,14 @@ public class UserAuthToken {
 
     public String getUserId() {
         return userId;
+    }
+
+    public String getRelatedUserId() {
+        return relatedUserId;
+    }
+
+    public void setRelatedUserId(String relatedUserId) {
+        this.relatedUserId = relatedUserId;
     }
 
     public void setUserId(String userId) {

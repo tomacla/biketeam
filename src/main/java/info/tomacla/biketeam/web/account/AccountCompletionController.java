@@ -29,8 +29,10 @@ import java.util.Optional;
 /**
  * Completion forcee d'un compte incomplet (typiquement un compte cree par la connexion Strava).
  * <p>
- * Deux chemins sont proposes : associer une adresse email verifiee et un mot de passe, ou lier
- * le compte a Google ou Facebook (via /account/link/{registrationId}).
+ * Trois chemins sont proposes : associer une adresse email verifiee et un mot de passe, lier le
+ * compte a Google ou Facebook (via /account/link/{registrationId}), ou -- si l'adresse saisie
+ * appartient deja a un compte existant -- demander le rattachement des deux comptes
+ * (voir {@link AccountMergeController}).
  */
 @Controller
 @RequestMapping(value = "/account/complete")
@@ -39,6 +41,19 @@ public class AccountCompletionController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(AccountCompletionController.class);
 
     private static final int MAX_EMAIL_VERIFICATIONS_PER_HOUR = 5;
+
+    private static final int MAX_MERGE_REQUESTS_PER_HOUR = 3;
+
+    /**
+     * Message unique, rendu a l'identique que l'adresse soit libre ou deja prise.
+     * <p>
+     * L'ancien message "Cette adresse email est deja utilisee par un autre compte" etait a la fois
+     * une impasse (aucun moyen de rattacher les deux comptes) et un oracle d'enumeration : depuis
+     * n'importe quelle session Strava, on pouvait tester l'existence d'un compte par adresse.
+     */
+    private static String emailSentMessage(String email) {
+        return "Si cette adresse peut être utilisée, un email vient de vous être envoyé à " + email + ".";
+    }
 
     @Autowired
     private AccountCompletionService accountCompletionService;
@@ -110,8 +125,14 @@ public class AccountCompletionController extends AbstractController {
             return "redirect:/account/complete";
         }
 
-        if (!userService.isEmailAvailable(email, user.getId())) {
-            attributes.addFlashAttribute("errors", List.of("Cette adresse email est déjà utilisée par un autre compte."));
+        final Optional<User> emailOwner = findOtherAccountUsing(email, user);
+
+        if (emailOwner.isPresent()) {
+            // l'adresse appartient a un autre compte : au lieu d'une impasse, on propose le
+            // rattachement des deux comptes. Le lien part sur l'adresse revendiquee, c'est lui
+            // qui prouve que la personne la possede.
+            requestAccountMerge(user, emailOwner.get(), email);
+            attributes.addFlashAttribute("infos", List.of(emailSentMessage(email)));
             return "redirect:/account/complete";
         }
 
@@ -122,7 +143,7 @@ public class AccountCompletionController extends AbstractController {
 
         sendEmailVerification(user, email);
 
-        attributes.addFlashAttribute("infos", List.of("Un email de vérification vient d'être envoyé à " + email + "."));
+        attributes.addFlashAttribute("infos", List.of(emailSentMessage(email)));
         return "redirect:/account/complete";
 
     }
@@ -151,14 +172,15 @@ public class AccountCompletionController extends AbstractController {
             return "redirect:/account/complete";
         }
 
-        if (!userService.isEmailAvailable(target, user.getId())) {
-            attributes.addFlashAttribute("errors", List.of("Cette adresse email est déjà utilisée par un autre compte."));
-            return "redirect:/account/complete";
+        final Optional<User> emailOwner = findOtherAccountUsing(target, user);
+
+        if (emailOwner.isPresent()) {
+            requestAccountMerge(user, emailOwner.get(), target);
+        } else {
+            sendEmailVerification(user, target);
         }
 
-        sendEmailVerification(user, target);
-
-        attributes.addFlashAttribute("infos", List.of("Un email de vérification vient d'être envoyé à " + target + "."));
+        attributes.addFlashAttribute("infos", List.of(emailSentMessage(target)));
         return "redirect:/account/complete";
 
     }
@@ -207,6 +229,44 @@ public class AccountCompletionController extends AbstractController {
 
         attributes.addFlashAttribute("infos", List.of("Votre compte est complet. Merci !"));
         return "redirect:/";
+
+    }
+
+    /**
+     * Compte, autre que {@code user}, utilisant cette adresse. {@link UserService#getByEmail}
+     * ecarte deja les comptes supprimes, dont l'index unique partiel libere l'adresse.
+     */
+    private Optional<User> findOtherAccountUsing(String email, User user) {
+        return userService.getByEmail(email)
+                .filter(owner -> !owner.getId().equals(user.getId()));
+    }
+
+    /**
+     * Emet un lien de rattachement vers le compte proprietaire de l'adresse.
+     * <p>
+     * Toute sortie anticipee (limitation de debit) est silencieuse : l'appelant rend le meme
+     * message dans tous les cas, sans quoi la limitation redeviendrait l'oracle d'enumeration
+     * que ce parcours vient justement de refermer.
+     */
+    private void requestAccountMerge(User requester, User owner, String email) {
+
+        if (userAuthTokenService.isThrottled(requester.getId(), UserAuthTokenType.ACCOUNT_MERGE, MAX_MERGE_REQUESTS_PER_HOUR)
+                || userAuthTokenService.isRecipientThrottled(owner.getId(), UserAuthTokenType.ACCOUNT_MERGE, MAX_MERGE_REQUESTS_PER_HOUR)) {
+            log.info("Account merge request throttled for user {}", requester.getId());
+            return;
+        }
+
+        try {
+
+            final String clearToken = userAuthTokenService.create(requester.getId(),
+                    UserAuthTokenType.ACCOUNT_MERGE, email, owner.getId(),
+                    userAuthTokenService.getAccountMergeValidity());
+
+            authMailService.sendAccountMergeRequest(email, clearToken, requester.getIdentity());
+
+        } catch (DataIntegrityViolationException e) {
+            log.warn("Concurrent account merge request", e);
+        }
 
     }
 

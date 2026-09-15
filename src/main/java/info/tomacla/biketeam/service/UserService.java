@@ -9,11 +9,10 @@ import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.SearchUserSpecification;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.user.UserRepository;
-import info.tomacla.biketeam.domain.userrole.Role;
-import info.tomacla.biketeam.domain.userrole.UserRole;
 import info.tomacla.biketeam.security.Authorities;
 import info.tomacla.biketeam.service.amqp.dto.UserProfileImageDTO;
 import info.tomacla.biketeam.service.file.FileService;
+import info.tomacla.biketeam.service.merge.UserMergeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -80,22 +79,10 @@ public class UserService {
     private TeamService teamService;
 
     @Autowired
-    private UserRoleService userRoleService;
-
-    @Autowired
-    private RideService rideService;
-
-    @Autowired
-    private TripService tripService;
-
-    @Autowired
-    private MessageService messageService;
-
-    @Autowired
-    private NotificationService notificationService;
-
-    @Autowired
     private FileService fileService;
+
+    @Autowired
+    private UserMergeService userMergeService;
 
     public Optional<User> getByStravaId(Long stravaId) {
         return userRepository.findOne(SearchUserSpecification.byStravaId(stravaId));
@@ -313,86 +300,33 @@ public class UserService {
         }
     }
 
+    /**
+     * Fusion de deux comptes : {@code sourceId} est vide de ses donnees au profit de
+     * {@code targetId}, puis supprime.
+     * <p>
+     * Le deplacement lui-meme est delegue a {@link UserMergeService}. Le soft delete reste ici,
+     * dans la meme transaction, et <strong>doit venir apres</strong> : a ce moment la source n'a
+     * plus aucune donnee rattachee ni aucune equipe privee reprise, la purge asynchrone
+     * (AsyncDeletionService, declenchee toutes les 30 secondes) n'a donc plus rien a detruire.
+     *
+     * @return le compte conserve, relu depuis la base : les requetes natives de la fusion
+     * detachent tout le contexte de persistance.
+     */
     @Transactional
-    public void merge(String sourceId, String targetId) {
-
-        Optional<User> optionalSource = get(sourceId);
-        Optional<User> optionalTarget = get(targetId);
-
-        if (optionalSource.isEmpty() || optionalTarget.isEmpty()) {
-            throw new IllegalArgumentException("Unknown ids for merge");
-        }
+    public User merge(String sourceId, String targetId) {
 
         try {
-            User source = optionalSource.get();
-            User target = optionalTarget.get();
 
-            if (!Strings.isBlank(source.getFirstName()) && Strings.isBlank(target.getFirstName())) {
-                target.setFirstName(source.getFirstName());
-            }
-            if (!Strings.isBlank(source.getLastName()) && Strings.isBlank(target.getLastName())) {
-                target.setLastName(source.getLastName());
-            }
-            if (source.getStravaId() != null && target.getStravaId() == null) {
-                target.setStravaId(source.getStravaId());
-                target.setStravaUserName(source.getStravaUserName());
-                source.setStravaId(null);
-            }
-            if (!Strings.isBlank(source.getCity()) && Strings.isBlank(target.getCity())) {
-                target.setCity(source.getCity());
-            }
-            if (!Strings.isBlank(source.getEmail()) && Strings.isBlank(target.getEmail())) {
-                // setVerifiedEmail des lors que la source avait prouve l'adresse : setEmail
-                // remettrait emailVerified a false et ferait perdre a la cible la seule identite
-                // de connexion que la fusion etait censee lui apporter.
-                if (source.isEmailVerified()) {
-                    target.setVerifiedEmail(source.getEmail());
-                } else {
-                    target.setEmail(source.getEmail());
-                }
-                source.setEmail(null);
-            }
+            userMergeService.merge(sourceId, targetId);
 
-            // le mot de passe de la source est detruit par delete() juste apres : sans cette
-            // reprise, fusionner un compte email/mot de passe dans un compte Strava nu laisserait
-            // la cible incomplete et bloquee sur l'ecran de completion.
-            if (target.getPasswordHash() == null && source.getPasswordHash() != null) {
-                target.setPasswordHash(source.getPasswordHash());
-                target.setPasswordUpdatedAt(source.getPasswordUpdatedAt());
-            }
-            if (!Strings.isBlank(source.getGoogleId()) && Strings.isBlank(target.getGoogleId())) {
-                target.setGoogleId(source.getGoogleId());
-                source.setGoogleId(null);
-            }
-            if (!Strings.isBlank(source.getFacebookId()) && Strings.isBlank(target.getFacebookId())) {
-                target.setFacebookId(source.getFacebookId());
-                source.setFacebookId(null);
-            }
+            // le compte source n'a plus ni donnees ni identifiants uniques
+            this.delete(sourceId);
 
-            target.setAdmin(source.isAdmin() || target.isAdmin());
-            target.setEmailPublishTrips(source.isEmailPublishTrips() || target.isEmailPublishTrips());
-            target.setEmailPublishPublications(source.isEmailPublishPublications() || target.isEmailPublishPublications());
-            target.setEmailPublishRides(source.isEmailPublishRides() || target.isEmailPublishRides());
+            return get(targetId).orElseThrow(
+                    () -> new IllegalStateException("Compte conserve introuvable apres fusion"));
 
-            for (UserRole role : source.getRoles()) {
-                if (role.getTeam().isMember(target)) {
-                    if (role.getRole().equals(Role.ADMIN) && !role.getTeam().isAdmin(target)) {
-                        UserRole targetRole = userRoleService.get(role.getTeam(), target).get();
-                        targetRole.setRole(Role.ADMIN);
-                        userRoleService.save(targetRole);
-                    }
-                } else {
-                    userRoleService.save(new UserRole(role.getTeam(), target, role.getRole()));
-                }
-            }
-
-            source.getRoles().clear();
-
-            this.delete(source.getId());
-            this.save(target);
-
-            // TODO copy participations in trips and rides
-
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Unable to merge user {} into {}", sourceId, targetId, e);
             throw new IllegalStateException("Impossible de fusionner les comptes", e);

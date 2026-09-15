@@ -47,6 +47,9 @@ public class UserAuthTokenService {
     @Value("${auth.password-reset.validity-hours:1}")
     private long passwordResetValidityHours;
 
+    @Value("${auth.account-merge.validity-hours:1}")
+    private long accountMergeValidityHours;
+
     public Duration getEmailVerificationValidity() {
         return Duration.ofHours(emailVerificationValidityHours);
     }
@@ -56,12 +59,29 @@ public class UserAuthTokenService {
     }
 
     /**
+     * Validite courte : un lien de rattachement de compte donne acces a une fusion irreversible.
+     */
+    public Duration getAccountMergeValidity() {
+        return Duration.ofHours(accountMergeValidityHours);
+    }
+
+    /**
      * Cree un token et renvoie sa valeur en clair (la seule fois ou elle existe).
      * Tout token actif du meme type pour cet utilisateur est invalide au prealable :
      * un seul lien vivant par type et par utilisateur.
      */
     @Transactional
     public String create(String userId, UserAuthTokenType type, String targetEmail, Duration ttl) {
+        return create(userId, type, targetEmail, null, ttl);
+    }
+
+    /**
+     * Variante a deux comptes, pour {@link UserAuthTokenType#ACCOUNT_MERGE} : {@code userId} est
+     * le compte demandeur, {@code relatedUserId} le compte destinataire du lien.
+     */
+    @Transactional
+    public String create(String userId, UserAuthTokenType type, String targetEmail,
+                         String relatedUserId, Duration ttl) {
 
         invalidateAll(userId, type);
 
@@ -76,6 +96,7 @@ public class UserAuthTokenService {
         token.setType(type);
         token.setTokenHash(sha256Hex(clearToken));
         token.setTargetEmail(targetEmail == null ? null : targetEmail.trim().toLowerCase());
+        token.setRelatedUserId(relatedUserId);
         token.setCreatedAt(now);
         token.setExpiresAt(now.plus(ttl));
 
@@ -178,6 +199,31 @@ public class UserAuthTokenService {
     public boolean isThrottled(String userId, UserAuthTokenType type, int maxPerHour) {
         final Instant after = Instant.now().minus(Duration.ofHours(1));
         return userAuthTokenRepository.countByUserIdAndTypeAndCreatedAtAfter(userId, type, after) >= maxPerHour;
+    }
+
+    /**
+     * Limitation de debit cote DESTINATAIRE : sans elle, n'importe qui pourrait inonder de mails
+     * de rattachement le proprietaire d'une adresse en revendiquant son adresse en boucle.
+     */
+    public boolean isRecipientThrottled(String relatedUserId, UserAuthTokenType type, int maxPerHour) {
+        final Instant after = Instant.now().minus(Duration.ofHours(1));
+        return userAuthTokenRepository
+                .countByRelatedUserIdAndTypeAndCreatedAtAfter(relatedUserId, type, after) >= maxPerHour;
+    }
+
+    /**
+     * Token de rattachement encore vivant, retrouve sans etre consomme.
+     * Le controleur doit verifier la session AVANT de consommer : consommer d'abord brulerait
+     * le lien a chaque ouverture depuis le mauvais navigateur (scanners de messagerie compris).
+     */
+    public Optional<UserAuthToken> peek(String clearToken, UserAuthTokenType type) {
+        if (clearToken == null || clearToken.isBlank()) {
+            return Optional.empty();
+        }
+        return userAuthTokenRepository.findByTokenHash(sha256Hex(clearToken.trim()))
+                .filter(token -> type.equals(token.getType()))
+                .filter(token -> token.getConsumedAt() == null)
+                .filter(token -> token.getExpiresAt() != null && token.getExpiresAt().isAfter(Instant.now()));
     }
 
     @Transactional

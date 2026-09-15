@@ -5,6 +5,7 @@ import info.tomacla.biketeam.security.completion.AccountCompletionService;
 import info.tomacla.biketeam.security.oauth2.link.AccountLinkService;
 import info.tomacla.biketeam.security.oauth2.link.OAuth2LinkIntentStore;
 import info.tomacla.biketeam.security.session.SecurityContextService;
+import info.tomacla.biketeam.service.merge.UserMergeService;
 import info.tomacla.biketeam.web.AbstractController;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -56,6 +57,9 @@ public class AccountLinkController extends AbstractController {
     @Autowired
     private AccountCompletionService accountCompletionService;
 
+    @Autowired
+    private UserMergeService userMergeService;
+
     @GetMapping(value = "/link/{registrationId}")
     public String link(@PathVariable("registrationId") String registrationId,
                        Principal principal,
@@ -104,6 +108,7 @@ public class AccountLinkController extends AbstractController {
         model.addAttribute("provider", accountLinkService.getPendingMergeProvider(session).orElse(""));
         model.addAttribute("userTeams", teamService.getUserTeams(user));
         model.addAttribute("otherUserTeams", teamService.getUserTeams(otherUser));
+        model.addAttribute("privateTeamLost", userMergeService.wouldLosePrivateTeam(otherUser, user));
 
         return "account_merge";
 
@@ -153,15 +158,16 @@ public class AccountLinkController extends AbstractController {
         final String pendingProvider = accountLinkService.getPendingMergeProvider(session).orElse("");
         final String pendingSubject = accountLinkService.getPendingMergeSubject(session).orElse(null);
 
+        User merged;
         try {
-            userService.merge(source.getId(), target.getId());
+            // merge relit et renvoie le compte conserve : les requetes natives de la fusion
+            // detachent tout le contexte de persistance, `target` n'est plus fiable ici.
+            merged = userService.merge(source.getId(), target.getId());
         } catch (Exception e) {
             log.error("Unable to merge accounts", e);
             attributes.addFlashAttribute("errors", List.of("La fusion des comptes a échoué."));
             return "redirect:/users/me";
         }
-
-        User merged = userService.get(target.getId()).orElse(target);
 
         final String googleId = sourceGoogleId != null ? sourceGoogleId
                 : ("google".equals(pendingProvider) ? pendingSubject : null);

@@ -6,6 +6,10 @@
 
     <script type="text/javascript">
 
+            function confirmMergeUsers() {
+                return confirm('La fusion est définitive : le compte source sera supprimé et toutes ses données transférées vers le compte cible. Confirmez vous ?');
+            }
+
             function confirmDeleteUser(userId, targetUrl) {
                 var confirmedDeletion = confirm('Confirmer la suppression définitive de l\'utilisateur ' + userId + ' ?');
                 if(confirmedDeletion) {
@@ -17,7 +21,7 @@
 
     <div class="col-12 col-md-8">
 
-        <form enctype="multipart/form-data" method="POST" action="<@common.teamUrl '' '/admin/users/merge' />" class="mb-0">
+        <form enctype="multipart/form-data" method="POST" action="<@common.teamUrl '' '/admin/users/merge' />" onsubmit="return confirmMergeUsers();" class="mb-0">
             <div class="row">
                 <div class="col-auto p-2">
                   <label for="form-user-sourceId" class="form-label">Source ID</label>

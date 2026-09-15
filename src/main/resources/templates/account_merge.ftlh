@@ -52,27 +52,46 @@
             <h5 class="card-header text-center">Fusion de comptes</h5>
             <div class="card-body">
 
+                <#if provider??>
+                    <p>
+                        Un autre compte utilise déjà cette identité
+                        <#if provider == 'facebook'>Facebook<#else>Google</#if>.
+                        Vous pouvez fusionner les deux comptes.
+                    </p>
+                <#else>
+                    <p>
+                        Vous avez demandé à rattacher votre compte actuel à un compte existant, et
+                        vous venez de prouver que vous possédez les deux.
+                    </p>
+                </#if>
+
                 <p>
-                    Un autre compte utilise déjà cette identité
-                    <#if provider?? && provider == 'facebook'>Facebook<#else>Google</#if>.
-                    Vous pouvez fusionner les deux comptes : le compte courant sera conservé, l'autre sera supprimé.
+                    Le compte conservé récupère de l'autre : ses équipes et ses rôles, ses
+                    participations aux sorties et aux séjours, ses messages, ses notifications,
+                    ses cartes favorites et ses notes de cartes. L'autre compte est ensuite
+                    supprimé. Cette opération est définitive.
                 </p>
 
-                <div class="alert alert-warning" role="alert">
-                    Les participations aux sorties de l'autre compte ne sont pas reprises.
-                </div>
+                <#if privateTeamLost?? && privateTeamLost>
+                    <div class="alert alert-danger" role="alert">
+                        <strong>Attention :</strong> les deux comptes possèdent un espace personnel,
+                        et un compte ne peut en avoir qu'un seul. L'espace personnel du compte
+                        supprimé sera perdu, avec tout son contenu (cartes, sorties, séjours,
+                        publications).
+                    </div>
+                </#if>
 
                 <div class="row">
-                    <@accountCard "Compte courant (conservé)" user userTeams />
-                    <@accountCard "Autre compte (supprimé)" otherUser otherUserTeams />
+                    <@accountCard "Compte conservé" user userTeams />
+                    <@accountCard "Compte supprimé" otherUser otherUserTeams />
                 </div>
 
-                <form name="form-account-merge" method="POST" action="<@common.teamUrl '' '/account/link-conflict' />">
+                <form name="form-account-merge" method="POST" action="<@common.teamUrl '' action!'/account/link-conflict' />">
 
                     <#if _csrf??><input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/></#if>
 
                     <button type="submit" class="btn btn-primary">Fusionner ces deux comptes</button>
-                    <a class="btn btn-secondary" href="<@common.teamUrl '' '/users/me' />">Annuler</a>
+                    <a class="btn btn-secondary" href="<@common.teamUrl '' cancelUrl!'/users/me' />">Annuler</a>
 
                 </form>
 

@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.Duration;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -61,9 +62,24 @@ public class AccountCompletionControllerTest {
         when(userAuthTokenService.getPendingTargetEmail(anyString(), any())).thenReturn(Optional.empty());
         when(userAuthTokenService.isThrottled(anyString(), any(), anyInt())).thenReturn(false);
         when(userService.isEmailAvailable(anyString(), anyString())).thenReturn(true);
+        when(userService.getByEmail(anyString())).thenReturn(Optional.empty());
+        when(userAuthTokenService.getAccountMergeValidity()).thenReturn(Duration.ofHours(1));
+        when(userAuthTokenService.create(any(), any(), any(), any(), any())).thenReturn("merge-token");
+        when(userAuthTokenService.isRecipientThrottled(anyString(), any(), anyInt())).thenReturn(false);
 
         mockMvc = ControllerTestSupport.mockMvc(controller);
 
+    }
+
+    /**
+     * Declare qu'un AUTRE compte utilise deja cette adresse.
+     */
+    private User otherAccountUsing(String email, String ownerId) {
+        User owner = new User();
+        owner.setId(ownerId);
+        when(userService.isEmailAvailable(eq(email), anyString())).thenReturn(false);
+        when(userService.getByEmail(email)).thenReturn(Optional.of(owner));
+        return owner;
     }
 
     private User stravaUser() {
@@ -189,17 +205,76 @@ public class AccountCompletionControllerTest {
 
     }
 
+    /**
+     * Une adresse deja prise n'est plus une impasse : elle declenche une demande de rattachement
+     * des deux comptes, dont le lien part sur l'adresse revendiquee.
+     */
     @Test
-    public void testAddressUsedByAnotherAccountIsRefused() throws Exception {
+    public void testAddressUsedByAnotherAccountRequestsAMerge() throws Exception {
 
         User user = stravaUser();
-        when(userService.isEmailAvailable("taken@example.com", "user-1")).thenReturn(false);
+        user.setFirstName("Jean");
+        user.setLastName("Dupont");
+        otherAccountUsing("taken@example.com", "user-2");
 
         mockMvc.perform(post("/account/complete/email")
                         .param("email", "taken@example.com")
                         .principal(ControllerTestSupport.authentication(user)))
                 .andExpect(view().name("redirect:/account/complete"))
-                .andExpect(flash().attributeExists("errors"));
+                .andExpect(flash().attributeExists("infos"));
+
+        verify(userAuthTokenService).create("user-1", UserAuthTokenType.ACCOUNT_MERGE,
+                "taken@example.com", "user-2", Duration.ofHours(1));
+        verify(authMailService).sendAccountMergeRequest("taken@example.com", "merge-token", "Jean Dupont");
+
+        // surtout pas de lien de verification : l'adresse n'appartient pas a ce compte
+        verify(authMailService, never()).sendEmailVerification(anyString(), anyString());
+
+    }
+
+    /**
+     * Anti-enumeration : le message rendu doit etre le MEME que l'adresse soit libre ou prise.
+     * Sinon n'importe quelle session Strava permet de tester l'existence d'un compte par adresse.
+     */
+    @Test
+    public void testTheSameMessageIsRenderedWhetherTheAddressIsFreeOrTaken() throws Exception {
+
+        User user = stravaUser();
+
+        final Object freeAddressMessage = mockMvc.perform(post("/account/complete/email")
+                        .param("email", "free@example.com")
+                        .principal(ControllerTestSupport.authentication(user)))
+                .andReturn().getFlashMap().get("infos");
+
+        otherAccountUsing("free@example.com", "user-2");
+
+        final Object takenAddressMessage = mockMvc.perform(post("/account/complete/email")
+                        .param("email", "free@example.com")
+                        .principal(ControllerTestSupport.authentication(user)))
+                .andReturn().getFlashMap().get("infos");
+
+        assertEquals(freeAddressMessage, takenAddressMessage);
+
+    }
+
+    /**
+     * La limitation de debit est silencieuse elle aussi : un message different retablirait
+     * l'oracle que ce parcours vient de refermer.
+     */
+    @Test
+    public void testThrottledMergeRequestIsSilent() throws Exception {
+
+        User user = stravaUser();
+        otherAccountUsing("taken@example.com", "user-2");
+        when(userAuthTokenService.isRecipientThrottled("user-2", UserAuthTokenType.ACCOUNT_MERGE, 3))
+                .thenReturn(true);
+
+        mockMvc.perform(post("/account/complete/email")
+                        .param("email", "taken@example.com")
+                        .principal(ControllerTestSupport.authentication(user)))
+                .andExpect(view().name("redirect:/account/complete"))
+                .andExpect(flash().attributeExists("infos"))
+                .andExpect(flash().attribute("errors", (Object) null));
 
         verifyNoInteractions(authMailService);
 

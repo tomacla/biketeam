@@ -59,6 +59,12 @@
 
                                 <button type="submit" class="btn btn-secondary">Envoyer le lien de vérification</button>
 
+                                <div class="form-text mt-2">
+                                    Si cette adresse est déjà celle d'un compte existant, le lien
+                                    envoyé vous proposera de rattacher les deux comptes : celui-ci
+                                    sera fusionné dans l'autre, qui sera conservé.
+                                </div>
+
                             </form>
 
                         </div>
