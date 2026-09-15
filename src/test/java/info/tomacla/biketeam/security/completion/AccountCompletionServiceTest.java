@@ -44,7 +44,7 @@ public class AccountCompletionServiceTest {
         service = new AccountCompletionService();
         ReflectionTestUtils.setField(service, "userService", userService);
         ReflectionTestUtils.setField(service, "mailSenderService", mailSenderService);
-        ReflectionTestUtils.setField(service, "completionEnabled", true);
+        ReflectionTestUtils.setField(service, "mode", AccountCompletionMode.ENFORCED);
 
         when(mailSenderService.isSmtpConfigured()).thenReturn(true);
 
@@ -91,8 +91,10 @@ public class AccountCompletionServiceTest {
     @Test
     public void testEnforcementDisabledByProperty() {
 
-        ReflectionTestUtils.setField(service, "completionEnabled", false);
+        ReflectionTestUtils.setField(service, "mode", AccountCompletionMode.SUGGESTED);
+        assertFalse(service.enforcementEnabled());
 
+        ReflectionTestUtils.setField(service, "mode", AccountCompletionMode.OFF);
         assertFalse(service.enforcementEnabled());
 
     }
@@ -101,10 +103,75 @@ public class AccountCompletionServiceTest {
     public void testInitDoesNotFailWhenSmtpMissing() {
 
         when(mailSenderService.isSmtpConfigured()).thenReturn(false);
+        ReflectionTestUtils.setField(service, "configuredMode", "ENFORCED");
 
         service.init();
 
         assertFalse(service.enforcementEnabled());
+
+    }
+
+    // --- suggestionEnabled ---
+
+    /**
+     * L'incitation ne depend pas du SMTP : la page de completion permet aussi de lier Google ou
+     * Facebook, l'utilisateur sollicite a donc toujours un chemin de sortie.
+     */
+    @Test
+    public void testSuggestionDoesNotRequireSmtp() {
+
+        when(mailSenderService.isSmtpConfigured()).thenReturn(false);
+
+        ReflectionTestUtils.setField(service, "mode", AccountCompletionMode.SUGGESTED);
+        assertTrue(service.suggestionEnabled());
+
+        ReflectionTestUtils.setField(service, "mode", AccountCompletionMode.ENFORCED);
+        assertTrue(service.suggestionEnabled());
+
+    }
+
+    @Test
+    public void testSuggestionDisabledWhenOff() {
+
+        ReflectionTestUtils.setField(service, "mode", AccountCompletionMode.OFF);
+
+        assertFalse(service.suggestionEnabled());
+        assertFalse(service.enforcementEnabled());
+
+    }
+
+    // --- resolution de la propriete ---
+
+    @Test
+    public void testModeParsingIsLenient() {
+
+        ReflectionTestUtils.setField(service, "configuredMode", " enforced ");
+        service.init();
+        assertEquals(AccountCompletionMode.ENFORCED, service.getMode());
+
+        ReflectionTestUtils.setField(service, "configuredMode", "off");
+        service.init();
+        assertEquals(AccountCompletionMode.OFF, service.getMode());
+
+    }
+
+    /**
+     * Une valeur de configuration erronee ne doit pas empecher le demarrage.
+     */
+    @Test
+    public void testUnknownModeFallsBackToSuggested() {
+
+        ReflectionTestUtils.setField(service, "configuredMode", "n_importe_quoi");
+        service.init();
+        assertEquals(AccountCompletionMode.SUGGESTED, service.getMode());
+
+        ReflectionTestUtils.setField(service, "configuredMode", "");
+        service.init();
+        assertEquals(AccountCompletionMode.SUGGESTED, service.getMode());
+
+        ReflectionTestUtils.setField(service, "configuredMode", null);
+        service.init();
+        assertEquals(AccountCompletionMode.SUGGESTED, service.getMode());
 
     }
 

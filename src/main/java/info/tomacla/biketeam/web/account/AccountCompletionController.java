@@ -2,7 +2,6 @@ package info.tomacla.biketeam.web.account;
 
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.domain.user.UserAuthTokenType;
-import info.tomacla.biketeam.security.completion.AccountCompletionService;
 import info.tomacla.biketeam.security.password.PasswordPolicy;
 import info.tomacla.biketeam.security.session.SecurityContextService;
 import info.tomacla.biketeam.service.auth.AuthMailService;
@@ -55,8 +54,6 @@ public class AccountCompletionController extends AbstractController {
         return "Si cette adresse peut être utilisée, un email vient de vous être envoyé à " + email + ".";
     }
 
-    @Autowired
-    private AccountCompletionService accountCompletionService;
 
     @Autowired
     private UserAuthTokenService userAuthTokenService;

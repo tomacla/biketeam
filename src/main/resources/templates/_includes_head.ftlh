@@ -75,6 +75,9 @@
 
     <#if !_embed>
         <#include "_includes_navbar.ftlh">
+        <#if (_account_completion_needed!false)>
+            <#include "_includes_account_completion_banner.ftlh">
+        </#if>
     </#if>
 
     <div class="modal fade" id="modal-filetoobig" tabindex="-1">
