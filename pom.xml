@@ -22,17 +22,10 @@
 		</repository>
 	</distributionManagement>
 
-	<repositories>
-		<repository>
-			<id>gpx2web</id>
-			<url>https://repo.repsy.io/mvn/glandais/gpx2web</url>
-		</repository>
-	</repositories>
-
 	<properties>
 		<java.version>17</java.version>
 		<dotenv-java.version>3.2.0</dotenv-java.version>
-		<gpx2web.version>1.4.5</gpx2web.version>
+		<gpx2web.version>1.5.0</gpx2web.version>
 		<zip4j.version>2.11.6</zip4j.version>
 		<postgresql.version>42.7.13</postgresql.version>
 		<thumbnailator.version>0.4.21</thumbnailator.version>

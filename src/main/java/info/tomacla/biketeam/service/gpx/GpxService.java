@@ -163,8 +163,10 @@ public class GpxService {
 
         map.setLength(Rounder.round2Decimals(Math.round(10.0 * gpx.getDist()) / 10000.0));
         map.setPostedAt(LocalDate.now(team.getZoneId()));
-        map.setPositiveElevation(Rounder.round1Decimal(gpx.getTotalElevation()));
-        map.setNegativeElevation(Rounder.round1Decimal(gpx.getTotalElevationNegative()));
+        // Scale-aware D+, measured by gpxEnhancer.virtualize above. getTotalElevation() is the raw
+        // sum of every positive delta, which grows without bound as the sampling gets finer.
+        map.setPositiveElevation(Rounder.round1Decimal(gpx.getReportedTotalElevation()));
+        map.setNegativeElevation(Rounder.round1Decimal(gpx.getReportedTotalElevationNegative()));
         map.setStartPoint(start);
         map.setEndPoint(end);
         map.setWindDirection(WindDirection.findDirectionFromVector(wind));
