@@ -140,6 +140,25 @@
 
     /* --- connexion -------------------------------------------------------- */
 
+    /**
+     * Parcours conditionnel en cours (remplissage automatique), ou null. Le navigateur n'accepte
+     * qu'un seul navigator.credentials.get a la fois : le bouton doit l'annuler avant de lancer le
+     * sien, sous peine de "A request is already pending". Le serveur ne garde de plus qu'un seul
+     * challenge par session : on attend que la requete d'options du parcours conditionnel soit
+     * terminee, pour qu'elle ne puisse pas ecraser celui demande par le bouton.
+     */
+    let conditional = null;
+
+    function abortConditionalMediation() {
+        if (!conditional) {
+            return Promise.resolve();
+        }
+        const current = conditional;
+        conditional = null;
+        current.controller.abort();
+        return current.done;
+    }
+
     function buildAssertionRequest(options, mediation) {
         const publicKey = Object.assign({}, options);
         publicKey.challenge = base64UrlToBuffer(options.challenge);
@@ -174,7 +193,10 @@
         button.disabled = true;
         showStatus(status, 'Suivez les instructions de votre appareil…', false);
 
-        postJson(button.dataset.optionsUrl)
+        abortConditionalMediation()
+            .then(function () {
+                return postJson(button.dataset.optionsUrl);
+            })
             .then(function (options) {
                 return navigator.credentials.get(buildAssertionRequest(options, null));
             })
@@ -186,6 +208,8 @@
                 showStatus(status, error.name === 'NotAllowedError'
                     ? 'La connexion a été annulée.'
                     : error.message, true);
+                // le parcours conditionnel a ete annule par le clic : on le relance
+                startConditionalMediation(button);
             });
 
     }
@@ -203,21 +227,39 @@
             return;
         }
 
-        window.PublicKeyCredential.isConditionalMediationAvailable()
+        const controller = new AbortController();
+        const current = {controller: controller, done: null};
+        conditional = current;
+
+        current.done = window.PublicKeyCredential.isConditionalMediationAvailable()
             .then(function (available) {
-                if (!available) {
+                if (!available || controller.signal.aborted) {
                     return;
                 }
+                // la requete d'options n'est pas annulable : le serveur enregistrerait quand meme
+                // son challenge, et le bouton doit pouvoir attendre qu'elle soit vraiment finie
                 return postJson(button.dataset.optionsUrl)
                     .then(function (options) {
-                        return navigator.credentials.get(buildAssertionRequest(options, 'conditional'));
+                        if (controller.signal.aborted) {
+                            return null;
+                        }
+                        const request = buildAssertionRequest(options, 'conditional');
+                        request.signal = controller.signal;
+                        return navigator.credentials.get(request);
                     })
                     .then(function (credential) {
-                        return submitAssertion(credential, button.dataset.loginUrl);
+                        if (credential) {
+                            return submitAssertion(credential, button.dataset.loginUrl);
+                        }
                     });
             })
             .catch(function () {
                 /* abandon silencieux : voir le commentaire ci-dessus */
+            })
+            .then(function () {
+                if (conditional === current) {
+                    conditional = null;
+                }
             });
 
     }
