@@ -111,10 +111,14 @@ public class UserMergeService {
      * <li>roles d'equipe, par manipulation d'entites : {@code Team} porte une collection
      *     {@code roles} EAGER qu'un DELETE natif laisserait perimee ;</li>
      * <li>champs scalaires du compte, puis <strong>liberation des identifiants uniques</strong>
-     *     de la source et {@code saveAndFlush} : les contraintes {@code unique_strava_id},
-     *     {@code unique_google_id}, {@code unique_facebook_id} et {@code strava_user_name} ne
-     *     sont PAS partielles (contrairement a l'index email), un identifiant laisse sur un
-     *     compte mort bloquerait definitivement le compte conserve ;</li>
+     *     de la source, flushee seule, et seulement ensuite reprise par la cible avec un second
+     *     flush. Hibernate emet les UPDATE dans l'ordre d'entree des entites dans le contexte de
+     *     persistance, pas dans l'ordre des save() : si la cible y est entree la premiere
+     *     (open-in-view, compte connecte), un flush unique poserait l'identifiant sur la cible
+     *     alors que la source le porte encore. Les contraintes {@code unique_strava_id},
+     *     {@code unique_google_id}, {@code unique_facebook_id}, {@code strava_user_name} et
+     *     {@code team_id} ne sont PAS partielles (contrairement a l'index email), un identifiant
+     *     laisse sur un compte mort bloquerait definitivement le compte conserve ;</li>
      * <li>tables enfants, en SQL natif : {@code Trip.participants} et
      *     {@code RideGroup.participants} sont EAGER, les charger tirerait tout le graphe ;</li>
      * <li>recalcul des compteurs de notes, invalidation des tokens, image de profil.</li>
@@ -153,14 +157,16 @@ public class UserMergeService {
         final int roles = mergeRoles(source, target);
 
         mergeScalars(source, target);
-        releaseUniqueIdentifiers(source, target);
+        final TakenOverIdentifiers takenOver = releaseUniqueIdentifiers(source, target);
 
-        userRepository.save(target);
+        // deux flushs, dans cet ordre : la source libere d'abord ses identifiants en base, la
+        // cible ne les reprend qu'ensuite (voir la javadoc sur l'ordre des UPDATE). Le second
+        // flush doit en outre preceder les requetes natives, qui videront le contexte.
         userRepository.save(source);
+        entityManager.flush();
 
-        // le flush doit preceder les requetes natives : sans lui les identifiants uniques ne sont
-        // pas encore liberes en base au moment ou les UPDATE tournent, et la transaction mourrait
-        // sur une contrainte au flush final.
+        takenOver.applyTo(target);
+        userRepository.save(target);
         entityManager.flush();
 
         // --- tables enfants, en SQL natif ---
@@ -239,6 +245,9 @@ public class UserMergeService {
     /**
      * Champs du compte, toujours selon la meme regle : la cible ne perd jamais une valeur
      * qu'elle possede deja, elle ne fait que combler ses trous.
+     * <p>
+     * Les colonnes uniques n'y figurent pas : elles sont reprises par
+     * {@link #releaseUniqueIdentifiers}, apres liberation en base.
      */
     private void mergeScalars(User source, User target) {
 
@@ -252,23 +261,6 @@ public class UserMergeService {
             target.setCity(source.getCity());
         }
 
-        if (source.getStravaId() != null && target.getStravaId() == null) {
-            target.setStravaId(source.getStravaId());
-            target.setStravaUserName(source.getStravaUserName());
-        }
-
-        if (!Strings.isBlank(source.getEmail()) && Strings.isBlank(target.getEmail())) {
-            // setVerifiedEmail des lors que la source avait prouve l'adresse : setEmail
-            // remettrait emailVerified a false et ferait perdre a la cible la seule identite
-            // de connexion que la fusion etait censee lui apporter.
-            if (source.isEmailVerified()) {
-                target.setVerifiedEmail(source.getEmail());
-            } else {
-                target.setEmail(source.getEmail());
-            }
-            source.setEmail(null);
-        }
-
         // le mot de passe de la source est detruit par le soft delete juste apres : sans cette
         // reprise, fusionner un compte email/mot de passe dans un compte Strava nu laisserait
         // la cible incomplete et bloquee sur l'ecran de completion.
@@ -277,21 +269,9 @@ public class UserMergeService {
             target.setPasswordUpdatedAt(source.getPasswordUpdatedAt());
         }
 
-        if (!Strings.isBlank(source.getGoogleId()) && Strings.isBlank(target.getGoogleId())) {
-            target.setGoogleId(source.getGoogleId());
-        }
-        if (!Strings.isBlank(source.getFacebookId()) && Strings.isBlank(target.getFacebookId())) {
-            target.setFacebookId(source.getFacebookId());
-        }
-
         if (!Strings.isBlank(source.getGarminToken()) && Strings.isBlank(target.getGarminToken())) {
             target.setGarminToken(source.getGarminToken());
             target.setGarminTokenSecret(source.getGarminTokenSecret());
-        }
-
-        // equipe privee : reprise seulement si la cible n'en a pas (colonne unique).
-        if (source.getTeamId() != null && target.getTeamId() == null) {
-            target.setTeamId(source.getTeamId());
         }
 
         target.setAdmin(source.isAdmin() || target.isAdmin());
@@ -302,23 +282,39 @@ public class UserMergeService {
     }
 
     /**
-     * Libere sur la source TOUS les identifiants uniques, qu'ils aient ete repris ou non.
+     * Libere sur la source TOUS les identifiants uniques, qu'ils aient ete repris ou non, et
+     * retourne ceux que la cible reprendra une fois la liberation flushee.
      * <p>
-     * Un identifiant que la cible n'a pas pu reprendre (parce qu'elle en portait deja un) resterait
-     * sinon pose sur un compte mort et interdirait definitivement de relier cette identite au
-     * compte conserve : {@code unique_strava_id}, {@code unique_google_id} et
-     * {@code unique_facebook_id} sont des contraintes totales, elles ne filtrent pas sur
-     * {@code deletion}.
+     * La cible reprend selon la regle habituelle (elle ne fait que combler ses trous). Un
+     * identifiant qu'elle ne peut pas reprendre resterait sinon pose sur un compte mort et
+     * interdirait definitivement de relier cette identite au compte conserve :
+     * {@code unique_strava_id}, {@code unique_google_id} et {@code unique_facebook_id} sont des
+     * contraintes totales, elles ne filtrent pas sur {@code deletion}.
      * <p>
      * L'email est la seule exception : l'index fonctionnel
-     * {@code unique_user_email_lower ... where deletion = false} libere deja l'adresse, et
-     * conserver la valeur permet un rattrapage en cas d'erreur. Elle n'est effacee que si la
-     * cible l'a reprise (fait dans {@link #mergeScalars}).
+     * {@code unique_user_email_lower ... where deletion = false} libere deja l'adresse une fois
+     * la source supprimee, et conserver la valeur permet un rattrapage en cas d'erreur. Elle
+     * n'est effacee que si la cible la reprend.
      * <p>
-     * {@code teamId} n'est libere que s'il a ete repris : sinon l'equipe privee resterait
+     * {@code teamId} n'est libere que s'il est repris : sinon l'equipe privee resterait
      * orpheline au lieu d'etre supprimee avec son proprietaire.
      */
-    private void releaseUniqueIdentifiers(User source, User target) {
+    private TakenOverIdentifiers releaseUniqueIdentifiers(User source, User target) {
+
+        final boolean strava = source.getStravaId() != null && target.getStravaId() == null;
+        final boolean email = !Strings.isBlank(source.getEmail()) && Strings.isBlank(target.getEmail());
+        final boolean google = !Strings.isBlank(source.getGoogleId()) && Strings.isBlank(target.getGoogleId());
+        final boolean facebook = !Strings.isBlank(source.getFacebookId()) && Strings.isBlank(target.getFacebookId());
+        final boolean team = source.getTeamId() != null && target.getTeamId() == null;
+
+        final TakenOverIdentifiers takenOver = new TakenOverIdentifiers(
+                strava ? source.getStravaId() : null,
+                strava ? source.getStravaUserName() : null,
+                email ? source.getEmail() : null,
+                email && source.isEmailVerified(),
+                google ? source.getGoogleId() : null,
+                facebook ? source.getFacebookId() : null,
+                team ? source.getTeamId() : null);
 
         source.setStravaId(null);
         // bug corrige : stravaUserName etait recopie sur la cible mais jamais libere ici, ce qui
@@ -329,8 +325,53 @@ public class UserMergeService {
         source.setGarminToken(null);
         source.setGarminTokenSecret(null);
 
-        if (source.getTeamId() != null && source.getTeamId().equals(target.getTeamId())) {
+        if (email) {
+            source.setEmail(null);
+        }
+        if (team) {
             source.setTeamId(null);
+        }
+
+        return takenOver;
+
+    }
+
+    /**
+     * Identifiants uniques retires a la source, a poser sur la cible apres le flush de la source.
+     * Un champ null signifie que la cible garde sa propre valeur.
+     */
+    private record TakenOverIdentifiers(Long stravaId, String stravaUserName, String email,
+                                        boolean emailVerified, String googleId, String facebookId,
+                                        String teamId) {
+
+        void applyTo(User target) {
+
+            if (stravaId != null) {
+                target.setStravaId(stravaId);
+                target.setStravaUserName(stravaUserName);
+            }
+
+            if (email != null) {
+                // setVerifiedEmail des lors que la source avait prouve l'adresse : setEmail
+                // remettrait emailVerified a false et ferait perdre a la cible la seule identite
+                // de connexion que la fusion etait censee lui apporter.
+                if (emailVerified) {
+                    target.setVerifiedEmail(email);
+                } else {
+                    target.setEmail(email);
+                }
+            }
+
+            if (googleId != null) {
+                target.setGoogleId(googleId);
+            }
+            if (facebookId != null) {
+                target.setFacebookId(facebookId);
+            }
+            if (teamId != null) {
+                target.setTeamId(teamId);
+            }
+
         }
 
     }
