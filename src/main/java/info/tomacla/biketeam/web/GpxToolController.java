@@ -251,9 +251,10 @@ public class GpxToolController extends AbstractController {
     @RequestMapping(value = "/{uuid}/fit", method = RequestMethod.GET, produces = "application/fit")
     public ResponseEntity<byte[]> getFitFile(@PathVariable("uuid") String uuid) {
 
-        if (fileService.fileExists(FileRepositories.GPXTOOLVIEWER, uuid + ".gpx")) {
+        Optional<Path> gpxFile = gpxService.getGpxFile(uuid);
+        if (gpxFile.isPresent()) {
             try {
-                Path file = fileService.getFile(FileRepositories.GPXTOOLVIEWER, uuid + ".gpx");
+                Path file = gpxService.getAsFit(gpxFile.get(), null);
 
                 HttpHeaders headers = new HttpHeaders();
                 headers.add("Content-Type", "application/vnd.ant.fit");
@@ -269,7 +270,7 @@ public class GpxToolController extends AbstractController {
 
 
             } catch (IOException e) {
-                throw new ServerErrorException("Error while reading gpx : " + uuid, e);
+                throw new ServerErrorException("Error while reading fit : " + uuid, e);
             }
 
         }
