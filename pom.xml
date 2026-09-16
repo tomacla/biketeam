@@ -39,8 +39,20 @@
 		<scribejava-core.version>8.3.3</scribejava-core.version>
 		<jacoco.version>0.8.15</jacoco.version>
 		<webauthn4j.version>0.31.10.RELEASE</webauthn4j.version>
+		<!-- Jackson 3 (requis par webauthn4j) reutilise les annotations de Jackson 2 et exige la 2.22 -->
+		<jackson-annotations.version>2.22</jackson-annotations.version>
 		<spring-boot.build-image.imageName>github.com/tomacla/biketeam:latest</spring-boot.build-image.imageName>
 	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-annotations</artifactId>
+				<version>${jackson-annotations.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<dependencies>
 
@@ -90,8 +102,9 @@
 		</dependency>
 
 		<!-- Verification des assertions et attestations WebAuthn (passkeys).
-		     webauthn4j embarque Jackson 3 (tools.jackson), qui cohabite sans conflit avec le
-		     Jackson 2 (com.fasterxml) de Spring Boot : les deux espaces de noms sont disjoints. -->
+		     webauthn4j embarque Jackson 3 (tools.jackson), qui cohabite avec le Jackson 2
+		     (com.fasterxml) de Spring Boot, mais partage le module jackson-annotations :
+		     sa version est forcee dans dependencyManagement. -->
 		<dependency>
 			<groupId>com.webauthn4j</groupId>
 			<artifactId>webauthn4j-core</artifactId>
