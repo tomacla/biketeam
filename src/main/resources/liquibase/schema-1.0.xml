@@ -1586,4 +1586,244 @@
         </addColumn>
     </changeSet>
 
+    <!-- ================================================================
+         Connexion email / mot de passe (login-password-*)
+         ================================================================ -->
+
+    <changeSet id="login-password-user-columns" author="tomacla">
+        <addColumn tableName="user_account">
+            <column name="password_hash" type="VARCHAR(100)"/>
+            <column name="email_verified" type="BOOLEAN"/>
+            <column name="password_updated_at" type="TIMESTAMP"/>
+            <!-- VARCHAR(255) et non 64 : initialise avec la valeur de "id" (voir plus bas),
+                 qui peut occuper jusqu'a 255 caracteres selon le generateur d'id historique -->
+            <column name="auth_token_seed" type="VARCHAR(255)"/>
+        </addColumn>
+        <sql>update user_account set email_verified = false</sql>
+        <!-- compatibilite ascendante des cookies remember-me deja emis :
+             la signature actuelle est calculee avec password = id utilisateur -->
+        <sql>update user_account set auth_token_seed = id where auth_token_seed is null</sql>
+        <addNotNullConstraint tableName="user_account" columnName="email_verified" columnDataType="BOOLEAN"/>
+        <addNotNullConstraint tableName="user_account" columnName="auth_token_seed" columnDataType="VARCHAR(255)"/>
+    </changeSet>
+
+    <changeSet id="login-password-email-conflict-table" author="tomacla">
+        <!-- Table d'audit des comptes dont l'email a ete retire lors de la deduplication
+             insensible a la casse : rien n'est perdu silencieusement, tout est retrouvable ici. -->
+        <createTable tableName="user_email_conflict">
+            <column name="user_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(150)"/>
+            <column name="kept_user_id" type="VARCHAR(255)"/>
+            <column name="detected_at" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <!--
+        AVERTISSEMENT D'EXPLOITATION :
+        la deduplication ci-dessous modifie des donnees de production de facon irreversible
+        (mise a null de l'email des comptes "perdants"). Avant toute application en production :
+          1. executer d'abord le SELECT de detection seul sur un dump de la base ;
+          2. relire le contenu qu'il produirait dans user_email_conflict ;
+          3. appliquer seulement ensuite ce changeset sur la base reelle.
+    -->
+    <changeSet id="login-password-email-dedup" author="tomacla">
+        <!--
+            L'ancienne contrainte unique_email porte sur TOUTES les lignes (elle est anterieure a
+            la colonne deletion) et est sensible a la casse. Elle doit donc etre supprimee AVANT
+            la normalisation en minuscules ci-dessous : un compte supprime portant "foo@bar.com"
+            face a un compte actif "Foo@Bar.com" est legal aujourd'hui, et la mise en minuscules
+            violerait la contrainte -> echec du changeset, donc du demarrage de l'application.
+            Le changeset login-password-email-unique-index qui suit rejoue ce drop (if exists),
+            il reste donc idempotent sur une base divergente.
+        -->
+        <sql>alter table user_account drop constraint if exists unique_email</sql>
+        <!--
+            La contrainte unique_email (changeset FIX-DUPLICATE-OPENID) existe deja : seuls des
+            doublons a la casse pres sont possibles ("Foo@Bar.com" vs "foo@bar.com"). La table
+            user_account n'a pas de colonne created_at : "garder le plus ancien" n'est donc pas
+            implementable. Strategie retenue, deterministe et documentee : le gagnant est le
+            compte porteur d'une identite Google/Facebook (email reellement prouve par un IdP),
+            a defaut le plus petit id.
+        -->
+        <sql><![CDATA[
+insert into user_email_conflict (user_id, email, kept_user_id, detected_at)
+select loser.id, loser.email, winner.id, now()
+from (
+  select id, email, lower(trim(email)) as norm,
+         row_number() over (partition by lower(trim(email))
+           order by (case when google_id is not null or facebook_id is not null then 0 else 1 end), id) as rn
+  from user_account where email is not null and deletion = false
+) loser
+join (
+  select id, lower(trim(email)) as norm,
+         row_number() over (partition by lower(trim(email))
+           order by (case when google_id is not null or facebook_id is not null then 0 else 1 end), id) as rn
+  from user_account where email is not null and deletion = false
+) winner on winner.norm = loser.norm and winner.rn = 1
+where loser.rn > 1;
+
+update user_account set email = null, email_verified = false
+ where id in (select user_id from user_email_conflict);
+
+update user_account set email = lower(trim(email))
+ where email is not null and email <> lower(trim(email));
+]]></sql>
+    </changeSet>
+
+    <changeSet id="login-password-email-verified-backfill" author="tomacla">
+        <!--
+            AUCUN email n'est promu "verifie" par la migration, y compris sur les comptes portant
+            une identite Google/Facebook.
+            Raison : "porter un google_id/facebook_id" ne prouve PAS que l'adresse vienne du
+            fournisseur. L'ancien formulaire /users/me permettait de saisir n'importe quelle
+            adresse sur son propre compte, y compris sur un compte deja lie a Google. Promouvoir
+            ces adresses en identites de connexion verifiees reouvrirait exactement l'usurpation
+            que le repli "recherche par email" des handlers OAuth2 cherche a fermer : la victime
+            se connectant pour la premiere fois avec Google atterrirait dans le compte de celui
+            qui a revendique son adresse.
+            Consequence assumee : email_verified ne vaut true que par une preuve reelle de
+            controle de la boite (lien de verification, reinitialisation de mot de passe, ou
+            connexion Google/Facebook qui repose setVerifiedEmail). Les comptes Google/Facebook
+            existants retrouvent donc le drapeau a leur prochaine connexion, sans action manuelle
+            et sans perte d'acces (ils restent "complets" par leur identite externe).
+            Requete d'audit avant/apres migration :
+              select id, email, google_id, facebook_id from user_account
+               where email is not null and (google_id is not null or facebook_id is not null);
+        -->
+        <sql>update user_account set email_verified = false where email_verified is null</sql>
+    </changeSet>
+
+    <changeSet id="login-password-email-unique-index" author="tomacla">
+        <!-- unicite insensible a la casse : impossible avec addUniqueConstraint.
+             index partiel pour que les comptes soft-deleted ne bloquent pas la reutilisation
+             de l'adresse. drop constraint if exists plutot que dropUniqueConstraint pour ne
+             pas echouer sur une base divergente. -->
+        <sql>alter table user_account drop constraint if exists unique_email</sql>
+        <sql>create unique index unique_user_email_lower on user_account (lower(email))
+             where email is not null and deletion = false</sql>
+        <rollback>
+            <sql>drop index if exists unique_user_email_lower</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="login-password-auth-token-table" author="tomacla">
+        <createTable tableName="user_auth_token">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="token_hash" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_email" type="VARCHAR(150)"/>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expires_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="consumed_at" type="TIMESTAMP"/>
+        </createTable>
+        <addPrimaryKey tableName="user_auth_token" columnNames="id"/>
+        <addForeignKeyConstraint baseTableName="user_auth_token" baseColumnNames="user_id"
+                                  referencedTableName="user_account" referencedColumnNames="id"
+                                  constraintName="fk_user_auth_token_user" onDelete="CASCADE"/>
+        <createIndex tableName="user_auth_token" indexName="uk_user_auth_token_hash" unique="true">
+            <column name="token_hash"/>
+        </createIndex>
+        <createIndex tableName="user_auth_token" indexName="idx_user_auth_token_user_type">
+            <column name="user_id"/>
+            <column name="type"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="account-merge-token-related-user" author="tomacla">
+        <!-- Second compte implique par un token ACCOUNT_MERGE : le compte destinataire du lien
+             de rattachement, celui que la fusion conservera. Epingle a l'emission plutot que
+             reresolu par target_email a la consommation : entre les deux, l'adresse peut avoir
+             change de proprietaire.
+             ON DELETE CASCADE : un token qui designe un compte disparu n'a plus d'objet. -->
+        <addColumn tableName="user_auth_token">
+            <column name="related_user_id" type="VARCHAR(255)"/>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="user_auth_token" baseColumnNames="related_user_id"
+                                 referencedTableName="user_account" referencedColumnNames="id"
+                                 constraintName="fk_user_auth_token_related_user" onDelete="CASCADE"/>
+        <createIndex tableName="user_auth_token" indexName="idx_user_auth_token_related_user">
+            <column name="related_user_id"/>
+            <column name="type"/>
+        </createIndex>
+        <rollback>
+            <dropIndex tableName="user_auth_token" indexName="idx_user_auth_token_related_user"/>
+            <dropForeignKeyConstraint baseTableName="user_auth_token" constraintName="fk_user_auth_token_related_user"/>
+            <dropColumn tableName="user_auth_token" columnName="related_user_id"/>
+        </rollback>
+    </changeSet>
+
+
+    <changeSet id="passkey-table" author="tomacla">
+        <!--
+            Une passkey ne contient aucun secret : seule la cle PUBLIQUE est stockee
+            (attested_credential_data, au format webauthn4j : AAGUID + credential id + cle COSE).
+            Sa fuite ne permet pas de se connecter, seulement de verifier une signature.
+        -->
+        <createTable tableName="user_passkey">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="credential_id" type="VARCHAR(500)">
+                <constraints nullable="false"/>
+            </column>
+            <!-- BYTEA et non BLOB : sur PostgreSQL, le type abstrait BLOB de Liquibase produit un
+                 "oid" (large object), alors qu'Hibernate ecrit un byte[] en "bytea". Le decalage
+                 ne se voit pas a la migration, seulement au premier insert :
+                 "column is of type oid but expression is of type bytea". -->
+            <column name="attested_credential_data" type="BYTEA">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sign_count" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="uv_initialized" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="backup_eligible" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="backed_up" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="transports" type="VARCHAR(100)"/>
+            <column name="label" type="VARCHAR(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_used_at" type="TIMESTAMP"/>
+        </createTable>
+        <addPrimaryKey tableName="user_passkey" columnNames="id"/>
+        <addForeignKeyConstraint baseTableName="user_passkey" baseColumnNames="user_id"
+                                  referencedTableName="user_account" referencedColumnNames="id"
+                                  constraintName="fk_user_passkey_user" onDelete="CASCADE"/>
+        <!-- l'unicite du credential id est une exigence du protocole : c'est la seule cle de
+             recherche disponible a la connexion, un doublon rendrait la resolution ambigue -->
+        <createIndex tableName="user_passkey" indexName="uk_user_passkey_credential_id" unique="true">
+            <column name="credential_id"/>
+        </createIndex>
+        <createIndex tableName="user_passkey" indexName="idx_user_passkey_user">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>

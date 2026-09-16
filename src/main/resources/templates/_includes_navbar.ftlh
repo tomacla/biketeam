@@ -68,6 +68,11 @@
             <li class="nav-item">
                 <a class="nav-link" href="<@common.teamUrl '' '/users/me' />"><img class="rounded" height="24" src="<@common.teamUrl '' '/users/${_user.id}/image' />" alt="profile"></a>
             </li>
+            <#if (_account_completion_needed!false)>
+            <li class="nav-item">
+                <a class="nav-link" href="<@common.teamUrl '' '/account/complete' />"><span class="badge bg-warning text-dark">Compte à compléter</span></a>
+            </li>
+            </#if>
             <#if _notifications?? && _notifications?size gt 0>
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="notification-dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"><span class="text-danger"><i class="bi bi-bell-fill"></i></span></a>

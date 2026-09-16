@@ -7,6 +7,9 @@ import info.tomacla.biketeam.domain.userrole.UserRole;
 import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.security.SecureRandom;
+import java.time.Instant;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -15,6 +18,8 @@ import java.util.UUID;
 @Entity
 @Table(name = "user_account")
 public class User {
+
+    private static final SecureRandom SEED_RANDOM = new SecureRandom();
 
     @Id
     @UuidGenerator
@@ -49,6 +54,14 @@ public class User {
     private boolean emailPublishRides;
     @Column(name = "email_publish_publications")
     private boolean emailPublishPublications;
+    @Column(name = "password_hash")
+    private String passwordHash;
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified = false;
+    @Column(name = "password_updated_at")
+    private Instant passwordUpdatedAt;
+    @Column(name = "auth_token_seed")
+    private String authTokenSeed;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<UserRole> roles = new HashSet<>();
 
@@ -155,11 +168,93 @@ public class User {
     }
 
     public void setEmail(String email) {
-        if (Strings.isEmail(email)) {
-            this.email = email.toLowerCase();
-        } else {
-            this.email = null;
+        String normalized = (email == null) ? null : email.trim().toLowerCase();
+        if (normalized != null && !Strings.isEmail(normalized)) {
+            normalized = null;
         }
+        if (!Objects.equals(this.email, normalized)) {
+            this.emailVerified = false;
+        }
+        this.email = normalized;
+    }
+
+    /**
+     * A n'utiliser que par les handlers OAuth2 (Google/Facebook) et par la consommation
+     * d'un token de verification d'email : pose l'email ET le marque comme verifie.
+     */
+    public void setVerifiedEmail(String email) {
+        setEmail(email);
+        this.emailVerified = (this.email != null);
+    }
+
+    public boolean isEmailVerified() {
+        return emailVerified;
+    }
+
+    public void setEmailVerified(boolean emailVerified) {
+        this.emailVerified = emailVerified;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public Instant getPasswordUpdatedAt() {
+        return passwordUpdatedAt;
+    }
+
+    public void setPasswordUpdatedAt(Instant passwordUpdatedAt) {
+        this.passwordUpdatedAt = passwordUpdatedAt;
+    }
+
+    public String getAuthTokenSeed() {
+        return authTokenSeed;
+    }
+
+    public void setAuthTokenSeed(String authTokenSeed) {
+        this.authTokenSeed = authTokenSeed;
+    }
+
+    /**
+     * auth_token_seed est NOT NULL en base et sert de secret de signature aux cookies
+     * remember-me (voir OAuth2UserDetails.getPassword()). Ce filet garantit sa presence
+     * quel que soit le chemin de creation du compte (UserService ou repository directement).
+     */
+    @PrePersist
+    void initAuthTokenSeed() {
+        if (this.authTokenSeed == null) {
+            byte[] bytes = new byte[32];
+            SEED_RANDOM.nextBytes(bytes);
+            this.authTokenSeed = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+        }
+    }
+
+    /**
+     * Compte disposant d'une connexion par email + mot de passe verifiee.
+     */
+    public boolean hasPasswordLogin() {
+        return email != null && emailVerified && passwordHash != null;
+    }
+
+    /**
+     * Compte lie a une identite externe forte (Google ou Facebook).
+     */
+    public boolean hasExternalIdentity() {
+        return googleId != null || facebookId != null;
+    }
+
+    /**
+     * Compte "complet" au sens produit : il dispose d'au moins un moyen de connexion
+     * perenne (email + mot de passe verifies, ou Google/Facebook lie).
+     * Un compte Strava seul (sans email verifie ni mot de passe, sans Google/Facebook)
+     * est incomplet et doit etre force a se completer.
+     */
+    public boolean isAccountComplete() {
+        return hasPasswordLogin() || hasExternalIdentity();
     }
 
     public boolean isEmailPublishTrips() {

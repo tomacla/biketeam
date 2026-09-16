@@ -37,6 +37,8 @@
 		<postgresql.version>42.7.13</postgresql.version>
 		<thumbnailator.version>0.4.21</thumbnailator.version>
 		<scribejava-core.version>8.3.3</scribejava-core.version>
+		<jacoco.version>0.8.15</jacoco.version>
+		<webauthn4j.version>0.31.10.RELEASE</webauthn4j.version>
 		<spring-boot.build-image.imageName>github.com/tomacla/biketeam:latest</spring-boot.build-image.imageName>
 	</properties>
 
@@ -85,6 +87,15 @@
 			<groupId>com.github.scribejava</groupId>
 			<artifactId>scribejava-core</artifactId>
 			<version>${scribejava-core.version}</version>
+		</dependency>
+
+		<!-- Verification des assertions et attestations WebAuthn (passkeys).
+		     webauthn4j embarque Jackson 3 (tools.jackson), qui cohabite sans conflit avec le
+		     Jackson 2 (com.fasterxml) de Spring Boot : les deux espaces de noms sont disjoints. -->
+		<dependency>
+			<groupId>com.webauthn4j</groupId>
+			<artifactId>webauthn4j-core</artifactId>
+			<version>${webauthn4j.version}</version>
 		</dependency>
 
 		<dependency>
@@ -159,6 +170,26 @@
 				<configuration>
 					<executable>true</executable>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
