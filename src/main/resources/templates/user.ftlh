@@ -1,7 +1,5 @@
 <#include "_includes_head.ftlh">
 
-<@common.csrfMeta />
-
 <div class="row pt-2 justify-content-center">
 
      <script type="text/javascript">
