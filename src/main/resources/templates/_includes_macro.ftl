@@ -1,3 +1,12 @@
+<#--
+  Expose le jeton CSRF aux requetes fetch (passkeys).
+  A n'inclure QUE sur les pages qui posent deja un jeton dans un formulaire : lire _csrf.token
+  force sa generation, donc la creation d'une session HTTP. Sur une page publique, cela
+  reviendrait a ouvrir une session pour chaque visiteur anonyme.
+-->
+<#macro csrfMeta><#if _csrf??><meta name="_csrf" content="${_csrf.token}">
+<meta name="_csrf_header" content="${_csrf.headerName}"></#if></#macro>
+
 <#macro teamUrlPrefix teamId>${_siteUrl}<#if teamId != ''>/${teamId}</#if></#macro>
 <#macro teamUrl teamId targetUrl><@common.teamUrlPrefix teamId />${targetUrl}</#macro>
 

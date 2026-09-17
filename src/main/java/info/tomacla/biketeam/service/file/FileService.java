@@ -129,6 +129,18 @@ public class FileService {
         }
     }
 
+    /**
+     * Suppression d'un fichier range a plat dans un depot sans equipe (USER_IMAGES notamment).
+     */
+    public void deleteFile(String directory, String fileName) {
+        try {
+            Files.deleteIfExists(Path.of(fileRepository, directory, fileName));
+        } catch (IOException e) {
+            log.error("Unable to delete file : " + fileName, e);
+            throw new RuntimeException("Unable to delete file : " + fileName, e);
+        }
+    }
+
     public void storeFile(Path file, String directory, String teamId, String fileName) {
         try {
             Files.createDirectories(Path.of(fileRepository, directory, teamId));

@@ -28,4 +28,14 @@ public interface MessageRepository extends CrudRepository<Message, String>, Pagi
     @Query(value = "delete from message where target_id = :targetId", nativeQuery = true)
     void deleteByTargetId(@Param("targetId") String targetId);
 
+
+    /**
+     * Fusion de comptes : les messages du compte absorbe sont reattribues au compte conserve.
+     * Aucune contrainte d'unicite sur message.user_id, un simple update suffit.
+     */
+    @Transactional
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query(value = "update message set user_id = :targetId where user_id = :sourceId", nativeQuery = true)
+    int moveToUser(@Param("sourceId") String sourceId, @Param("targetId") String targetId);
+
 }

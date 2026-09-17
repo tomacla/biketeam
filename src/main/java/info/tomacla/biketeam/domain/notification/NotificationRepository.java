@@ -28,4 +28,13 @@ public interface NotificationRepository extends CrudRepository<Notification, Str
     @Query(value = "delete from notification where (viewed = true and created_at < (NOW() - interval '2 months')) OR (viewed = false AND created_at < (NOW() - interval '6 months'))", nativeQuery = true)
     void deleteOld();
 
+
+    /**
+     * Fusion de comptes : les notifications du compte absorbe suivent le compte conserve.
+     */
+    @Transactional
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query(value = "update notification set user_id = :targetId where user_id = :sourceId", nativeQuery = true)
+    int moveToUser(@Param("sourceId") String sourceId, @Param("targetId") String targetId);
+
 }
