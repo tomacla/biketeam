@@ -13,11 +13,13 @@ import info.tomacla.biketeam.service.UserService;
 import info.tomacla.biketeam.service.url.UrlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.ui.Model;
+import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -191,8 +193,7 @@ public abstract class AbstractController {
     }
 
     protected Team checkTeam(String teamId) {
-        // FIXME redirect exception to root
-        return teamService.get(teamId).orElseThrow(() -> new IllegalArgumentException("Unknown team " + teamId));
+        return teamService.get(teamId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown team " + teamId));
     }
 
 

@@ -17,6 +17,7 @@ import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.service.url.UrlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import jakarta.servlet.DispatcherType;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -119,6 +120,10 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth -> {
 
             // request matchers is using old style ant_path_matcher (see application.properties)
+
+            // pages d'erreur : le forward vers /error matcherait sinon /{teamId}/** (teamId = "error")
+            auth.dispatcherTypeMatchers(DispatcherType.ERROR).permitAll();
+            auth.requestMatchers("/error").permitAll();
 
             // static
             auth.requestMatchers("/css/**", "/js/**", "/jsf/**", "/img/**", "/*/image", "/legal-mentions", "/robots.txt", "/misc/**").permitAll();
