@@ -3,6 +3,7 @@ package info.tomacla.biketeam.web;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.security.Authorities;
 import info.tomacla.biketeam.security.OAuth2UserDetails;
+import info.tomacla.biketeam.security.passkey.PasskeySuggestionService;
 import info.tomacla.biketeam.service.NotificationService;
 import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.service.url.UrlService;
@@ -37,6 +38,8 @@ public final class ControllerTestSupport {
         ReflectionTestUtils.setField(controller, "teamService", mock(TeamService.class));
         ReflectionTestUtils.setField(controller, "notificationService", mock(NotificationService.class));
         ReflectionTestUtils.setField(controller, "urlService", mock(UrlService.class));
+        // mock neutre : suggestionNeeded() repond false, aucun bandeau passkey dans les vues
+        ReflectionTestUtils.setField(controller, "passkeySuggestionService", mock(PasskeySuggestionService.class));
         ReflectionTestUtils.setField(controller, "siteName", "BikeTeam");
 
         return build(controller);

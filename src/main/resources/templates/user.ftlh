@@ -1,7 +1,5 @@
 <#include "_includes_head.ftlh">
 
-<@common.csrfMeta />
-
 <div class="row pt-2 justify-content-center">
 
      <script type="text/javascript">
@@ -195,9 +193,9 @@
             <h5>Passkeys</h5>
 
             <p class="text-muted small">
-                Une passkey remplace le mot de passe par l'empreinte, le visage ou le code de
-                votre appareil. Votre mot de passe et vos comptes liés restent actifs : une
-                passkey s'ajoute à vos moyens de connexion, elle n'en remplace aucun.
+                Une passkey vous identifie avec vos appareils, sans mot de passe à saisir.
+                Votre mot de passe et vos comptes liés restent actifs : une passkey s'ajoute
+                à vos moyens de connexion, elle n'en remplace aucun.
             </p>
 
             <#if passkeys?has_content>
@@ -238,6 +236,7 @@
                     <div class="form-text">Sert uniquement à la reconnaître dans cette liste.</div>
                 </div>
                 <button type="button" class="btn btn-secondary" id="passkey-register-button"
+                        data-passkey-register
                         data-options-url="<@common.teamUrl '' '/users/me/passkeys/options' />"
                         data-register-url="<@common.teamUrl '' '/users/me/passkeys' />"
                         data-label-id="passkey-label"

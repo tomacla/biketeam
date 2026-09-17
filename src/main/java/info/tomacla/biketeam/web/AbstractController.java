@@ -6,6 +6,7 @@ import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.security.OAuth2UserDetails;
 import info.tomacla.biketeam.security.completion.AccountCompletionService;
+import info.tomacla.biketeam.security.passkey.PasskeySuggestionService;
 import info.tomacla.biketeam.security.session.SecurityContextService;
 import info.tomacla.biketeam.service.NotificationService;
 import info.tomacla.biketeam.service.TeamService;
@@ -48,6 +49,9 @@ public abstract class AbstractController {
 
     @Autowired
     protected AccountCompletionService accountCompletionService;
+
+    @Autowired
+    private PasskeySuggestionService passkeySuggestionService;
 
     @Value("${site.name}")
     private String siteName;
@@ -94,6 +98,7 @@ public abstract class AbstractController {
         model.addAttribute("_embed", false);
         model.addAttribute("_fullSize", false);
         model.addAttribute("_account_completion_needed", false);
+        model.addAttribute("_passkey_suggestion_needed", false);
 
         if (session != null && session.getId() != null) {
             model.addAttribute("_session", session.getId());
@@ -117,8 +122,14 @@ public abstract class AbstractController {
             model.addAttribute("_notifications", notificationService.listUnviewedByUser(user));
 
             // bandeau et badge d'incitation : le mode OFF doit les faire disparaitre tous les deux
-            model.addAttribute("_account_completion_needed",
-                    !user.isAccountComplete() && accountCompletionService.suggestionEnabled());
+            final boolean accountCompletionNeeded =
+                    !user.isAccountComplete() && accountCompletionService.suggestionEnabled();
+            model.addAttribute("_account_completion_needed", accountCompletionNeeded);
+
+            // la passkey passe en second rang : on n'empile pas deux bandeaux, et la completion
+            // de compte a une echeance ferme (fin de la connexion Strava) que rien ne doit diluer
+            model.addAttribute("_passkey_suggestion_needed",
+                    !accountCompletionNeeded && passkeySuggestionService.suggestionNeeded(user));
 
         });
 

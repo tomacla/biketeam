@@ -30,6 +30,15 @@
 
     <title>${_pagetitle}</title>
 
+    <#--
+        Jeton CSRF expose a tous les appels JSON de passkey.js. Il doit etre pose sur TOUTES les
+        pages d'un utilisateur connecte, et non sur les seules /users/me et /login : le bandeau
+        d'incitation a enregistrer une passkey s'affiche partout, et son POST serait rejete par
+        le CsrfFilter - qui forwarde alors vers "/" en conservant la methode POST (voir
+        CustomAccessDeniedHandler), d'ou un "POST / not supported" trompeur dans les logs.
+    -->
+    <#if (_authenticated!false)><@common.csrfMeta /></#if>
+
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -77,8 +86,11 @@
 
     <#if !_embed>
         <#include "_includes_navbar.ftlh">
+        <#-- un seul bandeau a la fois : la completion de compte a une echeance ferme, la passkey non -->
         <#if (_account_completion_needed!false)>
             <#include "_includes_account_completion_banner.ftlh">
+        <#elseif (_passkey_suggestion_needed!false)>
+            <#include "_includes_passkey_banner.ftlh">
         </#if>
     </#if>
 
