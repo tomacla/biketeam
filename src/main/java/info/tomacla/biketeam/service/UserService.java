@@ -238,8 +238,10 @@ public class UserService {
             return true;
         }
 
-        final Team team = teamService.get(teamId).orElseThrow(() -> new IllegalArgumentException("Unknown team " + teamId));
-        if (team.isPublic()) {
+        // equipe inconnue (/favicon.ico, /sitemap.xml, scans de bots...) : rien a proteger,
+        // on laisse passer pour que MVC reponde un 404 plutot que de lever une exception dans le filtre
+        final Optional<Team> team = teamService.get(teamId);
+        if (team.isEmpty() || team.get().isPublic()) {
             return true;
         }
 
@@ -259,8 +261,10 @@ public class UserService {
             return true;
         }
 
-        final Team team = teamService.get(teamId).orElseThrow(() -> new IllegalArgumentException("Unknown team " + teamId));
-        if (team.isPublic()) {
+        // equipe inconnue (/favicon.ico, /sitemap.xml, scans de bots...) : rien a proteger,
+        // on laisse passer pour que MVC reponde un 404 plutot que de lever une exception dans le filtre
+        final Optional<Team> team = teamService.get(teamId);
+        if (team.isEmpty() || team.get().isPublic()) {
             return true;
         }
 
