@@ -53,6 +53,9 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.session.config.SessionRepositoryCustomizer;
+import org.springframework.session.jdbc.JdbcIndexedSessionRepository;
+import org.springframework.session.jdbc.PostgreSqlJdbcIndexedSessionRepositoryCustomizer;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -285,6 +288,25 @@ public class SecurityConfig {
     @Bean
     public CustomSessionIdResolver customCookieHttpSessionIdResolver() {
         return new CustomSessionIdResolver(urlService);
+    }
+
+    /**
+     * Ecriture des attributs de session en UPSERT (ON CONFLICT DO UPDATE) au lieu d'un INSERT sec.
+     * <p>
+     * Deux requetes concurrentes d'une meme session (une page et ses appels /notifications,
+     * /autocomplete...) chargent chacune leur copie de la session : si toutes deux posent un
+     * attribut pour la premiere fois, elles le voient toutes deux comme nouveau et l'INSERT de la
+     * seconde violait la cle primaire de SPRING_SESSION_ATTRIBUTES (DuplicateKeyException remontee
+     * en 500, par rafales, a chaque connexion).
+     * <p>
+     * Le customizer est fourni par spring-session-jdbc mais n'est pas enregistre automatiquement.
+     * Il doit passer APRES celui de Spring Boot, qui appelle setTableName() - ce qui reinitialise
+     * toutes les requetes : c'est le cas, celui de Spring Boot est @Order(HIGHEST_PRECEDENCE) et
+     * ce bean, sans ordre, est applique en dernier.
+     */
+    @Bean
+    public SessionRepositoryCustomizer<JdbcIndexedSessionRepository> postgreSqlSessionRepositoryCustomizer() {
+        return new PostgreSqlJdbcIndexedSessionRepositoryCustomizer();
     }
 
     @Bean
