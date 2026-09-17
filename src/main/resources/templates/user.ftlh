@@ -193,9 +193,9 @@
             <h5>Passkeys</h5>
 
             <p class="text-muted small">
-                Une passkey remplace le mot de passe par l'empreinte, le visage ou le code de
-                votre appareil. Votre mot de passe et vos comptes liés restent actifs : une
-                passkey s'ajoute à vos moyens de connexion, elle n'en remplace aucun.
+                Une passkey vous identifie avec vos appareils, sans mot de passe à saisir.
+                Votre mot de passe et vos comptes liés restent actifs : une passkey s'ajoute
+                à vos moyens de connexion, elle n'en remplace aucun.
             </p>
 
             <#if passkeys?has_content>

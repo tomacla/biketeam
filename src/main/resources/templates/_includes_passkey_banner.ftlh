@@ -14,9 +14,9 @@
      role="alert" data-passkey-supported-only hidden>
     <div class="container d-flex flex-wrap align-items-center justify-content-between gap-2">
         <div>
-            <i class="bi bi-fingerprint"></i>
+            <i class="bi bi-key-fill"></i>
             Connectez-vous plus vite et plus sûrement : activez une passkey pour vous identifier
-            avec l'empreinte, le visage ou le code de votre appareil.
+            avec vos appareils.
             <span class="d-block small" id="passkey-banner-status" hidden></span>
         </div>
         <button type="button" class="btn btn-sm btn-primary flex-shrink-0"
