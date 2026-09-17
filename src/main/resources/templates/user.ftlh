@@ -238,6 +238,7 @@
                     <div class="form-text">Sert uniquement à la reconnaître dans cette liste.</div>
                 </div>
                 <button type="button" class="btn btn-secondary" id="passkey-register-button"
+                        data-passkey-register
                         data-options-url="<@common.teamUrl '' '/users/me/passkeys/options' />"
                         data-register-url="<@common.teamUrl '' '/users/me/passkeys' />"
                         data-label-id="passkey-label"

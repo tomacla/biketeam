@@ -77,8 +77,11 @@
 
     <#if !_embed>
         <#include "_includes_navbar.ftlh">
+        <#-- un seul bandeau a la fois : la completion de compte a une echeance ferme, la passkey non -->
         <#if (_account_completion_needed!false)>
             <#include "_includes_account_completion_banner.ftlh">
+        <#elseif (_passkey_suggestion_needed!false)>
+            <#include "_includes_passkey_banner.ftlh">
         </#if>
     </#if>
 

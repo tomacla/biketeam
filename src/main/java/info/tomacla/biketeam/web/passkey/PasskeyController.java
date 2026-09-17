@@ -8,6 +8,7 @@ import info.tomacla.biketeam.security.passkey.PasskeyProperties;
 import info.tomacla.biketeam.security.passkey.PasskeyRegistrationBody;
 import info.tomacla.biketeam.security.passkey.PasskeyRegistrationService;
 import info.tomacla.biketeam.security.passkey.PasskeyService;
+import info.tomacla.biketeam.security.passkey.PasskeySuggestionService;
 import info.tomacla.biketeam.service.auth.RateLimitService;
 import info.tomacla.biketeam.web.AbstractController;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,6 +49,9 @@ public class PasskeyController extends AbstractController {
 
     @Autowired
     private PasskeyProperties passkeyProperties;
+
+    @Autowired
+    private PasskeySuggestionService passkeySuggestionService;
 
     @Autowired
     private RateLimitService rateLimitService;
@@ -102,6 +106,9 @@ public class PasskeyController extends AbstractController {
 
         final UserPasskey passkey = passkeyRegistrationService.finish(request, optionalUser.get(), body);
 
+        // le bandeau d'incitation n'a plus lieu d'etre : le cache de session dit encore le contraire
+        passkeySuggestionService.invalidate();
+
         return ResponseEntity.ok(Map.of("id", passkey.getId(), "label", passkey.getLabel()));
 
     }
@@ -115,6 +122,9 @@ public class PasskeyController extends AbstractController {
         if (optionalUser.isEmpty()) {
             return "redirect:/";
         }
+
+        // la suppression de la derniere passkey doit faire revenir l'incitation
+        passkeySuggestionService.invalidate();
 
         if (passkeyService.delete(passkeyId, optionalUser.get().getId())) {
             attributes.addFlashAttribute("infos", List.of("La passkey a été supprimée."));

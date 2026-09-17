@@ -282,12 +282,18 @@
             container.hidden = !sameOriginAsEndpoints(container);
         });
 
-        const registerButton = document.getElementById('passkey-register-button');
-        if (registerButton && !registerButton.closest('[data-passkey-supported-only]').hidden) {
+        // plusieurs boutons d'enregistrement peuvent coexister sur une meme page : celui de
+        // /users/me et celui du bandeau d'incitation. D'ou la selection par attribut plutot que
+        // par identifiant, qui doit rester unique.
+        document.querySelectorAll('[data-passkey-register]').forEach(function (registerButton) {
+            const container = registerButton.closest('[data-passkey-supported-only]');
+            if (container && container.hidden) {
+                return;
+            }
             registerButton.addEventListener('click', function () {
                 register(registerButton);
             });
-        }
+        });
 
         const loginButton = document.getElementById('passkey-login-button');
         if (loginButton && !loginButton.closest('[data-passkey-supported-only]').hidden) {
