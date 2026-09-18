@@ -2,14 +2,17 @@ package info.tomacla.biketeam.web;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -24,6 +27,19 @@ class WebExceptionHandlerTest {
         // et non la redirection vers l'accueil : c'est ce qui permet le 404 d'une equipe inconnue
         mockMvc.perform(get("/response-status"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void missingStaticResourceIsNotFound() throws Exception {
+        // /.env, *.js.map... demandes par les scanners et les devtools
+        mockMvc.perform(get("/missing-resource"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void unsupportedMethodIsMethodNotAllowed() throws Exception {
+        mockMvc.perform(post("/boom"))
+                .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
@@ -46,6 +62,11 @@ class WebExceptionHandlerTest {
         @GetMapping("/response-status")
         public String responseStatus() {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown team nope");
+        }
+
+        @GetMapping("/missing-resource")
+        public String missingResource() throws NoResourceFoundException {
+            throw new NoResourceFoundException(HttpMethod.GET, "missing-resource");
         }
 
         @GetMapping("/boom")
