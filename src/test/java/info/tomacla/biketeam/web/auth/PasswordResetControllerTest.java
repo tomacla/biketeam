@@ -6,6 +6,7 @@ import info.tomacla.biketeam.domain.user.UserAuthTokenType;
 import info.tomacla.biketeam.security.session.UserSessionService;
 import info.tomacla.biketeam.service.UserService;
 import info.tomacla.biketeam.service.auth.AuthMailService;
+import info.tomacla.biketeam.service.auth.BotProtectionService;
 import info.tomacla.biketeam.service.auth.RateLimitService;
 import info.tomacla.biketeam.service.auth.UserAuthTokenService;
 import info.tomacla.biketeam.web.ControllerTestSupport;
@@ -16,6 +17,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,6 +40,7 @@ public class PasswordResetControllerTest {
     private UserAuthTokenService userAuthTokenService;
     private AuthMailService authMailService;
     private RateLimitService rateLimitService;
+    private BotProtectionService botProtectionService;
     private UserSessionService userSessionService;
 
     private MockMvc mockMvc;
@@ -49,6 +52,7 @@ public class PasswordResetControllerTest {
         userAuthTokenService = mock(UserAuthTokenService.class);
         authMailService = mock(AuthMailService.class);
         rateLimitService = mock(RateLimitService.class);
+        botProtectionService = mock(BotProtectionService.class);
         userSessionService = mock(UserSessionService.class);
 
         PasswordResetController controller = new PasswordResetController();
@@ -56,10 +60,13 @@ public class PasswordResetControllerTest {
         ReflectionTestUtils.setField(controller, "userAuthTokenService", userAuthTokenService);
         ReflectionTestUtils.setField(controller, "authMailService", authMailService);
         ReflectionTestUtils.setField(controller, "rateLimitService", rateLimitService);
+        ReflectionTestUtils.setField(controller, "botProtectionService", botProtectionService);
         ReflectionTestUtils.setField(controller, "userSessionService", userSessionService);
         ReflectionTestUtils.setField(controller, "maxForgotPasswordPerHour", 3);
 
         when(rateLimitService.tryAcquire(any(), anyInt())).thenReturn(true);
+        when(botProtectionService.check(any(), any(), any())).thenReturn(BotProtectionService.Verdict.HUMAN);
+        when(botProtectionService.issueFormStamp()).thenReturn("stamp");
         when(rateLimitService.clientKey(any(), anyString())).thenAnswer(i -> i.getArgument(1) + ":1.2.3.4");
         when(userAuthTokenService.getPasswordResetValidity()).thenReturn(Duration.ofHours(1));
         when(userAuthTokenService.create(any(), any(), any(), any())).thenReturn("clear-token");
@@ -94,7 +101,8 @@ public class PasswordResetControllerTest {
 
         mockMvc.perform(get("/forgot-password"))
                 .andExpect(view().name("forgot_password"))
-                .andExpect(model().attributeExists("formdata"));
+                .andExpect(model().attributeExists("formdata"))
+                .andExpect(model().attribute("formStamp", "stamp"));
 
     }
 
@@ -150,6 +158,59 @@ public class PasswordResetControllerTest {
                 .andExpect(flash().attributeExists("infos"));
 
         verifyNoInteractions(authMailService);
+
+    }
+
+    @Test
+    public void testBotControlsReceiveTheSubmittedFields() throws Exception {
+
+        mockMvc.perform(post("/forgot-password")
+                .param("email", "jean@example.com")
+                .param("altcha", "payload")
+                .param("website", "")
+                .param("formStamp", "stamp"));
+
+        verify(botProtectionService).check("payload", "", "stamp");
+
+    }
+
+    /**
+     * Champ piege rempli : reponse inconditionnelle habituelle, sans aucun envoi.
+     */
+    @Test
+    public void testHoneypotAnswersTheSameWithoutSending() throws Exception {
+
+        when(userService.getByEmail("jean@example.com")).thenReturn(Optional.of(user("user-1", "jean@example.com")));
+        when(botProtectionService.check(any(), any(), any())).thenReturn(BotProtectionService.Verdict.HONEYPOT);
+
+        mockMvc.perform(post("/forgot-password").param("email", "jean@example.com"))
+                .andExpect(view().name("redirect:/forgot-password"))
+                .andExpect(flash().attributeExists("infos"));
+
+        verifyNoInteractions(authMailService);
+        verify(userAuthTokenService, never()).create(any(), any(), any(), any());
+
+    }
+
+    @Test
+    public void testFailedBotControlRedisplaysTheFormWithANewStamp() throws Exception {
+
+        when(userService.getByEmail("jean@example.com")).thenReturn(Optional.of(user("user-1", "jean@example.com")));
+
+        for (BotProtectionService.Verdict verdict : List.of(BotProtectionService.Verdict.TOO_FAST,
+                BotProtectionService.Verdict.CHALLENGE_FAILED)) {
+
+            when(botProtectionService.check(any(), any(), any())).thenReturn(verdict);
+
+            mockMvc.perform(post("/forgot-password").param("email", "jean@example.com"))
+                    .andExpect(view().name("forgot_password"))
+                    .andExpect(model().attribute("errors", List.of(BotProtectionService.errorMessage(verdict))))
+                    .andExpect(model().attribute("formStamp", "stamp"));
+
+        }
+
+        verifyNoInteractions(authMailService);
+        verify(rateLimitService, never()).tryAcquire(any(), anyInt());
 
     }
 

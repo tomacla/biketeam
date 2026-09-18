@@ -153,7 +153,8 @@ public class SecurityConfig {
             // ant /{teamId}/** matche aussi une URL a un seul segment (/register par exemple)
             auth.requestMatchers("/teams", "/notifications/**", "/autocomplete/**", "/users/*/image",
                     "/catalog/**", "/confirm-email",
-                    "/register/**", "/verify-email", "/forgot-password", "/reset-password").permitAll();
+                    "/register/**", "/verify-email", "/forgot-password", "/reset-password",
+                    "/forms/token").permitAll();
 
             // web protected endpoints
             auth.requestMatchers("/account/**").authenticated();

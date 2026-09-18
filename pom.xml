@@ -39,6 +39,7 @@
 		<scribejava-core.version>8.3.3</scribejava-core.version>
 		<jacoco.version>0.8.15</jacoco.version>
 		<webauthn4j.version>0.31.10.RELEASE</webauthn4j.version>
+		<altcha.version>2.0.3</altcha.version>
 		<!-- Jackson 3 (requis par webauthn4j) reutilise les annotations de Jackson 2 et exige la 2.22 -->
 		<jackson-annotations.version>2.22</jackson-annotations.version>
 		<spring-boot.build-image.imageName>github.com/tomacla/biketeam:latest</spring-boot.build-image.imageName>
@@ -109,6 +110,13 @@
 			<groupId>com.webauthn4j</groupId>
 			<artifactId>webauthn4j-core</artifactId>
 			<version>${webauthn4j.version}</version>
+		</dependency>
+
+		<!-- ALTCHA : preuve de travail anti-robot sur les formulaires publics qui envoient un mail -->
+		<dependency>
+			<groupId>org.altcha</groupId>
+			<artifactId>altcha</artifactId>
+			<version>${altcha.version}</version>
 		</dependency>
 
 		<dependency>

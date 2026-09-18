@@ -51,6 +51,7 @@ public class AccountCompletionFilter extends OncePerRequestFilter {
             "/verify-email",
             "/forgot-password",
             "/reset-password",
+            "/forms/token",
             "/confirm-email",
             "/users/me/delete",
             "/users/*/image",

@@ -6,6 +6,7 @@ import info.tomacla.biketeam.domain.user.UserAuthTokenType;
 import info.tomacla.biketeam.security.password.PasswordPolicy;
 import info.tomacla.biketeam.security.session.UserSessionService;
 import info.tomacla.biketeam.service.auth.AuthMailService;
+import info.tomacla.biketeam.service.auth.BotProtectionService;
 import info.tomacla.biketeam.service.auth.RateLimitService;
 import info.tomacla.biketeam.service.auth.UserAuthTokenService;
 import info.tomacla.biketeam.web.AbstractController;
@@ -53,6 +54,9 @@ public class PasswordResetController extends AbstractController {
     @Autowired
     private UserSessionService userSessionService;
 
+    @Autowired
+    private BotProtectionService botProtectionService;
+
     @Value("${auth.forgot-password.max-per-hour:3}")
     private int maxForgotPasswordPerHour;
 
@@ -60,11 +64,15 @@ public class PasswordResetController extends AbstractController {
     public String forgotPasswordPage(Principal principal, Model model) {
         addGlobalValues(principal, model, "Mot de passe oublié", null);
         model.addAttribute("formdata", ForgotPasswordForm.builder().get());
+        model.addAttribute("formStamp", botProtectionService.issueFormStamp());
         return "forgot_password";
     }
 
     @PostMapping(value = "/forgot-password")
     public String forgotPassword(ForgotPasswordForm form,
+                                 @RequestParam(value = "altcha", required = false) String altcha,
+                                 @RequestParam(value = BotProtectionService.HONEYPOT_FIELD, required = false) String honeypot,
+                                 @RequestParam(value = "formStamp", required = false) String formStamp,
                                  Principal principal,
                                  Model model,
                                  HttpServletRequest request,
@@ -74,10 +82,19 @@ public class PasswordResetController extends AbstractController {
         try {
             email = form.parser().getEmail();
         } catch (IllegalArgumentException e) {
-            addGlobalValues(principal, model, "Mot de passe oublié", null);
-            model.addAttribute("errors", List.of(e.getMessage()));
-            model.addAttribute("formdata", form);
-            return "forgot_password";
+            return renderForgotPasswordError(principal, model, form, e.getMessage());
+        }
+
+        final BotProtectionService.Verdict verdict = botProtectionService.check(altcha, honeypot, formStamp);
+        if (verdict == BotProtectionService.Verdict.HONEYPOT) {
+            // robot : reponse inconditionnelle habituelle, sans aucun envoi
+            log.info("Password reset request rejected by bot protection: {}", verdict);
+            attributes.addFlashAttribute("infos", List.of(FORGOT_PASSWORD_ANSWER));
+            return "redirect:/forgot-password";
+        }
+        if (verdict != BotProtectionService.Verdict.HUMAN) {
+            log.info("Password reset request rejected by bot protection: {}", verdict);
+            return renderForgotPasswordError(principal, model, form, BotProtectionService.errorMessage(verdict));
         }
 
         // double limitation : par adresse visee et par origine de la requete.
@@ -193,6 +210,14 @@ public class PasswordResetController extends AbstractController {
                 List.of("Votre mot de passe a été modifié. Vous pouvez vous connecter."));
         return "redirect:/login";
 
+    }
+
+    private String renderForgotPasswordError(Principal principal, Model model, ForgotPasswordForm form, String message) {
+        addGlobalValues(principal, model, "Mot de passe oublié", null);
+        model.addAttribute("errors", List.of(message));
+        model.addAttribute("formdata", form);
+        model.addAttribute("formStamp", botProtectionService.issueFormStamp());
+        return "forgot_password";
     }
 
     private String reissue(User user) {
