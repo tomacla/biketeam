@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.util.DisconnectedClientHelper;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -29,6 +30,12 @@ public class WebExceptionHandler {
         // qui appliquent le statut.
         if (e instanceof ErrorResponse) {
             throw e;
+        }
+
+        // client parti en cours de reponse (navigation interrompue : Broken pipe, ClientAbortException...) :
+        // il n'y a plus personne a qui repondre, et ce n'est pas une erreur du serveur
+        if (DisconnectedClientHelper.isClientDisconnectedException(e)) {
+            return new ModelAndView();
         }
 
         // sans cela l'exception d'origine n'apparait nulle part : seul l'echec de la redirection

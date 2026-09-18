@@ -1,6 +1,7 @@
 package info.tomacla.biketeam.web;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.catalina.connector.ClientAbortException;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -56,6 +57,14 @@ class WebExceptionHandlerTest {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    void disconnectedClientIsIgnored() throws Exception {
+        // Broken pipe : ni trace ERROR ni redirection vers l'accueil
+        mockMvc.perform(get("/client-abort"))
+                .andExpect(status().isOk())
+                .andExpect(redirectedUrl(null));
+    }
+
     @Controller
     static class ThrowingController {
 
@@ -67,6 +76,11 @@ class WebExceptionHandlerTest {
         @GetMapping("/missing-resource")
         public String missingResource() throws NoResourceFoundException {
             throw new NoResourceFoundException(HttpMethod.GET, "missing-resource");
+        }
+
+        @GetMapping("/client-abort")
+        public String clientAbort() throws ClientAbortException {
+            throw new ClientAbortException(new java.io.IOException("Broken pipe"));
         }
 
         @GetMapping("/boom")
