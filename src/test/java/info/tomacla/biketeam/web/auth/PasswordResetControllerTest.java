@@ -66,7 +66,6 @@ public class PasswordResetControllerTest {
 
         when(rateLimitService.tryAcquire(any(), anyInt())).thenReturn(true);
         when(botProtectionService.check(any(), any(), any())).thenReturn(BotProtectionService.Verdict.HUMAN);
-        when(botProtectionService.issueFormStamp()).thenReturn("stamp");
         when(rateLimitService.clientKey(any(), anyString())).thenAnswer(i -> i.getArgument(1) + ":1.2.3.4");
         when(userAuthTokenService.getPasswordResetValidity()).thenReturn(Duration.ofHours(1));
         when(userAuthTokenService.create(any(), any(), any(), any())).thenReturn("clear-token");
@@ -101,8 +100,7 @@ public class PasswordResetControllerTest {
 
         mockMvc.perform(get("/forgot-password"))
                 .andExpect(view().name("forgot_password"))
-                .andExpect(model().attributeExists("formdata"))
-                .andExpect(model().attribute("formStamp", "stamp"));
+                .andExpect(model().attributeExists("formdata"));
 
     }
 
@@ -193,7 +191,7 @@ public class PasswordResetControllerTest {
     }
 
     @Test
-    public void testFailedBotControlRedisplaysTheFormWithANewStamp() throws Exception {
+    public void testFailedBotControlRedisplaysTheForm() throws Exception {
 
         when(userService.getByEmail("jean@example.com")).thenReturn(Optional.of(user("user-1", "jean@example.com")));
 
@@ -204,8 +202,7 @@ public class PasswordResetControllerTest {
 
             mockMvc.perform(post("/forgot-password").param("email", "jean@example.com"))
                     .andExpect(view().name("forgot_password"))
-                    .andExpect(model().attribute("errors", List.of(BotProtectionService.errorMessage(verdict))))
-                    .andExpect(model().attribute("formStamp", "stamp"));
+                    .andExpect(model().attribute("errors", List.of(BotProtectionService.errorMessage(verdict))));
 
         }
 

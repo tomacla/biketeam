@@ -64,7 +64,6 @@ public class RegistrationControllerTest {
 
         when(rateLimitService.tryAcquire(any(), anyInt())).thenReturn(true);
         when(botProtectionService.check(any(), any(), any())).thenReturn(BotProtectionService.Verdict.HUMAN);
-        when(botProtectionService.issueFormStamp()).thenReturn("stamp");
         when(rateLimitService.clientKey(any(), anyString())).thenAnswer(i -> i.getArgument(1) + ":1.2.3.4");
         when(userAuthTokenService.getEmailVerificationValidity()).thenReturn(Duration.ofHours(24));
         when(userAuthTokenService.getPasswordResetValidity()).thenReturn(Duration.ofHours(1));
@@ -100,8 +99,7 @@ public class RegistrationControllerTest {
         mockMvc.perform(get("/register"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("register"))
-                .andExpect(model().attributeExists("formdata"))
-                .andExpect(model().attribute("formStamp", "stamp"));
+                .andExpect(model().attributeExists("formdata"));
 
     }
 
@@ -317,7 +315,7 @@ public class RegistrationControllerTest {
      * et un formulaire pret a etre renvoye.
      */
     @Test
-    public void testFailedBotControlRedisplaysTheFormWithANewStamp() throws Exception {
+    public void testFailedBotControlRedisplaysTheForm() throws Exception {
 
         for (BotProtectionService.Verdict verdict : List.of(BotProtectionService.Verdict.TOO_FAST,
                 BotProtectionService.Verdict.CHALLENGE_FAILED)) {
@@ -332,7 +330,6 @@ public class RegistrationControllerTest {
                             .param("passwordConfirm", "motdepasse123"))
                     .andExpect(view().name("register"))
                     .andExpect(model().attribute("errors", List.of(BotProtectionService.errorMessage(verdict))))
-                    .andExpect(model().attribute("formStamp", "stamp"))
                     .andExpect(model().attribute("formdata", hasProperty("password", "")));
 
         }

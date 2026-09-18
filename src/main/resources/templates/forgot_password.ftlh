@@ -18,7 +18,7 @@
                     <input autocomplete="username" name="email" value="${formdata.email}" type="email" class="form-control" id="form-forgot-password-email" required>
                 </div>
 
-                <#include "_includes_bot_protection.ftlh">
+                <@common.botProtection 'form-forgot-password' />
 
                 <button type="submit" class="btn btn-primary w-100">Envoyer le lien</button>
 

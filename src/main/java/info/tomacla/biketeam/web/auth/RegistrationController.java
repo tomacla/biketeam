@@ -60,7 +60,6 @@ public class RegistrationController extends AbstractController {
     public String registerPage(Principal principal, Model model) {
         addGlobalValues(principal, model, "Créer un compte", null);
         model.addAttribute("formdata", RegisterForm.builder().get());
-        model.addAttribute("formStamp", botProtectionService.issueFormStamp());
         return "register";
     }
 
@@ -235,7 +234,6 @@ public class RegistrationController extends AbstractController {
                 .withLastName(form.getLastName())
                 .withEmail(form.getEmail())
                 .get());
-        model.addAttribute("formStamp", botProtectionService.issueFormStamp());
         return "register";
     }
 

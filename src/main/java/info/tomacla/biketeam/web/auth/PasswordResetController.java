@@ -64,7 +64,6 @@ public class PasswordResetController extends AbstractController {
     public String forgotPasswordPage(Principal principal, Model model) {
         addGlobalValues(principal, model, "Mot de passe oublié", null);
         model.addAttribute("formdata", ForgotPasswordForm.builder().get());
-        model.addAttribute("formStamp", botProtectionService.issueFormStamp());
         return "forgot_password";
     }
 
@@ -216,7 +215,6 @@ public class PasswordResetController extends AbstractController {
         addGlobalValues(principal, model, "Mot de passe oublié", null);
         model.addAttribute("errors", List.of(message));
         model.addAttribute("formdata", form);
-        model.addAttribute("formStamp", botProtectionService.issueFormStamp());
         return "forgot_password";
     }
 
