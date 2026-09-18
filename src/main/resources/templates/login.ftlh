@@ -55,11 +55,10 @@
             <hr/>
             <p class="text-muted text-center">ou</p>
 
-            <a class="mx-auto mb-1 d-flex flex-row justify-content-between" style="padding:10px; text-decoration:none; font-weight:bold; background-color:#ffffff; color:#fb5304; border:1px solid #fb5304; border-radius:5px; width:275px;" href="<@common.teamUrl '' '/oauth2/authorization/strava' />" role="button">
+            <a class="mx-auto mb-3 d-flex flex-row justify-content-between" style="padding:10px; text-decoration:none; font-weight:bold; background-color:#ffffff; color:#fb5304; border:1px solid #fb5304; border-radius:5px; width:275px;" href="<@common.teamUrl '' '/oauth2/authorization/strava' />" role="button">
                 <img src="<@common.teamUrl '' '/css/stravalogo.jpg' />" width="25" alt="Strava logo">
                 <span>Connexion avec Strava</span>
             </a>
-            <small class="text-muted d-block text-center mb-3">La connexion Strava sera supprimée prochainement.</small>
             <a class="mx-auto mb-3 d-flex flex-row justify-content-between" style="padding:10px; text-decoration:none; font-weight:bold; background-color:#ffffff; color:#565656; border:1px solid #565656; border-radius:5px; width:275px;" href="<@common.teamUrl '' '/oauth2/authorization/google' />" role="button">
                 <img src="<@common.teamUrl '' '/css/googlelogo.png' />" width="25" alt="Google logo">
                 <span>Connexion avec Google</span>

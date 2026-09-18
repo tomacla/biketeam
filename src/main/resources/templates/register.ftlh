@@ -38,7 +38,7 @@
                     <input autocomplete="new-password" name="passwordConfirm" type="password" class="form-control" id="form-register-password-confirm" required>
                 </div>
 
-                <#include "_includes_bot_protection.ftlh">
+                <@common.botProtection 'form-register' />
 
                 <button type="submit" class="btn btn-primary w-100">Créer mon compte</button>
 
