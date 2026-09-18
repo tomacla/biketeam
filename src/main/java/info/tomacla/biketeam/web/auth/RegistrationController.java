@@ -5,6 +5,7 @@ import info.tomacla.biketeam.domain.user.UserAuthTokenType;
 import info.tomacla.biketeam.security.password.LoginFailureHandler;
 import info.tomacla.biketeam.security.password.PasswordPolicy;
 import info.tomacla.biketeam.service.auth.AuthMailService;
+import info.tomacla.biketeam.service.auth.BotProtectionService;
 import info.tomacla.biketeam.service.auth.RateLimitService;
 import info.tomacla.biketeam.service.auth.UserAuthTokenService;
 import info.tomacla.biketeam.web.AbstractController;
@@ -20,6 +21,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
@@ -48,6 +50,9 @@ public class RegistrationController extends AbstractController {
     @Autowired
     private RateLimitService rateLimitService;
 
+    @Autowired
+    private BotProtectionService botProtectionService;
+
     @Value("${auth.register.max-per-hour:5}")
     private int maxRegisterPerHour;
 
@@ -55,11 +60,15 @@ public class RegistrationController extends AbstractController {
     public String registerPage(Principal principal, Model model) {
         addGlobalValues(principal, model, "Créer un compte", null);
         model.addAttribute("formdata", RegisterForm.builder().get());
+        model.addAttribute("formStamp", botProtectionService.issueFormStamp());
         return "register";
     }
 
     @PostMapping(value = {"", "/"})
     public String register(RegisterForm form,
+                           @RequestParam(value = "altcha", required = false) String altcha,
+                           @RequestParam(value = BotProtectionService.HONEYPOT_FIELD, required = false) String honeypot,
+                           @RequestParam(value = "formStamp", required = false) String formStamp,
                            Principal principal,
                            Model model,
                            HttpServletRequest request,
@@ -81,6 +90,18 @@ public class RegistrationController extends AbstractController {
 
         } catch (IllegalArgumentException e) {
             return renderError(principal, model, form, e.getMessage());
+        }
+
+        final BotProtectionService.Verdict verdict = botProtectionService.check(altcha, honeypot, formStamp);
+        if (verdict == BotProtectionService.Verdict.HONEYPOT) {
+            // robot : meme reponse qu'une inscription reussie, pour ne pas l'inciter a s'adapter
+            log.info("Registration rejected by bot protection: {}", verdict);
+            session.setAttribute(LoginFailureHandler.REGISTER_PENDING_EMAIL, email);
+            return "redirect:/register/pending";
+        }
+        if (verdict != BotProtectionService.Verdict.HUMAN) {
+            log.info("Registration rejected by bot protection: {}", verdict);
+            return renderError(principal, model, form, BotProtectionService.errorMessage(verdict));
         }
 
         if (!rateLimitService.tryAcquire(rateLimitService.clientKey(request, "register"), maxRegisterPerHour)) {
@@ -214,6 +235,7 @@ public class RegistrationController extends AbstractController {
                 .withLastName(form.getLastName())
                 .withEmail(form.getEmail())
                 .get());
+        model.addAttribute("formStamp", botProtectionService.issueFormStamp());
         return "register";
     }
 

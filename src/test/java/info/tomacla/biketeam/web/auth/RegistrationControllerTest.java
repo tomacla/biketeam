@@ -5,6 +5,7 @@ import info.tomacla.biketeam.domain.user.UserAuthTokenType;
 import info.tomacla.biketeam.security.password.LoginFailureHandler;
 import info.tomacla.biketeam.service.UserService;
 import info.tomacla.biketeam.service.auth.AuthMailService;
+import info.tomacla.biketeam.service.auth.BotProtectionService;
 import info.tomacla.biketeam.service.auth.RateLimitService;
 import info.tomacla.biketeam.service.auth.UserAuthTokenService;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +41,7 @@ public class RegistrationControllerTest {
     private UserAuthTokenService userAuthTokenService;
     private AuthMailService authMailService;
     private RateLimitService rateLimitService;
+    private BotProtectionService botProtectionService;
 
     private MockMvc mockMvc;
 
@@ -50,15 +52,19 @@ public class RegistrationControllerTest {
         userAuthTokenService = mock(UserAuthTokenService.class);
         authMailService = mock(AuthMailService.class);
         rateLimitService = mock(RateLimitService.class);
+        botProtectionService = mock(BotProtectionService.class);
 
         RegistrationController controller = new RegistrationController();
         ReflectionTestUtils.setField(controller, "userService", userService);
         ReflectionTestUtils.setField(controller, "userAuthTokenService", userAuthTokenService);
         ReflectionTestUtils.setField(controller, "authMailService", authMailService);
         ReflectionTestUtils.setField(controller, "rateLimitService", rateLimitService);
+        ReflectionTestUtils.setField(controller, "botProtectionService", botProtectionService);
         ReflectionTestUtils.setField(controller, "maxRegisterPerHour", 5);
 
         when(rateLimitService.tryAcquire(any(), anyInt())).thenReturn(true);
+        when(botProtectionService.check(any(), any(), any())).thenReturn(BotProtectionService.Verdict.HUMAN);
+        when(botProtectionService.issueFormStamp()).thenReturn("stamp");
         when(rateLimitService.clientKey(any(), anyString())).thenAnswer(i -> i.getArgument(1) + ":1.2.3.4");
         when(userAuthTokenService.getEmailVerificationValidity()).thenReturn(Duration.ofHours(24));
         when(userAuthTokenService.getPasswordResetValidity()).thenReturn(Duration.ofHours(1));
@@ -94,7 +100,8 @@ public class RegistrationControllerTest {
         mockMvc.perform(get("/register"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("register"))
-                .andExpect(model().attributeExists("formdata"));
+                .andExpect(model().attributeExists("formdata"))
+                .andExpect(model().attribute("formStamp", "stamp"));
 
     }
 
@@ -261,6 +268,78 @@ public class RegistrationControllerTest {
 
         verifyNoInteractions(authMailService);
         verify(userService, never()).save(any(User.class));
+
+    }
+
+    @Test
+    public void testBotControlsReceiveTheSubmittedFields() throws Exception {
+
+        mockMvc.perform(post("/register")
+                .param("firstName", "Jean")
+                .param("lastName", "Dupont")
+                .param("email", "jean@example.com")
+                .param("password", "motdepasse123")
+                .param("passwordConfirm", "motdepasse123")
+                .param("altcha", "payload")
+                .param("website", "")
+                .param("formStamp", "stamp"));
+
+        verify(botProtectionService).check("payload", "", "stamp");
+
+    }
+
+    /**
+     * Champ piege rempli : le robot recoit la reponse d'une inscription reussie, sans qu'aucun
+     * compte ni mail ne soit cree.
+     */
+    @Test
+    public void testHoneypotFakesASuccessfulRegistration() throws Exception {
+
+        when(botProtectionService.check(any(), any(), any())).thenReturn(BotProtectionService.Verdict.HONEYPOT);
+
+        mockMvc.perform(post("/register")
+                        .param("firstName", "Jean")
+                        .param("lastName", "Dupont")
+                        .param("email", "jean@example.com")
+                        .param("password", "motdepasse123")
+                        .param("passwordConfirm", "motdepasse123")
+                        .param("website", "https://spam.example"))
+                .andExpect(view().name("redirect:/register/pending"))
+                .andExpect(request().sessionAttribute(LoginFailureHandler.REGISTER_PENDING_EMAIL, "jean@example.com"));
+
+        verifyNoInteractions(authMailService);
+        verify(userService, never()).save(any(User.class));
+
+    }
+
+    /**
+     * Envoi trop rapide ou defi ALTCHA invalide : peut toucher un humain, qui voit donc un message
+     * et un formulaire pret a etre renvoye.
+     */
+    @Test
+    public void testFailedBotControlRedisplaysTheFormWithANewStamp() throws Exception {
+
+        for (BotProtectionService.Verdict verdict : List.of(BotProtectionService.Verdict.TOO_FAST,
+                BotProtectionService.Verdict.CHALLENGE_FAILED)) {
+
+            when(botProtectionService.check(any(), any(), any())).thenReturn(verdict);
+
+            mockMvc.perform(post("/register")
+                            .param("firstName", "Jean")
+                            .param("lastName", "Dupont")
+                            .param("email", "jean@example.com")
+                            .param("password", "motdepasse123")
+                            .param("passwordConfirm", "motdepasse123"))
+                    .andExpect(view().name("register"))
+                    .andExpect(model().attribute("errors", List.of(BotProtectionService.errorMessage(verdict))))
+                    .andExpect(model().attribute("formStamp", "stamp"))
+                    .andExpect(model().attribute("formdata", hasProperty("password", "")));
+
+        }
+
+        verifyNoInteractions(authMailService);
+        verify(userService, never()).save(any(User.class));
+        verify(rateLimitService, never()).tryAcquire(any(), anyInt());
 
     }
 
