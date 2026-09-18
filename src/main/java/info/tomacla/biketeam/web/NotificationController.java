@@ -38,7 +38,7 @@ public class NotificationController extends AbstractController {
     private TripService tripService;
 
     @GetMapping(value = "/read-all")
-    public String readAll(@RequestHeader(HttpHeaders.REFERER) String referer,
+    public String readAll(@RequestHeader(value = HttpHeaders.REFERER, required = false, defaultValue = "/") String referer,
                           Principal principal,
                           Model model) {
 
@@ -50,7 +50,7 @@ public class NotificationController extends AbstractController {
 
     @GetMapping(value = "/{notificationId}")
     public String readOne(@PathVariable("notificationId") String notificationId,
-                          @RequestHeader(HttpHeaders.REFERER) String referer,
+                          @RequestHeader(value = HttpHeaders.REFERER, required = false, defaultValue = "/") String referer,
                           Principal principal,
                           Model model) {
 
