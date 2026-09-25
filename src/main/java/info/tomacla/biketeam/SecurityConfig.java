@@ -14,10 +14,14 @@ import info.tomacla.biketeam.security.password.EmailPasswordAuthenticationProvid
 import info.tomacla.biketeam.security.password.LoginFailureHandler;
 import info.tomacla.biketeam.security.session.CustomSessionIdResolver;
 import info.tomacla.biketeam.service.TeamService;
+import info.tomacla.biketeam.service.pedalons.PedalonsProperties;
+import info.tomacla.biketeam.service.pedalons.PedalonsRedirectResolver;
 import info.tomacla.biketeam.service.url.UrlService;
+import info.tomacla.biketeam.web.pedalons.PedalonsRedirectFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import jakarta.servlet.DispatcherType;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -34,8 +38,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.JdbcOAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -117,7 +119,12 @@ public class SecurityConfig {
                 AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/users/me/passkeys/**"),
                 AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/login/webauthn"),
                 AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/login/webauthn/options"),
-                AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/users/me/delete"))));
+                AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/users/me/delete"),
+                // migration vers Pedalons : le demarrage cree une demande et redirige vers Pedalons,
+                // la bascule redirige le groupe, l'annulation de la bascule le retablit
+                AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/*/admin/pedalons/start"),
+                AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/*/admin/pedalons/switch"),
+                AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/admin/teams/pedalons-unswitch/*"))));
 
         // requests conf
         http.authorizeHttpRequests(auth -> {
@@ -139,6 +146,12 @@ public class SecurityConfig {
 
             // Garmin auth
             auth.requestMatchers("/auth/**").permitAll();
+
+            // export M2M lu par Pedalons pendant une migration : public (pas de VPN, par l'entree
+            // HTTPS normale), sans session, protege par le secret X-Pedalons-Export-Secret verifie par
+            // PedalonsExportController et servi seulement pour un groupe en migration. Doit rester
+            // AVANT /{teamId}/**, qui lirait "internal" comme un identifiant de groupe.
+            auth.requestMatchers("/internal/pedalons/**").permitAll();
 
             // api public endpoints
             auth.requestMatchers("/api/data/**", "/api/auth/**", "/api/teams").permitAll();
@@ -261,6 +274,21 @@ public class SecurityConfig {
             AccountCompletionFilter accountCompletionFilter) {
         FilterRegistrationBean<AccountCompletionFilter> registration = new FilterRegistrationBean<>(accountCompletionFilter);
         registration.setEnabled(false);
+        return registration;
+    }
+
+    /**
+     * Redirections des groupes migres vers Pedalons et lecture seule pendant une migration.
+     * Enregistre dans le conteneur de servlets AVANT la chaine Spring Security : un groupe prive
+     * bascule redirige sans demander de connexion, Pedalons applique ses propres droits.
+     */
+    @Bean
+    public FilterRegistrationBean<PedalonsRedirectFilter> pedalonsRedirectFilterRegistration(
+            PedalonsRedirectResolver pedalonsRedirectResolver, PedalonsProperties pedalonsProperties) {
+        FilterRegistrationBean<PedalonsRedirectFilter> registration = new FilterRegistrationBean<>(
+                new PedalonsRedirectFilter(pedalonsRedirectResolver, pedalonsProperties.getRedirectStatus()));
+        registration.addUrlPatterns("/*");
+        registration.setOrder(SecurityProperties.DEFAULT_FILTER_ORDER - 1);
         return registration;
     }
 
@@ -390,10 +418,5 @@ public class SecurityConfig {
                 auth.authenticationProvider(passkeyAuthenticationProvider);
             }
         };
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }

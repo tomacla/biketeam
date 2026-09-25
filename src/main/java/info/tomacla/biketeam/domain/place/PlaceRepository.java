@@ -8,6 +8,8 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 import jakarta.transaction.Transactional;
 
 @Repository
@@ -42,5 +44,10 @@ public interface PlaceRepository extends CrudRepository<Place, String>, PagingAn
     @Modifying
     @Query(value = "update ride_template set end_place_id = NULL where end_place_id = :removedPlaceId", nativeQuery = true)
     void removeEndPlaceIdInRideTemplate(@Param("removedPlaceId") String removedPlaceId);
+
+    // export vers Pedalons (TeamSnapshotBuilder)
+    List<Place> findByTeamId(String teamId);
+
+    long countByTeamId(String teamId);
 
 }

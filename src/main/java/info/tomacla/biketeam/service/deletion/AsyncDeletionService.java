@@ -7,6 +7,7 @@ import info.tomacla.biketeam.domain.map.MapRepository;
 import info.tomacla.biketeam.domain.map.SearchMapSpecification;
 import info.tomacla.biketeam.domain.message.MessageRepository;
 import info.tomacla.biketeam.domain.notification.NotificationRepository;
+import info.tomacla.biketeam.domain.pedalons.PedalonsMigrationRepository;
 import info.tomacla.biketeam.domain.place.PlaceRepository;
 import info.tomacla.biketeam.domain.place.SearchPlaceSpecification;
 import info.tomacla.biketeam.domain.publication.Publication;
@@ -77,6 +78,9 @@ public class AsyncDeletionService {
 
     @Autowired
     private PublicationRepository publicationRepository;
+
+    @Autowired
+    private PedalonsMigrationRepository pedalonsMigrationRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -196,6 +200,10 @@ public class AsyncDeletionService {
 
             placeRepository.findAll(SearchPlaceSpecification.allInTeam(teamId))
                     .stream().forEach(placeRepository::delete);
+
+            // demandes de migration vers Pedalons : cle etrangere sans cascade
+            // (pedalons_redirect, elle, suit l'equipe par ON DELETE CASCADE)
+            pedalonsMigrationRepository.deleteByTeamId(teamId);
 
             // finaly delete the team
             teamRepository.delete(team);

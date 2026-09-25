@@ -1826,4 +1826,98 @@ update user_account set email = lower(trim(email))
         </createIndex>
     </changeSet>
 
+    <!-- Migration d'une equipe vers Pedalons (voir docs/plans/2026-09-22-biketeam-live-migration.md
+         dans le depot tribly). Une ligne par demande ; jamais supprimee (historique). -->
+    <changeSet id="pedalons-migration-table" author="tomacla">
+        <createTable tableName="pedalons_migration">
+            <!-- requestId : UUID v4, aussi claim jti du jeton de demande signe -->
+            <column name="id" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="team_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="requested_by" type="VARCHAR(255)"/>
+            <column name="status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="dry_run" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reset" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <!-- grant a usage unique recu de Pedalons, efface des que le job est cree -->
+            <column name="grant_value" type="VARCHAR(100)"/>
+            <column name="pedalons_job_id" type="VARCHAR(40)"/>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="triggered_at" type="TIMESTAMP"/>
+            <column name="finished_at" type="TIMESTAMP"/>
+            <column name="switched_at" type="TIMESTAMP"/>
+            <column name="error_code" type="VARCHAR(60)"/>
+            <column name="error_message" type="VARCHAR(2000)"/>
+            <!-- dernier statut recu de Pedalons, tel quel -->
+            <column name="result_json" type="TEXT"/>
+            <column name="pedalons_team_url" type="VARCHAR(1000)"/>
+        </createTable>
+        <addPrimaryKey tableName="pedalons_migration" columnNames="id"/>
+        <addForeignKeyConstraint baseTableName="pedalons_migration" baseColumnNames="team_id"
+                                 referencedTableName="team" referencedColumnNames="id"
+                                 constraintName="fk_pedalons_migration_team"/>
+        <addForeignKeyConstraint baseTableName="pedalons_migration" baseColumnNames="requested_by"
+                                 referencedTableName="user_account" referencedColumnNames="id"
+                                 constraintName="fk_pedalons_migration_user" onDelete="SET NULL"/>
+        <createIndex tableName="pedalons_migration" indexName="idx_pedalons_migration_team_status">
+            <column name="team_id"/>
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="pedalons-redirect-table" author="tomacla">
+        <!-- table d'URL renvoyee par Pedalons a la fin d'une migration definitive ;
+             entity_type = cles de urlMap (TEAM, ROUTE, RIDE, TRIP, TRIP_STAGE, POST...) -->
+        <createTable tableName="pedalons_redirect">
+            <column name="team_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="entity_type" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="entity_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_url" type="VARCHAR(1000)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="pedalons_redirect" columnNames="team_id, entity_type, entity_id"/>
+        <addForeignKeyConstraint baseTableName="pedalons_redirect" baseColumnNames="team_id"
+                                 referencedTableName="team" referencedColumnNames="id"
+                                 constraintName="fk_pedalons_redirect_team" onDelete="CASCADE"/>
+    </changeSet>
+
+    <changeSet id="team-pedalons-columns" author="tomacla">
+        <!-- MIGRATING : gel en lecture seule pendant une migration definitive ;
+             READY : migration definitive reussie, bascule en attente du clic de l'administrateur ;
+             MIGRATED : bascule faite, toutes les URL de l'equipe redirigent vers Pedalons -->
+        <addColumn tableName="team">
+            <column name="pedalons_state" type="VARCHAR(20)"/>
+            <column name="pedalons_url" type="VARCHAR(1000)"/>
+            <column name="pedalons_migrated_at" type="TIMESTAMP"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="pedalons-migration-running-since" author="tomacla">
+        <!-- premier statut RUNNING rapporte par Pedalons : le delai d'execution (6 h) part de la,
+             l'attente en QUEUED a son propre delai (48 h depuis triggered_at) -->
+        <addColumn tableName="pedalons_migration">
+            <column name="running_since" type="TIMESTAMP"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

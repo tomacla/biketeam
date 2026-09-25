@@ -63,6 +63,30 @@ public class FileService {
         return Files.exists(Path.of(fileRepository, directory, fileName));
     }
 
+    /**
+     * Noms des fichiers du repertoire d'une equipe, en un seul acces disque ; vide si le
+     * repertoire n'existe pas.
+     */
+    public Set<String> listFileNames(String directory, String teamId) {
+        final Path dir = Path.of(fileRepository, directory, teamId);
+        if (!Files.isDirectory(dir)) {
+            return Set.of();
+        }
+        try (java.util.stream.Stream<Path> files = Files.list(dir)) {
+            return files.map(f -> f.getFileName().toString()).collect(Collectors.toUnmodifiableSet());
+        } catch (IOException e) {
+            log.error("Unable to list files : " + dir, e);
+            throw new RuntimeException("Unable to list files : " + dir, e);
+        }
+    }
+
+    /**
+     * Chemin d'un fichier d'equipe, sans acces disque (contrairement a getFile, qui cree le repertoire).
+     */
+    public Path resolveFile(String directory, String teamId, String fileName) {
+        return Path.of(fileRepository, directory, teamId, fileName);
+    }
+
     public List<String> listSubDirectories(String directory) {
         try {
             return Files.walk(Path.of(fileRepository, directory), 1)

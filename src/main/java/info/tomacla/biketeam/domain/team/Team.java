@@ -11,6 +11,7 @@ import info.tomacla.biketeam.domain.userrole.UserRole;
 import jakarta.persistence.*;
 import org.springframework.data.domain.Persistable;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -49,6 +50,19 @@ public class Team implements MessageHolder, Persistable<String> {
     private Visibility visibility = Visibility.PUBLIC;
 
     private boolean deletion;
+
+    // migration vers Pedalons : voir PedalonsState et service.pedalons.
+    // Lecture seule pour Hibernate : ces colonnes ne sont ecrites que par les UPDATE cibles et
+    // conditionnels de TeamRepository. Sans cela, tout save() d'un Team charge avant un gel ou une
+    // bascule (formulaire d'administration, TeamService...) reecrirait l'ancien etat et annulerait
+    // silencieusement le gel ou la bascule. Les setters ne changent que la copie en memoire.
+    @Enumerated(EnumType.STRING)
+    @Column(name = "pedalons_state", length = 20, insertable = false, updatable = false)
+    private PedalonsState pedalonsState;
+    @Column(name = "pedalons_url", length = 1000, insertable = false, updatable = false)
+    private String pedalonsUrl;
+    @Column(name = "pedalons_migrated_at", insertable = false, updatable = false)
+    private Instant pedalonsMigratedAt;
 
     public Team() {
         setConfiguration(new TeamConfiguration());
@@ -170,6 +184,35 @@ public class Team implements MessageHolder, Persistable<String> {
 
     public void setDeletion(boolean deletion) {
         this.deletion = deletion;
+    }
+
+    public PedalonsState getPedalonsState() {
+        return pedalonsState;
+    }
+
+    /** Copie en memoire seulement (colonne non modifiable par save(), voir le champ). */
+    public void setPedalonsState(PedalonsState pedalonsState) {
+        this.pedalonsState = pedalonsState;
+    }
+
+    public String getPedalonsUrl() {
+        return pedalonsUrl;
+    }
+
+    public void setPedalonsUrl(String pedalonsUrl) {
+        this.pedalonsUrl = pedalonsUrl;
+    }
+
+    public Instant getPedalonsMigratedAt() {
+        return pedalonsMigratedAt;
+    }
+
+    public void setPedalonsMigratedAt(Instant pedalonsMigratedAt) {
+        this.pedalonsMigratedAt = pedalonsMigratedAt;
+    }
+
+    public boolean isPedalonsMigrated() {
+        return pedalonsState == PedalonsState.MIGRATED;
     }
 
     @Override

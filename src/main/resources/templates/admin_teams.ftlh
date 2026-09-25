@@ -49,9 +49,20 @@
                 </li>
                 <#list teams as team>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>${team.name}<span class="text-muted"> - ${team.id} - ${team.visibility}</span></div>
+                        <div>${team.name}<span class="text-muted"> - ${team.id} - ${team.visibility}</span>
+                            <#if team.pedalonsState??>
+                                <span class="badge <#if team.pedalonsState == 'MIGRATED'>bg-success<#elseif team.pedalonsState == 'READY'>bg-info text-dark<#else>bg-warning text-dark</#if>"><#if team.pedalonsState == 'MIGRATED'>Migré vers Pédalons<#elseif team.pedalonsState == 'READY'>Prêt à basculer vers Pédalons<#else>Migration en cours</#if></span>
+                            </#if>
+                        </div>
                         <div class="btn-group" role="group">
                             <a href="<@common.teamUrl team.id '/' />" class="btn btn-secondary btn-sm" role="button"><i class="bi bi-eye"></i></a>
+                            <#if team.pedalonsState??>
+                                <form method="POST" action="<@common.teamUrl '' '/admin/teams/pedalons-unswitch/${team.id}' />" class="d-inline"
+                                      onsubmit="return confirm('Annuler la bascule du groupe ${team.id} vers Pédalons ? Ses pages ne seront plus redirigées et il redeviendra modifiable. Les navigateurs ayant déjà suivi une redirection permanente continueront d\'aller sur Pédalons.');">
+                                    <#if _csrf??><input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/></#if>
+                                    <button type="submit" class="btn btn-warning btn-sm" title="Annuler la bascule vers Pédalons"><i class="bi bi-arrow-counterclockwise"></i></button>
+                                </form>
+                            </#if>
                             <a href="#" onclick="confirmDeleteTeam('${team.id}', '<@common.teamUrl '' '/admin/teams/delete/${team.id}' />')" class="btn btn-danger btn-sm" role="button"><i class="bi bi-trash"></i></a>
                         </div>
                     </li>
