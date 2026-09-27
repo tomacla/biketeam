@@ -44,6 +44,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
         "contact.email=contact@example.com",
         "no.reply.email=no-reply@example.com",
         "rememberme.key=test-remember-me-key",
+        // fournis en local par le .env, absent en CI
+        "file.repository=${java.io.tmpdir}/biketeam-startup-test/file",
+        "archive.directory=${java.io.tmpdir}/biketeam-startup-test/archive",
+        "gpx.data.cache=${java.io.tmpdir}/biketeam-startup-test/cache",
         "mapbox.api-key=test",
         "facebook.client-id=test",
         "facebook.client-secret=test",
