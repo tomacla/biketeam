@@ -199,3 +199,44 @@ Aucun test automatique ne couvre la chaîne complète de filtres de sécurité :
    5. Tenter un second enregistrement avec le même appareil : il doit être refusé (`excludeCredentials`, doublé d'un contrôle serveur).
    6. Sur un navigateur sans WebAuthn, vérifier que `/login` n'affiche pas le bouton et que `/users/me` affiche « Ce navigateur ne gère pas les passkeys ».
    7. Si une team dispose d'un domaine personnalisé, ouvrir `/login` sur ce domaine et vérifier que le bouton passkey est bien absent.
+
+## Migration vers Pédalons
+
+Un administrateur de groupe peut migrer **son** groupe vers [Pédalons](https://www.pedalons.fr), depuis l'administration du groupe (entrée « Migrer vers Pédalons », `/{teamId}/admin/pedalons`). Le contrat entre les deux applications (jeton, en-têtes, JSON, codes d'erreur) est fixé par le plan `docs/plans/2026-09-22-biketeam-live-migration.md` du dépôt tribly.
+
+### Déroulé
+
+1. L'administrateur choisit « Essai » (coché par défaut) et, au besoin, « Réinitialiser le groupe sur Pédalons », puis clique sur « Migrer vers Pédalons ».
+2. biketeam crée une demande (`pedalons_migration`) et redirige le navigateur vers Pédalons avec un jeton de demande signé (HMAC-SHA256, valable une heure). L'administrateur s'y connecte (ou crée un compte) et confirme : ce compte Pédalons deviendra administrateur du groupe.
+3. Pédalons renvoie le navigateur sur `/{teamId}/admin/pedalons/callback` avec une autorisation à usage unique. biketeam déclenche alors la migration par un appel machine à machine, en HTTPS.
+4. Pédalons lit le groupe sur l'export de biketeam (`/internal/pedalons/teams/{teamId}/snapshot` et `/files/…`), qui n'est servi que pendant une migration active. biketeam suit l'avancement toutes les 15 secondes ; la page d'administration se rafraîchit seule.
+5. **Essai** : le groupe est réellement créé sur Pédalons, rien ne change sur biketeam. **Définitif** : le groupe est gelé en lecture seule pendant la migration (423 sur toute écriture) ; un échec le dégèle. Un définitif réussi laisse le groupe **prêt à basculer** : la correspondance d'URL renvoyée par Pédalons est enregistrée, rien n'est encore redirigé, et le groupe **reste gelé** jusqu'à la bascule (ce qui y serait modifié n'arriverait pas sur Pédalons). Un essai relancé d'ici là le dégèle.
+6. **Bascule** : l'administrateur lit le bilan (compteurs, avertissements) puis clique sur « Basculer vers Pédalons ». Dès lors, les pages et téléchargements du groupe redirigent (302 par défaut, voir `PEDALONS_REDIRECT_STATUS`) vers leurs équivalents Pédalons (repli sur la page du groupe), les écritures répondent 410, et l'API (`/api/teams/{teamId}/**`, lectures comprises) répond `410` `{"code":"TEAM_MIGRATED","message":…,"url":"<page Pédalons du groupe>"}`. Rien n'est supprimé de biketeam. Avant la bascule, une nouvelle migration (essai ou définitive) reste possible et remplace la correspondance en attente (un essai l'annule : il faut alors un nouveau définitif pour basculer).
+
+Les groupes basculés restent listés sur `/teams` et l'accueil ; un clic mène à Pédalons.
+
+Ne sont **pas** migrés : les membres, les inscriptions, les commentaires, les notes et favoris de parcours.
+
+Un administrateur de la plateforme peut annuler une bascule (ou une bascule en attente, ou dégeler un groupe bloqué) depuis `/admin/teams`. Les navigateurs qui ont déjà suivi une redirection permanente (301) continueront d'aller sur Pédalons.
+
+### Configuration
+
+Cinq variables, toutes vides par défaut (fonction éteinte, entrée de menu masquée, `/internal/pedalons/**` en 404) ; les renseigner en partie seulement empêche le démarrage :
+
+| Variable | Rôle |
+|---|---|
+| `PEDALONS_URL` | URL publique de Pédalons (redirection du navigateur) |
+| `PEDALONS_INTERNAL_URL` | URL de Pédalons pour les appels machine à machine (déclenchement et suivi), `https://` obligatoire — en général la même que `PEDALONS_URL` |
+| `PEDALONS_REQUEST_KEY` | clé HMAC base64 (32 octets au moins) du jeton de demande, identique à `PEDALONS_BIKETEAM_REQUEST_KEY` côté Pédalons |
+| `PEDALONS_TRIGGER_SECRET` | secret envoyé à Pédalons, identique à `PEDALONS_BIKETEAM_TRIGGER_SECRET` |
+| `PEDALONS_EXPORT_SECRET` | secret attendu de Pédalons sur l'export, identique à `PEDALONS_BIKETEAM_EXPORT_SECRET` |
+
+`PEDALONS_REDIRECT_STATUS` (facultative, hors des cinq) : code des redirections d'un groupe basculé, `302` (défaut) ou `301`, toute autre valeur empêche le démarrage. Garder `302` tant qu'une bascule peut encore être annulée — un `301` est gardé indéfiniment par les navigateurs, que l'annulation ne rattrape pas — et passer à `301` une fois les bascules stabilisées (meilleur pour les moteurs de recherche).
+
+`PEDALONS_MENU_HIDDEN` (facultative, hors des cinq) : `true` masque l'entrée « Migrer vers Pédalons » du menu d'administration du groupe (défaut `false`). La migration reste possible en allant directement sur `/{teamId}/admin/pedalons`, y compris pour le suivi et la bascule d'une migration lancée (l'entrée reste masquée).
+
+Générer chaque secret avec `openssl rand -base64 32`. `SITE_URL` doit être l'adresse publique exacte de biketeam : Pédalons n'accepte que le retour vers `{SITE_URL}/{teamId}/admin/pedalons/callback`.
+
+**Réseau** : pas de VPN. Les appels machine à machine passent par Internet, en HTTPS, par les entrées publiques normales des deux applications. `/internal/pedalons/**` est donc public, mais protégé par le secret `X-Pedalons-Export-Secret` et servi seulement pour un groupe dont une migration est en cours ; côté Pédalons, `/api/internal/**` l'est de même par `X-Biketeam-Migration-Secret` et l'autorisation à usage unique. `PEDALONS_INTERNAL_URL` doit être en `https://` (le démarrage refuse `http://` hors `localhost`).
+
+En local, à côté d'un Pédalons en développement : lancer biketeam sur le port 8081 (`SERVER_PORT=8081`, `SITE_URL=http://localhost:8081`), avec `PEDALONS_URL=http://localhost:5173` et `PEDALONS_INTERNAL_URL=http://localhost:8080`.

@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.domain.map;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -7,6 +8,8 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 import jakarta.transaction.Transactional;
 import java.util.Set;
@@ -29,5 +32,13 @@ public interface MapRepository extends CrudRepository<Map, String>, PagingAndSor
     @Modifying
     @Query(value = "update trip_stage set map_id = NULL where map_id = :removedMapId", nativeQuery = true)
     void removeMapIdInStages(@Param("removedMapId") String removedMapId);
+
+    // export vers Pedalons (TeamSnapshotBuilder) : graphe de chargement (FETCH) - ce qui est liste
+    // vient dans la meme requete, tout le reste (y compris les associations EAGER : participants,
+    // inscriptions...) n'est pas charge. Nombre de requetes independant du nombre d'elements.
+    @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, attributePaths = {"tags"})
+    List<Map> findByTeamId(String teamId);
+
+    long countByTeamIdAndDeletionFalse(String teamId);
 
 }

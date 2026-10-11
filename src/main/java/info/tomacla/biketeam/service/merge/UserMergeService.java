@@ -36,8 +36,8 @@ import java.util.Optional;
  * <p>
  * Extrait de {@link info.tomacla.biketeam.service.UserService}, qui delegue ici : la fusion a
  * besoin de huit repositories, et UserService est deja injecte par SecurityConfig via
- * UserDetailsService (chaque dependance supplementaire rapproche du cycle que le {@code @Lazy}
- * sur PasswordEncoder documente deja).
+ * UserDetailsService (chaque dependance supplementaire rapproche du cycle que
+ * {@link info.tomacla.biketeam.PasswordEncoderConfig} documente deja).
  * <p>
  * <strong>Ce service ne supprime pas le compte source.</strong> Il le vide de ses donnees et
  * libere ses identifiants uniques ; la suppression (soft delete) reste a la charge de

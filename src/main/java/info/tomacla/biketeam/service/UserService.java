@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -50,12 +49,10 @@ public class UserService {
     private UserRepository userRepository;
 
     /**
-     * @Lazy indispensable : le bean PasswordEncoder est declare par SecurityConfig, qui injecte
-     * lui-meme UserDetailsService -> UserService. Sans proxy differe, le contexte echouerait
-     * au demarrage sur une reference circulaire (interdite par defaut depuis Spring Boot 2.6).
+     * Declare par PasswordEncoderConfig, surtout pas par SecurityConfig : init() l'utilise des le
+     * demarrage (compte admin.email), et SecurityConfig depend de UserService.
      */
     @Autowired
-    @Lazy
     private PasswordEncoder passwordEncoder;
 
     @Value("${admin.strava-id}")

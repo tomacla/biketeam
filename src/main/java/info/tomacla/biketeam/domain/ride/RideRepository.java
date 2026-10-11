@@ -1,6 +1,7 @@
 package info.tomacla.biketeam.domain.ride;
 
 import jakarta.transaction.Transactional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -8,6 +9,8 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public interface RideRepository extends CrudRepository<Ride, String>, PagingAndSortingRepository<Ride, String>, JpaSpecificationExecutor<Ride> {
@@ -38,5 +41,13 @@ public interface RideRepository extends CrudRepository<Ride, String>, PagingAndS
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query(value = "update ride_group_participant set user_id = :targetId where user_id = :sourceId", nativeQuery = true)
     int moveParticipations(@Param("sourceId") String sourceId, @Param("targetId") String targetId);
+
+    // export vers Pedalons (TeamSnapshotBuilder) : graphe de chargement (FETCH) - ce qui est liste
+    // vient dans la meme requete, tout le reste (y compris les associations EAGER : participants,
+    // inscriptions...) n'est pas charge. Nombre de requetes independant du nombre d'elements.
+    @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, attributePaths = {"startPlace", "endPlace", "groups", "groups.map"})
+    List<Ride> findByTeamId(String teamId);
+
+    long countByTeamIdAndDeletionFalse(String teamId);
 
 }

@@ -30,6 +30,9 @@
 
     <title>${_pagetitle}</title>
 
+    <#-- page de suivi d'une migration vers Pedalons : rafraichie tant qu'un job tourne -->
+    <#if (autoRefresh!false)><meta http-equiv="refresh" content="10"></#if>
+
     <#--
         Jeton CSRF expose a tous les appels JSON de passkey.js. Il doit etre pose sur TOUTES les
         pages d'un utilisateur connecte, et non sur les seules /users/me et /login : le bandeau
