@@ -9,8 +9,10 @@ import info.tomacla.biketeam.security.passkey.PasskeySuggestionService;
 import info.tomacla.biketeam.service.NotificationService;
 import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.service.pedalons.PedalonsMigrationService;
+import info.tomacla.biketeam.service.pedalons.PedalonsProperties;
 import info.tomacla.biketeam.service.pedalons.PedalonsSummary;
 import info.tomacla.biketeam.service.url.UrlService;
+import info.tomacla.biketeam.web.pedalons.PedalonsModelAdvice;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -37,8 +39,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 public class AdminTeamPedalonsTemplateTest {
 
+    private static final String MENU_ENTRY = "list-group-item-secondary\">Migrer vers Pédalons</a>";
+
     private PedalonsMigrationService migrationService;
     private Team team;
+    private PedalonsModelAdvice modelAdvice;
     private MockMvc mockMvc;
 
     @BeforeEach
@@ -73,7 +78,13 @@ public class AdminTeamPedalonsTemplateTest {
         configurer.setDefaultEncoding("UTF-8");
         configurer.afterPropertiesSet();
 
+        PedalonsProperties pedalonsProperties = mock(PedalonsProperties.class);
+        when(pedalonsProperties.isEnabled()).thenReturn(true);
+        modelAdvice = new PedalonsModelAdvice();
+        ReflectionTestUtils.setField(modelAdvice, "pedalonsProperties", pedalonsProperties);
+
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .setControllerAdvice(modelAdvice)
                 .setViewResolvers((viewName, locale) -> {
                     FreeMarkerView view = new FreeMarkerView();
                     view.setUrl(viewName + ".ftlh");
@@ -223,6 +234,29 @@ public class AdminTeamPedalonsTemplateTest {
                 .andExpect(content().string(not(containsString("http-equiv=\"refresh\""))))
                 .andExpect(content().string(not(containsString("/admin/pedalons/start"))))
                 .andExpect(content().string(not(containsString("/admin/pedalons/switch"))));
+    }
+
+    @Test
+    public void testMenuEntryShown() throws Exception {
+        when(migrationService.history("n-peloton")).thenReturn(List.of());
+
+        mockMvc.perform(get("/n-peloton/admin/pedalons"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(MENU_ENTRY)));
+    }
+
+    @Test
+    public void testMenuEntryHiddenEvenDuringAMigration() throws Exception {
+        // PEDALONS_MENU_HIDDEN=true : entree masquee, page toujours servie par son URL
+        ReflectionTestUtils.setField(modelAdvice, "menuHidden", true);
+        when(migrationService.history("n-peloton")).thenReturn(List.of(migration("m1", false, PedalonsMigrationStatus.RUNNING,
+                "{\"status\":\"RUNNING\",\"attempt\":1,\"progress\":{\"phase\":\"ROUTES\",\"done\":1,\"total\":2}}")));
+        team.setPedalonsState(PedalonsState.MIGRATING);
+
+        mockMvc.perform(get("/n-peloton/admin/pedalons"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("ROUTES")))
+                .andExpect(content().string(not(containsString(MENU_ENTRY))));
     }
 
 }

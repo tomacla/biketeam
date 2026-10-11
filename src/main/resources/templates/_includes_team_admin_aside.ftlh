@@ -27,7 +27,7 @@
       <a href="<@common.teamUrl team.id '/admin/faq' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri?ends_with('/admin/faq')> list-group-item-secondary</#if>">FAQ</a>
       <a href="<@common.teamUrl team.id '/admin/integration' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri?ends_with('/admin/integration')> list-group-item-secondary</#if>">Intégrations</a>
       <a href="<@common.teamUrl team.id '/admin/logo' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri?ends_with('/admin/logo')> list-group-item-secondary</#if>">Logo</a>
-      <#if (_pedalonsEnabled!false) || (team.pedalonsState??)>
+      <#if !(_pedalonsMenuHidden!false) && ((_pedalonsEnabled!false) || (team.pedalonsState??))>
       <a href="<@common.teamUrl team.id '/admin/pedalons' />" class="list-group-item list-group-item-action<#if springMacroRequestContext.requestUri?ends_with('/admin/pedalons')> list-group-item-secondary</#if>">Migrer vers Pédalons</a>
       </#if>
     </ul>

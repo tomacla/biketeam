@@ -233,6 +233,8 @@ Cinq variables, toutes vides par défaut (fonction éteinte, entrée de menu mas
 
 `PEDALONS_REDIRECT_STATUS` (facultative, hors des cinq) : code des redirections d'un groupe basculé, `302` (défaut) ou `301`, toute autre valeur empêche le démarrage. Garder `302` tant qu'une bascule peut encore être annulée — un `301` est gardé indéfiniment par les navigateurs, que l'annulation ne rattrape pas — et passer à `301` une fois les bascules stabilisées (meilleur pour les moteurs de recherche).
 
+`PEDALONS_MENU_HIDDEN` (facultative, hors des cinq) : `true` masque l'entrée « Migrer vers Pédalons » du menu d'administration du groupe (défaut `false`). La migration reste possible en allant directement sur `/{teamId}/admin/pedalons`, y compris pour le suivi et la bascule d'une migration lancée (l'entrée reste masquée).
+
 Générer chaque secret avec `openssl rand -base64 32`. `SITE_URL` doit être l'adresse publique exacte de biketeam : Pédalons n'accepte que le retour vers `{SITE_URL}/{teamId}/admin/pedalons/callback`.
 
 **Réseau** : pas de VPN. Les appels machine à machine passent par Internet, en HTTPS, par les entrées publiques normales des deux applications. `/internal/pedalons/**` est donc public, mais protégé par le secret `X-Pedalons-Export-Secret` et servi seulement pour un groupe dont une migration est en cours ; côté Pédalons, `/api/internal/**` l'est de même par `X-Biketeam-Migration-Secret` et l'autorisation à usage unique. `PEDALONS_INTERNAL_URL` doit être en `https://` (le démarrage refuse `http://` hors `localhost`).
