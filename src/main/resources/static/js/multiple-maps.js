@@ -68,7 +68,7 @@ function initMapsChart(data, color) {
 
 function initMaps(mapCenter, maps, colors, trip) {
     // init map
-    initLeafletMap('map-wrapper', mapCenter[0], mapCenter[1], 11, "Carto");
+    initLeafletMap('map-wrapper', mapCenter[0], mapCenter[1], 11, "Gris clair");
 
     // contains all lines
     var featureGroup = L.featureGroup();
