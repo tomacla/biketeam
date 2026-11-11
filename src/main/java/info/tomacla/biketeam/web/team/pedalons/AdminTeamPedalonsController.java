@@ -25,13 +25,13 @@ import java.util.List;
  * Migration du groupe vers Pedalons, depuis son administration (reserve aux administrateurs du
  * groupe par la regle /{teamId}/admin/** de SecurityConfig).
  * <ul>
- *     <li>GET  /{teamId}/admin/pedalons : ce qui sera migre, options, suivi, historique ;</li>
+ *     <li>GET  /{teamId}/admin/pedalons : ce qui sera migre, suivi, historique ;</li>
  *     <li>POST /{teamId}/admin/pedalons/start : cree la demande et envoie le navigateur sur
  *     Pedalons avec le jeton signe (303) ;</li>
  *     <li>GET  /{teamId}/admin/pedalons/callback : retour de Pedalons (grant ou annulation),
  *     declenchement M2M, puis retour sur la page de suivi ;</li>
- *     <li>POST /{teamId}/admin/pedalons/switch : bascule d'un groupe pret (migration definitive
- *     reussie) - ses URL redirigent des lors vers Pedalons.</li>
+ *     <li>POST /{teamId}/admin/pedalons/switch : bascule du groupe a partir de sa derniere migration
+ *     reussie - ses URL redirigent des lors vers Pedalons.</li>
  * </ul>
  */
 @Controller
@@ -66,6 +66,9 @@ public class AdminTeamPedalonsController extends AbstractController {
         model.addAttribute("pedalonsUrl", team.getPedalonsUrl() == null ? "" : team.getPedalonsUrl());
         model.addAttribute("migrations", migrations);
         model.addAttribute("running", running);
+        // la bascule part de la derniere migration reussie, hors migration en cours
+        model.addAttribute("switchable", migrationService.isEnabled() && team.getPedalonsState() == null && !running
+                && migrations.stream().anyMatch(m -> "SUCCEEDED".equals(m.getStatus())));
         // rafraichissement automatique de la page de suivi tant qu'un job tourne
         model.addAttribute("autoRefresh", running);
         if (migrationService.isEnabled() && !team.isPedalonsMigrated()) {
@@ -77,8 +80,6 @@ public class AdminTeamPedalonsController extends AbstractController {
 
     @PostMapping(value = "/start")
     public RedirectView start(@PathVariable("teamId") String teamId,
-                              @RequestParam(value = "dryRun", defaultValue = "false") boolean dryRun,
-                              @RequestParam(value = "reset", defaultValue = "false") boolean reset,
                               Principal principal,
                               RedirectAttributes attributes) {
 
@@ -87,7 +88,7 @@ public class AdminTeamPedalonsController extends AbstractController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN));
 
         try {
-            final String target = migrationService.start(team, user, dryRun, reset);
+            final String target = migrationService.start(team, user);
             return seeOther(new RedirectView(target));
         } catch (PedalonsMigrationException e) {
             attributes.addFlashAttribute("errors", List.of(e.getMessage()));

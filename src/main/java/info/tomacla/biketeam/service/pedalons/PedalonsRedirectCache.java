@@ -19,11 +19,11 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Cache memoire des equipes gelees (MIGRATING, READY) ou basculees (MIGRATED) et de leur table
+ * Cache memoire des equipes basculees vers Pedalons (MIGRATED) et de leur table
  * d'URL, lu a chaque requete par le filtre de redirection.
  * <p>
- * Charge paresseusement au premier acces, invalide a chaque changement d'etat (gel, degel,
- * bascule, annulation). Instance unique : pas de diffusion entre noeuds.
+ * Charge paresseusement au premier acces, invalide a chaque changement d'etat (bascule,
+ * annulation). Instance unique : pas de diffusion entre noeuds.
  * <p>
  * Le chargement fait un nombre fixe de requetes, quel que soit le nombre d'equipes : les equipes,
  * les tables d'URL des equipes basculees, les cles (id, permalien) de leurs voyages - ces
@@ -56,14 +56,6 @@ public class PedalonsRedirectCache {
 
         public boolean isMigrated() {
             return state == PedalonsState.MIGRATED;
-        }
-
-        /**
-         * Gelee en lecture seule : migration definitive en cours, ou reussie et en attente du clic
-         * « Basculer » - rien de ce qui serait modifie d'ici la n'arriverait sur Pedalons.
-         */
-        public boolean isFrozen() {
-            return state == PedalonsState.MIGRATING || state == PedalonsState.READY;
         }
     }
 

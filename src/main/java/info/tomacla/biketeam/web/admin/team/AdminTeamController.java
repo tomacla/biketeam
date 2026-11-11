@@ -63,7 +63,7 @@ public class AdminTeamController extends AbstractController {
     }
 
     /**
-     * Annulation de la bascule vers Pedalons (ou degel d'une migration bloquee) : le groupe
+     * Annulation de la bascule vers Pedalons (et de toute migration en cours) : le groupe
      * redevient un groupe biketeam ordinaire. Les navigateurs ayant mis un 301 en cache
      * continueront d'aller sur Pedalons.
      */

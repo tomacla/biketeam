@@ -70,7 +70,7 @@ public class PedalonsRepositoriesTest extends AbstractDBTest {
     public void testMigrationRows() {
         Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String id = UUID.randomUUID().toString();
-        PedalonsMigration migration = new PedalonsMigration(id, TEAM_ID, null, true, false, now);
+        PedalonsMigration migration = new PedalonsMigration(id, TEAM_ID, null, now);
         migrationRepository.save(migration);
 
         assertTrue(migrationRepository.findByIdAndTeamId(id, TEAM_ID).isPresent());
@@ -97,8 +97,8 @@ public class PedalonsRepositoriesTest extends AbstractDBTest {
     public void testTeamStateAndRedirects() {
         TransactionTemplate tx = new TransactionTemplate(transactionManager);
 
-        tx.executeWithoutResult(s -> teamRepository.updatePedalonsState(TEAM_ID, PedalonsState.MIGRATING));
-        assertEquals(PedalonsState.MIGRATING, teamRepository.findById(TEAM_ID).orElseThrow().getPedalonsState());
+        tx.executeWithoutResult(s -> teamRepository.updatePedalonsState(TEAM_ID, PedalonsState.MIGRATED));
+        assertEquals(PedalonsState.MIGRATED, teamRepository.findById(TEAM_ID).orElseThrow().getPedalonsState());
         assertTrue(teamRepository.findByPedalonsStateIsNotNull().stream().anyMatch(t -> t.getId().equals(TEAM_ID)));
 
         Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
@@ -131,62 +131,39 @@ public class PedalonsRepositoriesTest extends AbstractDBTest {
         TransactionTemplate tx = new TransactionTemplate(transactionManager);
         Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         try {
-            // groupe ordinaire : gel possible, bascule et abandon non
-            assertEquals((Integer) 0, tx.execute(s -> teamRepository.switchPedalons(TEAM_ID, now)));
-            assertEquals((Integer) 0, tx.execute(s -> teamRepository.clearPedalonsReady(TEAM_ID)));
-            assertEquals((Integer) 1, tx.execute(s -> teamRepository.freezePedalons(TEAM_ID)));
-            assertEquals(PedalonsState.MIGRATING, teamRepository.findById(TEAM_ID).orElseThrow().getPedalonsState());
-
-            // gele : ni second gel ni bascule
-            assertEquals((Integer) 0, tx.execute(s -> teamRepository.freezePedalons(TEAM_ID)));
-            assertEquals((Integer) 0, tx.execute(s -> teamRepository.switchPedalons(TEAM_ID, now)));
-
-            // pret a basculer : l'abandon efface l'URL
-            tx.executeWithoutResult(s -> teamRepository.updatePedalonsSwitch(TEAM_ID, PedalonsState.READY, "https://p/equipes/t", null));
-            assertEquals((Integer) 1, tx.execute(s -> teamRepository.clearPedalonsReady(TEAM_ID)));
-            Team cleared = teamRepository.findById(TEAM_ID).orElseThrow();
-            assertNull(cleared.getPedalonsState());
-            assertNull(cleared.getPedalonsUrl());
-
-            // pret a basculer : un nouveau gel efface l'URL en attente
-            tx.executeWithoutResult(s -> teamRepository.updatePedalonsSwitch(TEAM_ID, PedalonsState.READY, "https://p/equipes/t", null));
-            assertEquals((Integer) 1, tx.execute(s -> teamRepository.freezePedalons(TEAM_ID)));
-            assertNull(teamRepository.findById(TEAM_ID).orElseThrow().getPedalonsUrl());
-
-            // pret a basculer : bascule, puis plus de gel possible
-            tx.executeWithoutResult(s -> teamRepository.updatePedalonsSwitch(TEAM_ID, PedalonsState.READY, "https://p/equipes/t", null));
-            assertEquals((Integer) 1, tx.execute(s -> teamRepository.switchPedalons(TEAM_ID, now)));
+            // groupe ordinaire : la bascule ecrit l'etat, l'URL et la date
+            assertEquals((Integer) 1, tx.execute(s -> teamRepository.switchPedalons(TEAM_ID, "https://p/equipes/t", now)));
             Team switched = teamRepository.findById(TEAM_ID).orElseThrow();
             assertEquals(PedalonsState.MIGRATED, switched.getPedalonsState());
             assertEquals("https://p/equipes/t", switched.getPedalonsUrl());
             assertEquals(now, switched.getPedalonsMigratedAt());
-            assertEquals((Integer) 0, tx.execute(s -> teamRepository.freezePedalons(TEAM_ID)));
-            assertEquals((Integer) 0, tx.execute(s -> teamRepository.clearPedalonsReady(TEAM_ID)));
+
+            // deja bascule : pas de seconde bascule, rien n'est reecrit
+            assertEquals((Integer) 0, tx.execute(s -> teamRepository.switchPedalons(TEAM_ID, "https://p/equipes/other", now.plusSeconds(60))));
+            Team unchanged = teamRepository.findById(TEAM_ID).orElseThrow();
+            assertEquals("https://p/equipes/t", unchanged.getPedalonsUrl());
+            assertEquals(now, unchanged.getPedalonsMigratedAt());
         } finally {
             tx.executeWithoutResult(s -> teamRepository.updatePedalonsSwitch(TEAM_ID, null, null, null));
         }
     }
 
     @Test
-    public void testSavingAStaleTeamDoesNotUndoAFreezeOrASwitch() {
+    public void testSavingAStaleTeamDoesNotUndoASwitch() {
         TransactionTemplate tx = new TransactionTemplate(transactionManager);
         Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         try {
-            // copie chargee avant le gel (formulaire d'administration, TeamService...)
+            // copie chargee avant la bascule (formulaire d'administration, TeamService...)
             Team stale = teamRepository.findById(TEAM_ID).orElseThrow();
             assertNull(stale.getPedalonsState());
 
-            assertEquals((Integer) 1, tx.execute(s -> teamRepository.freezePedalons(TEAM_ID)));
+            assertEquals((Integer) 1, tx.execute(s -> teamRepository.switchPedalons(TEAM_ID, "https://p/equipes/t", now)));
             stale.setName("Renamed");
             teamRepository.save(stale);
 
+            // la bascule survit, URL et date comprises ; et un setter ne sert a rien
             Team reloaded = teamRepository.findById(TEAM_ID).orElseThrow();
             assertEquals("Renamed", reloaded.getName(), "the rest of the team is saved");
-            assertEquals(PedalonsState.MIGRATING, reloaded.getPedalonsState(), "the freeze survives");
-
-            // de meme pour une bascule, URL et date comprises ; et un setter ne sert a rien
-            tx.executeWithoutResult(s -> teamRepository.readyPedalons(TEAM_ID, "https://p/equipes/t"));
-            assertEquals((Integer) 1, tx.execute(s -> teamRepository.switchPedalons(TEAM_ID, now)));
             reloaded.setPedalonsState(null);
             reloaded.setPedalonsUrl(null);
             reloaded.setPedalonsMigratedAt(null);
@@ -202,34 +179,11 @@ public class PedalonsRepositoriesTest extends AbstractDBTest {
     }
 
     @Test
-    public void testReadyAndUnfreezeOnlyFromMigrating() {
-        TransactionTemplate tx = new TransactionTemplate(transactionManager);
-        try {
-            assertEquals((Integer) 0, tx.execute(s -> teamRepository.readyPedalons(TEAM_ID, "https://p/equipes/t")));
-            assertEquals((Integer) 0, tx.execute(s -> teamRepository.unfreezePedalons(TEAM_ID)));
-
-            tx.executeWithoutResult(s -> teamRepository.freezePedalons(TEAM_ID));
-            assertEquals((Integer) 1, tx.execute(s -> teamRepository.unfreezePedalons(TEAM_ID)));
-            assertNull(teamRepository.findById(TEAM_ID).orElseThrow().getPedalonsState());
-
-            tx.executeWithoutResult(s -> teamRepository.freezePedalons(TEAM_ID));
-            assertEquals((Integer) 1, tx.execute(s -> teamRepository.readyPedalons(TEAM_ID, "https://p/equipes/t")));
-            Team ready = teamRepository.findById(TEAM_ID).orElseThrow();
-            assertEquals(PedalonsState.READY, ready.getPedalonsState());
-            assertEquals("https://p/equipes/t", ready.getPedalonsUrl());
-            assertNull(ready.getPedalonsMigratedAt());
-            assertEquals((Integer) 0, tx.execute(s -> teamRepository.unfreezePedalons(TEAM_ID)));
-        } finally {
-            tx.executeWithoutResult(s -> teamRepository.updatePedalonsSwitch(TEAM_ID, null, null, null));
-        }
-    }
-
-    @Test
     public void testConditionalMigrationTransitions() {
         TransactionTemplate tx = new TransactionTemplate(transactionManager);
         Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         String id = UUID.randomUUID().toString();
-        migrationRepository.save(new PedalonsMigration(id, TEAM_ID, null, false, false, now));
+        migrationRepository.save(new PedalonsMigration(id, TEAM_ID, null, now));
         try {
             // REQUESTED -> TRIGGERING : seulement depuis l'etat attendu
             assertEquals((Integer) 0, tx.execute(s -> migrationRepository.transition(id, PedalonsMigrationStatus.RUNNING,

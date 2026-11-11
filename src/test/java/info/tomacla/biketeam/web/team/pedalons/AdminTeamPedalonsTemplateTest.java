@@ -100,8 +100,8 @@ public class AdminTeamPedalonsTemplateTest {
                 .build();
     }
 
-    private PedalonsMigration migration(String id, boolean dryRun, PedalonsMigrationStatus status, String resultJson) {
-        PedalonsMigration m = new PedalonsMigration(id, "n-peloton", "user-1", dryRun, false, Instant.parse("2026-09-22T10:00:00Z"));
+    private PedalonsMigration migration(String id, PedalonsMigrationStatus status, String resultJson) {
+        PedalonsMigration m = new PedalonsMigration(id, "n-peloton", "user-1", Instant.parse("2026-09-22T10:00:00Z"));
         m.setStatus(status, Instant.parse("2026-09-22T10:05:00Z"));
         m.setResultJson(resultJson);
         return m;
@@ -113,7 +113,12 @@ public class AdminTeamPedalonsTemplateTest {
 
         mockMvc.perform(get("/n-peloton/admin/pedalons"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Essai (recommandé)")))
+                .andExpect(content().string(not(containsString("Essai"))))
+                .andExpect(content().string(not(containsString("Réinitialiser"))))
+                .andExpect(content().string(not(containsString("name=\"dryRun\""))))
+                .andExpect(content().string(not(containsString("name=\"reset\""))))
+                // rien a basculer tant qu'aucune migration n'a reussi
+                .andExpect(content().string(not(containsString("/admin/pedalons/switch"))))
                 .andExpect(content().string(containsString("585 parcours")))
                 .andExpect(content().string(containsString("/n-peloton/admin/pedalons/start")))
                 .andExpect(content().string(containsString("Migrer vers Pédalons")));
@@ -121,27 +126,26 @@ public class AdminTeamPedalonsTemplateTest {
 
     @Test
     public void testRunningMigration() throws Exception {
-        when(migrationService.history("n-peloton")).thenReturn(List.of(migration("m1", false, PedalonsMigrationStatus.RUNNING,
+        when(migrationService.history("n-peloton")).thenReturn(List.of(migration("m1", PedalonsMigrationStatus.RUNNING,
                 "{\"status\":\"RUNNING\",\"attempt\":2,\"progress\":{\"phase\":\"ROUTES\",\"done\":120,\"total\":2601}}")));
-        team.setPedalonsState(PedalonsState.MIGRATING);
 
         mockMvc.perform(get("/n-peloton/admin/pedalons"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("http-equiv=\"refresh\"")))
                 .andExpect(content().string(containsString("ROUTES")))
                 .andExpect(content().string(containsString("width: 5%")))
-                .andExpect(content().string(not(containsString("/admin/pedalons/start"))));
+                .andExpect(content().string(not(containsString("/admin/pedalons/start"))))
+                .andExpect(content().string(not(containsString("/admin/pedalons/switch"))));
     }
 
     @Test
     public void testRunningMigrationWithoutLastAttemptError() throws Exception {
         // Pedalons plus ancien (champ absent) ou champ a null : rien sur l'essai precedent
         when(migrationService.history("n-peloton")).thenReturn(List.of(
-                migration("m1", false, PedalonsMigrationStatus.RUNNING,
+                migration("m1", PedalonsMigrationStatus.RUNNING,
                         "{\"status\":\"RUNNING\",\"attempt\":1,\"progress\":{\"phase\":\"ROUTES\",\"done\":1,\"total\":2}}"),
-                migration("m0", true, PedalonsMigrationStatus.RUNNING,
+                migration("m0", PedalonsMigrationStatus.RUNNING,
                         "{\"status\":\"RUNNING\",\"attempt\":1,\"lastAttemptError\":null,\"progress\":{\"phase\":\"ROUTES\",\"done\":1,\"total\":2}}")));
-        team.setPedalonsState(PedalonsState.MIGRATING);
 
         mockMvc.perform(get("/n-peloton/admin/pedalons"))
                 .andExpect(status().isOk())
@@ -150,10 +154,9 @@ public class AdminTeamPedalonsTemplateTest {
 
     @Test
     public void testQueuedRetryShowsTheFailedAttemptReason() throws Exception {
-        when(migrationService.history("n-peloton")).thenReturn(List.of(migration("m1", false, PedalonsMigrationStatus.RUNNING,
+        when(migrationService.history("n-peloton")).thenReturn(List.of(migration("m1", PedalonsMigrationStatus.RUNNING,
                 "{\"status\":\"QUEUED\",\"attempt\":1,\"progress\":{\"phase\":\"QUEUED\",\"done\":0,\"total\":0},"
                         + "\"lastAttemptError\":{\"code\":\"EXPORT_UNAVAILABLE\",\"message\":\"HTTP 502 <b>proxy</b>\"},\"error\":null}")));
-        team.setPedalonsState(PedalonsState.MIGRATING);
 
         mockMvc.perform(get("/n-peloton/admin/pedalons"))
                 .andExpect(status().isOk())
@@ -164,7 +167,7 @@ public class AdminTeamPedalonsTemplateTest {
     @Test
     public void testRunningRetryShowsThePreviousAttemptReason() throws Exception {
         // deuxieme tentative commencee : c'est la premiere qui a echoue ; sans message, le code
-        when(migrationService.history("n-peloton")).thenReturn(List.of(migration("m1", true, PedalonsMigrationStatus.RUNNING,
+        when(migrationService.history("n-peloton")).thenReturn(List.of(migration("m1", PedalonsMigrationStatus.RUNNING,
                 "{\"status\":\"RUNNING\",\"attempt\":2,\"progress\":{\"phase\":\"ROUTES\",\"done\":3,\"total\":10},"
                         + "\"lastAttemptError\":{\"code\":\"WORKER_LOST\",\"message\":null}}")));
 
@@ -176,7 +179,7 @@ public class AdminTeamPedalonsTemplateTest {
 
     @Test
     public void testFinalFailureDoesNotShowTheRetryNotice() throws Exception {
-        PedalonsMigration failed = migration("m1", true, PedalonsMigrationStatus.FAILED,
+        PedalonsMigration failed = migration("m1", PedalonsMigrationStatus.FAILED,
                 "{\"status\":\"FAILED\",\"attempt\":3,\"lastAttemptError\":{\"code\":\"EXPORT_UNAVAILABLE\",\"message\":\"HTTP 502\"},"
                         + "\"error\":{\"code\":\"EXPORT_UNAVAILABLE\",\"message\":\"HTTP 502\"}}");
         failed.setError("EXPORT_UNAVAILABLE", "HTTP 502");
@@ -189,36 +192,44 @@ public class AdminTeamPedalonsTemplateTest {
     }
 
     @Test
-    public void testReadyToSwitch() throws Exception {
-        PedalonsMigration succeeded = migration("m2", false, PedalonsMigrationStatus.SUCCEEDED,
+    public void testSucceededMigrationOffersToSwitch() throws Exception {
+        PedalonsMigration succeeded = migration("m2", PedalonsMigrationStatus.SUCCEEDED,
                 "{\"status\":\"SUCCEEDED\",\"counts\":{\"routes\":{\"total\":2601,\"migrated\":2560,\"skipped\":16,\"failed\":25}}}");
         succeeded.setPedalonsTeamUrl("https://www.pedalons.fr/equipes/n-peloton");
         when(migrationService.history("n-peloton")).thenReturn(List.of(succeeded));
-        team.setPedalonsState(PedalonsState.READY);
-        team.setPedalonsUrl("https://www.pedalons.fr/equipes/n-peloton");
 
         mockMvc.perform(get("/n-peloton/admin/pedalons"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("prêt à basculer")))
                 .andExpect(content().string(containsString("/n-peloton/admin/pedalons/switch")))
-                .andExpect(content().string(containsString("Basculer vers Pédalons")))
                 .andExpect(content().string(containsString("Basculer vers Pédalons : toutes les adresses")))
                 // compteurs du bilan (sans le separateur de milliers, qui depend de la locale)
                 .andExpect(content().string(containsString("560")))
-                // une nouvelle migration reste possible avant la bascule
+                // la migration peut etre relancee tant que le groupe n'a pas bascule
                 .andExpect(content().string(containsString("/n-peloton/admin/pedalons/start")))
                 .andExpect(content().string(not(containsString("http-equiv=\"refresh\""))));
     }
 
     @Test
+    public void testNoSwitchWithoutASucceededMigration() throws Exception {
+        PedalonsMigration failed = migration("m1", PedalonsMigrationStatus.FAILED, null);
+        failed.setError("BIKETEAM_SLUG_CONFLICT", "Slug taken");
+        when(migrationService.history("n-peloton")).thenReturn(List.of(failed));
+
+        mockMvc.perform(get("/n-peloton/admin/pedalons"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("/n-peloton/admin/pedalons/start")))
+                .andExpect(content().string(not(containsString("/admin/pedalons/switch"))));
+    }
+
+    @Test
     public void testFinishedMigrations() throws Exception {
-        PedalonsMigration succeeded = migration("m2", false, PedalonsMigrationStatus.SUCCEEDED,
+        PedalonsMigration succeeded = migration("m2", PedalonsMigrationStatus.SUCCEEDED,
                 "{\"status\":\"SUCCEEDED\",\"targetTeam\":{\"url\":\"https://www.pedalons.fr/equipes/n-peloton\"},"
                         + "\"counts\":{\"routes\":{\"total\":2601,\"migrated\":2560,\"skipped\":16,\"failed\":25}},"
                         + "\"warnings\":[{\"entityType\":\"ROUTE\",\"biketeamId\":\"8c0\",\"code\":\"GPX_MISSING\",\"message\":\"No GPX <file>\"}],"
                         + "\"warningsTruncated\":true}");
         succeeded.setPedalonsTeamUrl("https://www.pedalons.fr/equipes/n-peloton");
-        PedalonsMigration failed = migration("m1", true, PedalonsMigrationStatus.FAILED, null);
+        PedalonsMigration failed = migration("m1", PedalonsMigrationStatus.FAILED, null);
         failed.setError("BIKETEAM_SLUG_CONFLICT", "Slug taken");
         when(migrationService.history("n-peloton")).thenReturn(List.of(succeeded, failed));
         team.setPedalonsState(PedalonsState.MIGRATED);
@@ -249,9 +260,8 @@ public class AdminTeamPedalonsTemplateTest {
     public void testMenuEntryHiddenEvenDuringAMigration() throws Exception {
         // PEDALONS_MENU_HIDDEN=true : entree masquee, page toujours servie par son URL
         ReflectionTestUtils.setField(modelAdvice, "menuHidden", true);
-        when(migrationService.history("n-peloton")).thenReturn(List.of(migration("m1", false, PedalonsMigrationStatus.RUNNING,
+        when(migrationService.history("n-peloton")).thenReturn(List.of(migration("m1", PedalonsMigrationStatus.RUNNING,
                 "{\"status\":\"RUNNING\",\"attempt\":1,\"progress\":{\"phase\":\"ROUTES\",\"done\":1,\"total\":2}}")));
-        team.setPedalonsState(PedalonsState.MIGRATING);
 
         mockMvc.perform(get("/n-peloton/admin/pedalons"))
                 .andExpect(status().isOk())

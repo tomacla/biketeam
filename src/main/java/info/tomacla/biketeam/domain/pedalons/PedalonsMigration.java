@@ -31,12 +31,6 @@ public class PedalonsMigration {
     @Column(nullable = false, length = 20)
     private PedalonsMigrationStatus status;
 
-    @Column(name = "dry_run", nullable = false)
-    private boolean dryRun;
-
-    @Column(nullable = false)
-    private boolean reset;
-
     // grant a usage unique recu de Pedalons : garde le temps du declenchement, efface ensuite
     @Column(name = "grant_value", length = 100)
     private String grantValue;
@@ -80,12 +74,10 @@ public class PedalonsMigration {
     public PedalonsMigration() {
     }
 
-    public PedalonsMigration(String id, String teamId, String requestedBy, boolean dryRun, boolean reset, Instant now) {
+    public PedalonsMigration(String id, String teamId, String requestedBy, Instant now) {
         this.id = Objects.requireNonNull(id, "id is null");
         this.teamId = Objects.requireNonNull(teamId, "teamId is null");
         this.requestedBy = requestedBy;
-        this.dryRun = dryRun;
-        this.reset = reset;
         this.status = PedalonsMigrationStatus.REQUESTED;
         this.createdAt = now;
         this.updatedAt = now;
@@ -110,14 +102,6 @@ public class PedalonsMigration {
     public void setStatus(PedalonsMigrationStatus status, Instant now) {
         this.status = Objects.requireNonNull(status, "status is null");
         this.updatedAt = now;
-    }
-
-    public boolean isDryRun() {
-        return dryRun;
-    }
-
-    public boolean isReset() {
-        return reset;
     }
 
     public String getGrantValue() {

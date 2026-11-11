@@ -43,12 +43,12 @@ public class PedalonsClientTest {
                 .andExpect(jsonPath("$.requestId").value("req-1"))
                 .andExpect(jsonPath("$.grant").value("bmg_x"))
                 .andExpect(jsonPath("$.teamId").value("n-peloton"))
-                .andExpect(jsonPath("$.dryRun").value(true))
-                .andExpect(jsonPath("$.reset").value(false))
+                .andExpect(jsonPath("$.dryRun").doesNotExist())
+                .andExpect(jsonPath("$.reset").doesNotExist())
                 .andRespond(withStatus(HttpStatus.ACCEPTED).contentType(MediaType.APPLICATION_JSON)
                         .body("{\"jobId\":\"0hx3k2m9q8r4t\",\"status\":\"QUEUED\",\"targetTeamSlug\":\"n-peloton\"}"));
 
-        PedalonsClient.Response response = client.trigger("req-1", "bmg_x", "n-peloton", true, false);
+        PedalonsClient.Response response = client.trigger("req-1", "bmg_x", "n-peloton");
 
         assertEquals(202, response.status());
         assertEquals("0hx3k2m9q8r4t", response.text("jobId"));
@@ -61,7 +61,7 @@ public class PedalonsClientTest {
                 .andRespond(withStatus(HttpStatus.CONFLICT).contentType(MediaType.APPLICATION_JSON)
                         .body("{\"code\":\"BIKETEAM_MIGRATION_RUNNING\",\"activeJobId\":\"abc\"}"));
 
-        PedalonsClient.Response response = client.trigger("req-1", "bmg_x", "n-peloton", false, false);
+        PedalonsClient.Response response = client.trigger("req-1", "bmg_x", "n-peloton");
 
         assertEquals(409, response.status());
         assertEquals("BIKETEAM_MIGRATION_RUNNING", response.code());

@@ -153,14 +153,6 @@ public class PedalonsMigrationView {
         return migration.getStatus().isActive();
     }
 
-    public boolean isDryRun() {
-        return migration.isDryRun();
-    }
-
-    public boolean isReset() {
-        return migration.isReset();
-    }
-
     public String getCreatedAt() {
         return format(migration.getCreatedAt());
     }

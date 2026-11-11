@@ -51,7 +51,7 @@
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <div>${team.name}<span class="text-muted"> - ${team.id} - ${team.visibility}</span>
                             <#if team.pedalonsState??>
-                                <span class="badge <#if team.pedalonsState == 'MIGRATED'>bg-success<#elseif team.pedalonsState == 'READY'>bg-info text-dark<#else>bg-warning text-dark</#if>"><#if team.pedalonsState == 'MIGRATED'>Migré vers Pédalons<#elseif team.pedalonsState == 'READY'>Prêt à basculer vers Pédalons<#else>Migration en cours</#if></span>
+                                <span class="badge bg-success">Migré vers Pédalons</span>
                             </#if>
                         </div>
                         <div class="btn-group" role="group">

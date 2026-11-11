@@ -17,28 +17,6 @@
                 Toutes les adresses du groupe redirigent désormais vers Pédalons et le groupe est en lecture seule ici.
                 Rien n'a été supprimé de biketeam.
             </div>
-        <#elseif pedalonsState == 'READY'>
-            <div class="border border-success rounded p-4 mb-4">
-                <h6>Migration définitive terminée : le groupe est prêt à basculer</h6>
-                <p>
-                    Le groupe a été copié sur Pédalons<#if pedalonsUrl != ''> : <a href="${pedalonsUrl}" target="_blank">${pedalonsUrl}</a></#if>.
-                    Vérifiez le bilan (compteurs et avertissements, dans l'historique ci-dessous) et le groupe sur Pédalons.
-                    Tant que vous n'avez pas basculé, le groupe reste gelé en lecture seule (pour que rien ne manque sur Pédalons) et ses adresses ne sont pas redirigées. Un essai relancé d'ici là le dégèle.
-                </p>
-                <p class="small text-muted">
-                    Une nouvelle migration (essai ou définitive) reste possible avant la bascule ; elle remplace celle-ci,
-                    et seule une migration définitive réussie permet de basculer.
-                </p>
-                <form action="<@common.teamUrl team.id '/admin/pedalons/switch' />" method="POST"
-                      onsubmit="return confirm('Basculer vers Pédalons : toutes les adresses du groupe redirigeront vers Pédalons et le groupe restera en lecture seule ici. Continuer ?');">
-                    <#if _csrf??><input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/></#if>
-                    <button type="submit" class="btn btn-success">Basculer vers Pédalons</button>
-                </form>
-            </div>
-        <#elseif pedalonsState == 'MIGRATING'>
-            <div class="alert alert-warning" role="alert">
-                Migration définitive en cours : le groupe est en lecture seule jusqu'à la fin de la migration.
-            </div>
         </#if>
 
         <#if !pedalonsEnabled && pedalonsState != 'MIGRATED'>
@@ -52,7 +30,7 @@
                 <#if migration.active>
                     <div class="border rounded p-4 mb-4">
                         <h6>
-                            <#if migration.dryRun>Essai<#else>Migration définitive</#if> en cours
+                            Migration en cours
                             <span class="badge bg-info text-dark">${migration.statusLabel}</span>
                         </h6>
                         <#if migration.phase != ''>
@@ -80,8 +58,7 @@
 
         <#if pedalonsEnabled && pedalonsState != 'MIGRATED' && !running && pedalonsMigratable>
 
-            <form name="form-pedalons" action="<@common.teamUrl team.id '/admin/pedalons/start' />" method="POST" class="border rounded p-4 mb-4"
-                  onsubmit="return confirmPedalonsMigration(this);">
+            <form name="form-pedalons" action="<@common.teamUrl team.id '/admin/pedalons/start' />" method="POST" class="border rounded p-4 mb-4">
 
                 <#if _csrf??><input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/></#if>
 
@@ -110,44 +87,36 @@
                     sur Pédalons par les moyens habituels (lien d'invitation, adhésion libre).
                 </p>
 
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="checkbox" name="dryRun" value="true" id="form-pedalons-dryrun" checked>
-                    <label class="form-check-label" for="form-pedalons-dryrun">Essai (recommandé)</label>
-                    <div class="form-text">
-                        Le groupe est réellement créé sur Pédalons pour vérification, mais biketeam ne redirige rien
-                        et le groupe reste modifiable ici. Un essai peut être relancé autant de fois que nécessaire.
-                    </div>
-                </div>
-
-                <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" name="reset" value="true" id="form-pedalons-reset">
-                    <label class="form-check-label" for="form-pedalons-reset">Réinitialiser le groupe sur Pédalons avant la migration</label>
-                    <div class="form-text text-danger">
-                        Le groupe déjà créé sur Pédalons par une migration précédente est mis à la corbeille et recréé
-                        à partir de biketeam : tout ce qui y a été ajouté ou modifié depuis sur Pédalons sera perdu.
-                    </div>
-                </div>
-
-                <div class="alert alert-warning small" role="alert">
-                    Sans essai, la migration est <strong>définitive</strong> : le groupe passe en lecture seule pendant la
-                    migration, et le reste jusqu'à la bascule. Une fois celle-ci réussie, vous lirez le bilan puis cliquerez sur « Basculer vers Pédalons » :
-                    <strong>toutes les adresses du groupe redirigeront alors vers Pédalons</strong> et il restera en
-                    lecture seule ici. Les données restent conservées sur biketeam.
-                </div>
+                <p class="small text-muted">
+                    Le groupe est copié sur Pédalons, ou mis à jour s'il y a déjà été copié : la migration peut être
+                    relancée autant de fois que nécessaire. Elle ne change rien ici : le groupe reste modifiable et
+                    biketeam ne redirige rien tant que vous n'avez pas basculé.
+                </p>
 
                 <button type="submit" class="btn btn-primary">Migrer vers Pédalons</button>
 
             </form>
 
-            <script type="text/javascript">
-                function confirmPedalonsMigration(form) {
-                    if (form.elements['dryRun'].checked) {
-                        return true;
-                    }
-                    return confirm('Migration définitive : le groupe sera en lecture seule pendant la migration, puis jusqu\'à la bascule. La bascule vers Pédalons se fera ensuite, quand vous la déclencherez. Continuer ?');
-                }
-            </script>
+        </#if>
 
+        <#if switchable>
+            <div class="border border-success rounded p-4 mb-4">
+                <h6>Basculer vers Pédalons</h6>
+                <p>
+                    Une fois le groupe vérifié sur Pédalons (bilan de la dernière migration réussie, dans l'historique
+                    ci-dessous), vous pouvez basculer : <strong>toutes les adresses du groupe redirigeront alors vers
+                    Pédalons</strong> et le groupe passera en lecture seule ici. Les données restent conservées sur biketeam.
+                </p>
+                <p class="small text-muted">
+                    Ce qui a été ajouté ou modifié ici depuis la dernière migration réussie n'est pas sur Pédalons :
+                    relancez d'abord une migration si besoin.
+                </p>
+                <form action="<@common.teamUrl team.id '/admin/pedalons/switch' />" method="POST"
+                      onsubmit="return confirm('Basculer vers Pédalons : toutes les adresses du groupe redirigeront vers Pédalons et le groupe passera en lecture seule ici. Continuer ?');">
+                    <#if _csrf??><input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/></#if>
+                    <button type="submit" class="btn btn-success">Basculer vers Pédalons</button>
+                </form>
+            </div>
         </#if>
 
         <#if migrations?size gt 0>
@@ -156,8 +125,7 @@
                 <div class="border rounded p-3 mb-3">
                     <div class="d-flex justify-content-between flex-wrap">
                         <div>
-                            <strong><#if migration.dryRun>Essai<#else>Définitif</#if></strong><#if migration.reset> avec réinitialisation</#if>
-                            — demandé le ${migration.createdAt}
+                            <strong>Migration</strong> demandée le ${migration.createdAt}
                         </div>
                         <div>
                             <span class="badge <#if migration.status == 'SUCCEEDED'>bg-success<#elseif migration.status == 'FAILED'>bg-danger<#elseif migration.active>bg-info text-dark<#else>bg-secondary</#if>">${migration.statusLabel}</span>

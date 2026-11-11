@@ -53,9 +53,9 @@ public class Team implements MessageHolder, Persistable<String> {
 
     // migration vers Pedalons : voir PedalonsState et service.pedalons.
     // Lecture seule pour Hibernate : ces colonnes ne sont ecrites que par les UPDATE cibles et
-    // conditionnels de TeamRepository. Sans cela, tout save() d'un Team charge avant un gel ou une
+    // conditionnels de TeamRepository. Sans cela, tout save() d'un Team charge avant une
     // bascule (formulaire d'administration, TeamService...) reecrirait l'ancien etat et annulerait
-    // silencieusement le gel ou la bascule. Les setters ne changent que la copie en memoire.
+    // silencieusement la bascule. Les setters ne changent que la copie en memoire.
     @Enumerated(EnumType.STRING)
     @Column(name = "pedalons_state", length = 20, insertable = false, updatable = false)
     private PedalonsState pedalonsState;

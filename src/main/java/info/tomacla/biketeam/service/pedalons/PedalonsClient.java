@@ -106,13 +106,11 @@ public class PedalonsClient {
     /**
      * POST /api/internal/biketeam-migration/jobs : 202 (job cree) ou 200 (rejeu idempotent).
      */
-    public Response trigger(String requestId, String grant, String teamId, boolean dryRun, boolean reset) {
+    public Response trigger(String requestId, String grant, String teamId) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("requestId", requestId);
         body.put("grant", grant);
         body.put("teamId", teamId);
-        body.put("dryRun", dryRun);
-        body.put("reset", reset);
         return exchange(HttpMethod.POST, properties.getInternalUrl() + JOBS_PATH, body);
     }
 
