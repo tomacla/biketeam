@@ -63,9 +63,7 @@ public class PedalonsRedirectResolverTest {
         when(tripService.findByPermalink(anyString())).thenReturn(Optional.empty());
 
         Team migrated = team("n-peloton", PedalonsState.MIGRATED, BASE);
-        Team frozen = team("frozen", PedalonsState.MIGRATING, null);
-        Team ready = team("ready", PedalonsState.READY, "https://www.pedalons.fr/equipes/ready");
-        when(teamRepository.findByPedalonsStateIsNotNull()).thenReturn(List.of(migrated, frozen, ready));
+        when(teamRepository.findByPedalonsStateIsNotNull()).thenReturn(List.of(migrated));
         when(redirectRepository.findByTeamIdIn(List.of("n-peloton"))).thenReturn(List.of(
                 redirect(PedalonsRedirect.TEAM, "n-peloton", BASE),
                 redirect(PedalonsRedirect.TEAM_ABOUT, "n-peloton", BASE + "/a-propos"),
@@ -187,19 +185,6 @@ public class PedalonsRedirectResolverTest {
     }
 
     @Test
-    public void testTeamReadyToSwitchStaysFrozenButIsNotRedirected() {
-        assertEquals(Action.PASS, get("/ready").action());
-        assertEquals(Action.PASS, get("/ready/rides/r").action());
-        assertEquals(Action.PASS, resolver.resolve("GET", "/api/teams/ready/rides/r").action());
-        // page 423 : URL Pedalons connue et etat READY (texte « en attente de bascule »)
-        assertEquals(new Decision(Action.LOCKED, "https://www.pedalons.fr/equipes/ready", PedalonsState.READY), get("/ready/join"));
-        assertEquals(Action.LOCKED, resolver.resolve("POST", "/ready/admin/rides/r").action());
-        assertEquals(new Decision(Action.API_LOCKED, "https://www.pedalons.fr/equipes/ready"), resolver.resolve("PUT", "/api/teams/ready/rides/r"));
-        assertEquals(Action.PASS, get("/ready/admin/pedalons").action());
-        assertEquals(Action.PASS, resolver.resolve("POST", "/ready/admin/pedalons/switch").action());
-    }
-
-    @Test
     public void testCatalogTrip() {
         // id ou permalien, resolus par le cache
         assertRedirect(BASE + "/voyages/tour-2025", get("/catalog/trips/trip-1"));
@@ -231,8 +216,7 @@ public class PedalonsRedirectResolverTest {
 
     @Test
     public void testCatalogTripWithoutMigratedTeamLooksNothingUp() {
-        when(teamRepository.findByPedalonsStateIsNotNull()).thenReturn(List.of(
-                team("frozen", PedalonsState.MIGRATING, null), team("ready", PedalonsState.READY, null)));
+        when(teamRepository.findByPedalonsStateIsNotNull()).thenReturn(List.of());
         cache.invalidate();
 
         assertEquals(Action.PASS, get("/catalog/trips/trip-1").action());
@@ -243,8 +227,6 @@ public class PedalonsRedirectResolverTest {
     @Test
     public void testMigrationPageStaysReachable() {
         assertEquals(Action.PASS, get("/n-peloton/admin/pedalons").action());
-        assertEquals(Action.PASS, get("/frozen/admin/pedalons").action());
-        assertEquals(Action.PASS, resolver.resolve("POST", "/frozen/admin/pedalons/start").action());
     }
 
     @Test
@@ -259,30 +241,6 @@ public class PedalonsRedirectResolverTest {
         assertEquals(Action.PASS, get("/").action());
         assertEquals(Action.PASS, get("/internal/pedalons/teams/n-peloton/snapshot").action());
         verifyNoInteractions(mapService, rideService);
-    }
-
-    @Test
-    public void testFrozenTeamRefusesWrites() {
-        // URL Pedalons pas encore connue : page 423 sans lien, texte « migration en cours »
-        assertEquals(new Decision(Action.LOCKED, null, PedalonsState.MIGRATING), resolver.resolve("POST", "/frozen/rides/r/add-message"));
-        assertEquals(Action.LOCKED, resolver.resolve("POST", "/frozen/admin/rides/r").action());
-        assertEquals(new Decision(Action.API_LOCKED, null), resolver.resolve("PUT", "/api/teams/frozen/rides/r"));
-        assertEquals(Action.LOCKED, get("/frozen/join").action());
-        assertEquals(Action.LOCKED, get("/frozen/leave").action());
-        assertEquals(Action.LOCKED, get("/frozen/rides/r/add-participant/g").action());
-        assertEquals(Action.LOCKED, get("/frozen/trips/t/add-participant").action());
-        assertEquals(Action.LOCKED, get("/frozen/rides/r/remove-message/m").action());
-        assertEquals(Action.LOCKED, get("/frozen/maps/m/add-favorite").action());
-        assertEquals(Action.LOCKED, get("/frozen/admin/rides").action());
-    }
-
-    @Test
-    public void testFrozenTeamServesReads() {
-        assertEquals(Action.PASS, get("/frozen").action());
-        assertEquals(Action.PASS, get("/frozen/rides/r").action());
-        assertEquals(Action.PASS, get("/frozen/maps/m/gpx").action());
-        assertEquals(Action.PASS, resolver.resolve("HEAD", "/frozen/maps").action());
-        assertEquals(Action.PASS, get("/api/teams/frozen/rides").action());
     }
 
     @Test
@@ -309,20 +267,14 @@ public class PedalonsRedirectResolverTest {
     public void testEncodedPathsDoNotEscapeTheFilter() throws Exception {
         PedalonsRedirectFilter filter = new PedalonsRedirectFilter(resolver, 301);
 
-        // gel : un segment d'equipe encode reste une ecriture sur l'equipe gelee
-        MockHttpServletResponse locked = filter("GET", "/%66rozen/join", filter);
-        assertEquals(PedalonsRedirectFilter.SC_LOCKED, locked.getStatus());
-        MockHttpServletResponse apiLocked = filter("POST", "/api/teams/%66rozen/rides/r", filter);
-        assertEquals(PedalonsRedirectFilter.SC_LOCKED, apiLocked.getStatus());
-        assertTrue(apiLocked.getContentType().startsWith("application/json"));
-        assertTrue(apiLocked.getContentAsString().contains("\"code\":\"TEAM_FROZEN\""));
-        assertTrue(locked.getContentType().startsWith("text/html"));
-        assertEquals(PedalonsRedirectFilter.SC_LOCKED, filter("GET", "/frozen;x=1/join", filter).getStatus());
-
-        // bascule
+        // un segment d'equipe encode, ou suivi de ';', reste une requete sur l'equipe basculee
         MockHttpServletResponse moved = filter("GET", "/%6E-peloton/rides/ride-1", filter);
         assertEquals(301, moved.getStatus());
         assertEquals(BASE + "/sorties/sortie-du-12", moved.getHeader("Location"));
+        assertEquals(301, filter("GET", "/n-peloton;x=1/rides/ride-1", filter).getStatus());
+        MockHttpServletResponse apiGone = filter("POST", "/api/teams/%6E-peloton/rides/r", filter);
+        assertEquals(410, apiGone.getStatus());
+        assertTrue(apiGone.getContentAsString().contains("\"code\":\"TEAM_MIGRATED\""));
 
         // permalien non ASCII, servi encode
         Map map = new Map();
@@ -345,8 +297,8 @@ public class PedalonsRedirectResolverTest {
     public void testInvalidationWaitsForAnOngoingLoad() throws Exception {
         CountDownLatch loading = new CountDownLatch(1);
         CountDownLatch release = new CountDownLatch(1);
-        Team frozen = team("frozen", PedalonsState.MIGRATING, null);
-        // premier chargement : lit encore l'etat gele, puis le degel est valide pendant qu'il tourne
+        Team frozen = team("frozen", PedalonsState.MIGRATED, null);
+        // premier chargement : lit encore l'etat bascule, puis l'annulation est validee pendant qu'il tourne
         when(teamRepository.findByPedalonsStateIsNotNull())
                 .thenAnswer(invocation -> {
                     loading.countDown();

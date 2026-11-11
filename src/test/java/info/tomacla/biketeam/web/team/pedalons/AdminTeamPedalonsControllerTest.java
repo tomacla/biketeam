@@ -56,34 +56,21 @@ public class AdminTeamPedalonsControllerTest {
 
     @Test
     public void testStartRedirectsTheBrowserToPedalons() throws Exception {
-        when(migrationService.start(team, user, true, false))
+        when(migrationService.start(team, user))
                 .thenReturn("https://www.pedalons.fr/migration-biketeam?request=abc.def.ghi");
 
         mockMvc.perform(post("/n-peloton/admin/pedalons/start")
-                        .param("dryRun", "true")
                         .principal(ControllerTestSupport.authentication(user)))
                 .andExpect(status().isSeeOther())
                 .andExpect(redirectedUrl("https://www.pedalons.fr/migration-biketeam?request=abc.def.ghi"));
     }
 
     @Test
-    public void testUncheckedBoxesMeanDefinitiveWithoutReset() throws Exception {
-        when(migrationService.start(any(), any(), anyBoolean(), anyBoolean())).thenReturn("https://p/migration-biketeam?request=t");
-
-        mockMvc.perform(post("/n-peloton/admin/pedalons/start")
-                        .principal(ControllerTestSupport.authentication(user)))
-                .andExpect(status().isSeeOther());
-
-        verify(migrationService).start(team, user, false, false);
-    }
-
-    @Test
     public void testRefusedStartComesBackWithTheReason() throws Exception {
-        when(migrationService.start(any(), any(), anyBoolean(), anyBoolean()))
+        when(migrationService.start(any(), any()))
                 .thenThrow(new PedalonsMigrationException("Une migration de ce groupe est déjà en cours."));
 
         mockMvc.perform(post("/n-peloton/admin/pedalons/start")
-                        .param("dryRun", "true")
                         .principal(ControllerTestSupport.authentication(user)))
                 .andExpect(status().isSeeOther())
                 .andExpect(redirectedUrl("/n-peloton/admin/pedalons"))
@@ -104,18 +91,18 @@ public class AdminTeamPedalonsControllerTest {
     @Test
     public void testRefusedSwitchComesBackWithTheReason() throws Exception {
         when(migrationService.switchTeam(team))
-                .thenThrow(new PedalonsMigrationException("Aucune migration définitive réussie n'attend d'être basculée."));
+                .thenThrow(new PedalonsMigrationException("Aucune migration réussie."));
 
         mockMvc.perform(post("/n-peloton/admin/pedalons/switch")
                         .principal(ControllerTestSupport.authentication(user)))
                 .andExpect(status().isSeeOther())
                 .andExpect(redirectedUrl("/n-peloton/admin/pedalons"))
-                .andExpect(flash().attribute("errors", List.of("Aucune migration définitive réussie n'attend d'être basculée.")));
+                .andExpect(flash().attribute("errors", List.of("Aucune migration réussie.")));
     }
 
     @Test
     public void testCallbackTriggersAndHidesTheGrantFromReferers() throws Exception {
-        when(migrationService.callback(team, user, "req-1", GRANT, null)).thenReturn("Essai de migration lancé sur Pédalons.");
+        when(migrationService.callback(team, user, "req-1", GRANT, null)).thenReturn("Migration lancée sur Pédalons.");
 
         mockMvc.perform(get("/n-peloton/admin/pedalons/callback")
                         .param("request", "req-1")
@@ -124,7 +111,7 @@ public class AdminTeamPedalonsControllerTest {
                 .andExpect(status().isSeeOther())
                 .andExpect(redirectedUrl("/n-peloton/admin/pedalons"))
                 .andExpect(header().string("Referrer-Policy", "no-referrer"))
-                .andExpect(flash().attribute("infos", List.of("Essai de migration lancé sur Pédalons.")));
+                .andExpect(flash().attribute("infos", List.of("Migration lancée sur Pédalons.")));
     }
 
     @Test

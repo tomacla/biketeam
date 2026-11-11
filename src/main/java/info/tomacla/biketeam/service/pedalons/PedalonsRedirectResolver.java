@@ -3,7 +3,6 @@ package info.tomacla.biketeam.service.pedalons;
 import info.tomacla.biketeam.domain.map.Map;
 import info.tomacla.biketeam.domain.pedalons.PedalonsRedirect;
 import info.tomacla.biketeam.domain.ride.Ride;
-import info.tomacla.biketeam.domain.team.PedalonsState;
 import info.tomacla.biketeam.domain.trip.Trip;
 import info.tomacla.biketeam.service.MapService;
 import info.tomacla.biketeam.service.RideService;
@@ -14,12 +13,11 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 /**
- * Decide du sort d'une requete visant une equipe gelee ou basculee vers Pedalons.
+ * Decide du sort d'une requete visant une equipe basculee vers Pedalons.
  * <p>
- * Seules les equipes du cache (MIGRATING, READY ou MIGRATED) sont testees, sur le premier segment du
+ * Seules les equipes du cache (MIGRATED) sont testees, sur le premier segment du
  * chemin en minuscules : aucune collision possible avec les routes globales. Les identifiants
  * ou permaliens sont d'abord cherches tels quels dans la table d'URL, puis resolus par les
  * services existants (qui acceptent id ou permalien) - uniquement pour une equipe basculee. Les
@@ -38,44 +36,17 @@ public class PedalonsRedirectResolver {
          * Equipe basculee, requete d'API (/api/teams/{t}/**, lecture comprise) : 410 JSON portant
          * l'URL Pedalons de l'equipe - un client d'API ne sait que faire d'une page HTML.
          */
-        API_GONE,
-        /**
-         * Equipe gelee pendant une migration definitive : 423 (page HTML), avec l'URL Pedalons de
-         * l'equipe si elle est deja connue (null sinon) et l'etat du gel (MIGRATING ou READY).
-         */
-        LOCKED,
-        /**
-         * Equipe gelee, ecriture d'API (/api/teams/{t}/**) : 423 JSON portant l'URL Pedalons de
-         * l'equipe si elle est deja connue (null sinon).
-         */
-        API_LOCKED
+        API_GONE
     }
 
-    /**
-     * @param state etat de l'equipe gelee, pour le texte de la page 423 (LOCKED seulement, null sinon)
-     */
-    public record Decision(Action action, String url, PedalonsState state) {
+    public record Decision(Action action, String url) {
 
         static final Decision PASS = new Decision(Action.PASS, null);
-
-        public Decision(Action action, String url) {
-            this(action, url, null);
-        }
-
-        static Decision locked(PedalonsRedirectCache.TeamRedirects team) {
-            return new Decision(Action.LOCKED, team.fallback().orElse(null), team.state());
-        }
 
         static Decision redirect(String url) {
             return new Decision(Action.REDIRECT, url);
         }
     }
-
-    // ecritures en GET de biketeam
-    private static final Set<String> WRITE_SEGMENTS = Set.of(
-            "add-participant", "remove-participant", "remove-message", "add-favorite", "remove-favorite");
-
-    private static final Set<String> READ_METHODS = Set.of("GET", "HEAD", "OPTIONS");
 
     private final PedalonsRedirectCache cache;
     private final MapService mapService;
@@ -122,7 +93,7 @@ public class PedalonsRedirectResolver {
         }
         final PedalonsRedirectCache.TeamRedirects team = optionalTeam.get();
 
-        // la page de suivi de la migration reste accessible a l'administrateur, gel ou bascule
+        // la page de suivi de la migration reste accessible a l'administrateur apres la bascule
         if (!api && isMigrationAdminPage(rest)) {
             return Decision.PASS;
         }
@@ -130,13 +101,6 @@ public class PedalonsRedirectResolver {
         // le logo du groupe reste servi : les listes biketeam, ou le groupe bascule reste affiche, l'utilisent en <img>
         if (!api && rest.size() == 1 && rest.get(0).equals("image")) {
             return Decision.PASS;
-        }
-
-        if (team.isFrozen()) {
-            if (!isWrite(method, rest, api)) {
-                return Decision.PASS;
-            }
-            return api ? new Decision(Action.API_LOCKED, team.fallback().orElse(null)) : Decision.locked(team);
         }
 
         if (!team.isMigrated()) {
@@ -212,29 +176,6 @@ public class PedalonsRedirectResolver {
 
     private static boolean isMigrationAdminPage(List<String> rest) {
         return rest.size() >= 2 && rest.get(0).equals("admin") && rest.get(1).equals("pedalons");
-    }
-
-    /**
-     * Ecritures a refuser pendant le gel : toute methode autre que GET/HEAD, et les ecritures
-     * que biketeam fait en GET (adhesion, participation, messages, favoris, administration).
-     */
-    static boolean isWrite(String method, List<String> rest, boolean api) {
-        if (method == null || !READ_METHODS.contains(method.toUpperCase())) {
-            return true;
-        }
-        if (api) {
-            return false;
-        }
-        if (!rest.isEmpty()) {
-            final String first = rest.get(0);
-            if (rest.size() == 1 && (first.equals("join") || first.equals("leave"))) {
-                return true;
-            }
-            if (first.equals("admin")) {
-                return true;
-            }
-        }
-        return rest.stream().anyMatch(WRITE_SEGMENTS::contains);
     }
 
 }

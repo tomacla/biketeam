@@ -30,7 +30,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Etats d'une demande de migration (section 9.2 du plan), gel et bascule.
+ * Etats d'une demande de migration (section 9.2 du plan), bascule.
  */
 public class PedalonsMigrationServiceTest {
 
@@ -163,43 +163,13 @@ public class PedalonsMigrationServiceTest {
             team.setPedalonsState(i.getArgument(1));
             return 1;
         });
-        when(teamRepository.freezePedalons(TEAM_ID)).thenAnswer(i -> {
-            if (team.getPedalonsState() != null && team.getPedalonsState() != PedalonsState.READY) {
-                return 0;
-            }
-            team.setPedalonsState(PedalonsState.MIGRATING);
-            team.setPedalonsUrl(null);
-            return 1;
-        });
-        when(teamRepository.clearPedalonsReady(TEAM_ID)).thenAnswer(i -> {
-            if (team.getPedalonsState() != PedalonsState.READY) {
-                return 0;
-            }
-            team.setPedalonsState(null);
-            team.setPedalonsUrl(null);
-            return 1;
-        });
-        when(teamRepository.switchPedalons(eq(TEAM_ID), any())).thenAnswer(i -> {
-            if (team.getPedalonsState() != PedalonsState.READY) {
+        when(teamRepository.switchPedalons(eq(TEAM_ID), any(), any())).thenAnswer(i -> {
+            if (team.getPedalonsState() != null) {
                 return 0;
             }
             team.setPedalonsState(PedalonsState.MIGRATED);
-            team.setPedalonsMigratedAt(i.getArgument(1));
-            return 1;
-        });
-        when(teamRepository.readyPedalons(eq(TEAM_ID), any())).thenAnswer(i -> {
-            if (team.getPedalonsState() != PedalonsState.MIGRATING) {
-                return 0;
-            }
-            team.setPedalonsState(PedalonsState.READY);
             team.setPedalonsUrl(i.getArgument(1));
-            return 1;
-        });
-        when(teamRepository.unfreezePedalons(TEAM_ID)).thenAnswer(i -> {
-            if (team.getPedalonsState() != PedalonsState.MIGRATING) {
-                return 0;
-            }
-            team.setPedalonsState(null);
+            team.setPedalonsMigratedAt(i.getArgument(2));
             return 1;
         });
         when(teamRepository.updatePedalonsSwitch(eq(TEAM_ID), any(), any(), any())).thenAnswer(i -> {
@@ -232,21 +202,18 @@ public class PedalonsMigrationServiceTest {
         return new PedalonsClient.Response(status, json == null ? NullNode.getInstance() : objectMapper.readTree(json), json);
     }
 
-    private PedalonsMigration request(String id, boolean dryRun, Instant createdAt) {
-        PedalonsMigration m = new PedalonsMigration(id, TEAM_ID, "user-1", dryRun, false, createdAt);
+    private PedalonsMigration request(String id, Instant createdAt) {
+        PedalonsMigration m = new PedalonsMigration(id, TEAM_ID, "user-1", createdAt);
         store.put(id, m);
         return m;
     }
 
-    private PedalonsMigration running(String id, boolean dryRun) {
-        PedalonsMigration m = request(id, dryRun, NOW.minus(Duration.ofMinutes(5)));
+    private PedalonsMigration running(String id) {
+        PedalonsMigration m = request(id, NOW.minus(Duration.ofMinutes(5)));
         m.setStatus(PedalonsMigrationStatus.RUNNING, NOW);
         m.setTriggeredAt(NOW.minus(Duration.ofMinutes(4)));
         m.setRunningSince(NOW.minus(Duration.ofMinutes(3)));
         m.setPedalonsJobId("0hx3k2m9q8r4t");
-        if (!dryRun) {
-            team.setPedalonsState(PedalonsState.MIGRATING);
-        }
         return m;
     }
 
@@ -254,9 +221,9 @@ public class PedalonsMigrationServiceTest {
 
     @Test
     public void testStartCreatesARequestAndRedirectsToPedalons() {
-        PedalonsMigration previous = request("old", true, NOW.minus(Duration.ofMinutes(3)));
+        PedalonsMigration previous = request("old", NOW.minus(Duration.ofMinutes(3)));
 
-        String url = service.start(team, user, true, false);
+        String url = service.start(team, user);
 
         assertTrue(url.startsWith("https://www.pedalons.fr/migration-biketeam?request="));
         assertEquals(PedalonsMigrationStatus.CANCELLED, previous.getStatus());
@@ -264,8 +231,6 @@ public class PedalonsMigrationServiceTest {
         PedalonsMigration created = store.values().stream().filter(m -> !m.getId().equals("old")).findFirst().orElseThrow();
         assertEquals(PedalonsMigrationStatus.REQUESTED, created.getStatus());
         assertEquals("user-1", created.getRequestedBy());
-        assertTrue(created.isDryRun());
-        assertFalse(created.isReset());
 
         String token = URLDecoder.decode(url.substring(url.indexOf('=') + 1), StandardCharsets.UTF_8);
         String payload = new String(Base64.getUrlDecoder().decode(token.split("\\.")[1]), StandardCharsets.UTF_8);
@@ -273,34 +238,25 @@ public class PedalonsMigrationServiceTest {
         assertTrue(payload.contains("\"requestedBy\":\"Jane D.\""));
         assertTrue(payload.contains("\"returnUrl\":\"https://biketeam.example/n-peloton/admin/pedalons/callback\""));
         assertTrue(payload.contains("\"iat\":" + NOW.getEpochSecond()));
+        assertFalse(payload.contains("dryRun") || payload.contains("reset"), "neither trial nor reset any more");
     }
 
     @Test
     public void testStartIsRefusedWhileAMigrationIsActiveOrAfterTheSwitch() {
-        running("active", true);
-        assertThrows(PedalonsMigrationException.class, () -> service.start(team, user, true, false));
+        running("active");
+        assertThrows(PedalonsMigrationException.class, () -> service.start(team, user));
 
         store.clear();
         team.setPedalonsState(PedalonsState.MIGRATED);
-        assertThrows(PedalonsMigrationException.class, () -> service.start(team, user, true, false));
+        assertThrows(PedalonsMigrationException.class, () -> service.start(team, user));
         assertTrue(store.isEmpty());
-    }
-
-    @Test
-    public void testStartIsAllowedWhileASwitchIsPending() {
-        team.setPedalonsState(PedalonsState.READY);
-
-        String url = service.start(team, user, true, false);
-
-        assertTrue(url.startsWith("https://www.pedalons.fr/migration-biketeam?request="));
-        assertEquals(PedalonsState.READY, team.getPedalonsState(), "nothing changes until Pedalons confirms");
     }
 
     // --- retour de Pedalons ---
 
     @Test
     public void testCancelledOnPedalons() {
-        PedalonsMigration m = request("req", false, NOW.minus(Duration.ofMinutes(2)));
+        PedalonsMigration m = request("req", NOW.minus(Duration.ofMinutes(2)));
 
         service.callback(team, user, "req", null, "cancelled");
 
@@ -311,13 +267,13 @@ public class PedalonsMigrationServiceTest {
 
     @Test
     public void testUnknownExpiredOrForeignRequestIsRefused() {
-        request("old", true, NOW.minus(PedalonsMigrationService.REQUEST_ACCEPTANCE));
+        request("old", NOW.minus(PedalonsMigrationService.REQUEST_ACCEPTANCE));
         assertThrows(PedalonsMigrationException.class, () -> service.callback(team, user, "old", GRANT, null));
         assertThrows(PedalonsMigrationException.class, () -> service.callback(team, user, "missing", GRANT, null));
 
         Team other = new Team();
         other.setId("other");
-        request("req", true, NOW);
+        request("req", NOW);
         assertThrows(PedalonsMigrationException.class, () -> service.callback(other, user, "req", GRANT, null));
 
         assertThrows(PedalonsMigrationException.class, () -> service.callback(team, user, "req", "not-a-grant", null));
@@ -332,9 +288,9 @@ public class PedalonsMigrationServiceTest {
     }
 
     @Test
-    public void testDefinitiveMigrationFreezesTheTeamAndStartsTheJob() throws Exception {
-        PedalonsMigration m = request("req", false, NOW.minus(Duration.ofMinutes(2)));
-        when(client.trigger("req", GRANT, TEAM_ID, false, false))
+    public void testCallbackStartsTheJob() throws Exception {
+        PedalonsMigration m = request("req", NOW.minus(Duration.ofMinutes(2)));
+        when(client.trigger("req", GRANT, TEAM_ID))
                 .thenReturn(response(202, "{\"jobId\":\"0hx3k2m9q8r4t\",\"status\":\"QUEUED\",\"targetTeamSlug\":\"n-peloton\"}"));
 
         service.callback(team, user, "req", GRANT, null);
@@ -343,43 +299,13 @@ public class PedalonsMigrationServiceTest {
         assertEquals("0hx3k2m9q8r4t", m.getPedalonsJobId());
         assertNull(m.getGrantValue(), "grant forgotten once the job exists");
         assertEquals(NOW, m.getTriggeredAt());
-        assertEquals(PedalonsState.MIGRATING, team.getPedalonsState());
-        verify(cache, atLeastOnce()).invalidate();
-    }
-
-    @Test
-    public void testNewDefinitiveMigrationReplacesAPendingSwitch() throws Exception {
-        team.setPedalonsState(PedalonsState.READY);
-        team.setPedalonsUrl("https://www.pedalons.fr/equipes/n-peloton");
-        request("req", false, NOW);
-        when(client.trigger(anyString(), anyString(), anyString(), anyBoolean(), anyBoolean()))
-                .thenReturn(response(202, "{\"jobId\":\"job\"}"));
-
-        service.callback(team, user, "req", GRANT, null);
-
-        assertEquals(PedalonsState.MIGRATING, team.getPedalonsState());
-        assertNull(team.getPedalonsUrl());
-        verify(redirectRepository).deleteByTeamId(TEAM_ID);
-    }
-
-    @Test
-    public void testDryRunDropsAPendingSwitch() throws Exception {
-        team.setPedalonsState(PedalonsState.READY);
-        team.setPedalonsUrl("https://www.pedalons.fr/equipes/n-peloton");
-        request("req", true, NOW);
-        when(client.trigger(anyString(), anyString(), anyString(), anyBoolean(), anyBoolean()))
-                .thenReturn(response(202, "{\"jobId\":\"job\"}"));
-
-        service.callback(team, user, "req", GRANT, null);
-
-        assertNull(team.getPedalonsState(), "a dry run is never switchable, and its job invalidates the pending URL map");
-        verify(redirectRepository).deleteByTeamId(TEAM_ID);
-        verify(teamRepository, never()).freezePedalons(anyString());
+        assertNull(team.getPedalonsState());
+        verify(cache, never()).invalidate();
     }
 
     @Test
     public void testCallbackIsRefusedOnceTheTeamIsSwitched() {
-        request("req", false, NOW);
+        request("req", NOW);
         team.setPedalonsState(PedalonsState.MIGRATED);
 
         assertThrows(PedalonsMigrationException.class, () -> service.callback(team, user, "req", GRANT, null));
@@ -389,9 +315,9 @@ public class PedalonsMigrationServiceTest {
     }
 
     @Test
-    public void testDryRunDoesNotFreezeTheTeam() throws Exception {
-        PedalonsMigration m = request("req", true, NOW);
-        when(client.trigger(anyString(), anyString(), anyString(), anyBoolean(), anyBoolean()))
+    public void testMigrationDoesNotFreezeTheTeam() throws Exception {
+        PedalonsMigration m = request("req", NOW);
+        when(client.trigger(anyString(), anyString(), anyString()))
                 .thenReturn(response(200, "{\"jobId\":\"job\",\"status\":\"RUNNING\"}"));
 
         service.callback(team, user, "req", GRANT, null);
@@ -399,14 +325,14 @@ public class PedalonsMigrationServiceTest {
         assertEquals(PedalonsMigrationStatus.RUNNING, m.getStatus());
         assertNull(team.getPedalonsState());
         verify(teamRepository, never()).updatePedalonsState(anyString(), any());
-        verify(teamRepository, never()).freezePedalons(anyString());
+        verify(teamRepository, never()).switchPedalons(anyString(), any(), any());
         verifyNoInteractions(redirectRepository);
     }
 
     @Test
-    public void testRefusedTriggerFailsAndUnfreezes() throws Exception {
-        PedalonsMigration m = request("req", false, NOW);
-        when(client.trigger(anyString(), anyString(), anyString(), anyBoolean(), anyBoolean()))
+    public void testRefusedTriggerFails() throws Exception {
+        PedalonsMigration m = request("req", NOW);
+        when(client.trigger(anyString(), anyString(), anyString()))
                 .thenReturn(response(409, "{\"code\":\"BIKETEAM_MIGRATION_RUNNING\",\"activeJobId\":\"x\"}"));
 
         assertThrows(PedalonsMigrationException.class, () -> service.callback(team, user, "req", GRANT, null));
@@ -414,14 +340,14 @@ public class PedalonsMigrationServiceTest {
         assertEquals(PedalonsMigrationStatus.FAILED, m.getStatus());
         assertEquals("BIKETEAM_MIGRATION_RUNNING", m.getErrorCode());
         assertNull(m.getGrantValue());
-        assertNull(team.getPedalonsState(), "unfrozen");
-        verify(client, times(1)).trigger(anyString(), anyString(), anyString(), anyBoolean(), anyBoolean());
+        assertNull(team.getPedalonsState());
+        verify(client, times(1)).trigger(anyString(), anyString(), anyString());
     }
 
     @Test
     public void testServerErrorsAreRetriedWithTheSameGrant() throws Exception {
-        PedalonsMigration m = request("req", true, NOW);
-        when(client.trigger("req", GRANT, TEAM_ID, true, false))
+        PedalonsMigration m = request("req", NOW);
+        when(client.trigger("req", GRANT, TEAM_ID))
                 .thenReturn(response(503, null), response(0, null), response(202, "{\"jobId\":\"job\"}"));
 
         service.callback(team, user, "req", GRANT, null);
@@ -432,15 +358,15 @@ public class PedalonsMigrationServiceTest {
 
     @Test
     public void testUnreachablePedalonsFailsAfterThreeAttempts() throws Exception {
-        PedalonsMigration m = request("req", false, NOW);
-        when(client.trigger(anyString(), anyString(), anyString(), anyBoolean(), anyBoolean())).thenReturn(response(0, null));
+        PedalonsMigration m = request("req", NOW);
+        when(client.trigger(anyString(), anyString(), anyString())).thenReturn(response(0, null));
 
         assertThrows(PedalonsMigrationException.class, () -> service.callback(team, user, "req", GRANT, null));
 
         assertEquals(PedalonsMigrationStatus.FAILED, m.getStatus());
         assertEquals("TRIGGER_UNAVAILABLE", m.getErrorCode());
         assertNull(team.getPedalonsState());
-        verify(client, times(3)).trigger(anyString(), anyString(), anyString(), anyBoolean(), anyBoolean());
+        verify(client, times(3)).trigger(anyString(), anyString(), anyString());
     }
 
     // --- suivi ---
@@ -456,49 +382,38 @@ public class PedalonsMigrationServiceTest {
             + "\"POST\":{\"pub-1\":\"javascript:alert(1)\"}}}";
 
     @Test
-    public void testSucceededDefinitiveLeavesTheTeamReadyToSwitch() throws Exception {
-        PedalonsMigration m = running("req", false);
+    public void testSucceededMigrationRecordsTheReportAndChangesNothingOnTheTeam() throws Exception {
+        PedalonsMigration m = running("req");
         when(client.status("0hx3k2m9q8r4t")).thenReturn(response(200, SUCCEEDED));
 
         service.pollAll();
 
         assertEquals(PedalonsMigrationStatus.SUCCEEDED, m.getStatus());
         assertEquals(NOW, m.getFinishedAt());
-        assertNull(m.getSwitchedAt(), "the switch waits for the team admin");
+        assertNull(m.getSwitchedAt());
         assertEquals("https://www.pedalons.fr/equipes/n-peloton", m.getPedalonsTeamUrl());
-        assertEquals(SUCCEEDED, m.getResultJson());
-        // toujours gele (READY), mais pas redirige
-        assertEquals(PedalonsState.READY, team.getPedalonsState());
-        assertEquals("https://www.pedalons.fr/equipes/n-peloton", team.getPedalonsUrl());
-        assertNull(team.getPedalonsMigratedAt());
-
-        verify(redirectRepository).deleteByTeamId(TEAM_ID);
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<PedalonsRedirect>> captor = ArgumentCaptor.forClass(List.class);
-        verify(redirectRepository).saveAll(captor.capture());
-        List<PedalonsRedirect> saved = captor.getValue();
-        assertEquals(2, saved.size(), "unknown types and non-http URLs are dropped");
-        assertTrue(saved.stream().anyMatch(r -> r.getEntityType().equals("RIDE") && r.getEntityId().equals("ride-1")));
-        verify(cache).invalidate();
+        assertEquals(SUCCEEDED, m.getResultJson(), "the URL map is kept for the switch");
+        assertNull(team.getPedalonsState(), "neither frozen nor redirected");
+        assertNull(team.getPedalonsUrl());
+        verifyNoInteractions(redirectRepository);
+        verify(cache, never()).invalidate();
     }
 
     @Test
-    public void testSucceededDryRunDoesNotSwitch() throws Exception {
-        PedalonsMigration m = running("req", true);
-        when(client.status("0hx3k2m9q8r4t")).thenReturn(response(200, SUCCEEDED));
+    public void testTheTeamUrlFallsBackOnTheUrlMap() throws Exception {
+        PedalonsMigration m = running("req");
+        when(client.status("0hx3k2m9q8r4t")).thenReturn(response(200,
+                "{\"status\":\"SUCCEEDED\",\"urlMap\":{\"TEAM\":{\"n-peloton\":\"https://www.pedalons.fr/equipes/n-peloton\"}}}"));
 
         service.pollAll();
 
         assertEquals(PedalonsMigrationStatus.SUCCEEDED, m.getStatus());
-        assertNull(m.getSwitchedAt());
         assertEquals("https://www.pedalons.fr/equipes/n-peloton", m.getPedalonsTeamUrl());
-        assertNull(team.getPedalonsState());
-        verifyNoInteractions(redirectRepository);
     }
 
     @Test
     public void testProgressIsRecorded() throws Exception {
-        PedalonsMigration m = running("req", false);
+        PedalonsMigration m = running("req");
         String body = "{\"status\":\"RUNNING\",\"progress\":{\"phase\":\"ROUTES\",\"done\":12,\"total\":2601}}";
         when(client.status("0hx3k2m9q8r4t")).thenReturn(response(200, body));
 
@@ -506,12 +421,12 @@ public class PedalonsMigrationServiceTest {
 
         assertEquals(PedalonsMigrationStatus.RUNNING, m.getStatus());
         assertEquals(body, m.getResultJson());
-        assertEquals(PedalonsState.MIGRATING, team.getPedalonsState());
+        assertNull(team.getPedalonsState());
     }
 
     @Test
     public void testFailedAttemptAwaitingRetryIsRecordedButNotAnError() throws Exception {
-        PedalonsMigration m = running("req", false);
+        PedalonsMigration m = running("req");
         String body = "{\"status\":\"QUEUED\",\"attempt\":1,\"progress\":{\"phase\":\"QUEUED\",\"done\":0,\"total\":0},"
                 + "\"lastAttemptError\":{\"code\":\"EXPORT_UNAVAILABLE\",\"message\":\"biketeam export returned HTTP 502\"},\"error\":null}";
         when(client.status("0hx3k2m9q8r4t")).thenReturn(response(200, body));
@@ -523,12 +438,12 @@ public class PedalonsMigrationServiceTest {
         assertEquals(body, m.getResultJson());
         assertNull(m.getErrorCode());
         assertNull(m.getErrorMessage());
-        assertEquals(PedalonsState.MIGRATING, team.getPedalonsState());
+        assertNull(team.getPedalonsState());
     }
 
     @Test
-    public void testFailedJobUnfreezesTheTeam() throws Exception {
-        PedalonsMigration m = running("req", false);
+    public void testFailedJobChangesNothingOnTheTeam() throws Exception {
+        PedalonsMigration m = running("req");
         when(client.status("0hx3k2m9q8r4t")).thenReturn(response(200,
                 "{\"status\":\"FAILED\",\"error\":{\"code\":\"BIKETEAM_SLUG_CONFLICT\",\"message\":\"Slug taken\"}}"));
 
@@ -542,7 +457,7 @@ public class PedalonsMigrationServiceTest {
 
     @Test
     public void testLostJob() throws Exception {
-        PedalonsMigration m = running("req", false);
+        PedalonsMigration m = running("req");
         when(client.status("0hx3k2m9q8r4t")).thenReturn(response(404,
                 "{\"code\":\"BIKETEAM_JOB_NOT_FOUND\",\"message\":\"Unknown job\"}"));
 
@@ -555,7 +470,7 @@ public class PedalonsMigrationServiceTest {
 
     @Test
     public void testOther404sAreTransientUntilTheTimeout() throws Exception {
-        PedalonsMigration m = running("req", false);
+        PedalonsMigration m = running("req");
         when(client.status("0hx3k2m9q8r4t")).thenReturn(
                 response(404, null),
                 new PedalonsClient.Response(404, NullNode.getInstance(), "<html><body>404 Not Found</body></html>"),
@@ -566,7 +481,7 @@ public class PedalonsMigrationServiceTest {
         service.pollAll();
 
         assertEquals(PedalonsMigrationStatus.RUNNING, m.getStatus());
-        assertEquals(PedalonsState.MIGRATING, team.getPedalonsState());
+        assertNull(team.getPedalonsState());
 
         m.setRunningSince(NOW.minus(Duration.ofHours(7)));
         service.pollAll();
@@ -577,7 +492,7 @@ public class PedalonsMigrationServiceTest {
 
     @Test
     public void testNetworkErrorsAreRetriedUntilTheTimeout() throws Exception {
-        PedalonsMigration m = running("req", false);
+        PedalonsMigration m = running("req");
         when(client.status("0hx3k2m9q8r4t")).thenReturn(response(0, null));
 
         service.pollAll();
@@ -592,12 +507,12 @@ public class PedalonsMigrationServiceTest {
 
     @Test
     public void testStuckTriggeringIsReplayedAndOldRequestsExpire() throws Exception {
-        PedalonsMigration stuck = request("stuck", true, NOW.minus(Duration.ofMinutes(20)));
+        PedalonsMigration stuck = request("stuck", NOW.minus(Duration.ofMinutes(20)));
         stuck.setStatus(PedalonsMigrationStatus.TRIGGERING, NOW);
         stuck.setTriggeredAt(NOW.minus(Duration.ofMinutes(15)));
         stuck.setGrantValue(GRANT);
-        PedalonsMigration old = request("old", true, NOW.minus(PedalonsMigrationService.REQUEST_ACCEPTANCE));
-        when(client.trigger("stuck", GRANT, TEAM_ID, true, false)).thenReturn(response(200, "{\"jobId\":\"job\"}"));
+        PedalonsMigration old = request("old", NOW.minus(PedalonsMigrationService.REQUEST_ACCEPTANCE));
+        when(client.trigger("stuck", GRANT, TEAM_ID)).thenReturn(response(200, "{\"jobId\":\"job\"}"));
 
         service.pollAll();
 
@@ -613,7 +528,7 @@ public class PedalonsMigrationServiceTest {
         assertTrue(PedalonsMigrationService.TRIGGERING_STUCK_AFTER.plusMillis(PedalonsMigrationPoller.INTERVAL_MS)
                 .compareTo(PedalonsMigrationService.PEDALONS_GRANT_TTL) < 0);
 
-        PedalonsMigration recent = request("recent", true, NOW.minus(Duration.ofMinutes(5)));
+        PedalonsMigration recent = request("recent", NOW.minus(Duration.ofMinutes(5)));
         recent.setStatus(PedalonsMigrationStatus.TRIGGERING, NOW);
         recent.setTriggeredAt(NOW.minus(PedalonsMigrationService.TRIGGERING_STUCK_AFTER));
         recent.setGrantValue(GRANT);
@@ -622,20 +537,19 @@ public class PedalonsMigrationServiceTest {
         verifyNoInteractions(client);
 
         recent.setTriggeredAt(NOW.minus(PedalonsMigrationService.TRIGGERING_STUCK_AFTER).minusSeconds(1));
-        when(client.trigger("recent", GRANT, TEAM_ID, true, false)).thenReturn(response(200, "{\"jobId\":\"job\"}"));
+        when(client.trigger("recent", GRANT, TEAM_ID)).thenReturn(response(200, "{\"jobId\":\"job\"}"));
         service.pollAll();
         assertEquals(PedalonsMigrationStatus.RUNNING, recent.getStatus());
     }
 
     @Test
     public void testAFailedTriggerDoesNotUndoAConcurrentSuccessfulOne() throws Exception {
-        PedalonsMigration m = request("req", false, NOW);
+        PedalonsMigration m = request("req", NOW);
         m.setStatus(PedalonsMigrationStatus.TRIGGERING, NOW);
         m.setTriggeredAt(NOW);
         m.setGrantValue(GRANT);
-        team.setPedalonsState(PedalonsState.MIGRATING);
         // pendant cet essai, un autre declenchement du meme grant obtient le job
-        when(client.trigger(anyString(), anyString(), anyString(), anyBoolean(), anyBoolean())).thenAnswer(i -> {
+        when(client.trigger(anyString(), anyString(), anyString())).thenAnswer(i -> {
             m.setStatus(PedalonsMigrationStatus.RUNNING, NOW);
             m.setPedalonsJobId("job");
             return response(0, null);
@@ -645,7 +559,7 @@ public class PedalonsMigrationServiceTest {
 
         assertEquals(PedalonsMigrationStatus.RUNNING, m.getStatus());
         assertNull(m.getErrorCode());
-        assertEquals(PedalonsState.MIGRATING, team.getPedalonsState(), "still frozen");
+        assertNull(team.getPedalonsState());
         verify(cache, never()).invalidate();
     }
 
@@ -658,8 +572,8 @@ public class PedalonsMigrationServiceTest {
         Instant firstRefused = NOW.minus(PedalonsMigrationService.REQUEST_ACCEPTANCE);
         assertEquals(Duration.ofMinutes(75), PedalonsMigrationService.REQUEST_ACCEPTANCE);
 
-        PedalonsMigration late = request("late", true, lastAccepted);
-        PedalonsMigration tooLate = request("tooLate", true, firstRefused);
+        PedalonsMigration late = request("late", lastAccepted);
+        PedalonsMigration tooLate = request("tooLate", firstRefused);
         service.pollAll();
         assertEquals(PedalonsMigrationStatus.REQUESTED, late.getStatus(), "kept while a grant may still arrive");
         assertEquals(PedalonsMigrationStatus.EXPIRED, tooLate.getStatus());
@@ -667,7 +581,7 @@ public class PedalonsMigrationServiceTest {
         tooLate.setStatus(PedalonsMigrationStatus.REQUESTED, NOW);
         assertThrows(PedalonsMigrationException.class, () -> service.callback(team, user, "tooLate", GRANT, null));
 
-        when(client.trigger("late", GRANT, TEAM_ID, true, false)).thenReturn(response(202, "{\"jobId\":\"job\"}"));
+        when(client.trigger("late", GRANT, TEAM_ID)).thenReturn(response(202, "{\"jobId\":\"job\"}"));
         service.callback(team, user, "late", GRANT, null);
         assertEquals(PedalonsMigrationStatus.RUNNING, late.getStatus());
     }
@@ -678,23 +592,32 @@ public class PedalonsMigrationServiceTest {
         PedalonsMigrationService off = new PedalonsMigrationService(disabled, migrationRepository, redirectRepository,
                 teamRepository, new PedalonsRequestTokenSigner(disabled), client, mock(TeamSnapshotBuilder.class), cache,
                 mock(PlatformTransactionManager.class));
-        running("req", false);
+        running("req");
 
         off.pollAll();
 
         verifyNoInteractions(client);
-        assertThrows(PedalonsMigrationException.class, () -> off.start(team, user, true, false));
+        assertThrows(PedalonsMigrationException.class, () -> off.start(team, user));
     }
 
     // --- bascule ---
 
+    private PedalonsMigration succeeded(String id, Instant createdAt, String resultJson, String teamUrl) {
+        PedalonsMigration m = request(id, createdAt);
+        m.setStatus(PedalonsMigrationStatus.SUCCEEDED, createdAt);
+        m.setFinishedAt(createdAt);
+        m.setResultJson(resultJson);
+        m.setPedalonsTeamUrl(teamUrl);
+        return m;
+    }
+
     @Test
-    public void testSwitchAfterReadingTheReport() throws Exception {
-        PedalonsMigration m = running("req", false);
+    public void testSwitchRecordsTheUrlMapAndRedirectsTheTeam() throws Exception {
+        PedalonsMigration m = running("req");
         when(client.status("0hx3k2m9q8r4t")).thenReturn(response(200, SUCCEEDED));
         service.pollAll();
-        PedalonsMigration pending = request("pending", true, NOW.minus(Duration.ofMinutes(1)));
-        clearInvocations(cache);
+        assertNull(team.getPedalonsState(), "a succeeded migration does not switch on its own");
+        PedalonsMigration pending = request("pending", NOW.minus(Duration.ofMinutes(1)));
 
         String message = service.switchTeam(team);
 
@@ -704,22 +627,73 @@ public class PedalonsMigrationServiceTest {
         assertEquals("https://www.pedalons.fr/equipes/n-peloton", team.getPedalonsUrl());
         assertEquals(NOW, m.getSwitchedAt());
         assertEquals(PedalonsMigrationStatus.CANCELLED, pending.getStatus(), "a request confirmed later would target a switched team");
+
+        verify(redirectRepository).deleteByTeamId(TEAM_ID);
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<PedalonsRedirect>> captor = ArgumentCaptor.forClass(List.class);
+        verify(redirectRepository).saveAll(captor.capture());
+        List<PedalonsRedirect> saved = captor.getValue();
+        assertEquals(2, saved.size(), "unknown types and non-http URLs are dropped");
+        assertTrue(saved.stream().anyMatch(r -> r.getEntityType().equals("RIDE") && r.getEntityId().equals("ride-1")));
         verify(cache).invalidate();
     }
 
     @Test
-    public void testSwitchIsRefusedWithoutASucceededDefinitiveMigration() {
+    public void testSwitchUsesTheLatestSucceededMigration() {
+        PedalonsMigration first = succeeded("first", NOW.minus(Duration.ofDays(2)),
+                "{\"urlMap\":{\"RIDE\":{\"old\":\"https://www.pedalons.fr/equipes/old/sorties/s\"}}}", "https://www.pedalons.fr/equipes/old");
+        PedalonsMigration second = succeeded("second", NOW.minus(Duration.ofDays(1)), SUCCEEDED, null);
+        // un echec plus recent ne masque pas la derniere reussite
+        PedalonsMigration failed = request("third", NOW.minus(Duration.ofHours(1)));
+        failed.setStatus(PedalonsMigrationStatus.FAILED, NOW);
+
+        service.switchTeam(team);
+
+        assertEquals(PedalonsState.MIGRATED, team.getPedalonsState());
+        assertEquals("https://www.pedalons.fr/equipes/n-peloton", team.getPedalonsUrl(), "from the report when the row has no team URL");
+        assertEquals(NOW, second.getSwitchedAt());
+        assertNull(first.getSwitchedAt());
+        assertNull(failed.getSwitchedAt());
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<PedalonsRedirect>> captor = ArgumentCaptor.forClass(List.class);
+        verify(redirectRepository).saveAll(captor.capture());
+        assertTrue(captor.getValue().stream().noneMatch(r -> r.getEntityId().equals("old")));
+    }
+
+    @Test
+    public void testSwitchIsRefusedWithoutAUsableSucceededMigration() {
+        // aucune migration
+        assertThrows(PedalonsMigrationException.class, () -> service.switchTeam(team));
+
+        // une migration en echec seulement
+        PedalonsMigration failed = request("failed", NOW.minus(Duration.ofHours(1)));
+        failed.setStatus(PedalonsMigrationStatus.FAILED, NOW);
+        assertThrows(PedalonsMigrationException.class, () -> service.switchTeam(team));
+
+        // une reussite dont le bilan ne donne aucune adresse de groupe
+        succeeded("empty", NOW.minus(Duration.ofMinutes(30)), null, null);
+        assertThrows(PedalonsMigrationException.class, () -> service.switchTeam(team));
+
+        assertNull(team.getPedalonsState());
+        verifyNoInteractions(redirectRepository);
+        verify(cache, never()).invalidate();
+    }
+
+    @Test
+    public void testSwitchIsRefusedWhileAMigrationIsActiveOrOnceSwitched() {
+        PedalonsMigration done = succeeded("done", NOW.minus(Duration.ofDays(1)), SUCCEEDED, "https://www.pedalons.fr/equipes/n-peloton");
+        PedalonsMigration active = running("active");
         assertThrows(PedalonsMigrationException.class, () -> service.switchTeam(team));
         assertNull(team.getPedalonsState());
+        assertNull(done.getSwitchedAt());
 
-        running("req", false);
-        assertThrows(PedalonsMigrationException.class, () -> service.switchTeam(team));
-        assertEquals(PedalonsState.MIGRATING, team.getPedalonsState());
+        active.setStatus(PedalonsMigrationStatus.FAILED, NOW);
+        service.switchTeam(team);
+        assertEquals(PedalonsState.MIGRATED, team.getPedalonsState());
 
-        team.setPedalonsState(PedalonsState.MIGRATED);
-        store.clear();
-        assertThrows(PedalonsMigrationException.class, () -> service.switchTeam(team));
-        verify(cache, never()).invalidate();
+        assertThrows(PedalonsMigrationException.class, () -> service.switchTeam(team), "already switched");
+        verify(redirectRepository, times(1)).saveAll(any());
+        verify(cache, times(1)).invalidate();
     }
 
     // --- annulation de la bascule ---
@@ -737,7 +711,7 @@ public class PedalonsMigrationServiceTest {
 
     @Test
     public void testUnswitchCancelsTheActiveMigrationAndIgnoresWhatPedalonsReportsLater() throws Exception {
-        PedalonsMigration m = running("req", false);
+        PedalonsMigration m = running("req");
         assertTrue(migrationRepository.existsByTeamIdAndStatusIn(TEAM_ID, PedalonsMigrationStatus.ACTIVE));
 
         service.unswitch(TEAM_ID);
@@ -745,7 +719,7 @@ public class PedalonsMigrationServiceTest {
         assertEquals(PedalonsMigrationStatus.CANCELLED, m.getStatus());
         assertEquals(PedalonsMigrationRepository.CANCELLED_BY_ADMIN, m.getErrorCode());
         assertEquals(NOW, m.getFinishedAt());
-        assertNull(team.getPedalonsState(), "unfrozen");
+        assertNull(team.getPedalonsState());
         // garde de l'export (PedalonsExportController) : plus de migration active, plus d'export
         assertFalse(migrationRepository.existsByTeamIdAndStatusIn(TEAM_ID, PedalonsMigrationStatus.ACTIVE));
 
@@ -757,38 +731,15 @@ public class PedalonsMigrationServiceTest {
         service.fail("req", "FAILED", "late", null);
         assertEquals(PedalonsMigrationStatus.CANCELLED, m.getStatus());
         assertEquals(PedalonsMigrationRepository.CANCELLED_BY_ADMIN, m.getErrorCode());
-        assertNull(team.getPedalonsState(), "not READY");
-        verify(redirectRepository, never()).saveAll(any());
-        verify(teamRepository, never()).readyPedalons(anyString(), any());
-    }
-
-    @Test
-    public void testUnswitchDuringTheSuccessWins() throws Exception {
-        PedalonsMigration m = running("req", false);
-        // l'annulation est validee juste apres la verification du gel par succeed()
-        when(teamRepository.findById(TEAM_ID)).thenAnswer(i -> {
-            Optional<Team> current = Optional.of(team).map(t -> {
-                Team copy = new Team();
-                copy.setId(TEAM_ID);
-                copy.setPedalonsState(t.getPedalonsState());
-                return copy;
-            });
-            service.unswitch(TEAM_ID);
-            return current;
-        });
-        when(client.status("0hx3k2m9q8r4t")).thenReturn(response(200, SUCCEEDED));
-
-        service.pollAll();
-
-        assertEquals(PedalonsMigrationStatus.CANCELLED, m.getStatus());
         assertNull(team.getPedalonsState());
         verify(redirectRepository, never()).saveAll(any());
+        verify(teamRepository, never()).switchPedalons(anyString(), any(), any());
     }
 
     @Test
     public void testUnswitchDuringTheTriggerWins() throws Exception {
-        PedalonsMigration m = request("req", false, NOW);
-        when(client.trigger(anyString(), anyString(), anyString(), anyBoolean(), anyBoolean())).thenAnswer(i -> {
+        PedalonsMigration m = request("req", NOW);
+        when(client.trigger(anyString(), anyString(), anyString())).thenAnswer(i -> {
             service.unswitch(TEAM_ID);
             return response(202, "{\"jobId\":\"job\"}");
         });
@@ -804,25 +755,11 @@ public class PedalonsMigrationServiceTest {
         assertFalse(migrationRepository.existsByTeamIdAndStatusIn(TEAM_ID, PedalonsMigrationStatus.ACTIVE));
     }
 
-    @Test
-    public void testSuccessOfATeamNoLongerFrozenIsNotApplied() throws Exception {
-        PedalonsMigration m = running("req", false);
-        team.setPedalonsState(null);
-        when(client.status("0hx3k2m9q8r4t")).thenReturn(response(200, SUCCEEDED));
-
-        service.pollAll();
-
-        assertEquals(PedalonsMigrationStatus.FAILED, m.getStatus());
-        assertEquals("TEAM_NOT_FROZEN", m.getErrorCode());
-        assertNull(team.getPedalonsState());
-        verify(redirectRepository, never()).saveAll(any());
-    }
-
     // --- delais ---
 
     @Test
     public void testAQueuedJobIsNotTimedOutByTheExecutionDelay() throws Exception {
-        PedalonsMigration m = running("req", false);
+        PedalonsMigration m = running("req");
         m.setRunningSince(null);
         m.setTriggeredAt(NOW.minus(Duration.ofHours(7)));
         when(client.status("0hx3k2m9q8r4t")).thenReturn(response(200, "{\"status\":\"QUEUED\",\"progress\":{\"phase\":\"QUEUED\"}}"));
@@ -831,7 +768,7 @@ public class PedalonsMigrationServiceTest {
 
         assertEquals(PedalonsMigrationStatus.RUNNING, m.getStatus(), "still waiting behind another team");
         assertNull(m.getRunningSince());
-        assertEquals(PedalonsState.MIGRATING, team.getPedalonsState(), "still frozen");
+        assertNull(team.getPedalonsState());
         assertTrue(migrationRepository.existsByTeamIdAndStatusIn(TEAM_ID, PedalonsMigrationStatus.ACTIVE), "export still served");
 
         // premier RUNNING : le delai d'execution part de maintenant
@@ -854,7 +791,7 @@ public class PedalonsMigrationServiceTest {
     @Test
     public void testAJobQueuedForTooLongTimesOut() throws Exception {
         assertTrue(PedalonsMigrationService.QUEUED_TIMEOUT.compareTo(PedalonsMigrationService.RUNNING_TIMEOUT.multipliedBy(4)) >= 0);
-        PedalonsMigration m = running("req", false);
+        PedalonsMigration m = running("req");
         m.setRunningSince(null);
         m.setTriggeredAt(NOW.minus(PedalonsMigrationService.QUEUED_TIMEOUT));
         when(client.status("0hx3k2m9q8r4t")).thenReturn(response(200, "{\"status\":\"QUEUED\"}"));
@@ -872,7 +809,7 @@ public class PedalonsMigrationServiceTest {
 
     @Test
     public void testAJobRequeuedAfterRunningWaitsForTheQueueDelay() throws Exception {
-        PedalonsMigration m = running("req", false);
+        PedalonsMigration m = running("req");
         // nouvelle tentative de Pedalons : de nouveau QUEUED, 7 h apres le premier RUNNING
         m.setRunningSince(NOW.minus(Duration.ofHours(7)));
         when(client.status("0hx3k2m9q8r4t")).thenReturn(response(200, "{\"status\":\"QUEUED\"}"));
@@ -880,7 +817,7 @@ public class PedalonsMigrationServiceTest {
         service.pollAll();
 
         assertEquals(PedalonsMigrationStatus.RUNNING, m.getStatus());
-        assertEquals(PedalonsState.MIGRATING, team.getPedalonsState());
+        assertNull(team.getPedalonsState());
     }
 
     @Test

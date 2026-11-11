@@ -47,8 +47,8 @@ public class PedalonsRequestTokenSigner {
      * Construit et signe le jeton d'une demande.
      */
     public String createToken(String requestId, Instant now, String teamId, String teamName, String requestedBy,
-                              boolean dryRun, boolean reset, PedalonsSummary summary) {
-        return sign(payload(requestId, now.getEpochSecond(), teamId, teamName, requestedBy, dryRun, reset,
+                              PedalonsSummary summary) {
+        return sign(payload(requestId, now.getEpochSecond(), teamId, teamName, requestedBy,
                 returnUrl(properties.getSiteUrl(), teamId), summary), properties.getRequestKey());
     }
 
@@ -56,7 +56,7 @@ public class PedalonsRequestTokenSigner {
      * Charge utile JSON, sans espace, claims dans l'ordre du contrat.
      */
     public String payload(String requestId, long iat, String teamId, String teamName, String requestedBy,
-                          boolean dryRun, boolean reset, String returnUrl, PedalonsSummary summary) {
+                          String returnUrl, PedalonsSummary summary) {
 
         Map<String, Object> summaryClaim = new LinkedHashMap<>();
         summaryClaim.put("places", summary.getPlaces());
@@ -79,8 +79,6 @@ public class PedalonsRequestTokenSigner {
         claims.put("teamId", teamId);
         claims.put("teamName", teamName);
         claims.put("requestedBy", requestedBy);
-        claims.put("dryRun", dryRun);
-        claims.put("reset", reset);
         claims.put("returnUrl", returnUrl);
         claims.put("summary", summaryClaim);
 

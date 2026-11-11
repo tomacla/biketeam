@@ -1902,9 +1902,9 @@ update user_account set email = lower(trim(email))
     </changeSet>
 
     <changeSet id="team-pedalons-columns" author="tomacla">
-        <!-- MIGRATING : gel en lecture seule pendant une migration definitive ;
-             READY : migration definitive reussie, bascule en attente du clic de l'administrateur ;
-             MIGRATED : bascule faite, toutes les URL de l'equipe redirigent vers Pedalons -->
+        <!-- MIGRATED : bascule faite, toutes les URL de l'equipe redirigent vers Pedalons
+             (MIGRATING et READY, le gel pendant puis apres une migration definitive, ont disparu :
+             voir pedalons-migration-incremental) -->
         <addColumn tableName="team">
             <column name="pedalons_state" type="VARCHAR(20)"/>
             <column name="pedalons_url" type="VARCHAR(1000)"/>
@@ -1918,6 +1918,24 @@ update user_account set email = lower(trim(email))
         <addColumn tableName="pedalons_migration">
             <column name="running_since" type="TIMESTAMP"/>
         </addColumn>
+    </changeSet>
+
+    <changeSet id="pedalons-migration-incremental" author="tomacla">
+        <!-- plus d'essai ni de migration definitive, plus de reinitialisation : toute migration est
+             incrementale et ne gele plus le groupe ; la bascule est un bouton a part, qui prend la
+             table d'URL de la derniere migration reussie -->
+        <dropColumn tableName="pedalons_migration" columnName="dry_run"/>
+        <dropColumn tableName="pedalons_migration" columnName="reset"/>
+        <!-- un groupe gele (migration definitive en vol, ou reussie et en attente de bascule) au moment
+             du deploiement redevient un groupe ordinaire : sa bascule se refera par le bouton -->
+        <delete tableName="pedalons_redirect">
+            <where>team_id in (select id from team where pedalons_state in ('MIGRATING', 'READY'))</where>
+        </delete>
+        <update tableName="team">
+            <column name="pedalons_state" valueComputed="NULL"/>
+            <column name="pedalons_url" valueComputed="NULL"/>
+            <where>pedalons_state in ('MIGRATING', 'READY')</where>
+        </update>
     </changeSet>
 
 </databaseChangeLog>

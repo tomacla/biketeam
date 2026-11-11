@@ -207,18 +207,18 @@ Un administrateur de groupe peut migrer **son** groupe vers [Pédalons](https://
 
 ### Déroulé
 
-1. L'administrateur choisit « Essai » (coché par défaut) et, au besoin, « Réinitialiser le groupe sur Pédalons », puis clique sur « Migrer vers Pédalons ».
+1. L'administrateur clique sur « Migrer vers Pédalons ». Il n'y a ni essai ni option : toute migration est **incrémentale**.
 2. biketeam crée une demande (`pedalons_migration`) et redirige le navigateur vers Pédalons avec un jeton de demande signé (HMAC-SHA256, valable une heure). L'administrateur s'y connecte (ou crée un compte) et confirme : ce compte Pédalons deviendra administrateur du groupe.
 3. Pédalons renvoie le navigateur sur `/{teamId}/admin/pedalons/callback` avec une autorisation à usage unique. biketeam déclenche alors la migration par un appel machine à machine, en HTTPS.
 4. Pédalons lit le groupe sur l'export de biketeam (`/internal/pedalons/teams/{teamId}/snapshot` et `/files/…`), qui n'est servi que pendant une migration active. biketeam suit l'avancement toutes les 15 secondes ; la page d'administration se rafraîchit seule.
-5. **Essai** : le groupe est réellement créé sur Pédalons, rien ne change sur biketeam. **Définitif** : le groupe est gelé en lecture seule pendant la migration (423 sur toute écriture) ; un échec le dégèle. Un définitif réussi laisse le groupe **prêt à basculer** : la correspondance d'URL renvoyée par Pédalons est enregistrée, rien n'est encore redirigé, et le groupe **reste gelé** jusqu'à la bascule (ce qui y serait modifié n'arriverait pas sur Pédalons). Un essai relancé d'ici là le dégèle.
-6. **Bascule** : l'administrateur lit le bilan (compteurs, avertissements) puis clique sur « Basculer vers Pédalons ». Dès lors, les pages et téléchargements du groupe redirigent (302 par défaut, voir `PEDALONS_REDIRECT_STATUS`) vers leurs équivalents Pédalons (repli sur la page du groupe), les écritures répondent 410, et l'API (`/api/teams/{teamId}/**`, lectures comprises) répond `410` `{"code":"TEAM_MIGRATED","message":…,"url":"<page Pédalons du groupe>"}`. Rien n'est supprimé de biketeam. Avant la bascule, une nouvelle migration (essai ou définitive) reste possible et remplace la correspondance en attente (un essai l'annule : il faut alors un nouveau définitif pour basculer).
+5. **Migration** : le groupe est créé sur Pédalons, ou mis à jour s'il y a déjà été copié. Rien ne change sur biketeam : le groupe reste modifiable, rien n'est redirigé, et la migration peut être relancée autant de fois que voulu.
+6. **Bascule** : quand il le décide, l'administrateur lit le bilan (compteurs, avertissements) puis clique sur « Basculer vers Pédalons ». biketeam enregistre alors la correspondance d'URL de la **dernière migration réussie** ; dès lors, les pages et téléchargements du groupe redirigent (302 par défaut, voir `PEDALONS_REDIRECT_STATUS`) vers leurs équivalents Pédalons (repli sur la page du groupe), les écritures répondent 410, et l'API (`/api/teams/{teamId}/**`, lectures comprises) répond `410` `{"code":"TEAM_MIGRATED","message":…,"url":"<page Pédalons du groupe>"}`. Rien n'est supprimé de biketeam. Le groupe n'est jamais gelé avant la bascule : ce qui y est modifié après la dernière migration réussie n'arrive pas sur Pédalons, il faut donc relancer une migration juste avant de basculer si besoin.
 
 Les groupes basculés restent listés sur `/teams` et l'accueil ; un clic mène à Pédalons.
 
 Ne sont **pas** migrés : les membres, les inscriptions, les commentaires, les notes et favoris de parcours.
 
-Un administrateur de la plateforme peut annuler une bascule (ou une bascule en attente, ou dégeler un groupe bloqué) depuis `/admin/teams`. Les navigateurs qui ont déjà suivi une redirection permanente (301) continueront d'aller sur Pédalons.
+Un administrateur de la plateforme peut annuler une bascule depuis `/admin/teams`. Les navigateurs qui ont déjà suivi une redirection permanente (301) continueront d'aller sur Pédalons.
 
 ### Configuration
 

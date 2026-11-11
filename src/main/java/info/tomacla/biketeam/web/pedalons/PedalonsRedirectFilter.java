@@ -1,7 +1,6 @@
 package info.tomacla.biketeam.web.pedalons;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import info.tomacla.biketeam.domain.team.PedalonsState;
 import info.tomacla.biketeam.service.pedalons.PedalonsRedirectResolver;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -29,17 +28,12 @@ import java.util.Map;
  *     PEDALONS_REDIRECT_STATUS=301) vers l'equivalent Pedalons (query string abandonnee), autres
  *     methodes -> 410 avec le lien ;</li>
  *     <li>groupe bascule, API (/api/teams/{t}/**, toute methode) -> 410 JSON
- *     {"code":"TEAM_MIGRATED","message":...,"url":...} ;</li>
- *     <li>groupe gele (migration definitive en cours ou en attente de bascule) : toute ecriture
- *     -> 423, en page HTML, ou pour l'API en JSON {"code":"TEAM_FROZEN","message":...,"url":...}
- *     (url : page Pedalons si deja connue, sinon null).</li>
+ *     {"code":"TEAM_MIGRATED","message":...,"url":...}.</li>
  * </ul>
  */
 public class PedalonsRedirectFilter extends OncePerRequestFilter {
 
     private static final Logger log = LoggerFactory.getLogger(PedalonsRedirectFilter.class);
-
-    public static final int SC_LOCKED = 423;
 
     /**
      * Meme resolution de chemin que Spring MVC (ant_path_matcher) : decode, sans contenu apres ';',
@@ -54,7 +48,6 @@ public class PedalonsRedirectFilter extends OncePerRequestFilter {
     }
 
     public static final String TEAM_MIGRATED = "TEAM_MIGRATED";
-    public static final String TEAM_FROZEN = "TEAM_FROZEN";
 
     private static final ObjectMapper JSON = new ObjectMapper();
 
@@ -108,22 +101,6 @@ public class PedalonsRedirectFilter extends OncePerRequestFilter {
             }
             case API_GONE -> writeJson(response, HttpServletResponse.SC_GONE, TEAM_MIGRATED,
                     "Ce groupe a déménagé sur Pédalons.", decision.url());
-            case API_LOCKED -> writeJson(response, SC_LOCKED, TEAM_FROZEN,
-                    "Ce groupe migre vers Pédalons : il est en lecture seule jusqu'à sa bascule.", decision.url());
-            case LOCKED -> {
-                if (decision.state() == PedalonsState.READY) {
-                    writePage(response, SC_LOCKED,
-                            "Migration vers Pédalons terminée",
-                            "La migration de ce groupe vers Pédalons est terminée, en attente de bascule par l'administrateur du groupe : "
-                                    + "il reste en lecture seule ici jusque-là.",
-                            decision.url(), "Voir le groupe sur Pédalons");
-                } else {
-                    writePage(response, SC_LOCKED,
-                            "Migration vers Pédalons en cours",
-                            "La migration de ce groupe vers Pédalons est en cours : il est en lecture seule jusqu'à la fin de la migration.",
-                            decision.url(), "Voir le groupe sur Pédalons");
-                }
-            }
             default -> chain.doFilter(request, response);
         }
     }

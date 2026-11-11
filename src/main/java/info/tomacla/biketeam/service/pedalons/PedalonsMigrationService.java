@@ -1,6 +1,8 @@
 package info.tomacla.biketeam.service.pedalons;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.domain.pedalons.PedalonsMigration;
 import info.tomacla.biketeam.domain.pedalons.PedalonsMigrationRepository;
@@ -37,11 +39,12 @@ import java.util.regex.Pattern;
  * Migration d'une equipe biketeam vers Pedalons : demande, retour de Pedalons, declenchement,
  * suivi, bascule et annulation de la bascule.
  * <p>
- * La bascule est manuelle : une migration definitive reussie laisse l'equipe READY (table d'URL
- * enregistree, toujours gelee en lecture seule, pas encore redirigee - rien de ce qui serait modifie
- * d'ici la n'arriverait sur Pedalons) ; l'administrateur du groupe lit le bilan puis bascule
- * ({@link #switchTeam}). Toute nouvelle migration lancee avant cela remplace la table en attente
- * (un essai la supprime et degele le groupe).
+ * Toute migration est incrementale : elle copie (ou met a jour) le groupe sur Pedalons et ne change
+ * rien ici - le groupe reste modifiable, rien n'est redirige, et elle peut etre relancee autant de
+ * fois que voulu. La bascule est manuelle et separee : l'administrateur du groupe lit le bilan puis
+ * bascule ({@link #switchTeam}), ce qui enregistre la table d'URL de la derniere migration reussie
+ * et redirige des lors toutes les URL du groupe. Ce qui est modifie ici apres cette migration
+ * n'est pas sur Pedalons : a lui de relancer une migration juste avant de basculer.
  * <p>
  * Les transactions sont courtes et explicites (TransactionTemplate) : aucun appel HTTP vers
  * Pedalons ne se fait dans une transaction, et l'etat TRIGGERING est valide AVANT le
@@ -103,6 +106,8 @@ public class PedalonsMigrationService {
      * Code du corps JSON d'un 404 de Pedalons pour un job inconnu : seul ce 404 conclut JOB_LOST.
      */
     public static final String JOB_NOT_FOUND = "BIKETEAM_JOB_NOT_FOUND";
+    // lecture seule du bilan garde en base (result_json)
+    private static final ObjectMapper JSON = new ObjectMapper();
     private static final Pattern GRANT_PATTERN = Pattern.compile("^bmg_[A-Za-z0-9_-]{20,100}$");
 
     /** Permet aux tests de ne pas attendre. */
@@ -181,7 +186,7 @@ public class PedalonsMigrationService {
     /**
      * Cree une demande et rend l'URL Pedalons vers laquelle rediriger le navigateur.
      */
-    public String start(Team team, User user, boolean dryRun, boolean reset) {
+    public String start(Team team, User user) {
 
         if (!properties.isEnabled()) {
             throw new PedalonsMigrationException("La migration vers Pédalons n'est pas activée.");
@@ -206,13 +211,13 @@ public class PedalonsMigrationService {
                 migrationRepository.save(previous);
             }
             return migrationRepository.save(new PedalonsMigration(
-                    UUID.randomUUID().toString(), teamId, user == null ? null : user.getId(), dryRun, reset, now));
+                    UUID.randomUUID().toString(), teamId, user == null ? null : user.getId(), now));
         });
 
         final String token = signer.createToken(migration.getId(), now, teamId, team.getName(), displayName(user),
-                dryRun, reset, snapshotBuilder.summary(team));
+                snapshotBuilder.summary(team));
 
-        log.info("Pedalons migration {} requested for team {} (dryRun={}, reset={})", migration.getId(), teamId, dryRun, reset);
+        log.info("Pedalons migration {} requested for team {}", migration.getId(), teamId);
 
         return properties.getUrl() + "/migration-biketeam?request=" + URLEncoder.encode(token, StandardCharsets.UTF_8);
     }
@@ -268,8 +273,6 @@ public class PedalonsMigrationService {
             throw new PedalonsMigrationException("Ce groupe a déjà été migré vers Pédalons.");
         }
 
-        final boolean definitive = !migration.isDryRun();
-
         final boolean moved = Boolean.TRUE.equals(tx.execute(status -> {
             final Optional<PedalonsMigration> fresh = pendingRequest(teamId, requestId, now);
             if (fresh.isEmpty()) {
@@ -283,32 +286,14 @@ public class PedalonsMigrationService {
             m.setGrantValue(grant);
             m.setTriggeredAt(now);
             migrationRepository.save(m);
-            if (definitive) {
-                // gel : plus aucune ecriture sur le groupe entre l'instantane et la fin du job.
-                // Conditionnel : refuse (et annule la transaction) si le groupe a ete bascule
-                // entre-temps.
-                if (teamRepository.freezePedalons(teamId) == 0) {
-                    throw new PedalonsMigrationException("Ce groupe a déjà été migré vers Pédalons.");
-                }
-                // une bascule en attente est perimee : la nouvelle migration fournira sa table
-                redirectRepository.deleteByTeamId(teamId);
-            } else if (teamRepository.clearPedalonsReady(teamId) > 0) {
-                // un essai modifie (voire reinitialise) le groupe Pedalons : la table d'URL d'une
-                // migration definitive precedente n'est plus fiable, il faudra en relancer une
-                redirectRepository.deleteByTeamId(teamId);
-            }
             return true;
         }));
         if (!moved) {
             throw new PedalonsMigrationException("Demande de migration inconnue, expirée ou déjà traitée.");
         }
-        redirectCache.invalidate();
-
         final PedalonsMigrationStatus result = trigger(requestId);
         if (result == PedalonsMigrationStatus.RUNNING) {
-            return migration.isDryRun()
-                    ? "Essai de migration lancé sur Pédalons."
-                    : "Migration lancée sur Pédalons. Le groupe est en lecture seule jusqu'à la fin.";
+            return "Migration lancée sur Pédalons.";
         }
         if (result == PedalonsMigrationStatus.CANCELLED) {
             throw new PedalonsMigrationException("La migration a été annulée par un administrateur de la plateforme.");
@@ -361,8 +346,7 @@ public class PedalonsMigrationService {
                     break;
                 }
             }
-            response = client.trigger(migration.getId(), migration.getGrantValue(), migration.getTeamId(),
-                    migration.isDryRun(), migration.isReset());
+            response = client.trigger(migration.getId(), migration.getGrantValue(), migration.getTeamId());
             if (!response.isRetryable()) {
                 break;
             }
@@ -400,7 +384,7 @@ public class PedalonsMigrationService {
     /**
      * Echec d'un declenchement : seulement si la migration est encore TRIGGERING. Un autre
      * declenchement du meme grant (rejeu du poller, double clic) a pu la faire passer RUNNING
-     * entre-temps : l'echec de celui-ci ne doit alors ni la terminer ni degeler le groupe.
+     * entre-temps : l'echec de celui-ci ne doit alors pas la terminer.
      */
     private void failTriggering(String migrationId, String code, String message, String rawBody) {
         fail(migrationId, code, message, rawBody, PedalonsMigrationStatus.TRIGGERING);
@@ -520,15 +504,14 @@ public class PedalonsMigrationService {
     }
 
     /**
-     * Job termine avec succes. Essai : rien d'autre que l'enregistrement du bilan. Definitif :
-     * dans une seule transaction, table d'URL remplacee et equipe READY - toujours gelee, pas encore
-     * redirigee : la bascule attend le clic de l'administrateur ({@link #switchTeam}).
+     * Job termine avec succes : le bilan (compteurs, avertissements, table d'URL) est enregistre
+     * tel quel, rien d'autre ne change - le groupe reste modifiable et non redirige. La table d'URL
+     * ne sert qu'a la bascule ({@link #switchTeam}).
      */
     void succeed(String migrationId, PedalonsClient.Response response) {
 
         final Instant now = clock.instant();
         final JsonNode body = response.body();
-        final String teamUrl = validUrl(body.path("targetTeam").path("url").asText(null));
 
         final PedalonsMigration migration = migrationRepository.findById(migrationId).orElse(null);
         if (migration == null || migration.getStatus() != PedalonsMigrationStatus.RUNNING) {
@@ -536,57 +519,28 @@ public class PedalonsMigrationService {
             return;
         }
 
-        final List<PedalonsRedirect> redirects = migration.isDryRun()
-                ? List.of()
-                : redirects(migration.getTeamId(), body.path("urlMap"));
-        final String switchUrl = Optional.ofNullable(teamUrl).orElseGet(() -> redirects.stream()
-                .filter(r -> PedalonsRedirect.TEAM.equals(r.getEntityType()))
-                .map(PedalonsRedirect::getTargetUrl)
-                .findFirst().orElse(null));
+        final String teamUrl = teamUrl(body, redirects(migration.getTeamId(), body.path("urlMap")));
 
-        if (!migration.isDryRun() && switchUrl == null) {
-            fail(migrationId, "INVALID_RESULT", "No Pedalons team URL in the job result", response.rawBody());
-            return;
-        }
+        // UPDATE conditionnel : un succes rapporte apres une annulation ne change rien
+        final Integer moved = tx.execute(status -> migrationRepository.markSucceeded(migrationId, now, response.rawBody(), teamUrl));
 
-        final String teamId = migration.getTeamId();
-        if (!migration.isDryRun() && teamRepository.findById(teamId)
-                .map(t -> t.getPedalonsState() != PedalonsState.MIGRATING).orElse(true)) {
-            // le groupe n'est plus gele : rien ne garantit que l'instantane soit a jour
-            fail(migrationId, "TEAM_NOT_FROZEN", "Team is no longer frozen for this migration", response.rawBody(),
-                    PedalonsMigrationStatus.RUNNING);
-            return;
-        }
-
-        // UPDATE conditionnels, la migration d'abord (meme ordre de verrous que unswitch) : un
-        // succes rapporte apres une annulation ne change rien
-        final Boolean ready = tx.execute(status -> {
-            if (migrationRepository.markSucceeded(migrationId, now, response.rawBody(), switchUrl) == 0) {
-                return null;
-            }
-            if (migration.isDryRun()) {
-                return false;
-            }
-            // MIGRATING -> READY : toujours gele, pas encore redirige ; switched_at et
-            // pedalons_migrated_at attendent la bascule
-            if (teamRepository.readyPedalons(teamId, switchUrl) == 0) {
-                // degele ou change d'etat entre la lecture ci-dessus et maintenant : tout annuler
-                throw new IllegalStateException("Team " + teamId + " is no longer frozen for migration " + migrationId);
-            }
-            redirectRepository.deleteByTeamId(teamId);
-            redirectRepository.saveAll(redirects);
-            return true;
-        });
-
-        if (ready == null) {
+        if (moved == null || moved == 0) {
             log.warn("Pedalons migration {} reported SUCCEEDED but is no longer RUNNING (cancelled?): ignored", migrationId);
-        } else if (ready) {
-            redirectCache.invalidate();
-            log.info("Pedalons migration {} succeeded, team {} ready to switch to {} ({} redirects)",
-                    migrationId, migration.getTeamId(), switchUrl, redirects.size());
         } else {
-            log.info("Pedalons migration {} (dry run) succeeded for team {}", migrationId, migration.getTeamId());
+            log.info("Pedalons migration {} succeeded for team {} ({})", migrationId, migration.getTeamId(), teamUrl);
         }
+    }
+
+    /**
+     * URL du groupe sur Pedalons d'apres un statut SUCCEEDED : targetTeam.url, a defaut l'entree
+     * TEAM de la table d'URL ; null si aucune n'est une URL http(s) valide.
+     */
+    private static String teamUrl(JsonNode body, List<PedalonsRedirect> redirects) {
+        return Optional.ofNullable(validUrl(body.path("targetTeam").path("url").asText(null)))
+                .orElseGet(() -> redirects.stream()
+                        .filter(r -> PedalonsRedirect.TEAM.equals(r.getEntityType()))
+                        .map(PedalonsRedirect::getTargetUrl)
+                        .findFirst().orElse(null));
     }
 
     /**
@@ -634,9 +588,8 @@ public class PedalonsMigrationService {
     }
 
     /**
-     * Echec : l'etat terminal est enregistre et le groupe degele s'il etait MIGRATING. Pendant une
-     * migration active, un groupe n'est jamais READY (un definitif le gele en MIGRATING, un essai
-     * annule la bascule en attente).
+     * Echec : l'etat terminal est enregistre, rien d'autre ne change (une migration ne gele pas le
+     * groupe).
      */
     void fail(String migrationId, String code, String message, String rawBody) {
         fail(migrationId, code, message, rawBody, null);
@@ -644,28 +597,15 @@ public class PedalonsMigrationService {
 
     private void fail(String migrationId, String code, String message, String rawBody, PedalonsMigrationStatus expected) {
         final Instant now = clock.instant();
-        final PedalonsMigration migration = migrationRepository.findById(migrationId).orElse(null);
-        if (migration == null) {
-            return;
-        }
-        // null : rien n'a echoue (deja terminee, annulee, ou plus dans l'etat attendu). UPDATE
-        // conditionnels, la migration d'abord : un echec rapporte apres une annulation est ignore
-        final Boolean unfrozen = tx.execute(status -> {
-            if (migrationRepository.markFailed(migrationId, expected == null ? PedalonsMigrationStatus.ACTIVE : List.of(expected),
-                    now, code, message, rawBody) == 0) {
-                return null;
-            }
-            // degel seulement d'un groupe encore gele (MIGRATING)
-            return !migration.isDryRun() && teamRepository.unfreezePedalons(migration.getTeamId()) > 0;
-        });
-        if (unfrozen == null) {
+        // UPDATE conditionnel : un echec rapporte apres une annulation, ou pour une migration qui
+        // n'est plus dans l'etat attendu, est ignore
+        final Integer failed = tx.execute(status -> migrationRepository.markFailed(migrationId,
+                expected == null ? PedalonsMigrationStatus.ACTIVE : List.of(expected), now, code, message, rawBody));
+        if (failed == null || failed == 0) {
             log.info("Pedalons migration {} not failed ({}): already moved on", migrationId, code);
             return;
         }
         log.warn("Pedalons migration {} failed: {} {}", migrationId, code, message == null ? "" : message);
-        if (unfrozen) {
-            redirectCache.invalidate();
-        }
     }
 
     // ------------------------------------------------------------------------------------------
@@ -673,9 +613,10 @@ public class PedalonsMigrationService {
     // ------------------------------------------------------------------------------------------
 
     /**
-     * Bascule d'un groupe READY : a partir de maintenant toutes ses URL redirigent vers Pedalons.
-     * La derniere migration definitive reussie recoit switched_at ; les demandes encore en attente
-     * de confirmation sur Pedalons sont annulees (elles viseraient un groupe bascule).
+     * Bascule du groupe, a partir de sa derniere migration reussie : la table d'URL de son bilan est
+     * enregistree et, a partir de maintenant, toutes les URL du groupe redirigent vers Pedalons (le
+     * groupe est en lecture seule ici). Cette migration recoit switched_at ; les demandes encore en
+     * attente de confirmation sur Pedalons sont annulees (elles viseraient un groupe bascule).
      */
     public String switchTeam(Team team) {
 
@@ -686,31 +627,56 @@ public class PedalonsMigrationService {
         final Instant now = clock.instant();
         final String teamId = team.getId();
 
-        tx.executeWithoutResult(status -> {
+        final Integer count = tx.execute(status -> {
             if (migrationRepository.existsByTeamIdAndStatusIn(teamId, PedalonsMigrationStatus.ACTIVE)) {
                 throw new PedalonsMigrationException("Une migration de ce groupe est en cours : attendez sa fin.");
             }
-            // conditionnel : rien ne bascule si le groupe n'est pas (ou plus) READY
-            if (teamRepository.switchPedalons(teamId, now) == 0) {
-                throw new PedalonsMigrationException("Aucune migration définitive réussie n'attend d'être basculée.");
+            final PedalonsMigration last = lastSucceeded(teamId)
+                    .orElseThrow(() -> new PedalonsMigrationException("Aucune migration réussie : lancez d'abord une migration vers Pédalons."));
+            final JsonNode body = readResult(last);
+            final List<PedalonsRedirect> redirects = redirects(teamId, body.path("urlMap"));
+            final String switchUrl = Optional.ofNullable(validUrl(last.getPedalonsTeamUrl())).orElseGet(() -> teamUrl(body, redirects));
+            if (switchUrl == null) {
+                throw new PedalonsMigrationException("Le bilan de la dernière migration ne donne pas l'adresse du groupe sur Pédalons : relancez une migration.");
             }
-            migrationRepository.findByTeamIdOrderByCreatedAtDesc(teamId).stream()
-                    .filter(m -> m.getStatus() == PedalonsMigrationStatus.SUCCEEDED && !m.isDryRun())
-                    .findFirst()
-                    .ifPresent(m -> {
-                        m.setSwitchedAt(now);
-                        m.setUpdatedAt(now);
-                        migrationRepository.save(m);
-                    });
+            // conditionnel : rien ne bascule si le groupe l'est deja
+            if (teamRepository.switchPedalons(teamId, switchUrl, now) == 0) {
+                throw new PedalonsMigrationException("Ce groupe a déjà été migré vers Pédalons.");
+            }
+            redirectRepository.deleteByTeamId(teamId);
+            redirectRepository.saveAll(redirects);
+            last.setSwitchedAt(now);
+            last.setUpdatedAt(now);
+            migrationRepository.save(last);
             for (PedalonsMigration pending : migrationRepository.findByTeamIdAndStatusIn(teamId, List.of(PedalonsMigrationStatus.REQUESTED))) {
                 pending.setStatus(PedalonsMigrationStatus.CANCELLED, now);
                 migrationRepository.save(pending);
             }
+            return redirects.size();
         });
 
         redirectCache.invalidate();
-        log.info("Team {} switched to Pedalons", teamId);
+        log.info("Team {} switched to Pedalons ({} redirects)", teamId, count);
         return "Le groupe a basculé vers Pédalons : ses adresses redirigent désormais vers Pédalons.";
+    }
+
+    /** Derniere migration reussie de l'equipe (la plus recemment demandee). */
+    private Optional<PedalonsMigration> lastSucceeded(String teamId) {
+        return migrationRepository.findByTeamIdOrderByCreatedAtDesc(teamId).stream()
+                .filter(m -> m.getStatus() == PedalonsMigrationStatus.SUCCEEDED)
+                .findFirst();
+    }
+
+    /** Dernier statut recu de Pedalons pour cette migration ; un noeud vide s'il est absent ou illisible. */
+    private static JsonNode readResult(PedalonsMigration migration) {
+        if (Strings.isBlank(migration.getResultJson())) {
+            return JSON.createObjectNode();
+        }
+        try {
+            return JSON.readTree(migration.getResultJson());
+        } catch (JsonProcessingException e) {
+            return JSON.createObjectNode();
+        }
     }
 
     // ------------------------------------------------------------------------------------------
@@ -718,8 +684,7 @@ public class PedalonsMigrationService {
     // ------------------------------------------------------------------------------------------
 
     /**
-     * Le groupe redevient un groupe biketeam ordinaire : plus de redirection, plus de gel, plus de
-     * bascule en attente. Une migration active (TRIGGERING, RUNNING) est annulee dans la meme
+     * Le groupe redevient un groupe biketeam ordinaire : plus de redirection. Une migration active (TRIGGERING, RUNNING) est annulee dans la meme
      * transaction (CANCELLED, {@link PedalonsMigrationRepository#CANCELLED_BY_ADMIN}) : l'export
      * n'est plus servi (le job Pedalons echouera sur l'export) et un succes ou un echec rapporte
      * ensuite est ignore. Les navigateurs qui ont mis un 301 en cache continueront d'aller sur
