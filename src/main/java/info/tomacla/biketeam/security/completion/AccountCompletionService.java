@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -39,6 +40,12 @@ public class AccountCompletionService {
      */
     private static final String PRINCIPAL_ATTR = "accountComplete";
 
+    /**
+     * Prefixe des autorites posees par {@code Authorities.teamAdmin(teamId)}. Le souligne final
+     * ecarte ROLE_ADMIN, l'administrateur de l'application, qui n'administre pas une equipe.
+     */
+    private static final String TEAM_ADMIN_AUTHORITY_PREFIX = "ROLE_ADMIN_";
+
     @Autowired
     private UserService userService;
 
@@ -59,7 +66,7 @@ public class AccountCompletionService {
     public void init() {
         mode = parseMode(configuredMode);
         log.info("Mode de complétion de compte : {}", mode);
-        if (mode == AccountCompletionMode.ENFORCED && !mailSenderService.isSmtpConfigured()) {
+        if (isEnforcingMode() && !mailSenderService.isSmtpConfigured()) {
             log.warn("Forçage de la complétion de compte désactivé : SMTP non configuré. Le bandeau d'incitation reste affiché.");
         }
     }
@@ -81,13 +88,50 @@ public class AccountCompletionService {
         return mode;
     }
 
+    private boolean isEnforcingMode() {
+        return mode == AccountCompletionMode.ENFORCED || mode == AccountCompletionMode.ENFORCED_FOR_ADMINS;
+    }
+
     /**
-     * Le forcage n'a de sens que si l'utilisateur peut effectivement verifier une adresse : sans
-     * SMTP, il serait enferme dans la boucle de redirection. Evalue a CHAQUE requete pour que
-     * la propriete serve de retour arriere immediat.
+     * Vrai des que le mode force au moins une population. Le forcage n'a de sens que si
+     * l'utilisateur peut effectivement verifier une adresse : sans SMTP, il serait enferme dans
+     * la boucle de redirection. Evalue a CHAQUE requete pour que la propriete serve de retour
+     * arriere immediat.
+     * <p>
+     * Ne dit pas si un utilisateur donne est force : voir {@link #enforcementEnabledFor(Authentication)}.
      */
     public boolean enforcementEnabled() {
-        return mode == AccountCompletionMode.ENFORCED && mailSenderService.isSmtpConfigured();
+        return isEnforcingMode() && mailSenderService.isSmtpConfigured();
+    }
+
+    /**
+     * Forcage applicable a cette session : tout le monde en {@link AccountCompletionMode#ENFORCED},
+     * les seuls administrateurs d'equipe en {@link AccountCompletionMode#ENFORCED_FOR_ADMINS}.
+     */
+    public boolean enforcementEnabledFor(Authentication authentication) {
+        if (!enforcementEnabled()) {
+            return false;
+        }
+        return mode == AccountCompletionMode.ENFORCED || isTeamAdmin(authentication);
+    }
+
+    /**
+     * Lu sur les autorites de la session et non en base : ce sont elles qui ouvrent les pages
+     * d'administration d'une equipe, le forcage vise donc exactement ceux qui y ont acces, sans
+     * requete supplementaire a chaque page. L'espace personnel est une equipe comme une autre :
+     * son proprietaire en porte l'autorite d'administrateur et est donc force lui aussi.
+     */
+    private boolean isTeamAdmin(Authentication authentication) {
+        if (authentication == null) {
+            return false;
+        }
+        for (GrantedAuthority authority : authentication.getAuthorities()) {
+            final String name = authority.getAuthority();
+            if (name != null && name.startsWith(TEAM_ADMIN_AUTHORITY_PREFIX)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -96,7 +140,7 @@ public class AccountCompletionService {
      * envoi de mail. Un utilisateur sollicite sans SMTP a donc bien un chemin de sortie.
      */
     public boolean suggestionEnabled() {
-        return mode == AccountCompletionMode.SUGGESTED || mode == AccountCompletionMode.ENFORCED;
+        return mode != AccountCompletionMode.OFF;
     }
 
     /**
