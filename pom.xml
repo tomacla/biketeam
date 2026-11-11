@@ -34,7 +34,7 @@
 		<dotenv-java.version>3.2.0</dotenv-java.version>
 		<gpx2web.version>1.4.5</gpx2web.version>
 		<zip4j.version>2.11.6</zip4j.version>
-		<postgresql.version>42.7.13</postgresql.version>
+		<postgresql.version>42.7.14</postgresql.version>
 		<thumbnailator.version>0.4.21</thumbnailator.version>
 		<scribejava-core.version>8.3.3</scribejava-core.version>
 		<jacoco.version>0.8.15</jacoco.version>
