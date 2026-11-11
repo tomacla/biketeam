@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.HashMap;
@@ -96,6 +97,92 @@ public class AccountCompletionServiceTest {
 
         ReflectionTestUtils.setField(service, "mode", AccountCompletionMode.OFF);
         assertFalse(service.enforcementEnabled());
+
+    }
+
+    // --- enforcementEnabledFor ---
+
+    private Authentication authenticationWithAuthorities(GrantedAuthority... authorities) {
+        return UsernamePasswordAuthenticationToken.authenticated("user-1", null, List.of(authorities));
+    }
+
+    @Test
+    public void testEnforcedAppliesToEveryone() {
+
+        assertTrue(service.enforcementEnabledFor(authenticationWithAuthorities(Authorities.user())));
+        assertTrue(service.enforcementEnabledFor(
+                authenticationWithAuthorities(Authorities.user(), Authorities.teamAdmin("team-1"))));
+
+    }
+
+    @Test
+    public void testEnforcedForAdminsAppliesToTeamAdminsOnly() {
+
+        ReflectionTestUtils.setField(service, "mode", AccountCompletionMode.ENFORCED_FOR_ADMINS);
+
+        assertTrue(service.enforcementEnabledFor(
+                authenticationWithAuthorities(Authorities.user(), Authorities.teamUser("team-1"), Authorities.teamAdmin("team-2"))));
+
+        assertFalse(service.enforcementEnabledFor(authenticationWithAuthorities(Authorities.user())));
+        assertFalse(service.enforcementEnabledFor(
+                authenticationWithAuthorities(Authorities.user(), Authorities.teamUser("team-1"))),
+                "un simple membre n'est que sollicite");
+        assertFalse(service.enforcementEnabledFor(null));
+
+    }
+
+    /**
+     * ROLE_ADMIN est l'administrateur de l'application, pas celui d'une equipe : le prefixe
+     * ROLE_ADMIN_ ne doit pas le capturer.
+     */
+    @Test
+    public void testEnforcedForAdminsIgnoresApplicationAdmin() {
+
+        ReflectionTestUtils.setField(service, "mode", AccountCompletionMode.ENFORCED_FOR_ADMINS);
+
+        assertFalse(service.enforcementEnabledFor(
+                authenticationWithAuthorities(Authorities.user(), Authorities.admin())));
+
+    }
+
+    @Test
+    public void testEnforcedForAdminsRequiresSmtp() {
+
+        ReflectionTestUtils.setField(service, "mode", AccountCompletionMode.ENFORCED_FOR_ADMINS);
+        final Authentication teamAdmin = authenticationWithAuthorities(Authorities.teamAdmin("team-1"));
+
+        assertTrue(service.enforcementEnabled());
+        assertTrue(service.enforcementEnabledFor(teamAdmin));
+
+        when(mailSenderService.isSmtpConfigured()).thenReturn(false);
+        assertFalse(service.enforcementEnabled());
+        assertFalse(service.enforcementEnabledFor(teamAdmin));
+
+    }
+
+    @Test
+    public void testEnforcedForAdminsKeepsSuggestionForEveryone() {
+
+        ReflectionTestUtils.setField(service, "mode", AccountCompletionMode.ENFORCED_FOR_ADMINS);
+
+        assertTrue(service.suggestionEnabled());
+
+        ReflectionTestUtils.setField(service, "configuredMode", "enforced_for_admins");
+        service.init();
+        assertEquals(AccountCompletionMode.ENFORCED_FOR_ADMINS, service.getMode());
+
+    }
+
+    @Test
+    public void testNoOneEnforcedWhenSuggestedOrOff() {
+
+        final Authentication teamAdmin = authenticationWithAuthorities(Authorities.teamAdmin("team-1"));
+
+        ReflectionTestUtils.setField(service, "mode", AccountCompletionMode.SUGGESTED);
+        assertFalse(service.enforcementEnabledFor(teamAdmin));
+
+        ReflectionTestUtils.setField(service, "mode", AccountCompletionMode.OFF);
+        assertFalse(service.enforcementEnabledFor(teamAdmin));
 
     }
 

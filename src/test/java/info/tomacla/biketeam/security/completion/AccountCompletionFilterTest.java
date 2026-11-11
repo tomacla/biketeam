@@ -63,7 +63,7 @@ public class AccountCompletionFilterTest {
     public void testCompleteAccountPassesThrough() throws Exception {
 
         authenticateAsUser();
-        when(accountCompletionService.enforcementEnabled()).thenReturn(true);
+        when(accountCompletionService.enforcementEnabledFor(any())).thenReturn(true);
         when(accountCompletionService.isComplete(any(), any())).thenReturn(true);
 
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/users/me");
@@ -80,7 +80,7 @@ public class AccountCompletionFilterTest {
     public void testIncompleteAccountRedirectedToAccountComplete() throws Exception {
 
         authenticateAsUser();
-        when(accountCompletionService.enforcementEnabled()).thenReturn(true);
+        when(accountCompletionService.enforcementEnabledFor(any())).thenReturn(true);
         when(accountCompletionService.isComplete(any(), any())).thenReturn(false);
 
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/users/me");
@@ -98,7 +98,7 @@ public class AccountCompletionFilterTest {
     public void testEveryWhitelistEntryPassesThrough() throws Exception {
 
         authenticateAsUser();
-        when(accountCompletionService.enforcementEnabled()).thenReturn(true);
+        when(accountCompletionService.enforcementEnabledFor(any())).thenReturn(true);
         when(accountCompletionService.isComplete(any(), any())).thenReturn(false);
 
         for (String pattern : AccountCompletionFilter.WHITELIST_PATTERNS) {
@@ -125,7 +125,7 @@ public class AccountCompletionFilterTest {
     public void testXhrRequestReceivesJson403InsteadOfRedirect() throws Exception {
 
         authenticateAsUser();
-        when(accountCompletionService.enforcementEnabled()).thenReturn(true);
+        when(accountCompletionService.enforcementEnabledFor(any())).thenReturn(true);
         when(accountCompletionService.isComplete(any(), any())).thenReturn(false);
 
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/users/me");
@@ -146,7 +146,7 @@ public class AccountCompletionFilterTest {
     public void testJsonAcceptHeaderReceivesJson403() throws Exception {
 
         authenticateAsUser();
-        when(accountCompletionService.enforcementEnabled()).thenReturn(true);
+        when(accountCompletionService.enforcementEnabledFor(any())).thenReturn(true);
         when(accountCompletionService.isComplete(any(), any())).thenReturn(false);
 
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/users/me");
@@ -164,7 +164,7 @@ public class AccountCompletionFilterTest {
     public void testEnforcementDisabledPassesThrough() throws Exception {
 
         authenticateAsUser();
-        when(accountCompletionService.enforcementEnabled()).thenReturn(false);
+        when(accountCompletionService.enforcementEnabledFor(any())).thenReturn(false);
 
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/users/me");
         MockHttpServletResponse response = new MockHttpServletResponse();

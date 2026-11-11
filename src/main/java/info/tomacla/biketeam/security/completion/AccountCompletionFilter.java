@@ -95,7 +95,7 @@ public class AccountCompletionFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (!accountCompletionService.enforcementEnabled()) {
+        if (!accountCompletionService.enforcementEnabledFor(authentication)) {
             filterChain.doFilter(request, response);
             return;
         }

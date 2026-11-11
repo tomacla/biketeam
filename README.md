@@ -100,11 +100,12 @@ Le niveau d'insistance est piloté par `auth.completion.mode`, qui forme une esc
 | --- | --- |
 | `OFF` | Aucune sollicitation. |
 | `SUGGESTED` *(défaut)* | Bandeau d'incitation en haut de toutes les pages + badge « Compte à compléter » dans la barre de navigation. La navigation reste libre. Le bandeau est masquable, mais pour la session seulement (mémorisé en `sessionStorage`) ; le badge reste toujours visible. |
+| `ENFORCED_FOR_ADMINS` | `ENFORCED` pour les administrateurs d'au moins une équipe (espace personnel compris), `SUGGESTED` pour tous les autres. Le rôle est lu sur les autorités de la session : une promotion en cours de session ne prend effet qu'à la connexion suivante, comme l'accès aux pages d'administration. |
 | `ENFORCED` | En plus du bandeau, toute page hors whitelist redirige vers `/account/complete` (whitelist : login/logout, pages de complétion, ressources statiques, `/confirm-email`, `/users/me/delete` et l'API `/api/**`). Les requêtes JSON/XHR reçoivent un `403 {"error":"account_completion_required"}` plutôt qu'une page HTML. |
 
 Une valeur inconnue ne bloque pas le démarrage : repli sur `SUGGESTED` avec un avertissement dans les logs. Le mode effectif est loggué au démarrage.
 
-La trajectoire prévue est donc d'ouvrir en `SUGGESTED` le temps que les comptes Strava se complètent d'eux-mêmes, puis de passer en `ENFORCED` pour les retardataires, `OFF` servant de retour arrière.
+La trajectoire prévue est donc d'ouvrir en `SUGGESTED` le temps que les comptes Strava se complètent d'eux-mêmes, de forcer d'abord les administrateurs d'équipe avec `ENFORCED_FOR_ADMINS`, puis de passer en `ENFORCED` pour les retardataires, `OFF` servant de retour arrière.
 
 ### Passkeys (WebAuthn)
 
@@ -147,7 +148,7 @@ Côté cycle de vie du compte : la suppression (soft delete) détruit les passke
 
 ### Prérequis SMTP
 
-Sans configuration SMTP (`SMTP_*`), l'inscription par email, la réinitialisation de mot de passe **et le forçage de complétion de compte** sont désactivés : sans mail, personne ne peut vérifier une adresse, un utilisateur Strava incomplet serait donc enfermé dans la boucle de complétion. Le forçage se désactive automatiquement (`auth.completion.mode=ENFORCED` seul ne suffit pas, il faut aussi que le SMTP soit configuré) et un avertissement est loggué au démarrage si ce n'est pas le cas.
+Sans configuration SMTP (`SMTP_*`), l'inscription par email, la réinitialisation de mot de passe **et le forçage de complétion de compte** sont désactivés : sans mail, personne ne peut vérifier une adresse, un utilisateur Strava incomplet serait donc enfermé dans la boucle de complétion. Le forçage se désactive automatiquement (`auth.completion.mode=ENFORCED` ou `ENFORCED_FOR_ADMINS` seul ne suffit pas, il faut aussi que le SMTP soit configuré) et un avertissement est loggué au démarrage si ce n'est pas le cas.
 
 Le bandeau d'incitation, lui, reste affiché sans SMTP : la page de complétion permet aussi de lier un compte Google ou Facebook, ce qui ne demande aucun envoi de mail.
 

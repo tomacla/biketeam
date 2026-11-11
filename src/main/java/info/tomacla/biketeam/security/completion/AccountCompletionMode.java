@@ -3,9 +3,10 @@ package info.tomacla.biketeam.security.completion;
 /**
  * Niveau d'insistance sur la completion de compte, pilote par {@code auth.completion.mode}.
  * <p>
- * Les trois valeurs forment une escalade volontairement progressive : on ouvre en {@link #SUGGESTED}
- * le temps que les comptes Strava se completent d'eux-memes, puis on passe en {@link #ENFORCED}
- * pour les retardataires. {@link #OFF} est le retour arriere.
+ * Les valeurs forment une escalade volontairement progressive : on ouvre en {@link #SUGGESTED}
+ * le temps que les comptes Strava se completent d'eux-memes, on force d'abord les administrateurs
+ * d'equipe avec {@link #ENFORCED_FOR_ADMINS}, puis tout le monde avec {@link #ENFORCED}.
+ * {@link #OFF} est le retour arriere.
  */
 public enum AccountCompletionMode {
 
@@ -19,6 +20,12 @@ public enum AccountCompletionMode {
      * mais la navigation reste entierement libre.
      */
     SUGGESTED,
+
+    /**
+     * {@link #ENFORCED} pour les administrateurs d'au moins une equipe, {@link #SUGGESTED} pour
+     * tous les autres.
+     */
+    ENFORCED_FOR_ADMINS,
 
     /**
      * Incitation ET blocage : en plus du bandeau, toute page hors whitelist renvoie vers
