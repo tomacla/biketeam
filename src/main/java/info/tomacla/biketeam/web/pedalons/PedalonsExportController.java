@@ -4,11 +4,12 @@ import info.tomacla.biketeam.domain.pedalons.PedalonsMigrationRepository;
 import info.tomacla.biketeam.domain.pedalons.PedalonsMigrationStatus;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.service.TeamService;
+import info.tomacla.biketeam.service.pedalons.PedalonsFilePaths;
 import info.tomacla.biketeam.service.pedalons.PedalonsProperties;
-import info.tomacla.biketeam.service.pedalons.export.PedalonsExportFiles;
-import info.tomacla.biketeam.service.pedalons.export.PedalonsFileKind;
-import info.tomacla.biketeam.service.pedalons.export.TeamSnapshot;
-import info.tomacla.biketeam.service.pedalons.export.TeamSnapshotBuilder;
+import info.tomacla.biketeam.service.export.TeamExportFiles;
+import info.tomacla.biketeam.service.export.TeamFileKind;
+import info.tomacla.biketeam.service.export.TeamSnapshot;
+import info.tomacla.biketeam.service.export.TeamSnapshotBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,12 +51,12 @@ public class PedalonsExportController {
     private final TeamService teamService;
     private final PedalonsMigrationRepository migrationRepository;
     private final TeamSnapshotBuilder snapshotBuilder;
-    private final PedalonsExportFiles files;
+    private final TeamExportFiles files;
 
     @Autowired
     public PedalonsExportController(PedalonsProperties properties, TeamService teamService,
                                     PedalonsMigrationRepository migrationRepository,
-                                    TeamSnapshotBuilder snapshotBuilder, PedalonsExportFiles files) {
+                                    TeamSnapshotBuilder snapshotBuilder, TeamExportFiles files) {
         this.properties = properties;
         this.teamService = teamService;
         this.migrationRepository = migrationRepository;
@@ -68,7 +69,7 @@ public class PedalonsExportController {
                                              @RequestHeader(value = SECRET_HEADER, required = false) String secret) {
         final Team team = checkAccess(teamId, secret);
         log.info("Pedalons export: snapshot of team {}", team.getId());
-        return snapshotBuilder.build(team);
+        return snapshotBuilder.build(team, PedalonsFilePaths.INSTANCE).snapshot();
     }
 
     @GetMapping(path = "/teams/{teamId}/files/{kind}/{entityId}")
@@ -79,7 +80,7 @@ public class PedalonsExportController {
 
         final Team team = checkAccess(teamId, secret);
 
-        final PedalonsExportFiles.ExportFile file = PedalonsFileKind.fromPathSegment(kind)
+        final TeamExportFiles.ExportFile file = TeamFileKind.fromPathSegment(kind)
                 .flatMap(k -> files.resolve(k, team.getId(), entityId))
                 .orElseThrow(() -> new ExportException(HttpStatus.NOT_FOUND, "FILE_NOT_FOUND", "File not found"));
 

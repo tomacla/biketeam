@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.service.pedalons;
 
+import info.tomacla.biketeam.service.export.TeamExportSummary;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -45,7 +46,7 @@ public class PedalonsRequestTokenSignerTest {
         // sans exp, puis la signature complete sur le vecteur
         String payload = signer.payload("6f1c2a3e-0000-4000-8000-000000000001", 1790000000L, "n-peloton", "N'Peloton",
                 "Jane D.", "https://biketeam.example/n-peloton/admin/pedalons/callback",
-                new PedalonsSummary(1, 2, 3, 0, 1, 2, 4, true, false));
+                new TeamExportSummary(1, 2, 3, 0, 1, 2, 4, true, false));
 
         assertEquals(PAYLOAD.replace("\"exp\":1790000900", "\"exp\":1790003600"), payload);
     }
@@ -55,7 +56,7 @@ public class PedalonsRequestTokenSignerTest {
         PedalonsRequestTokenSigner signer = new PedalonsRequestTokenSigner(properties("https://biketeam.example/"));
 
         String token = signer.createToken("6f1c2a3e-0000-4000-8000-000000000001", Instant.ofEpochSecond(1790000000L),
-                "n-peloton", "N'Peloton", "Jane D.", new PedalonsSummary(1, 2, 3, 0, 1, 2, 4, true, false));
+                "n-peloton", "N'Peloton", "Jane D.", new TeamExportSummary(1, 2, 3, 0, 1, 2, 4, true, false));
 
         String[] parts = token.split("\\.");
         assertEquals(3, parts.length);

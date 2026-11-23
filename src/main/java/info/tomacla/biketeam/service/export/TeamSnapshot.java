@@ -1,11 +1,12 @@
-package info.tomacla.biketeam.service.pedalons.export;
+package info.tomacla.biketeam.service.export;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.List;
 
 /**
- * Instantane JSON d'une equipe servi a Pedalons (schemaVersion 1).
+ * Instantane JSON d'une equipe (schemaVersion 1), servi a Pedalons et inclus dans l'archive ZIP
+ * telechargee par les administrateurs de l'equipe.
  * <p>
  * Tout champ documente est toujours present, null quand il n'a pas de valeur ; tableaux vides
  * plutot que null. Les dates et heures sont deja formatees en chaines (LocalDate.toString(),
@@ -194,8 +195,8 @@ public final class TeamSnapshot {
     }
 
     /**
-     * Reference d'un fichier a telecharger sur l'endpoint de fichiers. path est relatif a l'hote ;
-     * size et md5 portent sur l'integralite du fichier.
+     * Reference d'un fichier : path est relatif a l'hote (endpoint de fichiers Pedalons) ou a la
+     * racine de l'archive ZIP ; size et md5 portent sur l'integralite du fichier.
      */
     @JsonInclude(JsonInclude.Include.ALWAYS)
     public record FileRef(String kind,

@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.service.pedalons;
 
+import info.tomacla.biketeam.service.export.TeamExportSummary;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
 import info.tomacla.biketeam.domain.pedalons.PedalonsMigration;
@@ -11,7 +12,7 @@ import info.tomacla.biketeam.domain.team.PedalonsState;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.TeamRepository;
 import info.tomacla.biketeam.domain.user.User;
-import info.tomacla.biketeam.service.pedalons.export.TeamSnapshotBuilder;
+import info.tomacla.biketeam.service.export.TeamSnapshotBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -184,7 +185,7 @@ public class PedalonsMigrationServiceTest {
         cache = mock(PedalonsRedirectCache.class);
 
         TeamSnapshotBuilder snapshotBuilder = mock(TeamSnapshotBuilder.class);
-        when(snapshotBuilder.summary(any())).thenReturn(new PedalonsSummary(1, 2, 3, 0, 1, 2, 4, true, false));
+        when(snapshotBuilder.summary(any())).thenReturn(new TeamExportSummary(1, 2, 3, 0, 1, 2, 4, true, false));
 
         service = new PedalonsMigrationService(properties, migrationRepository, redirectRepository, teamRepository,
                 new PedalonsRequestTokenSigner(properties), client, snapshotBuilder, cache,

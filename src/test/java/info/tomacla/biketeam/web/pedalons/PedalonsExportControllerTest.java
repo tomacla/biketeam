@@ -4,11 +4,12 @@ import info.tomacla.biketeam.domain.pedalons.PedalonsMigrationRepository;
 import info.tomacla.biketeam.domain.pedalons.PedalonsMigrationStatus;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.service.TeamService;
+import info.tomacla.biketeam.service.pedalons.PedalonsFilePaths;
 import info.tomacla.biketeam.service.pedalons.PedalonsProperties;
-import info.tomacla.biketeam.service.pedalons.export.PedalonsExportFiles;
-import info.tomacla.biketeam.service.pedalons.export.PedalonsFileKind;
-import info.tomacla.biketeam.service.pedalons.export.TeamSnapshot;
-import info.tomacla.biketeam.service.pedalons.export.TeamSnapshotBuilder;
+import info.tomacla.biketeam.service.export.TeamExportFiles;
+import info.tomacla.biketeam.service.export.TeamFileKind;
+import info.tomacla.biketeam.service.export.TeamSnapshot;
+import info.tomacla.biketeam.service.export.TeamSnapshotBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -43,7 +44,7 @@ public class PedalonsExportControllerTest {
     private TeamService teamService;
     private PedalonsMigrationRepository migrationRepository;
     private TeamSnapshotBuilder snapshotBuilder;
-    private PedalonsExportFiles files;
+    private TeamExportFiles files;
     private Team team;
 
     @BeforeEach
@@ -51,7 +52,7 @@ public class PedalonsExportControllerTest {
         teamService = mock(TeamService.class);
         migrationRepository = mock(PedalonsMigrationRepository.class);
         snapshotBuilder = mock(TeamSnapshotBuilder.class);
-        files = mock(PedalonsExportFiles.class);
+        files = mock(TeamExportFiles.class);
 
         team = new Team();
         team.setId("n-peloton");
@@ -118,8 +119,10 @@ public class PedalonsExportControllerTest {
     public void testSnapshotIsServedAsJson() throws Exception {
         TeamSnapshot.SnapshotTeam snapshotTeam = new TeamSnapshot.SnapshotTeam("n-peloton", "N'Peloton", "Nantes", "FR",
                 "2019-03-02", "PUBLIC", "Europe/Paris", null, null, null);
-        when(snapshotBuilder.build(team)).thenReturn(new TeamSnapshot.Snapshot(1, "2026-09-22T10:16:11.123Z", snapshotTeam,
-                List.of(), List.of(), List.of(), List.of(), List.of(), List.of()));
+        when(snapshotBuilder.build(team, PedalonsFilePaths.INSTANCE)).thenReturn(new TeamSnapshotBuilder.TeamExport(
+                new TeamSnapshot.Snapshot(1, "2026-09-22T10:16:11.123Z", snapshotTeam,
+                        List.of(), List.of(), List.of(), List.of(), List.of(), List.of()),
+                List.of()));
 
         mockMvc(true).perform(get("/internal/pedalons/teams/n-peloton/snapshot")
                         .header(PedalonsExportController.SECRET_HEADER, SECRET))
@@ -136,8 +139,8 @@ public class PedalonsExportControllerTest {
     public void testFileIsStreamedWithEtag() throws Exception {
         Path gpx = tmp.resolve("map-1.gpx");
         Files.writeString(gpx, "<gpx/>");
-        PedalonsExportFiles.ExportFile file = new PedalonsExportFiles.ExportFile(gpx, "map-1.gpx", "application/gpx+xml");
-        when(files.resolve(PedalonsFileKind.GPX, "n-peloton", "map-1")).thenReturn(Optional.of(file));
+        TeamExportFiles.ExportFile file = new TeamExportFiles.ExportFile(gpx, "map-1.gpx", "application/gpx+xml");
+        when(files.resolve(TeamFileKind.GPX, "n-peloton", "map-1")).thenReturn(Optional.of(file));
         when(files.md5(file)).thenReturn("9e107d9d372bb6826bd81d3542a419d6");
 
         mockMvc(true).perform(get("/internal/pedalons/teams/n-peloton/files/gpx/map-1")
@@ -168,7 +171,7 @@ public class PedalonsExportControllerTest {
 
     @Test
     public void testUnexpectedErrorIsA500NotARedirect() throws Exception {
-        when(snapshotBuilder.build(team)).thenThrow(new UncheckedIOException(new IOException("disk")));
+        when(snapshotBuilder.build(team, PedalonsFilePaths.INSTANCE)).thenThrow(new UncheckedIOException(new IOException("disk")));
         when(files.resolve(any(), eq("n-peloton"), any())).thenThrow(new IllegalStateException("db down"));
         // le gestionnaire global de biketeam redirige vers l'accueil : il ne doit pas voir l'export
         MockMvc mockMvc = MockMvcBuilders.standaloneSetup(
