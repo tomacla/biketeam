@@ -1,4 +1,4 @@
-package info.tomacla.biketeam.service.pedalons.export;
+package info.tomacla.biketeam.service.export;
 
 import info.tomacla.biketeam.common.file.FileRepositories;
 import info.tomacla.biketeam.domain.map.Map;
@@ -24,15 +24,16 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Resolution des fichiers exportes vers Pedalons.
+ * Resolution des fichiers d'une equipe exportes (vers Pedalons, ou dans l'archive ZIP telechargee
+ * par ses administrateurs).
  * <p>
  * Le fichier est TOUJOURS deduit de (type, equipe, entite) apres verification que l'entite
  * appartient a l'equipe et n'est pas supprimee : jamais un chemin fourni par l'appelant.
  */
 @Component
-public class PedalonsExportFiles {
+public class TeamExportFiles {
 
-    private static final Logger log = LoggerFactory.getLogger(PedalonsExportFiles.class);
+    private static final Logger log = LoggerFactory.getLogger(TeamExportFiles.class);
 
     public static final String GPX_CONTENT_TYPE = "application/gpx+xml";
 
@@ -49,7 +50,7 @@ public class PedalonsExportFiles {
     private final PublicationRepository publicationRepository;
 
     @Autowired
-    public PedalonsExportFiles(FileService fileService, FileDigestCache digestCache, MapRepository mapRepository,
+    public TeamExportFiles(FileService fileService, FileDigestCache digestCache, MapRepository mapRepository,
                                RideRepository rideRepository, TripRepository tripRepository,
                                PublicationRepository publicationRepository) {
         this.fileService = fileService;
@@ -67,9 +68,18 @@ public class PedalonsExportFiles {
     }
 
     /**
+     * Chemin d'un fichier tel qu'il apparait dans l'instantane (FileRef.path) : URL de l'endpoint
+     * de fichiers pour Pedalons, chemin relatif dans l'archive ZIP pour l'export des administrateurs.
+     */
+    @FunctionalInterface
+    public interface FilePaths {
+        String path(TeamFileKind kind, String teamId, String entityId, ExportFile file);
+    }
+
+    /**
      * Resolution pour l'endpoint de fichiers : verifie l'appartenance de l'entite a l'equipe.
      */
-    public Optional<ExportFile> resolve(PedalonsFileKind kind, String teamId, String entityId) {
+    public Optional<ExportFile> resolve(TeamFileKind kind, String teamId, String entityId) {
         return switch (kind) {
             case GPX -> mapRepository.findById(entityId)
                     .filter(m -> teamId.equals(m.getTeamId()) && !m.isDeletion())
@@ -96,7 +106,7 @@ public class PedalonsExportFiles {
                 fileName, GPX_CONTENT_TYPE));
     }
 
-    public Optional<ExportFile> image(PedalonsFileKind kind, String teamId, String entityId) {
+    public Optional<ExportFile> image(TeamFileKind kind, String teamId, String entityId) {
         final String directory = switch (kind) {
             case RIDE_IMAGE -> FileRepositories.RIDE_IMAGES;
             case TRIP_IMAGE -> FileRepositories.TRIP_IMAGES;
@@ -108,22 +118,22 @@ public class PedalonsExportFiles {
 
     /**
      * misc/{teamId}/logo.(png|jpg|jpeg), y compris le logo factice pose a la creation de
-     * l'equipe : c'est Pedalons qui l'ecarte par empreinte. Jamais misc/logo.png (logo du site).
+     * l'equipe : c'est le destinataire (Pedalons) qui l'ecarte par empreinte. Jamais misc/logo.png (logo du site).
      */
     public Optional<ExportFile> logo(String teamId) {
         return findImage(FileRepositories.MISC_IMAGES, teamId, "logo");
     }
 
     public Optional<ExportFile> find(Ride ride) {
-        return image(PedalonsFileKind.RIDE_IMAGE, ride.getTeamId(), ride.getId());
+        return image(TeamFileKind.RIDE_IMAGE, ride.getTeamId(), ride.getId());
     }
 
     public Optional<ExportFile> find(Trip trip) {
-        return image(PedalonsFileKind.TRIP_IMAGE, trip.getTeamId(), trip.getId());
+        return image(TeamFileKind.TRIP_IMAGE, trip.getTeamId(), trip.getId());
     }
 
     public Optional<ExportFile> find(Publication publication) {
-        return image(PedalonsFileKind.PUBLICATION_IMAGE, publication.getTeamId(), publication.getId());
+        return image(TeamFileKind.PUBLICATION_IMAGE, publication.getTeamId(), publication.getId());
     }
 
     /**
@@ -207,7 +217,7 @@ public class PedalonsExportFiles {
      * Null (et un avertissement) si le fichier ne peut pas etre lu : l'element part sans fichier
      * (Pedalons le signale comme fichier manquant) plutot que de faire echouer tout l'instantane.
      */
-    public TeamSnapshot.FileRef toRef(PedalonsFileKind kind, String teamId, String entityId, ExportFile file) {
+    public TeamSnapshot.FileRef toRef(TeamFileKind kind, String teamId, String entityId, ExportFile file, FilePaths paths) {
         try {
             // un seul acces disque : taille et date lues ensemble
             final BasicFileAttributes attributes = Files.readAttributes(file.path(), BasicFileAttributes.class);
@@ -215,13 +225,13 @@ public class PedalonsExportFiles {
             final long modified = attributes.lastModifiedTime().toMillis();
             return new TeamSnapshot.FileRef(
                     kind.name(),
-                    filePath(teamId, kind, entityId),
+                    paths.path(kind, teamId, entityId, file),
                     file.fileName(),
                     file.contentType(),
                     size,
                     digestCache.md5(file.path(), size, modified));
         } catch (IOException | UncheckedIOException e) {
-            log.warn("Pedalons export: unreadable {} file {} of {} in team {}, exported without it",
+            log.warn("Team export: unreadable {} file {} of {} in team {}, exported without it",
                     kind, file.fileName(), entityId, teamId, e);
             return null;
         }
@@ -233,10 +243,6 @@ public class PedalonsExportFiles {
         } catch (IOException e) {
             throw new UncheckedIOException("Unable to read " + file.fileName(), e);
         }
-    }
-
-    public static String filePath(String teamId, PedalonsFileKind kind, String entityId) {
-        return "/internal/pedalons/teams/" + teamId + "/files/" + kind.getPathSegment() + "/" + entityId;
     }
 
 }

@@ -1,13 +1,13 @@
-package info.tomacla.biketeam.service.pedalons.export;
+package info.tomacla.biketeam.service.export;
 
 import java.util.Arrays;
 import java.util.Optional;
 
 /**
- * Types de fichiers servis par l'export : nom du FileRef.kind et segment de chemin de
- * /internal/pedalons/teams/{teamId}/files/{kind}/{entityId}.
+ * Types de fichiers exportes : nom du FileRef.kind et segment de chemin (endpoint Pedalons
+ * /internal/pedalons/teams/{teamId}/files/{kind}/{entityId}, repertoire files/{kind}/ de l'archive ZIP).
  */
-public enum PedalonsFileKind {
+public enum TeamFileKind {
 
     GPX("gpx"),
     RIDE_IMAGE("ride-image"),
@@ -17,7 +17,7 @@ public enum PedalonsFileKind {
 
     private final String pathSegment;
 
-    PedalonsFileKind(String pathSegment) {
+    TeamFileKind(String pathSegment) {
         this.pathSegment = pathSegment;
     }
 
@@ -25,7 +25,7 @@ public enum PedalonsFileKind {
         return pathSegment;
     }
 
-    public static Optional<PedalonsFileKind> fromPathSegment(String segment) {
+    public static Optional<TeamFileKind> fromPathSegment(String segment) {
         return Arrays.stream(values()).filter(k -> k.pathSegment.equals(segment)).findFirst();
     }
 

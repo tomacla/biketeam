@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.service.pedalons;
 
+import info.tomacla.biketeam.service.export.TeamExportSummary;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,7 @@ public class PedalonsRequestTokenSigner {
      * Construit et signe le jeton d'une demande.
      */
     public String createToken(String requestId, Instant now, String teamId, String teamName, String requestedBy,
-                              PedalonsSummary summary) {
+                              TeamExportSummary summary) {
         return sign(payload(requestId, now.getEpochSecond(), teamId, teamName, requestedBy,
                 returnUrl(properties.getSiteUrl(), teamId), summary), properties.getRequestKey());
     }
@@ -56,7 +57,7 @@ public class PedalonsRequestTokenSigner {
      * Charge utile JSON, sans espace, claims dans l'ordre du contrat.
      */
     public String payload(String requestId, long iat, String teamId, String teamName, String requestedBy,
-                          String returnUrl, PedalonsSummary summary) {
+                          String returnUrl, TeamExportSummary summary) {
 
         Map<String, Object> summaryClaim = new LinkedHashMap<>();
         summaryClaim.put("places", summary.getPlaces());

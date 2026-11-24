@@ -1,5 +1,6 @@
-package info.tomacla.biketeam.service.pedalons.export;
+package info.tomacla.biketeam.service.export;
 
+import info.tomacla.biketeam.service.pedalons.PedalonsFilePaths;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.tomacla.biketeam.common.data.PublishedStatus;
@@ -24,7 +25,6 @@ import info.tomacla.biketeam.domain.trip.TripRepository;
 import info.tomacla.biketeam.domain.trip.TripStage;
 import info.tomacla.biketeam.domain.user.User;
 import info.tomacla.biketeam.service.file.FileService;
-import info.tomacla.biketeam.service.pedalons.PedalonsSummary;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -91,7 +91,7 @@ public class TeamSnapshotBuilderTest {
                 return super.md5(file, size, modifiedMillis);
             }
         };
-        PedalonsExportFiles files = new PedalonsExportFiles(fileService, digestCache, mapRepository,
+        TeamExportFiles files = new TeamExportFiles(fileService, digestCache, mapRepository,
                 rideRepository, tripRepository, publicationRepository);
 
         builder = new TeamSnapshotBuilder(placeRepository, mapRepository, rideTemplateRepository, publicationRepository,
@@ -257,7 +257,7 @@ public class TeamSnapshotBuilderTest {
     }
 
     private JsonNode snapshot() {
-        return objectMapper.valueToTree(builder.build(team));
+        return objectMapper.valueToTree(builder.build(team, PedalonsFilePaths.INSTANCE).snapshot());
     }
 
     @Test
@@ -329,6 +329,21 @@ public class TeamSnapshotBuilderTest {
     }
 
     @Test
+    public void testExportListsReferencedFilesWithTheGivenPaths() {
+        TeamSnapshotBuilder.TeamExport export = builder.build(team, TeamArchiveExporter.ZIP_PATHS);
+
+        assertEquals("files/logo/logo.png", export.snapshot().team().logo().path());
+        assertEquals("files/gpx/map-1.gpx", export.snapshot().maps().get(1).gpx().path());
+
+        // un fichier par reference non nulle, dans l'ordre de l'instantane, avec son emplacement sur disque
+        List<String> paths = export.files().stream().map(f -> f.ref().path()).toList();
+        assertEquals("files/logo/logo.png", paths.get(0));
+        assertTrue(paths.contains("files/gpx/map-1.gpx"));
+        assertTrue(paths.contains("files/ride-image/ride-1.jpg") || paths.contains("files/ride-image/ride-1.png"), paths.toString());
+        export.files().forEach(f -> assertTrue(Files.exists(f.file().path()), f.file().path().toString()));
+    }
+
+    @Test
     public void testRideGroupsFollowBiketeamDisplayOrder() {
         JsonNode ride = snapshot().get("rides").get(0);
 
@@ -387,7 +402,7 @@ public class TeamSnapshotBuilderTest {
 
     @Test
     public void testNoPersonalDataIsExported() throws Exception {
-        String json = objectMapper.writeValueAsString(builder.build(team));
+        String json = objectMapper.writeValueAsString(builder.build(team, PedalonsFilePaths.INSTANCE).snapshot());
         assertFalse(json.contains("user-1"));
         assertFalse(json.contains("jean.membre@example.org"));
         assertFalse(json.contains("Membre"));
@@ -432,7 +447,7 @@ public class TeamSnapshotBuilderTest {
         when(tripRepository.countStagesOfActiveTrips(TEAM_ID)).thenReturn(3L);
         when(publicationRepository.countByTeamIdAndDeletionFalse(TEAM_ID)).thenReturn(1L);
 
-        PedalonsSummary summary = builder.summary(team);
+        TeamExportSummary summary = builder.summary(team);
         assertEquals(2, summary.getPlaces());
         assertEquals(1, summary.getRoutes());
         assertEquals(3, summary.getTripStages());
@@ -442,7 +457,7 @@ public class TeamSnapshotBuilderTest {
 
     @Test
     public void testFileResolutionChecksOwnershipAndDeletion() {
-        PedalonsExportFiles files = (PedalonsExportFiles) ReflectionTestUtils.getField(builder, "files");
+        TeamExportFiles files = (TeamExportFiles) ReflectionTestUtils.getField(builder, "files");
 
         Map foreign = map("map-9", false);
         foreign.setTeamId("other-team");
@@ -452,21 +467,21 @@ public class TeamSnapshotBuilderTest {
         Map own = map("map-1", false);
         when(mapRepository.findById("map-1")).thenReturn(java.util.Optional.of(own));
 
-        assertTrue(files.resolve(PedalonsFileKind.GPX, TEAM_ID, "map-9").isEmpty());
-        assertTrue(files.resolve(PedalonsFileKind.GPX, TEAM_ID, "map-0").isEmpty());
-        assertTrue(files.resolve(PedalonsFileKind.GPX, TEAM_ID, "map-1").isPresent());
-        assertTrue(files.resolve(PedalonsFileKind.LOGO, TEAM_ID, TEAM_ID).isPresent());
-        assertTrue(files.resolve(PedalonsFileKind.LOGO, TEAM_ID, "other-team").isEmpty());
+        assertTrue(files.resolve(TeamFileKind.GPX, TEAM_ID, "map-9").isEmpty());
+        assertTrue(files.resolve(TeamFileKind.GPX, TEAM_ID, "map-0").isEmpty());
+        assertTrue(files.resolve(TeamFileKind.GPX, TEAM_ID, "map-1").isPresent());
+        assertTrue(files.resolve(TeamFileKind.LOGO, TEAM_ID, TEAM_ID).isPresent());
+        assertTrue(files.resolve(TeamFileKind.LOGO, TEAM_ID, "other-team").isEmpty());
     }
 
     @Test
     public void testUnreadableFileIsExportedAsMissing() {
-        PedalonsExportFiles files = (PedalonsExportFiles) ReflectionTestUtils.getField(builder, "files");
-        PedalonsExportFiles.ExportFile vanished = new PedalonsExportFiles.ExportFile(
-                repository.resolve("vanished.gpx"), "vanished.gpx", PedalonsExportFiles.GPX_CONTENT_TYPE);
+        TeamExportFiles files = (TeamExportFiles) ReflectionTestUtils.getField(builder, "files");
+        TeamExportFiles.ExportFile vanished = new TeamExportFiles.ExportFile(
+                repository.resolve("vanished.gpx"), "vanished.gpx", TeamExportFiles.GPX_CONTENT_TYPE);
 
         // fichier disparu entre la resolution et la lecture : l'element part sans fichier
-        assertNull(files.toRef(PedalonsFileKind.GPX, TEAM_ID, "map-1", vanished));
+        assertNull(files.toRef(TeamFileKind.GPX, TEAM_ID, "map-1", vanished, PedalonsFilePaths.INSTANCE));
     }
 
     /**
@@ -501,7 +516,7 @@ public class TeamSnapshotBuilderTest {
         });
         digestInTransaction.clear();
 
-        TeamSnapshot.Snapshot snapshot = builder.build(team);
+        TeamSnapshot.Snapshot snapshot = builder.build(team, PedalonsFilePaths.INSTANCE).snapshot();
 
         assertEquals(List.of(true), readInTransaction, "entities are read in a transaction");
         assertFalse(digestInTransaction.isEmpty());

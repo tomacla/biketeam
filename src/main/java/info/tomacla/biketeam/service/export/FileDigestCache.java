@@ -1,4 +1,4 @@
-package info.tomacla.biketeam.service.pedalons.export;
+package info.tomacla.biketeam.service.export;
 
 import org.springframework.stereotype.Component;
 

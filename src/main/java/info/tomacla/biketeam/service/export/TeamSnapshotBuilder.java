@@ -1,4 +1,4 @@
-package info.tomacla.biketeam.service.pedalons.export;
+package info.tomacla.biketeam.service.export;
 
 import info.tomacla.biketeam.common.datatype.Strings;
 import info.tomacla.biketeam.common.geo.Point;
@@ -19,7 +19,6 @@ import info.tomacla.biketeam.domain.template.RideTemplateRepository;
 import info.tomacla.biketeam.domain.trip.Trip;
 import info.tomacla.biketeam.domain.trip.TripRepository;
 import info.tomacla.biketeam.domain.trip.TripStage;
-import info.tomacla.biketeam.service.pedalons.PedalonsSummary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -30,6 +29,7 @@ import java.time.Clock;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.IdentityHashMap;
@@ -38,7 +38,8 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
- * Construit l'instantane d'une equipe pour Pedalons (GET /internal/pedalons/teams/{teamId}/snapshot).
+ * Construit l'instantane d'une equipe : pour Pedalons (GET /internal/pedalons/teams/{teamId}/snapshot)
+ * et pour l'archive ZIP telechargee par les administrateurs de l'equipe.
  * <p>
  * Couvre le contenu de l'equipe et rien de ce qui touche aux personnes : ni utilisateurs, ni roles,
  * ni participants, ni messages, ni inscriptions, ni notes ou favoris de parcours.
@@ -81,7 +82,7 @@ public class TeamSnapshotBuilder {
     private final PublicationRepository publicationRepository;
     private final RideRepository rideRepository;
     private final TripRepository tripRepository;
-    private final PedalonsExportFiles files;
+    private final TeamExportFiles files;
     private final TransactionTemplate readOnlyTx;
 
     private Clock clock = Clock.systemUTC();
@@ -89,7 +90,7 @@ public class TeamSnapshotBuilder {
     @Autowired
     public TeamSnapshotBuilder(PlaceRepository placeRepository, MapRepository mapRepository,
                                RideTemplateRepository rideTemplateRepository, PublicationRepository publicationRepository,
-                               RideRepository rideRepository, TripRepository tripRepository, PedalonsExportFiles files,
+                               RideRepository rideRepository, TripRepository tripRepository, TeamExportFiles files,
                                PlatformTransactionManager transactionManager) {
         this.placeRepository = placeRepository;
         this.mapRepository = mapRepository;
@@ -107,16 +108,31 @@ public class TeamSnapshotBuilder {
     }
 
     /**
+     * Instantane et fichiers references, dans l'ordre de l'instantane (logo, parcours, publications,
+     * rides, trips). Seuls les fichiers lisibles - ceux dont la reference n'est pas nulle - y figurent.
+     */
+    public record TeamExport(TeamSnapshot.Snapshot snapshot, List<ExportedFile> files) {
+    }
+
+    /**
+     * Un fichier reference par l'instantane (ref.path() donne par les FilePaths de la construction),
+     * et son emplacement sur disque.
+     */
+    public record ExportedFile(TeamSnapshot.FileRef ref, TeamExportFiles.ExportFile file) {
+    }
+
+    /**
      * Deux temps : les entites sont lues et converties en valeurs simples (les records de
      * l'instantane) dans une transaction courte en lecture seule, qui localise aussi les fichiers ;
      * les references de fichiers (taille, md5 - lecture complete de chaque fichier absent du cache)
      * sont calculees ensuite, hors transaction : aucune connexion n'est tenue pendant ces lectures,
      * qui precedent l'envoi du moindre en-tete de reponse.
      */
-    public TeamSnapshot.Snapshot build(Team team) {
-        final PendingFiles pending = new PendingFiles();
+    public TeamExport build(Team team, TeamExportFiles.FilePaths paths) {
+        final PendingFiles pending = new PendingFiles(paths);
         final TeamSnapshot.Snapshot draft = readOnlyTx.execute(status -> draft(team, pending));
-        return pending.resolve(draft);
+        final TeamSnapshot.Snapshot snapshot = pending.resolve(draft);
+        return new TeamExport(snapshot, List.copyOf(pending.resolved));
     }
 
     private TeamSnapshot.Snapshot draft(Team team, PendingFiles pending) {
@@ -124,7 +140,7 @@ public class TeamSnapshotBuilder {
         final String teamId = team.getId();
         // une requete par type d'element (graphes de chargement des depots), une liste par
         // repertoire de fichiers : rien par element
-        final PedalonsExportFiles.TeamFiles teamFiles = files.teamFiles(teamId);
+        final TeamExportFiles.TeamFiles teamFiles = files.teamFiles(teamId);
 
         return new TeamSnapshot.Snapshot(
                 TeamSnapshot.SCHEMA_VERSION,
@@ -145,14 +161,20 @@ public class TeamSnapshotBuilder {
      */
     private final class PendingFiles {
 
-        private record Request(PedalonsFileKind kind, String teamId, String entityId, PedalonsExportFiles.ExportFile file) {
+        private record Request(TeamFileKind kind, String teamId, String entityId, TeamExportFiles.ExportFile file) {
         }
 
+        private final TeamExportFiles.FilePaths paths;
         private final java.util.Map<TeamSnapshot.FileRef, Request> requests = new IdentityHashMap<>();
+        private final List<ExportedFile> resolved = new ArrayList<>();
 
-        TeamSnapshot.FileRef defer(PedalonsFileKind kind, String teamId, String entityId, PedalonsExportFiles.ExportFile file) {
+        PendingFiles(TeamExportFiles.FilePaths paths) {
+            this.paths = paths;
+        }
+
+        TeamSnapshot.FileRef defer(TeamFileKind kind, String teamId, String entityId, TeamExportFiles.ExportFile file) {
             final TeamSnapshot.FileRef placeholder = new TeamSnapshot.FileRef(kind.name(),
-                    PedalonsExportFiles.filePath(teamId, kind, entityId), file.fileName(), file.contentType(), -1, null);
+                    paths.path(kind, teamId, entityId, file), file.fileName(), file.contentType(), -1, null);
             requests.put(placeholder, new Request(kind, teamId, entityId, file));
             return placeholder;
         }
@@ -162,7 +184,12 @@ public class TeamSnapshotBuilder {
                 return null;
             }
             final Request request = requests.get(placeholder);
-            return files.toRef(request.kind(), request.teamId(), request.entityId(), request.file());
+            final TeamSnapshot.FileRef ref = files.toRef(request.kind(), request.teamId(), request.entityId(),
+                    request.file(), paths);
+            if (ref != null) {
+                resolved.add(new ExportedFile(ref, request.file()));
+            }
+            return ref;
         }
 
         TeamSnapshot.Snapshot resolve(TeamSnapshot.Snapshot draft) {
@@ -184,9 +211,9 @@ public class TeamSnapshotBuilder {
      * Compteurs du jeton de demande : elements non supprimes, sans lire les fichiers.
      */
     @Transactional(readOnly = true)
-    public PedalonsSummary summary(Team team) {
+    public TeamExportSummary summary(Team team) {
         final String teamId = team.getId();
-        return new PedalonsSummary(
+        return new TeamExportSummary(
                 placeRepository.countByTeamId(teamId),
                 mapRepository.countByTeamIdAndDeletionFalse(teamId),
                 rideRepository.countByTeamIdAndDeletionFalse(teamId),
@@ -198,7 +225,7 @@ public class TeamSnapshotBuilder {
                 files.logo(teamId).isPresent());
     }
 
-    private TeamSnapshot.SnapshotTeam team(Team team, PedalonsExportFiles.TeamFiles teamFiles, PendingFiles pending) {
+    private TeamSnapshot.SnapshotTeam team(Team team, TeamExportFiles.TeamFiles teamFiles, PendingFiles pending) {
         final TeamDescription d = team.getDescription();
         final TeamSnapshot.SnapshotTeamDescription description = d == null ? null : new TeamSnapshot.SnapshotTeamDescription(
                 d.getDescription(),
@@ -226,7 +253,7 @@ public class TeamSnapshotBuilder {
                 description,
                 Strings.isBlank(markdownPage) ? null : markdownPage,
                 teamFiles.logo()
-                        .map(f -> pending.defer(PedalonsFileKind.LOGO, team.getId(), team.getId(), f))
+                        .map(f -> pending.defer(TeamFileKind.LOGO, team.getId(), team.getId(), f))
                         .orElse(null));
     }
 
@@ -243,9 +270,9 @@ public class TeamSnapshotBuilder {
                 place.isEndPlace());
     }
 
-    private TeamSnapshot.SnapshotMap map(Map map, PedalonsExportFiles.TeamFiles teamFiles, PendingFiles pending) {
+    private TeamSnapshot.SnapshotMap map(Map map, TeamExportFiles.TeamFiles teamFiles, PendingFiles pending) {
         final TeamSnapshot.FileRef gpx = map.isDeletion() ? null : teamFiles.gpx(map)
-                .map(f -> pending.defer(PedalonsFileKind.GPX, map.getTeamId(), map.getId(), f))
+                .map(f -> pending.defer(TeamFileKind.GPX, map.getTeamId(), map.getId(), f))
                 .orElse(null);
         final List<String> tags = map.getTags() == null ? List.of() : map.getTags().stream()
                 .filter(t -> !Strings.isBlank(t))
@@ -282,7 +309,7 @@ public class TeamSnapshotBuilder {
                         .toList());
     }
 
-    private TeamSnapshot.SnapshotPublication publication(Publication publication, PedalonsExportFiles.TeamFiles teamFiles,
+    private TeamSnapshot.SnapshotPublication publication(Publication publication, TeamExportFiles.TeamFiles teamFiles,
                                                          PendingFiles pending) {
         return new TeamSnapshot.SnapshotPublication(
                 publication.getId(),
@@ -292,11 +319,11 @@ public class TeamSnapshotBuilder {
                 instant(publication.getPublishedAt()),
                 publication.isDeletion(),
                 publication.isDeletion() ? null : teamFiles.find(publication)
-                        .map(f -> pending.defer(PedalonsFileKind.PUBLICATION_IMAGE, publication.getTeamId(), publication.getId(), f))
+                        .map(f -> pending.defer(TeamFileKind.PUBLICATION_IMAGE, publication.getTeamId(), publication.getId(), f))
                         .orElse(null));
     }
 
-    private TeamSnapshot.SnapshotRide ride(Ride ride, PedalonsExportFiles.TeamFiles teamFiles, PendingFiles pending) {
+    private TeamSnapshot.SnapshotRide ride(Ride ride, TeamExportFiles.TeamFiles teamFiles, PendingFiles pending) {
         return new TeamSnapshot.SnapshotRide(
                 ride.getId(),
                 ride.getPermalink(),
@@ -311,7 +338,7 @@ public class TeamSnapshotBuilder {
                 ride.isListedInFeed(),
                 ride.isDeletion(),
                 ride.isDeletion() ? null : teamFiles.find(ride)
-                        .map(f -> pending.defer(PedalonsFileKind.RIDE_IMAGE, ride.getTeamId(), ride.getId(), f))
+                        .map(f -> pending.defer(TeamFileKind.RIDE_IMAGE, ride.getTeamId(), ride.getId(), f))
                         .orElse(null),
                 // sans les participants
                 sorted(ride.getGroups(), RIDE_GROUP_ORDER).stream()
@@ -321,7 +348,7 @@ public class TeamSnapshotBuilder {
                         .toList());
     }
 
-    private TeamSnapshot.SnapshotTrip trip(Trip trip, PedalonsExportFiles.TeamFiles teamFiles, PendingFiles pending) {
+    private TeamSnapshot.SnapshotTrip trip(Trip trip, TeamExportFiles.TeamFiles teamFiles, PendingFiles pending) {
         return new TeamSnapshot.SnapshotTrip(
                 trip.getId(),
                 trip.getPermalink(),
@@ -339,7 +366,7 @@ public class TeamSnapshotBuilder {
                 trip.isListedInFeed(),
                 trip.isDeletion(),
                 trip.isDeletion() ? null : teamFiles.find(trip)
-                        .map(f -> pending.defer(PedalonsFileKind.TRIP_IMAGE, trip.getTeamId(), trip.getId(), f))
+                        .map(f -> pending.defer(TeamFileKind.TRIP_IMAGE, trip.getTeamId(), trip.getId(), f))
                         .orElse(null),
                 // sans les participants
                 sorted(trip.getStages(), TRIP_STAGE_ORDER).stream()

@@ -1,4 +1,4 @@
-package info.tomacla.biketeam.service.pedalons.export;
+package info.tomacla.biketeam.service.export;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;

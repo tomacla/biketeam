@@ -10,7 +10,7 @@ import info.tomacla.biketeam.service.NotificationService;
 import info.tomacla.biketeam.service.TeamService;
 import info.tomacla.biketeam.service.pedalons.PedalonsMigrationService;
 import info.tomacla.biketeam.service.pedalons.PedalonsProperties;
-import info.tomacla.biketeam.service.pedalons.PedalonsSummary;
+import info.tomacla.biketeam.service.export.TeamExportSummary;
 import info.tomacla.biketeam.service.url.UrlService;
 import info.tomacla.biketeam.web.pedalons.PedalonsModelAdvice;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,7 +52,7 @@ public class AdminTeamPedalonsTemplateTest {
         when(migrationService.isEnabled()).thenReturn(true);
         when(migrationService.isMigratable(org.mockito.ArgumentMatchers.any())).thenReturn(true);
         when(migrationService.summary(org.mockito.ArgumentMatchers.any()))
-                .thenReturn(new PedalonsSummary(12, 2585, 665, 3, 19, 124, 40, true, false));
+                .thenReturn(new TeamExportSummary(12, 2585, 665, 3, 19, 124, 40, true, false));
 
         AdminTeamPedalonsController controller = new AdminTeamPedalonsController();
         ReflectionTestUtils.setField(controller, "migrationService", migrationService);

@@ -1,5 +1,6 @@
-package info.tomacla.biketeam.service.pedalons.export;
+package info.tomacla.biketeam.service.export;
 
+import info.tomacla.biketeam.service.pedalons.PedalonsFilePaths;
 import info.tomacla.biketeam.common.data.PublishedStatus;
 import info.tomacla.biketeam.common.geo.Point;
 import info.tomacla.biketeam.domain.AbstractDBTest;
@@ -197,7 +198,7 @@ public class TeamSnapshotBuilderQueryCountTest extends AbstractDBTest {
         final FileService fileService = new FileService(repository.toString());
         final TeamSnapshotBuilder builder = new TeamSnapshotBuilder(placeRepository, mapRepository, rideTemplateRepository,
                 publicationRepository, rideRepository, tripRepository,
-                new PedalonsExportFiles(fileService, new FileDigestCache(), mapRepository, rideRepository, tripRepository,
+                new TeamExportFiles(fileService, new FileDigestCache(), mapRepository, rideRepository, tripRepository,
                         publicationRepository),
                 transactionManager);
 
@@ -207,7 +208,7 @@ public class TeamSnapshotBuilderQueryCountTest extends AbstractDBTest {
         statistics.clear();
         final TeamSnapshot.Snapshot snapshot;
         try {
-            snapshot = builder.build(team);
+            snapshot = builder.build(team, PedalonsFilePaths.INSTANCE).snapshot();
         } finally {
             statistics.setStatisticsEnabled(enabled);
         }

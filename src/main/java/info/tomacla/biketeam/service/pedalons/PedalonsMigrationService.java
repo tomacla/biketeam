@@ -1,5 +1,6 @@
 package info.tomacla.biketeam.service.pedalons;
 
+import info.tomacla.biketeam.service.export.TeamExportSummary;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,7 +14,7 @@ import info.tomacla.biketeam.domain.team.PedalonsState;
 import info.tomacla.biketeam.domain.team.Team;
 import info.tomacla.biketeam.domain.team.TeamRepository;
 import info.tomacla.biketeam.domain.user.User;
-import info.tomacla.biketeam.service.pedalons.export.TeamSnapshotBuilder;
+import info.tomacla.biketeam.service.export.TeamSnapshotBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -171,7 +172,7 @@ public class PedalonsMigrationService {
         return MIGRATABLE_TEAM_ID.matcher(team.getId()).matches();
     }
 
-    public PedalonsSummary summary(Team team) {
+    public TeamExportSummary summary(Team team) {
         return snapshotBuilder.summary(team);
     }
 

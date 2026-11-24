@@ -1,10 +1,10 @@
-package info.tomacla.biketeam.service.pedalons;
+package info.tomacla.biketeam.service.export;
 
 /**
- * Compteurs de ce qui sera migre (elements non supprimes), repris dans le claim summary du jeton
- * de demande et affiches sur la page d'administration.
+ * Compteurs du contenu exporte d'une equipe (elements non supprimes) : repris dans le claim summary
+ * du jeton de demande Pedalons et affiches sur les pages d'administration (migration, export).
  */
-public class PedalonsSummary {
+public class TeamExportSummary {
 
     private final long places;
     private final long routes;
@@ -16,7 +16,7 @@ public class PedalonsSummary {
     private final boolean faqPage;
     private final boolean logo;
 
-    public PedalonsSummary(long places, long routes, long rides, long rideTemplates, long trips, long tripStages,
+    public TeamExportSummary(long places, long routes, long rides, long rideTemplates, long trips, long tripStages,
                            long publications, boolean faqPage, boolean logo) {
         this.places = places;
         this.routes = routes;
