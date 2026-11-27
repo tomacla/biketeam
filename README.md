@@ -1,6 +1,6 @@
 # Biketeam
 
-[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/S6S6CLH20)
+**This repo is inactive.**
 
 ## Use project
 
